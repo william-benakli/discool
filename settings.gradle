@@ -1,5 +1,1 @@
 rootProject.name = 'discool'
-include 'common'
-include 'client'
-include 'server'
-

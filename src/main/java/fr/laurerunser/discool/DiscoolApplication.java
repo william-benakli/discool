@@ -1,4 +1,4 @@
-package fr.laurerunser.discool.discool;
+package fr.laurerunser.discool;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
