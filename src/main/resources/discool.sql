@@ -51,7 +51,7 @@ CREATE TABLE IF NOT EXISTS groups (
     courseid BIGINT UNSIGNED NOT NULL,
     name VARCHAR(255) NOT NULL,
     description TEXT,
-    enrolmentkey VARCHAR(50) NOT NULL,
+    enrolmentkey VARCHAR(50),
     CONSTRAINT fk_courseid2
         FOREIGN KEY(courseid) REFERENCES courses(id),
     PRIMARY KEY(id)

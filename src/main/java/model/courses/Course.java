@@ -1,18 +1,10 @@
-package model;
+package model.courses;
 
-import lombok.Builder;
 import lombok.Getter;
 
 import javax.persistence.*;
 
-/**
- * This class represents a text channel. It is linked to the
- * "channels" table in the database.
- */
-@Builder
-@Entity(name = "channels")
-@Table(name = "channels")
-public class TextChannel {
+public class Course {
 
     @Getter
     @Id // to say this is the primary key in the database
@@ -31,19 +23,6 @@ public class TextChannel {
     )
     private Long id;
 
-    /**
-     * The id of the course this channel is in.
-     */
-    @Getter
-    @Column(
-            name = "courseid",
-            nullable = false
-    )
-    private Long courseId;
-
-    /**
-     * The name of the channel.
-     */
     @Getter
     @Column(
             name = "name",
@@ -51,4 +30,10 @@ public class TextChannel {
     )
     private String name;
 
+    @Getter
+    @Column(
+            name = "teacherid",
+            nullable = false
+    )
+    private Long teacherId;
 }

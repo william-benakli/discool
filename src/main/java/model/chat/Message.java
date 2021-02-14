@@ -1,4 +1,4 @@
-package model;
+package model.chat;
 
 import lombok.Getter;
 

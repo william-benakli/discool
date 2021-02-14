@@ -1,7 +1,8 @@
-package model;
+package model.chat;
 
 import lombok.Builder;
 import lombok.Getter;
+import model.MessageType;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
