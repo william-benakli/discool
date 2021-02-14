@@ -1,4 +1,4 @@
-package model;
+package fr.laurerunser.discool.model;
 
 import lombok.Builder;
 import lombok.Getter;
