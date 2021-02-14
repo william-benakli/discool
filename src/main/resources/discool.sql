@@ -70,32 +70,18 @@ CREATE TABLE IF NOT EXISTS groupMembers (
     PRIMARY KEY(id)
 ) ENGINE=InnoDB;
 
-CREATE TABLE IF NOT EXISTS unreadDMs (
+CREATE TABLE IF NOT EXISTS directMessages (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE,
     useridfrom BIGINT UNSIGNED NOT NULL,
     useridto BIGINT UNSIGNED NOT NULL,
     subject VARCHAR(255),
     message TEXT NOT NULL,
     timecreated BIGINT NOT NULL,
+    deleted BIT NOT NULL,
 
-    CONSTRAINT fk_useridfrom 
+    CONSTRAINT fk_useridfrom
 	FOREIGN KEY (useridfrom) REFERENCES users(id),
-    CONSTRAINT fk_useridto 
-	FOREIGN KEY(useridto) REFERENCES users(id),
-    PRIMARY KEY (id)
-) ENGINE=InnoDB;
-
-CREATE TABLE IF NOT EXISTS readDMs (
-    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE,
-    useridfrom BIGINT UNSIGNED NOT NULL,
-    useridto BIGINT UNSIGNED NOT NULL,
-    subject VARCHAR(255),
-    message TEXT NOT NULL,
-    timecreated BIGINT NOT NULL,
-
-    CONSTRAINT fk_useridfrom_read 
-	FOREIGN KEY (useridfrom) REFERENCES users(id),
-    CONSTRAINT fk_useridto_read 
+    CONSTRAINT fk_useridto
 	FOREIGN KEY(useridto) REFERENCES users(id),
     PRIMARY KEY (id)
 ) ENGINE=InnoDB;
@@ -104,7 +90,7 @@ CREATE TABLE IF NOT EXISTS channels (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE,
     courseid BIGINT UNSIGNED NOT NULL,
     name VARCHAR(255),
-    CONSTRAINT fk_courseid_channels 
+    CONSTRAINT fk_courseid_channels
 	FOREIGN KEY (courseid) REFERENCES users(id),
     PRIMARY KEY(id)
 ) ENGINE=InnoDB;
@@ -112,7 +98,7 @@ CREATE TABLE IF NOT EXISTS channels (
 CREATE TABLE IF NOT EXISTS posts (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE,
     channelid BIGINT UNSIGNED NOT NULL,
-    parentid BIGINT UNSIGNED NOT NULL,
+    parentid BIGINT UNSIGNED,
     userid BIGINT UNSIGNED NOT NULL,
     timecreated BIGINT NOT NULL,
     message TEXT NOT NULL,
@@ -122,7 +108,7 @@ CREATE TABLE IF NOT EXISTS posts (
         FOREIGN KEY(parentid) REFERENCES posts(id),
     CONSTRAINT fk_userid_posts
         FOREIGN KEY(userid) REFERENCES users(id),
-    CONSTRAINT fk_channelid 
+    CONSTRAINT fk_channelid
 	FOREIGN KEY (channelid) REFERENCES channels(id),
     PRIMARY KEY (id)
 ) ENGINE=InnoDB;

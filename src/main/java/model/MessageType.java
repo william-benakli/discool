@@ -3,5 +3,7 @@ package model;
 public enum MessageType {
     CHAT,
     CONNECT,
-    DISCONNECT
+    DISCONNECT,
+    DM,
+    MOODLE_CHANGE,
 }
