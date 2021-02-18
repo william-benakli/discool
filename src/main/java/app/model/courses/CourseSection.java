@@ -1,15 +1,20 @@
 package app.model.courses;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
-@Getter
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
 @Entity(name = "course_sections")
 @Table(name = "course_sections")
 public class CourseSection {
+
 
     @Id // to say this is the primary key in the database
     @GeneratedValue(strategy = GenerationType.IDENTITY) // to generate the id
