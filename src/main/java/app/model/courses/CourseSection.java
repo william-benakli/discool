@@ -17,19 +17,19 @@ public class CourseSection {
             name = "id", // the name of the column in the database
             updatable = false // so that the value can't be updated
     )
-    private Long id;
+    private long id;
 
     @Column(
             name = "courseid",
             nullable = false
     )
-    private Long courseId;
+    private long courseId;
 
     @Column(
             name = "parentid",
             nullable = false
     )
-    private Long parentId;
+    private long parentId;
 
     @Column(
             name = "title",

@@ -22,7 +22,7 @@ public class TextChannel {
             name = "id", // the name of the column in the database
             updatable = false // so that the value can't be updated
     )
-    private Long id;
+    private long id;
 
     /**
      * The id of the course this channel is in.
@@ -32,7 +32,7 @@ public class TextChannel {
             name = "courseid",
             nullable = false
     )
-    private Long courseId;
+    private long courseId;
 
     /**
      * The name of the channel.
