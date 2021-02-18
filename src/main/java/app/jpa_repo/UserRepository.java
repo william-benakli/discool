@@ -1,6 +1,6 @@
-package jpa_repo;
+package app.jpa_repo;
 
-import model.users.User;
+import app.model.users.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface UserRepository extends JpaRepository<User, Long> {

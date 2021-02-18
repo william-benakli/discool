@@ -18,22 +18,22 @@ Il manque des "pages" : pouvoir écrire des longs textes facilement (pour le pro
 
 Dans les salons chat, on pourrait poster des références vers les "pages"
 
-On pourrait faire une synchronisation entre page et salon web : une modif de la page lance un msg dans le salon
+On pourrait faire une synchronisation entre page et salon app.web : une modif de la page lance un msg dans le salon
 
 ## Point de départ
 
-Rechercher un tuto pour écrire un client chat web en pur java
+Rechercher un tuto pour écrire un client chat app.web en pur java
 
 ## Archi
 
 - des clients ↔ un serveur (un seul, genre machine dans un garage => pas la peine de faire des archi répliquées, redondance, etc)
 
 - serveur -> java
-- client : pur java ? client web en javascript ?
-- ou **Kotlin multi-plateforme ?** pour avoir un serveur et un client dans le même langage, avec qd même un client web (peut se compiler vers du javascript)
+- client : pur java ? client app.web en javascript ?
+- ou **Kotlin multi-plateforme ?** pour avoir un serveur et un client dans le même langage, avec qd même un client app.web (peut se compiler vers du javascript)
 
 => **Tout faire en java, sans paufiner le côté graphique** (client et serveur)
-    - puis si on se sent, faire du Kotlin pour passer sur un client web
+    - puis si on se sent, faire du Kotlin pour passer sur un client app.web
     - ce sera bcp moins risqué
 
 - une bdd pour stocker les données (users, msg, ...)
@@ -45,7 +45,7 @@ Rechercher un tuto pour écrire un client chat web en pur java
 Communication = **websocket** => **trouver une lib** : Ktor ? **Spring (plus complet)** ?
     
 Socket par dessus HTTP, comme TCP
-- on a une page web unique qui communique avec les websockets
+- on a une page app.web unique qui communique avec les websockets
 - (pas on clique sur un lien et une nouvelle page s'affiche)
 
 Intérêt : dans le client, réagir à des events du serveur de façon asynchrone, et vice-versa
@@ -78,7 +78,7 @@ PAS LA PRIORITE
 sinon le standard est Web RTC
 trouver une lib qui fait ça si on a bcp de temps
 
-## JavaFX ou client web ?
+## JavaFX ou client app.web ?
 
 - Si client lourd => JavaFX
     - faire les tutos openjfk.io pour faire un prototype
@@ -106,14 +106,14 @@ trouver une lib qui fait ça si on a bcp de temps
     - [x] java 15
     - [x] envoyer un mail au prof -> William
 - [x] : trouver une lib pour le websocket : Spring ?
-- [x] : décider si on veut faire tout en java ? ~~ou client web~~
+- [x] : décider si on veut faire tout en java ? ~~ou client app.web~~
 - [ ] : look at GSON
 - [x] : choisir une bdd : mariadb
 - [ ] : look at JBDC
 - [ ] : look at Common Markdown (github)
 - [ ] : écrire un doc précis spécifiant ce qu'on veut faire -> Laure
 - [x] : dessiner des fausses captures d'écran (prototype sans programmation)
-- [x] : Rechercher un tuto pour écrire un client chat web en pur java
+- [x] : Rechercher un tuto pour écrire un client chat app.web en pur java
 - [ ] : est ce que l'API u-paris permet d'envoyer un token si la personne est bien authentifiée -> William
 
 **IMPORTANT** : 

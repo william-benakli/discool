@@ -31,7 +31,7 @@ Dépendances :
  
 ## Techno front
 
-- web avec Vaadin ? à voir la prochaine fois
+- app.web avec Vaadin ? à voir la prochaine fois
 
 ## Répartition des tâches (front,back,...)
 

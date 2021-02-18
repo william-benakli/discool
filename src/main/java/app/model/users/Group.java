@@ -1,22 +1,18 @@
-package model.users;
+package app.model.users;
 
+import lombok.Builder;
 import lombok.Getter;
 
 import javax.persistence.*;
 
+@Builder
+@Entity(name = "groups")
+@Table(name = "groups")
 public class Group {
 
     @Getter
     @Id // to say this is the primary key in the database
-    @SequenceGenerator( // the generator for the id
-            name = "idGenerator",
-            sequenceName = "idGenerator",
-            allocationSize = 1 // to increment the id by 1 each time
-    )
-    @GeneratedValue( // to generate the id
-            strategy = GenerationType.SEQUENCE,
-            generator = "idGenerator"
-    )
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // to generate the id
     @Column(
             name = "id", // the name of the column in the database
             updatable = false // so that the value can't be updated
@@ -38,7 +34,10 @@ public class Group {
     private String name;
 
     @Getter
-    @Column(name = "description")
+    @Column(
+            name = "description",
+            columnDefinition = "TEXT"
+    )
     private String description;
 
     @Getter
