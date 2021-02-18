@@ -1,7 +1,9 @@
 package app.model.chat;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
@@ -10,6 +12,8 @@ import javax.persistence.*;
  * "channels" table in the database.
  */
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity(name = "channels")
 @Table(name = "channels")
 public class TextChannel {

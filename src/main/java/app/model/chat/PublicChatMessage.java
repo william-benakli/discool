@@ -1,7 +1,9 @@
 package app.model.chat;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
@@ -10,6 +12,8 @@ import javax.persistence.*;
  * It is linked to the data contained in the "posts" table.
  */
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity(name = "posts")
 @Table(name = "posts")
 public class PublicChatMessage {

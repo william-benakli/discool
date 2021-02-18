@@ -1,11 +1,15 @@
 package app.model.users;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity(name = "group_members")
 @Table(name = "group_members")
 public class GroupMembers {
