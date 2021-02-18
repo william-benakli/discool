@@ -2,7 +2,6 @@ package model.chat;
 
 import lombok.Builder;
 import lombok.Getter;
-import model.MessageType;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -16,10 +15,6 @@ import javax.persistence.Table;
 @Entity(name = "posts")
 @Table(name = "posts")
 public class PublicChatMessage extends Message {
-
-    @Getter
-    private final MessageType type = MessageType.CHAT;
-
     /**
      * The id of the channel this post was sent to.
      */
