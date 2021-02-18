@@ -17,7 +17,7 @@ public class User {
             name = "id", // the name of the column in the database
             updatable = false // so that the value can't be updated
     )
-    private Long id;
+    private long id;
 
     @Getter
     @Column(
@@ -64,19 +64,19 @@ public class User {
             name = "firstlogin",
             nullable = false
     )
-    private Long firstLogin;
+    private long firstLogin;
     @Getter
     @Column(
             name = "lastlogin",
             nullable = false
     )
-    private Long lastLogin;
+    private long lastLogin;
     @Getter
     @Column(
             name = "timecreated",
             nullable = false
     )
-    private Long timeCreated;
+    private long timeCreated;
 
     // TODO : make sure it converts to an int when saving to the database
     private enum Role {ADMIN, TEACHER, STUDENT}

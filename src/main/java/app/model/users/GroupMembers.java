@@ -16,27 +16,27 @@ public class GroupMembers {
             name = "id", // the name of the column in the database
             updatable = false // so that the value can't be updated
     )
-    private Long id;
+    private long id;
 
     @Getter
     @Column(
             name = "groupid",
             nullable = false
     )
-    private Long groupId;
+    private long groupId;
 
     @Getter
     @Column(
             name = "userid",
             nullable = false
     )
-    private Long userId;
+    private long userId;
 
     @Getter
     @Column(
             name = "timeadded",
             nullable = false
     )
-    private Long timeAdded;
+    private long timeAdded;
 
 }
