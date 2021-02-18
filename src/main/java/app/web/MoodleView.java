@@ -3,8 +3,8 @@ package app.web;
 import app.jpa_repo.CourseSectionRepository;
 import app.model.courses.CourseSection;
 import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.router.Route;
@@ -15,25 +15,26 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 @Route("")
 public class MoodleView extends VerticalLayout {
-    private CourseSectionRepository repo;
-    private VerticalLayout sectionList = new VerticalLayout();
+    private final CourseSectionRepository repo;
+    private final VerticalLayout sectionList = new VerticalLayout();
 
     public MoodleView(@Autowired CourseSectionRepository repo) {
         this.repo = repo;
-        add(new H1("test"));
+        add(new H1("Test d'affichage de la page Moodle"));
         add(sectionList);
+        refresh();
     }
 
     private void refresh() {
-        repo.findAll() // get all the sections from the table
-                .stream() // stream them
-                .map(SectionLayout::new) // create a new SectionLayout for each
-                .forEach(sectionList::add); // add them to the sectionList layout to be displayed
+        repo.findAllSectionsByCourseId(1) // get all the sections from the table
+                .stream()
+                .map(SectionLayout::new)    // create a new SectionLayout for each
+                .forEach(sectionList::add); // add this SectionLayout into the sectionList layout to be displayed
     }
 
     class SectionLayout extends VerticalLayout {
-        private H2 title; // will be filled with the value of the title field in the CourseSection
-        private TextField content;  // same with the content field
+        TextField title = new TextField(); // will be filled with the value of the title field in the CourseSection
+        TextArea content = new TextArea(); // same with the content field
 
         public SectionLayout(CourseSection section) {
             add(title, content);
@@ -44,6 +45,7 @@ public class MoodleView extends VerticalLayout {
             binder.bindInstanceFields(this);
             binder.setBean(section);
 
+            // for when the values of the fields change
             binder.addValueChangeListener(e -> {
                 repo.delete(section); // delete the old section
                 repo.save(binder.getBean()); // add the new one
