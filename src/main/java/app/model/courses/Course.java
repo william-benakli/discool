@@ -1,11 +1,15 @@
 package app.model.courses;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity(name = "courses")
 @Table(name = "courses")
 public class Course {

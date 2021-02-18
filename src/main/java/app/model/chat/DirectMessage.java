@@ -1,7 +1,9 @@
 package app.model.chat;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
@@ -10,6 +12,8 @@ import javax.persistence.*;
  * It is linked to the "directMessages" table in the database.
  */
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity(name = "direct_messages")
 @Table(name = "direct_messages")
 public class DirectMessage {
