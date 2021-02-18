@@ -11,9 +11,9 @@
 
 ## TODO pour vendredi 19/02 11 h
 - Avoir un chat fonctionnel si possible avec 3 cannaux
-    - William : partie controller du chat
+    - William : partie app.controller du chat
     - David : avec Vaadin => interface graphique du chat
 - Moodle : page d'accueil
     - Yani : Vaadin > pour l'affichage => afficher une page "statique"
-    - Laure : partie controller pour interface bdd
+    - Laure : partie app.controller pour interface bdd
     - Laure (si j'ai le temps) : partie markdown à interpréter

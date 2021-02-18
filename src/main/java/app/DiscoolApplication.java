@@ -9,5 +9,4 @@ public class DiscoolApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(DiscoolApplication.class, args);
 	}
-
 }

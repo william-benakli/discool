@@ -4,4 +4,4 @@
  * We will add methods later to manipulate more precisely the date, but a lot of methods are
  * already available since all the classes extend JPARepository.
  */
-package jpa_repo;
+package app.jpa_repo;
