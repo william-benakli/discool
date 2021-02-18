@@ -1,26 +1,21 @@
-package model.chat;
+package app.model.chat;
 
+import lombok.Builder;
 import lombok.Getter;
 
 import javax.persistence.*;
 
 /**
- * Abstract class that contains all the common fields between a message
- * in the public channels and the direct messages.
+ * This class is the data model for the posts in the public channels.
+ * It is linked to the data contained in the "posts" table.
  */
-public abstract class Message {
-
+@Builder
+@Entity(name = "posts")
+@Table(name = "posts")
+public class PublicChatMessage {
     @Getter
     @Id // to say this is the primary key in the database
-    @SequenceGenerator( // the generator for the id
-            name = "idGenerator",
-            sequenceName = "idGenerator",
-            allocationSize = 1 // to increment the id by 1 each time
-    )
-    @GeneratedValue( // to generate the id
-            strategy = GenerationType.SEQUENCE,
-            generator = "idGenerator"
-    )
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // to generate the id
     @Column(
             name = "id", // the name of the column in the database
             updatable = false // so that the value can't be updated
@@ -40,7 +35,7 @@ public abstract class Message {
             name = "userid",
             nullable = false
     )
-    private String sender;
+    private Long sender;
 
     @Getter
     @Column(
@@ -67,4 +62,14 @@ public abstract class Message {
             nullable = false
     )
     private boolean deleted;
+
+    /**
+     * The id of the channel this post was sent to.
+     */
+    @Getter
+    @Column(
+            name = "channelid",
+            nullable = false
+    )
+    private Long channelid;
 }

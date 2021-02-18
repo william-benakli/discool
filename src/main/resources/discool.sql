@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS config (
 CREATE TABLE IF NOT EXISTS users (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE,
     username VARCHAR(100) NOT NULL,
-    role TINYINT NOT NULL,
+    role INT NOT NULL,
     firstname VARCHAR(100) NOT NULL,
     lastname VARCHAR(100) NOT NULL,
     email VARCHAR(100) NOT NULL UNIQUE,
@@ -32,17 +32,17 @@ CREATE TABLE IF NOT EXISTS courses (
     PRIMARY KEY(id)
 ) ENGINE=InnoDB;
 
-CREATE TABLE IF NOT EXISTS courseSections (
+CREATE TABLE IF NOT EXISTS course_sections (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE,
     courseid BIGINT UNSIGNED NOT NULL,
     parentid BIGINT UNSIGNED NOT NULL,
     title VARCHAR(255) NOT NULL,
     content TEXT NOT NULL,
 
-    CONSTRAINT fk_courseid
+    CONSTRAINT fk_courseid_course
         FOREIGN KEY(courseid) REFERENCES courses(id),
-    CONSTRAINT fk_parentid
-        FOREIGN KEY(parentid) REFERENCES courseSections(id),
+    CONSTRAINT fk_parentid_course
+        FOREIGN KEY(parentid) REFERENCES course_sections(id),
     PRIMARY KEY(id)
 ) ENGINE=InnoDB;
 
@@ -57,7 +57,7 @@ CREATE TABLE IF NOT EXISTS groups (
     PRIMARY KEY(id)
 ) ENGINE=InnoDB;
 
-CREATE TABLE IF NOT EXISTS groupMembers (
+CREATE TABLE IF NOT EXISTS group_members (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE,
     groupid BIGINT UNSIGNED NOT NULL,
     userid BIGINT UNSIGNED NOT NULL,
@@ -70,15 +70,18 @@ CREATE TABLE IF NOT EXISTS groupMembers (
     PRIMARY KEY(id)
 ) ENGINE=InnoDB;
 
-CREATE TABLE IF NOT EXISTS directMessages (
+CREATE TABLE IF NOT EXISTS direct_messages (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE,
     useridfrom BIGINT UNSIGNED NOT NULL,
     useridto BIGINT UNSIGNED NOT NULL,
     subject VARCHAR(255),
+    parentid BIGINT UNSIGNED,
     message TEXT NOT NULL,
     timecreated BIGINT NOT NULL,
     deleted BIT NOT NULL,
 
+    CONSTRAINT fk_parentid_direct
+    FOREIGN KEY(parentid) REFERENCES direct_messages(id),
     CONSTRAINT fk_useridfrom
 	FOREIGN KEY (useridfrom) REFERENCES users(id),
     CONSTRAINT fk_useridto

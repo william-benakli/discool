@@ -1,6 +1,6 @@
-package jpa_repo;
+package app.jpa_repo;
 
-import model.users.Group;
+import app.model.users.Group;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface GroupRepository extends JpaRepository<Group, Long> {

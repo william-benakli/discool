@@ -14,7 +14,7 @@ import javax.persistence.Table;
 @Builder
 @Entity(name = "posts")
 @Table(name = "posts")
-public class PublicChatMessage extends Message {
+public class PublicChatMessage {
     /**
      * The id of the channel this post was sent to.
      */
