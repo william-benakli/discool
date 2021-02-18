@@ -32,9 +32,9 @@ Présents:
 - faire une vraie maquette
 
 ### Répartition des tâches
-- David : partie web graphique, faire la maquette
+- David : partie app.web graphique, faire la maquette
 - Yani : back => model
-- William : back du chat => chat controller
+- William : back du chat => chat app.controller
 - Laure : bdd et le plugin mariadb
 
 ## Important/bonnes pratiques

@@ -1,4 +1,4 @@
-package model.users;
+package app.model.users;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -12,15 +12,7 @@ public class User {
 
     @Getter
     @Id // to say this is the primary key in the database
-    @SequenceGenerator( // the generator for the id
-            name = "idGenerator",
-            sequenceName = "idGenerator",
-            allocationSize = 1 // to increment the id by 1 each time
-    )
-    @GeneratedValue( // to generate the id
-            strategy = GenerationType.SEQUENCE,
-            generator = "idGenerator"
-    )
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // to generate the id
     @Column(
             name = "id", // the name of the column in the database
             updatable = false // so that the value can't be updated
