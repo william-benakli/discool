@@ -1,4 +1,4 @@
-package app;
+package app.web;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Key;
@@ -6,8 +6,6 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import web.ComponentBuilder;
-import web.ComponentButton;
 
 @Route(value = "", layout = MainLayout.class)
 @PageTitle("Discool")

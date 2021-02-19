@@ -1,4 +1,4 @@
-package web;
+package app.web;
 
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Key;
