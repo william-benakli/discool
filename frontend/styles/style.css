@@ -1,0 +1,8 @@
+body{
+    overflow: hidden;
+}
+
+/*Go check limitation*/
+@media screen and (max-width: 900px) {
+
+}
