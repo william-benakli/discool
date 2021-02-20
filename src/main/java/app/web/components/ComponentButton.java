@@ -29,8 +29,14 @@ public class ComponentButton extends Button {
      */
     private String pathImageOff;
 
+    /**
+     * Icon alt attribute when button is not selected
+     */
     private String altOff;
 
+    /**
+     * Icon alt attribute when button is selected
+     */
     private String altOn;
 
     /**
@@ -39,7 +45,7 @@ public class ComponentButton extends Button {
     private Key shortCut;
 
     public ComponentButton(String pathImageOn, String pathImageOff, String altOff, String altOn, Key shortCut) {
-        super(new Image(pathImageOn, altOn));
+        setIcon(SetStyle(new Image(pathImageOn, altOn)));
         status = false;
         this.pathImageOn = pathImageOn;
         this.pathImageOff = pathImageOff;
@@ -50,7 +56,21 @@ public class ComponentButton extends Button {
     }
 
     /**
-     * Actualise un bouton apres un clic
+     * Add css properties to the image of a button
+     *
+     * @param img The image that will undergo styling changes
+     * @return The image with new css properties
+     */
+    public Image SetStyle(Image img){
+        img.getStyle()
+                .set("width","25px")
+                .set("vertical-align","middle")
+                .set("horizontal-align","middle");
+        return img;
+    }
+
+    /**
+     * Refresh a button after a click
      *
      * @param event The even that fired the change
      */
@@ -60,7 +80,7 @@ public class ComponentButton extends Button {
     }
 
     /**
-     * Actualise l'apparence d'un bouton selon son status (on ou off)
+     * Updates the appearance of a button according to its status (on or off)
      *
      * @param status True if the button is selected, false otherwise
      * @param event  The event that fired the change
