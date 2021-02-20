@@ -16,7 +16,7 @@ import java.util.LinkedList;
 /**
  * test class to try to display a Moodle page
  */
-@Route("")
+@Route("moodle")
 public class MoodleView extends VerticalLayout {
     private final CourseSectionRepository repo;
     private final VerticalLayout sectionList = new VerticalLayout();

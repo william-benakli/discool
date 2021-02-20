@@ -6,6 +6,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.RouterLink;
 
 @Route(value = "", layout = MainLayout.class)
 @PageTitle("Discool")
@@ -42,6 +43,7 @@ public class MainView extends ComponentBuilder {
                 .set("margin","0")
                 .set("padding","0");
         for (Component item:card) layout.add(item);
+        layout.add(new RouterLink("MOODLE", MoodleView.class));
         add(layout);
     }
 
