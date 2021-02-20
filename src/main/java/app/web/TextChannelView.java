@@ -2,6 +2,7 @@ package app.web;
 
 import app.jpa_repo.TextChannelRepository;
 import app.model.chat.TextChannel;
+import app.web.layout.MainLayout;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;

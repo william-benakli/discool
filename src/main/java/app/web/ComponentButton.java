@@ -7,55 +7,74 @@ import com.vaadin.flow.component.html.Image;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * An extension of the Button class to add our style and several manipulation methods
+ */
+@Getter
+@Setter
 public class ComponentButton extends Button {
 
-    @Getter @Setter boolean status;
+    /**
+     * True if the button is selected, false otherwise
+     */
+    private boolean status;
 
-    @Getter @Setter String pathImageOn;
+    /**
+     * Path of the icon when the button is selected
+     */
+    private String pathImageOn;
 
-    @Getter @Setter String pathImageOff;
+    /**
+     * Path of the icon when the button is not selected
+     */
+    private String pathImageOff;
 
-    @Getter @Setter String altOff;
+    private String altOff;
 
-    @Getter @Setter String altOn;
+    private String altOn;
 
-    @Getter @Setter Key shortCut;
+    /**
+     * The shortcut to activate the button
+     */
+    private Key shortCut;
 
-    public ComponentButton(String pathImageOn, String pathImageOff, String altOff, String altOn, Key shortCut){
+    public ComponentButton(String pathImageOn, String pathImageOff, String altOff, String altOn, Key shortCut) {
         super(new Image(pathImageOn, altOn));
-        status=false;
-        this.pathImageOn=pathImageOn;
-        this.pathImageOff=pathImageOff;
-        this.altOff=altOff;
-        this.altOn=altOn;
-        this.shortCut=shortCut;
+        status = false;
+        this.pathImageOn = pathImageOn;
+        this.pathImageOff = pathImageOff;
+        this.altOff = altOff;
+        this.altOn = altOn;
+        this.shortCut = shortCut;
 
     }
 
     /**
-     * Actualise l'apparence d'un bouton
-     * @param status
-     * @param event
+     * Actualise un bouton apres un clic
+     *
+     * @param event The even that fired the change
      */
-    public void changeImage(boolean status, ClickEvent<Button> event){
+    public void changeStatus(ClickEvent<Button> event) {
+        this.status = !status;
+        changeImage(this.status, event);
+    }
+
+    /**
+     * Actualise l'apparence d'un bouton selon son status (on ou off)
+     *
+     * @param status True if the button is selected, false otherwise
+     * @param event  The event that fired the change
+     */
+    public void changeImage(boolean status, ClickEvent<Button> event) {
         Image img = new Image(
-                (status)?pathImageOff:pathImageOn,
-                (status)?altOff:altOn
+                (status) ? pathImageOff : pathImageOn,
+                (status) ? altOff : altOn
         );
         img.getStyle()
-                .set("width","25px")
-                .set("vertical-align","middle")
-                .set("horizontal-align","middle");
+                .set("width", "25px")
+                .set("vertical-align", "middle")
+                .set("horizontal-align", "middle");
         event.getSource().setIcon(img);
-    }
-
-    /**
-     * Actualise un bouton apres un clique
-     * @param event
-     */
-    public void changeStatus(ClickEvent<Button> event){
-        this.status=!status;
-        changeImage(this.status, event);
     }
 
 }

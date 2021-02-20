@@ -97,7 +97,7 @@ CREATE TABLE IF NOT EXISTS channels (
     courseid BIGINT UNSIGNED NOT NULL,
     name VARCHAR(255),
     CONSTRAINT fk_courseid_channels
-	FOREIGN KEY (courseid) REFERENCES users(id),
+	FOREIGN KEY (courseid) REFERENCES courses(id),
     PRIMARY KEY(id)
 ) ENGINE=InnoDB;
 
