@@ -1,7 +1,9 @@
 package app.model.chat;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
@@ -10,6 +12,8 @@ import javax.persistence.*;
  * "channels" table in the database.
  */
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity(name = "channels")
 @Table(name = "channels")
 public class TextChannel {
@@ -22,7 +26,7 @@ public class TextChannel {
             name = "id", // the name of the column in the database
             updatable = false // so that the value can't be updated
     )
-    private Long id;
+    private long id;
 
     /**
      * The id of the course this channel is in.
@@ -32,7 +36,7 @@ public class TextChannel {
             name = "courseid",
             nullable = false
     )
-    private Long courseId;
+    private long courseId;
 
     /**
      * The name of the channel.

@@ -1,46 +1,48 @@
 package app.model.courses;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
 @Entity(name = "course_sections")
 @Table(name = "course_sections")
 public class CourseSection {
 
-    @Getter
+
     @Id // to say this is the primary key in the database
     @GeneratedValue(strategy = GenerationType.IDENTITY) // to generate the id
     @Column(
             name = "id", // the name of the column in the database
             updatable = false // so that the value can't be updated
     )
-    private Long id;
+    private long id;
 
-    @Getter
     @Column(
             name = "courseid",
             nullable = false
     )
-    private Long courseId;
+    private long courseId;
 
-    @Getter
     @Column(
             name = "parentid",
             nullable = false
     )
-    private Long parentId;
+    private long parentId;
 
-    @Getter
     @Column(
             name = "title",
             nullable = false
     )
     private String title;
 
-    @Getter
+
     @Column(
             name = "content",
             nullable = false,

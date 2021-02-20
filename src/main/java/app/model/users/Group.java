@@ -1,11 +1,15 @@
 package app.model.users;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity(name = "groups")
 @Table(name = "groups")
 public class Group {
@@ -17,14 +21,14 @@ public class Group {
             name = "id", // the name of the column in the database
             updatable = false // so that the value can't be updated
     )
-    private Long id;
+    private long id;
 
     @Getter
     @Column(
             name = "courseid",
             nullable = false
     )
-    private Long courseId;
+    private long courseId;
 
     @Getter
     @Column(

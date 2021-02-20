@@ -1,11 +1,15 @@
 package app.model.courses;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity(name = "courses")
 @Table(name = "courses")
 public class Course {
@@ -17,7 +21,7 @@ public class Course {
             name = "id", // the name of the column in the database
             updatable = false // so that the value can't be updated
     )
-    private Long id;
+    private long id;
 
     @Getter
     @Column(
@@ -31,5 +35,5 @@ public class Course {
             name = "teacherid",
             nullable = false
     )
-    private Long teacherId;
+    private long teacherId;
 }

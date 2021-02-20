@@ -24,7 +24,7 @@ public class PublicChatMessage {
             name = "id", // the name of the column in the database
             updatable = false // so that the value can't be updated
     )
-    private Long id;
+    private long id;
 
     @Getter
     @Column(
@@ -39,21 +39,21 @@ public class PublicChatMessage {
             name = "userid",
             nullable = false
     )
-    private Long sender;
+    private long sender;
 
     @Getter
     @Column(
             name = "timecreated",
             nullable = false
     )
-    private Long timeCreated;
+    private long timeCreated;
 
     /**
      * If this is a reply to another message, parentId is the id of that original message
      */
     @Getter
     @Column(name = "parentid")
-    private Long parentId;
+    private long parentId;
 
     /**
      * True if the message is deleted, false otherwise.
@@ -75,5 +75,5 @@ public class PublicChatMessage {
             name = "channelid",
             nullable = false
     )
-    private Long channelid;
+    private long channelid;
 }
