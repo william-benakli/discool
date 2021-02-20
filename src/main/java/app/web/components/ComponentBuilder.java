@@ -46,6 +46,29 @@ public class ComponentBuilder extends VerticalLayout {
      * @param button      The Button(s) to add to the div
      * @return a grey div with the user messages
      */
+    public static Component createCard(ColorHTML color, String width, String className,String[] messageUser ,Button... button) {
+        FlexLayout card = new FlexLayout();
+        card.addClassName("card");
+        card.addClassName(className);
+        card.getStyle()
+                .set("overflow", "auto")
+                .set("width", width)
+                .set("margin", "0px")
+                .set("background", color.getColorHtml())
+                .set("display", "flex")
+                .set("flex-direction", "column")
+                .set("padding", "10px");
+        switch (className){
+            case "cardCenter":
+                cardCenter(card, messageUser, button);
+                break;
+
+            default:
+                //TODO: Définir une largeur max pour les div DARKGREY : card.getStyle().set("max-width", "275px");
+                break;
+        }
+
+        return card;
     public static Component createCard(ColorHTML color, String width, String className, String[] messageUser, Button... button) {
         FlexLayout card = new FlexLayout();
         card.addClassName("card");
@@ -124,7 +147,7 @@ public class ComponentBuilder extends VerticalLayout {
     }
 
     /**
-     * Affiche dans un chat un message envoye par l'utilisateur
+     * Creates a Paragraph with the user's message
      *
      * @param text The text to put on the card
      * @return a Paragraph containing the message card
@@ -137,7 +160,7 @@ public class ComponentBuilder extends VerticalLayout {
         return para;
     }
 
-    public static enum ColorHTML {
+    public enum ColorHTML {
         PURPLE("#7510F7"),
         WHITE("#FFFFFF"),
         GREY("#EAEAEA"),
