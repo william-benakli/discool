@@ -1,11 +1,15 @@
-package app.web;
+package app.web.views;
 
 import app.jpa_repo.TextChannelRepository;
 import app.model.chat.TextChannel;
+import app.web.components.ComponentBuilder;
+import app.web.components.ComponentButton;
+import app.web.layout.MainLayout;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.HasDynamicTitle;
 import com.vaadin.flow.router.HasUrlParameter;
@@ -16,7 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.Optional;
 
 @Route(value = "channels", layout = MainLayout.class)
-public class TextChannelView extends ComponentBuilder implements HasDynamicTitle, HasUrlParameter<Long> {
+public class TextChannelView extends VerticalLayout implements HasDynamicTitle, HasUrlParameter<Long> {
     String textUser[] = {
             "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce semper sed ipsum nec vulputate. Duis gravida velit nec quam consequat semper. Vestibulum lobortis eros in dictum iaculis. Etiam mi est, rhoncus elementum leo a, maximus placerat odio. Nulla varius, lorem eleifend faucibus consequat, mi nulla placerat leo, nec suscipit nisl tellus vitae risus. Mauris a suscipit risus. Donec condimentum enim eu tortor euismod, eu porttitor libero mattis. Integer sodales, turpis vitae mollis mollis, felis mauris semper sem, in aliquet eros nisl et ante. Fusce vulputate tortor elit, et condimentum tortor dignissim vitae. Vivamus fermentum ultricies leo, ut maximus sem efficitur at. Vestibulum ultrices lacinia blandit. Mauris neque dui, varius ac magna non, tempus euismod erat. Aliquam laoreet pharetra faucibus. Proin consequat rhoncus diam, nec euismod felis gravida in.\n" +
                     "\n",
@@ -32,9 +36,9 @@ public class TextChannelView extends ComponentBuilder implements HasDynamicTitle
     private TextChannel textChannel;
     //TODO: créer un objet Button img path(false/true) + statut
 
-    ComponentButton muteMicrophone;
-    ComponentButton muteHeadphone;
-    Button exitButton;
+    private final ComponentButton muteMicrophone;
+    private final ComponentButton muteHeadphone;
+    private final Button exitButton;
 
     //TODO: send message enter/button
     //TODO: sur la meme ligne
@@ -48,7 +52,7 @@ public class TextChannelView extends ComponentBuilder implements HasDynamicTitle
         muteHeadphone = new ComponentButton("img/headsetOn.svg", "img/headsetOff.svg", "unmute headphone", "mute headphone", Key.DIGIT_2);
         muteHeadphone.addClickListener(event -> muteHeadphone.changeStatus(event));
 
-        exitButton = createButtonText("Quitter", "#F04747");
+        exitButton = ComponentBuilder.createButtonText("Quitter", "#F04747");
         exitButton.addClickListener(event -> {
             exitButton.getStyle().set("display", "none");
             muteHeadphone.getStyle().set("display", "none");
@@ -57,9 +61,9 @@ public class TextChannelView extends ComponentBuilder implements HasDynamicTitle
         //exitButton.addClickListener(event -> ); hide mic and head
 
         createLayout(
-                createCard(ComponentBuilder.ColorHTML.DARKGRAY, "20%", "cardLeft", textUser),
-                createCard(ComponentBuilder.ColorHTML.GREY, "60%", "cardCenter", textUser, muteMicrophone, muteHeadphone, exitButton),
-                createCard(ComponentBuilder.ColorHTML.DARKGRAY, "20%", "cardRigth", textUser)
+                ComponentBuilder.createCard(ComponentBuilder.ColorHTML.DARKGRAY, "20%", "cardLeft", textUser),
+                ComponentBuilder.createCard(ComponentBuilder.ColorHTML.GREY, "60%", "cardCenter", textUser, muteMicrophone, muteHeadphone, exitButton),
+                ComponentBuilder.createCard(ComponentBuilder.ColorHTML.DARKGRAY, "20%", "cardRigth", textUser)
         );
 
     }
@@ -74,7 +78,7 @@ public class TextChannelView extends ComponentBuilder implements HasDynamicTitle
                 .set("margin", "0")
                 .set("padding", "0");
         for (Component item : card) layout.add(item);
-        add(layout);
+        this.add(layout);
     }
 
     @Override

@@ -1,4 +1,4 @@
-package app.web;
+package app.web.views;
 
 import app.jpa_repo.CourseRepository;
 import app.jpa_repo.CourseSectionRepository;
