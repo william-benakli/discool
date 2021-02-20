@@ -28,7 +28,7 @@ public class TextChannelView extends ComponentBuilder implements HasDynamicTitle
                     "\n"
     };
 
-    private TextChannelRepository textChannelRepository;
+    private final TextChannelRepository textChannelRepository;
     private TextChannel textChannel;
     //TODO: créer un objet Button img path(false/true) + statut
 
@@ -43,10 +43,10 @@ public class TextChannelView extends ComponentBuilder implements HasDynamicTitle
     public TextChannelView(@Autowired TextChannelRepository textChannelRepository) {
         this.textChannelRepository = textChannelRepository;
         muteMicrophone = new ComponentButton("img/micOn.svg", "img/micOff.svg", "unmute microphone", "mute microphone", Key.DIGIT_1);
-        muteMicrophone.addClickListener(event -> {muteMicrophone.changeStatus(event);});
+        muteMicrophone.addClickListener(event -> muteMicrophone.changeStatus(event));
 
         muteHeadphone = new ComponentButton("img/headsetOn.svg", "img/headsetOff.svg", "unmute headphone", "mute headphone", Key.DIGIT_2);
-        muteHeadphone.addClickListener(event -> {muteHeadphone.changeStatus(event);});
+        muteHeadphone.addClickListener(event -> muteHeadphone.changeStatus(event));
 
         exitButton = createButtonText("Quitter", "#F04747");
         exitButton.addClickListener(event -> {
