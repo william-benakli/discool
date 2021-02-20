@@ -10,6 +10,9 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.router.Route;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
+
 /**
  * test class to try to display a Moodle page
  */
@@ -26,8 +29,10 @@ public class MoodleView extends VerticalLayout {
     }
 
     private void refresh() {
-        repo.findAllSectionsByCourseId(1) // get all the sections from the table
-                .stream()
+        ArrayList<CourseSection> list = repo.findAllSectionsByCourseId(1); // get all the sections from the table
+        list.forEach(courseSection -> courseSection.addParent(repo)); // add the parent for each element
+        LinkedList<CourseSection> sortedList = CourseSection.sort(list); // sort the sections in the right order
+        sortedList.stream()
                 .map(SectionLayout::new)    // create a new SectionLayout for each
                 .forEach(sectionList::add); // add this SectionLayout into the sectionList layout to be displayed
     }
@@ -47,7 +52,6 @@ public class MoodleView extends VerticalLayout {
 
             // for when the values of the fields change
             binder.addValueChangeListener(e -> {
-                repo.delete(section); // delete the old section
                 repo.save(binder.getBean()); // add the new one
                 refresh();
             });
