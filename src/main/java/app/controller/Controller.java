@@ -6,9 +6,7 @@ import app.model.chat.PublicChatMessage;
 import app.model.chat.TextChannel;
 import app.model.courses.CourseSection;
 
-import java.text.DateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.LinkedList;
 
 public class Controller {
@@ -37,7 +35,7 @@ public class Controller {
                 .channelid(channelId)
                 .parentId(parentId)
                 .sender(userId)
-                .timeCreated(Long.parseLong(DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(new Date())))
+                .timeCreated(000) // TODO add time of creation
                 .deleted(false)
                 .build();
         publicChatMessageRepository.save(messageToSave);

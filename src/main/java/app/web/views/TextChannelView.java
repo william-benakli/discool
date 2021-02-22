@@ -9,7 +9,6 @@ import app.model.chat.TextChannel;
 import app.web.components.ComponentButton;
 import app.web.layout.CourseLayout;
 import com.vaadin.flow.component.Key;
-import com.vaadin.flow.component.KeyModifier;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -25,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.Optional;
+
 
 @Route(value = "channels", layout = CourseLayout.class)
 public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle, HasUrlParameter<Long> {
@@ -58,8 +58,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         TextField textField = new TextField();
         textField.setPlaceholder("Envoyer un message");
         textField.setWidthFull();
-        textField.addFocusShortcut(Key.KEY_T, KeyModifier.ALT);
-        // messageTextField.setLabel("Press ALT + T to focus");
+        //textField.addFocusShortcut(Key.KEY_T, KeyModifier.ALT);
         textField.getStyle().set("margin", "0 2.5px");
         return textField;
     }
@@ -67,6 +66,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
     private void createSendMessageButton() {
         sendMessage = createButtonWithLabel("Envoyer", "#000");
         sendMessage.addClickShortcut(Key.ENTER);
+
         sendMessage.addClickListener(event -> {
             if (!messageTextField.isEmpty()) {
                 // TODO : set the parentId and the userId depending on context
@@ -114,7 +114,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
 
         FlexLayout messageInputBar = new FlexLayout();
         messageInputBar.add(
-                createTextField(),
+                messageTextField,
                 chatButtonContainer
         );
 
@@ -132,7 +132,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
             MessageLayout messageLayout = new MessageLayout(message);
             messageContainer.add(messageLayout);
         }
-        messageContainer.getStyle().set("flex-direction", "column-reverse");
+        messageContainer.getStyle().set("flex-direction", "column");
         chatBar.add(messageContainer, messageInputBar);
     }
 
@@ -195,6 +195,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
             binder.bindInstanceFields(this);
             binder.setBean(publicMessage);
             binder.addValueChangeListener(event -> getController().saveMessage(binder.getBean()));
+
         }
     }
 
