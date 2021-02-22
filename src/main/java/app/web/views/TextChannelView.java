@@ -8,13 +8,12 @@ import app.model.chat.TextChannel;
 import app.web.components.ComponentBuilder;
 import app.web.components.ComponentButton;
 import app.web.layout.CourseLayout;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.data.binder.Binder;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.HasDynamicTitle;
 import com.vaadin.flow.router.HasUrlParameter;
@@ -28,43 +27,26 @@ import java.util.Optional;
 
 @Route(value = "channels", layout = CourseLayout.class)
 public class TextChannelView extends VerticalLayout implements HasDynamicTitle, HasUrlParameter<Long> {
-    String textUser[] = {
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce semper sed ipsum nec vulputate. Duis gravida velit nec quam consequat semper. Vestibulum lobortis eros in dictum iaculis. Etiam mi est, rhoncus elementum leo a, maximus placerat odio. Nulla varius, lorem eleifend faucibus consequat, mi nulla placerat leo, nec suscipit nisl tellus vitae risus. Mauris a suscipit risus. Donec condimentum enim eu tortor euismod, eu porttitor libero mattis. Integer sodales, turpis vitae mollis mollis, felis mauris semper sem, in aliquet eros nisl et ante. Fusce vulputate tortor elit, et condimentum tortor dignissim vitae. Vivamus fermentum ultricies leo, ut maximus sem efficitur at. Vestibulum ultrices lacinia blandit. Mauris neque dui, varius ac magna non, tempus euismod erat. Aliquam laoreet pharetra faucibus. Proin consequat rhoncus diam, nec euismod felis gravida in.\n" +
-                    "\n",
-            "Quisque volutpat arcu vitae mi fringilla mattis. Cras eu massa neque. Morbi non dictum tellus. Nullam orci enim, gravida at felis sed, porttitor condimentum risus. Nam ac odio dolor. Donec sagittis sem ac ullamcorper aliquet. Aliquam erat volutpat. Mauris eros mauris, posuere vitae aliquet eu, hendrerit quis ex. Integer quam lorem, suscipit vitae ultrices sed, imperdiet non tortor.\n" +
-                    "\n",
-            "Ut sit amet massa mattis, auctor felis consectetur, molestie enim. Suspendisse sed malesuada turpis. Sed venenatis augue vel dolor placerat dapibus. Cras aliquam non est quis accumsan. Proin sed tincidunt odio. Curabitur eu condimentum metus. Mauris in arcu ut massa dignissim facilisis. Ut fringilla turpis mollis faucibus semper. Suspendisse ut dapibus sapien.\n" +
-                    "\n",
-            "Etiam mauris ipsum, tempus non placerat vitae, dignissim sit amet nunc. Sed in orci leo. Quisque eu tortor mi. Vivamus neque nibh, commodo eget purus quis, finibus ultricies lorem. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Mauris feugiat placerat lobortis. Nunc ornare lacus non enim rhoncus aliquam.\n" +
-                    "\n"
-    };
-
     private final PublicChatMessageRepository publicMessageRepository;
     private final UserRepository userRepository;
-
     private final TextChannelRepository textChannelRepository;
     private TextChannel textChannel;
-    //TODO: créer un objet Button img path(false/true) + statut
 
     private final ComponentButton muteMicrophone;
     private final ComponentButton muteHeadphone;
     private final Button exitButton;
+    private final Button sendMessage;
+    private final TextField textField;
 
-    private Button sendMessage;
-    private Button exitButton;
-
-    private HorizontalLayout layout = new HorizontalLayout();
-
-    //TODO: send message enter/button
-    //TODO: sur la meme ligne
-    //TODO: Change color loader
-
-    private String[] test = {"william", "david", "laure"};
+    private Component sidebar;
+    private Component chat;
+    private Component membersBar;
 
     public TextChannelView(@Autowired TextChannelRepository textChannelRepository, @Autowired PublicChatMessageRepository publicMessageRepository, @Autowired UserRepository userRepository) {
         this.textChannelRepository = textChannelRepository;
         this.publicMessageRepository = publicMessageRepository;
         this.userRepository = userRepository;
+        textField = ComponentBuilder.createTextField();
         muteMicrophone = new ComponentButton("img/micOn.svg", "img/micOff.svg", "unmute microphone", "mute microphone", Key.DIGIT_1);
         muteMicrophone.addClickListener(muteMicrophone::changeStatus);
 
@@ -77,17 +59,17 @@ public class TextChannelView extends VerticalLayout implements HasDynamicTitle, 
             muteHeadphone.getStyle().set("display", "none");
             muteMicrophone.getStyle().set("display", "none");
         });
-        sendMessage = createButtonText("Envoyer", "#000");
+
+        sendMessage = ComponentBuilder.createButtonText("Envoyer", "#000");
         sendMessage.addClickShortcut(Key.ENTER);
         sendMessage.addClickListener(event -> {
-
             if (!textField.isEmpty()) {
                 PublicChatMessage msg = PublicChatMessage.builder()
                         .message(textField.getValue())
                         .channelid(1)
                         .parentId(1)
                         .sender(1)
-                        .timeCreated(DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(new Date()))
+                        .timeCreated(Long.parseLong(DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(new Date())))
                         .deleted(false)
                         .build();
                 publicMessageRepository.save(msg);
@@ -96,8 +78,6 @@ public class TextChannelView extends VerticalLayout implements HasDynamicTitle, 
                 refresh();
             }
         });
-
-        //exitButton.addClickListener(event -> ); hide mic and head
     }
 
     @Override
@@ -118,56 +98,25 @@ public class TextChannelView extends VerticalLayout implements HasDynamicTitle, 
         makeLayout();
     }
 
+    private void refresh() {
+        sidebar = ComponentBuilder.createSideBar("20%", textChannel.getCourseId(), textChannelRepository);
+        chat = ComponentBuilder.createMessageCard(ComponentBuilder.ColorHTML.GREY, "60%", "cardCenter",
+                                                  publicMessageRepository.findAllByChannelid(textChannel.getId()),
+                                                  publicMessageRepository, userRepository, sendMessage,
+                                                  muteMicrophone, muteHeadphone, exitButton);
+        membersBar = ComponentBuilder.createMembersCard(ComponentBuilder.ColorHTML.DARKGRAY, "20%");
+    }
+
     private void makeLayout() {
-        HorizontalLayout layout = ComponentBuilder.createLayout(
-                ComponentBuilder.createSideBar("20%", textChannel.getCourseId(), textChannelRepository),
-                ComponentBuilder.createMessageCard(ComponentBuilder.ColorHTML.GREY, "60%", "cardCenter", textUser, muteMicrophone, muteHeadphone, exitButton),
-                ComponentBuilder.createMembersCard(ComponentBuilder.ColorHTML.DARKGRAY, "20%")
-        );
+        sidebar = ComponentBuilder.createSideBar("20%", textChannel.getCourseId(), textChannelRepository);
+        chat = ComponentBuilder.createMessageCard(ComponentBuilder.ColorHTML.GREY, "60%", "cardCenter",
+                                                  publicMessageRepository.findAllByChannelid(textChannel.getId()),
+                                                  publicMessageRepository, userRepository,
+                                                  sendMessage, muteMicrophone, muteHeadphone, exitButton);
+        membersBar = ComponentBuilder.createMembersCard(ComponentBuilder.ColorHTML.DARKGRAY, "20%");
+        HorizontalLayout layout = ComponentBuilder.createLayout(sidebar, chat, membersBar);
         this.add(layout);
     }
 
-
-    private void refresh() {
-        cardTop.removeAll();
-        //TODO: ici il faut changer le 1 (qui correspond au channel id 1) par une variable qui depend de l'url
-        publicMessageRepository.findAllByChannelidAndDeletedFalse(1)
-                .stream()
-                .map(MessageLayout::new)
-                .forEach(cardTop::add);
-    }
-
-
-    class MessageLayout extends HorizontalLayout {
-
-        private TextField message = new TextField();
-        private VerticalLayout layout = new VerticalLayout();
-        private Button supprimer;
-        private Button modification;
-
-        public MessageLayout(PublicChatMessage publicMessage) {
-            supprimer = new Button("Suppression");
-            modification = new Button("Modification");
-
-            supprimer.addClickListener(event -> {
-                publicMessageRepository.updateDeletedById(publicMessage.getId());
-            });
-
-            message.getStyle().set("border", "none");
-            message.getStyle().set("border-width", "0px");
-            message.getStyle().set("outline", "none");
-
-            message.setLabel(user.findById(publicMessage.getSender()).getUsername() + " " + String.valueOf(publicMessage.getTimeCreated()));
-            add(message);
-            layout.add(modification);
-            layout.add(supprimer);
-            add(layout);
-
-            Binder<PublicChatMessage> binder = new Binder<>(PublicChatMessage.class);
-            binder.bindInstanceFields(this);
-            binder.setBean(publicMessage);
-            binder.addValueChangeListener(event -> publicMessageRepository.save(binder.getBean()));
-        }
-    }
 }
 

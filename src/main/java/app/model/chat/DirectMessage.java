@@ -1,9 +1,6 @@
 package app.model.chat;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 
@@ -14,11 +11,12 @@ import javax.persistence.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
+@Setter
 @Entity(name = "direct_messages")
 @Table(name = "direct_messages")
 public class DirectMessage {
 
-    @Getter
     @Id // to say this is the primary key in the database
     @GeneratedValue(strategy = GenerationType.IDENTITY) // to generate the id
     @Column(
@@ -27,7 +25,6 @@ public class DirectMessage {
     )
     private long id;
 
-    @Getter
     @Column(
             name = "message",
             nullable = false, // can't be null
@@ -35,7 +32,6 @@ public class DirectMessage {
     )
     private String message;
 
-    @Getter
     @Column(
             name = "timecreated",
             nullable = false
@@ -45,7 +41,6 @@ public class DirectMessage {
     /**
      * If this is a reply to another message, parentId is the id of that original message
      */
-    @Getter
     @Column(name = "parentid")
     private long parentId;
 
@@ -53,7 +48,6 @@ public class DirectMessage {
      * True if the message is deleted, false otherwise.
      * All messages are kept for monitoring purposes.
      */
-    @Getter
     @Column(
             name = "deleted",
             columnDefinition = "bit",
@@ -64,7 +58,6 @@ public class DirectMessage {
     /**
      * The user sending the message.
      */
-    @Getter
     @Column(
             name = "useridfrom",
             nullable = false
@@ -74,7 +67,6 @@ public class DirectMessage {
     /**
      * The user receiving the message
      */
-    @Getter
     @Column(
             name = "useridto",
             nullable = false
@@ -84,7 +76,6 @@ public class DirectMessage {
     /**
      * The subject of the message
      */
-    @Getter
     @Column(name = "subject")
     private String subject;
 }

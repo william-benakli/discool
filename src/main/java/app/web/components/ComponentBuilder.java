@@ -1,7 +1,11 @@
 package app.web.components;
 
+import app.jpa_repo.PublicChatMessageRepository;
 import app.jpa_repo.TextChannelRepository;
+import app.jpa_repo.UserRepository;
+import app.model.chat.PublicChatMessage;
 import app.model.chat.TextChannel;
+import app.web.layout.MessageLayout;
 import app.web.views.MoodleView;
 import app.web.views.TextChannelView;
 import com.vaadin.flow.component.Component;
@@ -53,12 +57,17 @@ public class ComponentBuilder extends VerticalLayout {
      * @param button      The Button(s) to add to the div
      * @return the center panel for the chat messages
      */
-    public static Component createMessageCard(ColorHTML color, String width, String className, String[] messageUser, Button... button) {
+    public static Component createMessageCard(ColorHTML color, String width, String className,
+                                              ArrayList<PublicChatMessage> messageUser,
+                                              PublicChatMessageRepository publicChatMessageRepository,
+                                              UserRepository userRepository, Button... button) {
         FlexLayout card = new FlexLayout();
         card.addClassName("card");
         card.addClassName(className);
         setCardStyle(card, width, color);
-        cardCenter(card, messageUser, button);
+        cardCenter(card, messageUser,
+                   publicChatMessageRepository,
+                   userRepository, button);
         return card;
     }
 
@@ -177,7 +186,9 @@ public class ComponentBuilder extends VerticalLayout {
      * @param messageUser The user messages
      * @param button      The Button(s) to add to the div
      */
-    public static void cardCenter(FlexLayout card, String[] messageUser, Button... button) {
+    public static void cardCenter(FlexLayout card, ArrayList<PublicChatMessage> messageUser,
+                                  PublicChatMessageRepository publicChatMessageRepository,
+                                  UserRepository userRepository, Button... button) {
         FlexLayout chatButton = new FlexLayout();
         chatButton.getStyle()
                 .set("padding", "0 2.5px");
@@ -189,7 +200,6 @@ public class ComponentBuilder extends VerticalLayout {
         messageMenu.add(
                 createTextField(),
                 chatButton
-                //TODO: add button mute and demute
         );
 
         FlexLayout cardTop = new FlexLayout();
@@ -199,13 +209,14 @@ public class ComponentBuilder extends VerticalLayout {
                 .set("position", "sticky")
                 .set("bottom", "0px")
                 .set("background-color", ColorHTML.GREY.getColorHtml());
-        //TODO: add text
 
-        for (String message : messageUser) {
-            cardTop.add(createMessageCard(message));
+        for (PublicChatMessage message : messageUser) {
+            MessageLayout messageLayout = new MessageLayout(message, publicChatMessageRepository, userRepository);
+            cardTop.add(messageLayout);
         }
         cardTop.getStyle().set("flex-direction", "column-reverse");
         card.add(cardTop, messageMenu);
+
     }
 
     /**
@@ -213,11 +224,12 @@ public class ComponentBuilder extends VerticalLayout {
      *
      * @return a TextField for the user to input a message
      */
-    public static Component createTextField() {
+    public static TextField createTextField() {
         TextField textField = new TextField();
         textField.setPlaceholder("Envoyer un message");
         textField.setWidthFull();
-        textField.addFocusShortcut(Key.KEY_T, KeyModifier.ALT);//textField.setLabel("Press ALT + T to focus");
+        textField.addFocusShortcut(Key.KEY_T, KeyModifier.ALT);
+        //textField.setLabel("Press ALT + T to focus");
         textField.getStyle().set("margin", "0 2.5px");
         return textField;
     }

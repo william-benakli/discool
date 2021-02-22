@@ -1,9 +1,6 @@
 package app.model.chat;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 
@@ -14,10 +11,11 @@ import javax.persistence.*;
 @Builder
 @AllArgsConstructor()
 @NoArgsConstructor()
+@Getter
+@Setter
 @Entity(name = "posts")
 @Table(name = "posts")
 public class PublicChatMessage {
-    @Getter
     @Id // to say this is the primary key in the database
     @GeneratedValue(strategy = GenerationType.IDENTITY) // to generate the id
     @Column(
@@ -26,7 +24,6 @@ public class PublicChatMessage {
     )
     private long id;
 
-    @Getter
     @Column(
             name = "message",
             nullable = false, // can't be null
@@ -34,25 +31,22 @@ public class PublicChatMessage {
     )
     private String message;
 
-    @Getter
     @Column(
             name = "userid",
             nullable = false
     )
     private long sender;
 
-    @Getter
     @Column(
             name = "timecreated",
             nullable = false,
             columnDefinition = "TEXT"
     )
-    private String timeCreated;
+    private long timeCreated;
 
     /**
      * If this is a reply to another message, parentId is the id of that original message
      */
-    @Getter
     @Column(name = "parentid")
     private long parentId;
 
@@ -60,7 +54,6 @@ public class PublicChatMessage {
      * True if the message is deleted, false otherwise.
      * All messages are kept for monitoring purposes.
      */
-    @Getter
     @Column(
             name = "deleted",
             columnDefinition = "bit",
@@ -71,7 +64,6 @@ public class PublicChatMessage {
     /**
      * The id of the channel this post was sent to.
      */
-    @Getter
     @Column(
             name = "channelid",
             nullable = false
