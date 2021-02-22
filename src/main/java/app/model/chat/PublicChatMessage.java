@@ -1,7 +1,6 @@
 package app.model.chat;
 
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
 
 import javax.persistence.*;
 
@@ -10,19 +9,21 @@ import javax.persistence.*;
  * It is linked to the data contained in the "posts" table.
  */
 @Builder
+@AllArgsConstructor()
+@NoArgsConstructor()
+@Getter
+@Setter
 @Entity(name = "posts")
 @Table(name = "posts")
 public class PublicChatMessage {
-    @Getter
     @Id // to say this is the primary key in the database
     @GeneratedValue(strategy = GenerationType.IDENTITY) // to generate the id
     @Column(
             name = "id", // the name of the column in the database
             updatable = false // so that the value can't be updated
     )
-    private Long id;
+    private long id;
 
-    @Getter
     @Column(
             name = "message",
             nullable = false, // can't be null
@@ -30,32 +31,29 @@ public class PublicChatMessage {
     )
     private String message;
 
-    @Getter
     @Column(
             name = "userid",
             nullable = false
     )
-    private Long sender;
+    private long sender;
 
-    @Getter
     @Column(
             name = "timecreated",
-            nullable = false
+            nullable = false,
+            columnDefinition = "TEXT"
     )
-    private Long timeCreated;
+    private long timeCreated;
 
     /**
      * If this is a reply to another message, parentId is the id of that original message
      */
-    @Getter
     @Column(name = "parentid")
-    private Long parentId;
+    private long parentId;
 
     /**
      * True if the message is deleted, false otherwise.
      * All messages are kept for monitoring purposes.
      */
-    @Getter
     @Column(
             name = "deleted",
             columnDefinition = "bit",
@@ -66,10 +64,9 @@ public class PublicChatMessage {
     /**
      * The id of the channel this post was sent to.
      */
-    @Getter
     @Column(
             name = "channelid",
             nullable = false
     )
-    private Long channelid;
+    private long channelid;
 }

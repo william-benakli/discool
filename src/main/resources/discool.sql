@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS users (
     PRIMARY KEY(id)
 ) ENGINE=InnoDB;
 
+
 CREATE TABLE IF NOT EXISTS courses (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE,
     name VARCHAR(255) NOT NULL,
@@ -32,6 +33,7 @@ CREATE TABLE IF NOT EXISTS courses (
     PRIMARY KEY(id)
 ) ENGINE=InnoDB;
 
+
 CREATE TABLE IF NOT EXISTS course_sections (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE,
     courseid BIGINT UNSIGNED NOT NULL,
@@ -39,12 +41,13 @@ CREATE TABLE IF NOT EXISTS course_sections (
     title VARCHAR(255) NOT NULL,
     content TEXT NOT NULL,
 
+    FOREIGN KEY (parentid) REFERENCES course_sections(id),
+
     CONSTRAINT fk_courseid_course
         FOREIGN KEY(courseid) REFERENCES courses(id),
-    CONSTRAINT fk_parentid_course
-        FOREIGN KEY(parentid) REFERENCES course_sections(id),
     PRIMARY KEY(id)
 ) ENGINE=InnoDB;
+
 
 CREATE TABLE IF NOT EXISTS groups (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE,
@@ -94,7 +97,7 @@ CREATE TABLE IF NOT EXISTS channels (
     courseid BIGINT UNSIGNED NOT NULL,
     name VARCHAR(255),
     CONSTRAINT fk_courseid_channels
-	FOREIGN KEY (courseid) REFERENCES users(id),
+	FOREIGN KEY (courseid) REFERENCES courses(id),
     PRIMARY KEY(id)
 ) ENGINE=InnoDB;
 
