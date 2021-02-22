@@ -157,7 +157,6 @@ public class TextChannelView extends ComponentBuilder implements HasDynamicTitle
             message.getStyle().set("border", "none");
             message.getStyle().set("border-width", "0px");
             message.getStyle().set("outline", "none");
-            message.getStyle().set("content::after", "none");
 
             message.setLabel(user.findById(publicMessage.getSender()).getUsername() + " " + String.valueOf(publicMessage.getTimeCreated()));
             add(message);
