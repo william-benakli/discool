@@ -1,14 +1,14 @@
 package app.web.views;
 
+import app.controller.Controller;
 import app.jpa_repo.CourseRepository;
 import app.jpa_repo.CourseSectionRepository;
 import app.jpa_repo.TextChannelRepository;
+import app.jpa_repo.UserRepository;
 import app.model.courses.Course;
 import app.model.courses.CourseSection;
-import app.web.components.ComponentBuilder;
 import app.web.layout.CourseLayout;
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
@@ -20,7 +20,6 @@ import com.vaadin.flow.router.Route;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Optional;
 
@@ -28,39 +27,24 @@ import java.util.Optional;
  * test class to try to display a Moodle page
  */
 @Route(value = "courses", layout = CourseLayout.class)
-public class MoodleView extends VerticalLayout implements HasDynamicTitle, HasUrlParameter<Long> {
+public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, HasUrlParameter<Long> {
     private final CourseSectionRepository courseSectionRepository;
     private final CourseRepository courseRepository;
-    private final TextChannelRepository textChannelRepository;
-
-    private Component sectionList;
     private Course course;
+
+    private FlexLayout moodleBar = new FlexLayout();
+
 
     public MoodleView(@Autowired CourseSectionRepository courseSectionRepository,
                       @Autowired CourseRepository courseRepository,
-                      @Autowired TextChannelRepository textChannelRepository) {
+                      @Autowired TextChannelRepository textChannelRepository,
+                      @Autowired UserRepository userRepository) {
         this.courseSectionRepository = courseSectionRepository;
         this.courseRepository = courseRepository;
-        this.textChannelRepository = textChannelRepository;
+        setController(new Controller(userRepository, textChannelRepository, null,
+                                     courseRepository, courseSectionRepository));
     }
 
-    private void refresh() {
-        sectionList = ComponentBuilder.createMoodleSectionsCard(ComponentBuilder.ColorHTML.GREY, "60%", getAllSectionsInOrder());
-    }
-
-    /**
-     * @return all the course sections in the right order
-     */
-    private ArrayList<SectionLayout> getAllSectionsInOrder() {
-        ArrayList<CourseSection> list = courseSectionRepository.findAllSectionsByCourseId(course.getId()); // get all the sections from the table
-        list.forEach(courseSection -> courseSection.addParent(courseSectionRepository)); // add the parent for each element
-        LinkedList<CourseSection> sortedList = CourseSection.sort(list); // sort the sections in the right order
-        ArrayList<SectionLayout> listOfLayouts = new ArrayList<>();
-        sortedList.forEach(section -> {
-            listOfLayouts.add(new SectionLayout(section));
-        });
-        return listOfLayouts;
-    }
 
     @SneakyThrows // so that javac doesn't complain about not catching the exception
     @Override
@@ -72,22 +56,31 @@ public class MoodleView extends VerticalLayout implements HasDynamicTitle, HasUr
             throw new Exception("There is no course with this ID.");
             // TODO : take care of the exception
         }
-        makeLayout();
+        createSidebar(course.getId());
+        createMembersBar(course.getId());
+        createMoodleBar();
+        createLayout(moodleBar);
     }
 
-    private void makeLayout() {
-        HorizontalLayout layout = ComponentBuilder.createLayout(
-                ComponentBuilder.createSideBar("20%", course.getId(), textChannelRepository),
-                ComponentBuilder.createMoodleSectionsCard(ComponentBuilder.ColorHTML.GREY, "60%", getAllSectionsInOrder()),
-                ComponentBuilder.createMembersCard(ComponentBuilder.ColorHTML.DARKGRAY, "20%")
-        );
-        this.add(layout);
+    public void createMoodleBar() {
+        moodleBar.removeAll();
+        setCardStyle(moodleBar, "60%", ColorHTML.GREY);
+        LinkedList<CourseSection> listOfSections = getController().getAllSectionsInOrder(course.getId());
+        for (CourseSection section : listOfSections) {
+            SectionLayout sectionLayout = new SectionLayout(section);
+            moodleBar.add(sectionLayout);
+        }
     }
 
     @Override
     public String getPageTitle() {
         return course.getName();
     }
+
+    private void refresh() {
+        createMoodleBar();
+    }
+
 
     public class SectionLayout extends VerticalLayout {
         TextField title = new TextField(); // will be filled with the value of the title field in the CourseSection
