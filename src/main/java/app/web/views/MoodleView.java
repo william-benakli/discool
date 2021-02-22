@@ -1,10 +1,14 @@
-package app.web;
+package app.web.views;
 
 import app.jpa_repo.CourseRepository;
 import app.jpa_repo.CourseSectionRepository;
+import app.jpa_repo.TextChannelRepository;
 import app.model.courses.Course;
 import app.model.courses.CourseSection;
-import com.vaadin.flow.component.html.H1;
+import app.web.components.ComponentBuilder;
+import app.web.layout.CourseLayout;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
@@ -23,28 +27,39 @@ import java.util.Optional;
 /**
  * test class to try to display a Moodle page
  */
-@Route(value = "courses")
+@Route(value = "courses", layout = CourseLayout.class)
 public class MoodleView extends VerticalLayout implements HasDynamicTitle, HasUrlParameter<Long> {
     private final CourseSectionRepository courseSectionRepository;
     private final CourseRepository courseRepository;
-    private final VerticalLayout sectionList = new VerticalLayout();
+    private final TextChannelRepository textChannelRepository;
+
+    private Component sectionList;
     private Course course;
 
-    public MoodleView(@Autowired CourseSectionRepository courseSectionRepository, @Autowired CourseRepository courseRepository) {
+    public MoodleView(@Autowired CourseSectionRepository courseSectionRepository,
+                      @Autowired CourseRepository courseRepository,
+                      @Autowired TextChannelRepository textChannelRepository) {
         this.courseSectionRepository = courseSectionRepository;
         this.courseRepository = courseRepository;
-        add(new H1("Test d'affichage de la page Moodle"));
-        add(sectionList);
-        //refresh();
+        this.textChannelRepository = textChannelRepository;
     }
 
     private void refresh() {
+        sectionList = ComponentBuilder.createMoodleSectionsCard(ComponentBuilder.ColorHTML.GREY, "60%", getAllSectionsInOrder());
+    }
+
+    /**
+     * @return all the course sections in the right order
+     */
+    private ArrayList<SectionLayout> getAllSectionsInOrder() {
         ArrayList<CourseSection> list = courseSectionRepository.findAllSectionsByCourseId(course.getId()); // get all the sections from the table
         list.forEach(courseSection -> courseSection.addParent(courseSectionRepository)); // add the parent for each element
         LinkedList<CourseSection> sortedList = CourseSection.sort(list); // sort the sections in the right order
-        sortedList.stream()
-                .map(SectionLayout::new)    // create a new SectionLayout for each
-                .forEach(sectionList::add); // add this SectionLayout into the sectionList layout to be displayed
+        ArrayList<SectionLayout> listOfLayouts = new ArrayList<>();
+        sortedList.forEach(section -> {
+            listOfLayouts.add(new SectionLayout(section));
+        });
+        return listOfLayouts;
     }
 
     @SneakyThrows // so that javac doesn't complain about not catching the exception
@@ -57,7 +72,16 @@ public class MoodleView extends VerticalLayout implements HasDynamicTitle, HasUr
             throw new Exception("There is no course with this ID.");
             // TODO : take care of the exception
         }
-        refresh();
+        makeLayout();
+    }
+
+    private void makeLayout() {
+        HorizontalLayout layout = ComponentBuilder.createLayout(
+                ComponentBuilder.createSideBar("20%", course.getId(), textChannelRepository),
+                ComponentBuilder.createMoodleSectionsCard(ComponentBuilder.ColorHTML.GREY, "60%", getAllSectionsInOrder()),
+                ComponentBuilder.createMembersCard(ComponentBuilder.ColorHTML.DARKGRAY, "20%")
+        );
+        this.add(layout);
     }
 
     @Override
@@ -65,7 +89,7 @@ public class MoodleView extends VerticalLayout implements HasDynamicTitle, HasUr
         return course.getName();
     }
 
-    class SectionLayout extends VerticalLayout {
+    public class SectionLayout extends VerticalLayout {
         TextField title = new TextField(); // will be filled with the value of the title field in the CourseSection
         TextArea content = new TextArea(); // same with the content field
 
