@@ -44,9 +44,10 @@ public class PublicChatMessage {
     @Getter
     @Column(
             name = "timecreated",
-            nullable = false
+            nullable = false,
+            columnDefinition = "TEXT"
     )
-    private long timeCreated;
+    private String timeCreated;
 
     /**
      * If this is a reply to another message, parentId is the id of that original message

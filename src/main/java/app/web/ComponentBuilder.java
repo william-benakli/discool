@@ -21,19 +21,23 @@ public class ComponentBuilder extends VerticalLayout {
         private String colorHtml;
 
         ColorHTML(String s) {
-            this.colorHtml=s;
+            this.colorHtml = s;
         }
     }
 
+    protected TextField textField;
+    protected FlexLayout cardTop;
+
     /**
      * Cree des boutons
+     *
      * @param Text
      * @param color
      * @param paramStyle
      * @return
      */
-    public Button createButtonText(String Text, String color, String[]... paramStyle){//TODO: add style simple
-        Button button= new Button(Text);
+    public Button createButtonText(String Text, String color, String[]... paramStyle) {//TODO: add style simple
+        Button button = new Button(Text);
         button.getStyle()
                 .set("background-color",color)
                 .set("color", ColorHTML.WHITE.getColorHtml());
@@ -70,28 +74,29 @@ public class ComponentBuilder extends VerticalLayout {
         for (Component component: button) {
             chatButton.add(component);
         }
-
+        textField = (TextField) textField();
         FlexLayout messageMenu = new FlexLayout();
         messageMenu.add(
-                textField(),
+                textField,
                 chatButton
                 //TODO: add button mute and demute
         );
 
-        FlexLayout cardTop = new FlexLayout();
+        cardTop = new FlexLayout();
         cardTop.setHeightFull();
         messageMenu.getStyle()
-                .set("position","-webkit-sticky")
-                .set("position","sticky")
-                .set("bottom","0px")
+                .set("position", "-webkit-sticky")
+                .set("position", "sticky")
+                .set("bottom", "0px")
+                .set("top", "96%")
                 .set("background-color",ColorHTML.GREY.getColorHtml());
         //TODO: add text
 
         for (String message: messageUser) {
             cardTop.add(messageCard(message));
         }
-        cardTop.getStyle().set("flex-direction","column-reverse");
-        card.add(cardTop,messageMenu);
+        cardTop.getStyle().set("flex-direction", "column");
+        card.add(cardTop, messageMenu);
     }
 
     /**
