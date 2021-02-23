@@ -4,10 +4,12 @@ package app.controller;
 import app.jpa_repo.*;
 import app.model.chat.PublicChatMessage;
 import app.model.chat.TextChannel;
+import app.model.courses.Course;
 import app.model.courses.CourseSection;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.Optional;
 
 public class Controller {
 
@@ -27,6 +29,15 @@ public class Controller {
         this.userRepository = userRepository;
         this.courseRepository = courseRepository;
         this.courseSectionRepository = courseSectionRepository;
+    }
+
+    public String getTitleCourse(long id) {
+        Optional<Course> c = courseRepository.findById(id);
+        if (c.isPresent()) {
+            return c.get().getName();
+        } else {
+            return null;
+        }
     }
 
     public void saveMessage(String message, long channelId, long parentId, long userId) {

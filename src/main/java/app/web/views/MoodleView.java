@@ -1,6 +1,7 @@
 package app.web.views;
 
 import app.controller.Controller;
+import app.controller.Markdown;
 import app.jpa_repo.CourseRepository;
 import app.jpa_repo.CourseSectionRepository;
 import app.jpa_repo.TextChannelRepository;
@@ -8,11 +9,12 @@ import app.jpa_repo.UserRepository;
 import app.model.courses.Course;
 import app.model.courses.CourseSection;
 import app.web.layout.CourseLayout;
+import com.vaadin.flow.component.HasText;
+import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.textfield.TextArea;
-import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.HasDynamicTitle;
 import com.vaadin.flow.router.HasUrlParameter;
@@ -32,7 +34,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
     private final CourseRepository courseRepository;
     private Course course;
 
-    private FlexLayout moodleBar = new FlexLayout();
+    private final FlexLayout moodleBar = new FlexLayout();
 
 
     public MoodleView(@Autowired CourseSectionRepository courseSectionRepository,
@@ -65,6 +67,8 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
     public void createMoodleBar() {
         moodleBar.removeAll();
         setCardStyle(moodleBar, "60%", ColorHTML.GREY);
+        H1 title = new H1(getController().getTitleCourse(course.getId()));
+        moodleBar.add(title);
         LinkedList<CourseSection> listOfSections = getController().getAllSectionsInOrder(course.getId());
         for (CourseSection section : listOfSections) {
             SectionLayout sectionLayout = new SectionLayout(section);
@@ -82,24 +86,23 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
     }
 
 
-    public class SectionLayout extends VerticalLayout {
-        TextField title = new TextField(); // will be filled with the value of the title field in the CourseSection
-        TextArea content = new TextArea(); // same with the content field
-
+    /**
+     * The Layout that contains for each section :
+     * - the title
+     * - the content
+     * - the delete button
+     * - the modify button
+     */
+    public static class SectionLayout extends VerticalLayout implements HasText {
         public SectionLayout(CourseSection section) {
-            add(title, content);
-
-            // The UI fields on *this* will be bound to the fields of the same name in the CourseSection class,
-            // taking the value from the *section* object
-            Binder<CourseSection> binder = new Binder<>(CourseSection.class);
-            binder.bindInstanceFields(this);
-            binder.setBean(section);
-
-            // for when the values of the fields change
-            binder.addValueChangeListener(e -> {
-                courseSectionRepository.save(binder.getBean()); // save the new values
-                refresh();
-            });
+            H2 title = new H2();
+            Paragraph content = new Paragraph();
+            title.add(Markdown.getHtmlFromMarkdown(section.getTitle()));
+            content.add(Markdown.getHtmlFromMarkdown(section.getContent()));
+            add(title);
+            add(content);
         }
+
     }
+
 }

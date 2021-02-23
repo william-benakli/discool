@@ -1,6 +1,7 @@
 package app.web.views;
 
 import app.controller.Controller;
+import app.controller.Markdown;
 import app.jpa_repo.PublicChatMessageRepository;
 import app.jpa_repo.TextChannelRepository;
 import app.jpa_repo.UserRepository;
@@ -10,11 +11,11 @@ import app.web.components.ComponentButton;
 import app.web.layout.CourseLayout;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.HasDynamicTitle;
 import com.vaadin.flow.router.HasUrlParameter;
@@ -168,33 +169,36 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
     }
 
     class MessageLayout extends HorizontalLayout {
-        private TextField message = new TextField();
-        private VerticalLayout layout = new VerticalLayout();
-        private Button supprimer;
-        private Button modification;
 
         public MessageLayout(PublicChatMessage publicMessage) {
-            supprimer = new Button("Suppression");
-            modification = new Button("Modification");
+            Paragraph metaData = new Paragraph();
+            metaData.setText(getController().getUsernameOfSender(publicMessage) + " " + publicMessage.getTimeCreated());
+            metaData.getStyle().set("border", "none");
+            metaData.getStyle().set("border-width", "0px");
+            metaData.getStyle().set("outline", "none");
+            this.add(metaData);
 
-            supprimer.addClickListener(event -> {
-                getController().deleteMessage(publicMessage);
-            });
-
+            Paragraph message = new Paragraph();
+            message.add(Markdown.getHtmlFromMarkdown(publicMessage.getMessage()));
             message.getStyle().set("border", "none");
             message.getStyle().set("border-width", "0px");
             message.getStyle().set("outline", "none");
+            this.add(message);
 
-            message.setLabel(getController().getUsernameOfSender(publicMessage) + " " + publicMessage.getTimeCreated());
-            add(message);
-            layout.add(modification);
-            layout.add(supprimer);
-            add(layout);
+            Button delete = new Button("Suppression");
 
-            Binder<PublicChatMessage> binder = new Binder<>(PublicChatMessage.class);
-            binder.bindInstanceFields(this);
-            binder.setBean(publicMessage);
-            binder.addValueChangeListener(event -> getController().saveMessage(binder.getBean()));
+            delete.addClickListener(event -> {
+                getController().deleteMessage(publicMessage);
+                refresh();
+            });
+
+            Button modify = new Button("Modification");
+            // TODO : add listener to change the text
+
+            VerticalLayout layout = new VerticalLayout();
+            layout.add(modify);
+            layout.add(delete);
+            this.add(layout);
 
         }
     }

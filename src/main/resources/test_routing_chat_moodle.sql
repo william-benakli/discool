@@ -13,9 +13,9 @@ INSERT INTO channels VALUES
     (NULL, 1, "text chat 4");
 
 INSERT INTO course_sections VALUES
-    (NULL, 1, 1, "course 1 section 1", "course 1 section 1 content"),
-    (NULL, 1, 1, "course 1 section 2", "course 1 section 2 content"),
-    (NULL, 1, 2, "course 1 section 3", "course 1 section 3 content"),
+    (NULL, 1, 1, "course 1 *section* 1", "course 1 **section** 1 content"),
+    (NULL, 1, 1, "course 1 ~section~ 2", "course 1 ~~section 2~~ content"),
+    (NULL, 1, 2, "course 1 section 3", "link : [link to google.fr](http://google.fr)"),
     (NULL, 1, 3, "course 1 section 4", "course 1 section 4 content"),
     (NULL, 2, 5, "course 2 section 1", "course 2 section 1 content"),
     (NULL, 2, 5, "course 2 section 2", "course 2 section 2 content"),
