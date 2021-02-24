@@ -1,13 +1,14 @@
 package app.web.views;
 
-import app.web.layout.MainLayout;
+import app.web.layout.Navbar;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouterLink;
 
 
-@Route(value = "", layout = MainLayout.class)
-public class MainView extends VerticalLayout {
+@Route(value = "moodle", layout = Navbar.class)
+public class MainView extends HorizontalLayout {
 
     public MainView() {
         VerticalLayout layout = new VerticalLayout();

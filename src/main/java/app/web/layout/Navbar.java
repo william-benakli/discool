@@ -3,9 +3,11 @@ package app.web.layout;
 import app.jpa_repo.CourseRepository;
 import app.model.courses.Course;
 import app.web.views.MoodleView;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.StyleSheet;
+import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -16,28 +18,32 @@ import java.util.ArrayList;
 
 @CssImport("./styles/style.css")
 @StyleSheet("https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap")
-public class MainLayout extends AppLayout {
+public class Navbar extends AppLayout {
 
     private final CourseRepository courseRepository;
 
-    public MainLayout(@Autowired CourseRepository courseRepository) {
+    public Navbar(@Autowired CourseRepository courseRepository) {
         this.courseRepository = courseRepository;
-        createHeader();
+        setPrimarySection(AppLayout.Section.NAVBAR);
+        Image img = new Image("img/Discool.svg", "Discool Logo");
+        img.setHeight("44px");
+        img.getStyle().set("margin-left","20px");
+        addToNavbar(img, createHeaderContent());
+        createHeaderContent();
         printCourseBar();
+
     }
 
-    /**
-     * Cree la nav bar
-     */
-    private void createHeader() {
-        HorizontalLayout header = new HorizontalLayout(/*logo*/);
-        header.setDefaultVerticalComponentAlignment(FlexComponent.Alignment.CENTER);
-        header.setWidth("100%");
-        header.addClassName("header");
-        header.setHeight("75px");
-        addToNavbar(header);
-    }
+    private Component createHeaderContent() {
+        HorizontalLayout layout = new HorizontalLayout();
+        layout.setId("header");
+        layout.getThemeList().set("white", true);
+        layout.setWidthFull();
+        layout.setSpacing(false);
+        layout.setAlignItems(FlexComponent.Alignment.CENTER);
 
+        return layout;
+    }
 
     private void printCourseBar() {
         // methode temporaire pour chercher tous les cours
@@ -48,6 +54,5 @@ public class MainLayout extends AppLayout {
         }
         addToNavbar(layout);
     }
-
-
 }
+

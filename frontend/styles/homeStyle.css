@@ -1,0 +1,6 @@
+.hello-world-view {
+    display: flex;
+    justify-content: space-around;
+    background-image:url("src/main/resources/META-INF/resources/images/img.svg") ;
+    image-resolution: normal;
+}

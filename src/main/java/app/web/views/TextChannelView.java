@@ -8,7 +8,7 @@ import app.jpa_repo.UserRepository;
 import app.model.chat.PublicChatMessage;
 import app.model.chat.TextChannel;
 import app.web.components.ComponentButton;
-import app.web.layout.CourseLayout;
+import app.web.layout.Navbar;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Paragraph;
@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.Optional;
 
 
-@Route(value = "channels", layout = CourseLayout.class)
+@Route(value = "channels", layout = Navbar.class)
 public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle, HasUrlParameter<Long> {
     private final TextChannelRepository textChannelRepository;
     private TextChannel textChannel;
