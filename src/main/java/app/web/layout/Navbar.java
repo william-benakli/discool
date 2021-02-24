@@ -7,6 +7,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.StyleSheet;
+import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -25,13 +26,15 @@ public class Navbar extends AppLayout {
     public Navbar(@Autowired CourseRepository courseRepository) {
         this.courseRepository = courseRepository;
         setPrimarySection(AppLayout.Section.NAVBAR);
+        // create logo
         Image img = new Image("img/Discool.svg", "Discool Logo");
         img.setHeight("44px");
-        img.getStyle().set("margin-left","20px");
-        addToNavbar(img, createHeaderContent());
-        createHeaderContent();
-        printCourseBar();
+        img.getStyle().set("margin-left", "20px");
+        // create logout link
+        Anchor logout = new Anchor("logout", "Log out");
 
+        // add the element to the navbar
+        addToNavbar(img, createHeaderContent(), printCourseBar(), logout);
     }
 
     private Component createHeaderContent() {
@@ -45,14 +48,14 @@ public class Navbar extends AppLayout {
         return layout;
     }
 
-    private void printCourseBar() {
+    private VerticalLayout printCourseBar() {
         // methode temporaire pour chercher tous les cours
         VerticalLayout layout = new VerticalLayout();
         ArrayList<Course> courses = (ArrayList<Course>) courseRepository.findAll();
         for (Course c : courses) {
             layout.add(new RouterLink(c.getName(), MoodleView.class, c.getId()));
         }
-        addToNavbar(layout);
+        return layout;
     }
 }
 

@@ -4,8 +4,8 @@ import app.controller.Controller;
 import app.controller.Markdown;
 import app.jpa_repo.CourseRepository;
 import app.jpa_repo.CourseSectionRepository;
+import app.jpa_repo.PersonRepository;
 import app.jpa_repo.TextChannelRepository;
-import app.jpa_repo.UserRepository;
 import app.model.courses.Course;
 import app.model.courses.CourseSection;
 import app.web.layout.Navbar;
@@ -40,10 +40,10 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
     public MoodleView(@Autowired CourseSectionRepository courseSectionRepository,
                       @Autowired CourseRepository courseRepository,
                       @Autowired TextChannelRepository textChannelRepository,
-                      @Autowired UserRepository userRepository) {
+                      @Autowired PersonRepository personRepository) {
         this.courseSectionRepository = courseSectionRepository;
         this.courseRepository = courseRepository;
-        setController(new Controller(userRepository, textChannelRepository, null,
+        setController(new Controller(personRepository, textChannelRepository, null,
                                      courseRepository, courseSectionRepository));
     }
 

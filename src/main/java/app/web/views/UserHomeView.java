@@ -7,10 +7,10 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouterLink;
 
 
-@Route(value = "moodle", layout = Navbar.class)
-public class MainView extends HorizontalLayout {
+@Route(value = "me", layout = Navbar.class)
+public class UserHomeView extends HorizontalLayout {
 
-    public MainView() {
+    public UserHomeView() {
         VerticalLayout layout = new VerticalLayout();
         this.add(new RouterLink("moodle 1", MoodleView.class, 1L));
         this.add(new RouterLink("chat1cours1", TextChannelView.class, 1L));

@@ -13,25 +13,29 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 
-@Route(value = "")
+import javax.annotation.security.PermitAll;
+
+@Route(value = "home")
+@PermitAll
 @PageTitle("Discool")
 @CssImport("./styles/homeStyle.css")
 @RouteAlias(value = "", layout = Navbar.class)
-
 public class HomeView extends VerticalLayout {
 
-        public HomeView(){
-            H1 bienvenue = new H1("Bienvenue sur Discool !");
-            Button join = new Button("Lancer Discool");
-            Paragraph p = new Paragraph("Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.");
-            Image img= new Image("img/img.svg", "alt");
-            add(img);
+    public HomeView() {
+        H1 bienvenue = new H1("Bienvenue sur Discool !");
 
-            bienvenue.getStyle().set("display","block");
-            bienvenue.getStyle().set("color","#845ec2");
+        // TODO add a RouterLink to the LoginView when the button is clicked
+        Button join = new Button("Lancer Discool");
+        Paragraph p = new Paragraph("Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.");
+        Image img = new Image("img/img.svg", "alt");
+        add(img);
 
-            join.getStyle().set("display","block");
-            join.getStyle().set("width","200px");
+        bienvenue.getStyle().set("display", "block");
+        bienvenue.getStyle().set("color", "#845ec2");
+
+        join.getStyle().set("display", "block");
+        join.getStyle().set("width", "200px");
             join.getStyle().set("height","80px");
             join.getStyle().set("background-color","#845ec2");
             join.getStyle().set("color","white");

@@ -2,9 +2,9 @@ package app.web.views;
 
 import app.controller.Controller;
 import app.controller.Markdown;
+import app.jpa_repo.PersonRepository;
 import app.jpa_repo.PublicChatMessageRepository;
 import app.jpa_repo.TextChannelRepository;
-import app.jpa_repo.UserRepository;
 import app.model.chat.PublicChatMessage;
 import app.model.chat.TextChannel;
 import app.web.components.ComponentButton;
@@ -41,9 +41,9 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
 
     public TextChannelView(@Autowired TextChannelRepository textChannelRepository,
                            @Autowired PublicChatMessageRepository publicChatMessageRepository,
-                           @Autowired UserRepository userRepository) {
+                           @Autowired PersonRepository personRepository) {
         this.textChannelRepository = textChannelRepository;
-        setController(new Controller(userRepository, textChannelRepository, publicChatMessageRepository,
+        setController(new Controller(personRepository, textChannelRepository, publicChatMessageRepository,
                                      null, null));
         messageTextField = createTextField();
         createVoiceChatButtons();
