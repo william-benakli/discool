@@ -32,4 +32,10 @@ public class Course {
             nullable = false
     )
     private long teacherId;
+
+    @Column(
+            name = "pathicon",
+            nullable = false
+    )
+    private String pathIcon;
 }

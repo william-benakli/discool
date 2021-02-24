@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS courses (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE,
     name VARCHAR(255) NOT NULL,
     teacherid BIGINT UNSIGNED NOT NULL,
-
+    pathicon VARCHAR(255) NOT NULL,
     CONSTRAINT fk_teacherid
         FOREIGN KEY(teacherid) REFERENCES users(id),
     PRIMARY KEY(id)
