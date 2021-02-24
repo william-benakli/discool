@@ -8,7 +8,7 @@ import app.jpa_repo.TextChannelRepository;
 import app.jpa_repo.UserRepository;
 import app.model.courses.Course;
 import app.model.courses.CourseSection;
-import app.web.layout.CourseLayout;
+import app.web.layout.Navbar;
 import com.vaadin.flow.component.HasText;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
@@ -28,7 +28,7 @@ import java.util.Optional;
 /**
  * test class to try to display a Moodle page
  */
-@Route(value = "courses", layout = CourseLayout.class)
+@Route(value = "moodle", layout = Navbar.class)
 public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, HasUrlParameter<Long> {
     private final CourseSectionRepository courseSectionRepository;
     private final CourseRepository courseRepository;
