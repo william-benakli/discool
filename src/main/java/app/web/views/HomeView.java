@@ -15,7 +15,7 @@ import com.vaadin.flow.router.RouteAlias;
 
 import javax.annotation.security.PermitAll;
 
-@Route(value = "home")
+@Route(value = "home", layout = Navbar.class)
 @PermitAll
 @PageTitle("Discool")
 @CssImport("./styles/homeStyle.css")
