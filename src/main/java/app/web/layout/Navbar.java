@@ -1,19 +1,17 @@
 package app.web.layout;
 
 import app.jpa_repo.CourseRepository;
-import app.jpa_repo.GroupMembersRepository;
-import app.jpa_repo.GroupRepository;
 import app.model.courses.Course;
+import app.web.components.ComponentButton;
+import app.web.views.HomeView;
 import app.web.views.MoodleView;
-import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Key;
+import com.vaadin.flow.component.KeyModifier;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.StyleSheet;
-import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Image;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.RouterLink;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -23,47 +21,123 @@ import java.util.ArrayList;
 @StyleSheet("https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap")
 public class Navbar extends AppLayout {
 
+    //TODO: adapt the display of the buttons according to the user
+    //TODO: the background of the selected button changes color when clicked
+
     private final CourseRepository courseRepository;
-    private final GroupMembersRepository groupMembersRepository;
-    private final GroupRepository groupRepository;
+    private String[][] settingMenu = {
+            {"img/chatBubble.svg", "Messages privés"},
+            {"img/manageAccounts.svg", "Paramètres des utilisateurs"},
+            {"img/settings.svg", "Paramètres de serveurs"}
+    };
 
-    public Navbar(@Autowired CourseRepository courseRepository,
-                  @Autowired GroupMembersRepository groupMembersRepository,
-                  @Autowired GroupRepository groupRepository) {
+    public Navbar(@Autowired CourseRepository courseRepository) {
         this.courseRepository = courseRepository;
-        this.groupMembersRepository = groupMembersRepository;
-        this.groupRepository = groupRepository;
-        setPrimarySection(AppLayout.Section.NAVBAR);
-        // create logo
-        Image img = new Image("img/Discool.svg", "Discool Logo");
-        img.setHeight("44px");
-        img.getStyle().set("margin-left", "20px");
-        // create logout link
-        Anchor logout = new Anchor("logout", "Log out");
-
-        // add the element to the navbar
-        addToNavbar(img, createHeaderContent(), printCourseBar(), logout);
+        subMenuLeft();
+        printCourseBar();
+        subMenuRight(settingMenu);
     }
 
-    private Component createHeaderContent() {
-        HorizontalLayout layout = new HorizontalLayout();
-        layout.setId("header");
-        layout.getThemeList().set("white", true);
-        layout.setWidthFull();
-        layout.setSpacing(false);
-        layout.setAlignItems(FlexComponent.Alignment.CENTER);
-
-        return layout;
+    /**
+     * Generates the navigation bar submenu that contains the logo
+     */
+    private void subMenuLeft() {
+        HorizontalLayout servCardDock = HorizontalLayoutCustom();
+        servCardDock.getStyle().set("margin", "0");
+        ComponentButton button = createServDockImage(new Image("img/Discool.svg", "créer un serveur"), Key.NAVIGATE_NEXT);
+        button.getStyle()
+                .set("width", "200px")
+                .set("margin-top", "10px")
+                .set("margin-left", "18px");//TODO: check
+        RouterLink routerLink = new RouterLink("", HomeView.class);
+        linkRouteurImge(servCardDock, button, routerLink);
+        addToNavbar(servCardDock);
     }
 
-    private VerticalLayout printCourseBar() {
-        // methode temporaire pour chercher tous les cours
-        VerticalLayout layout = new VerticalLayout();
+    /**
+     * Generates the main sub-menu of the navigation bar which contains the list of servers joined by the user as well as a button to create servers
+     */
+    private void printCourseBar() {
+        long tmp = 0;//TODO: edit with the correct redirect values
+        HorizontalLayout servCardDock = HorizontalLayoutCustom();
         ArrayList<Course> courses = (ArrayList<Course>) courseRepository.findAll();
         for (Course c : courses) {
-            layout.add(new RouterLink(c.getName(), MoodleView.class, c.getId()));
+            ComponentButton button = createServDockImage(
+                    new Image(
+                            (c.getPathIcon().length() != 0) ? c.getPathIcon() : "img/DDiscool.svg",
+                            (c.getPathIcon().length() != 0) ? c.getName() : "DDiscool"
+                    ), Key.NAVIGATE_NEXT);
+            RouterLink routerLink = new RouterLink("", MoodleView.class, c.getId());
+            linkRouteurImge(servCardDock, button, routerLink);
         }
-        return layout;
+        ComponentButton button = createServDockImage(new Image("img/add.svg", "Create serveur"), Key.NAVIGATE_NEXT);
+        RouterLink routerLink = new RouterLink("", MoodleView.class, tmp);
+        linkRouteurImge(servCardDock, button, routerLink);
+        addToNavbar(servCardDock);
+    }
+
+    /**
+     * Generates the submenu of the navigation bar which contains user, server and private message settings
+     */
+    private void subMenuRight(String[][] pathImage) {
+        long tmp = 0;//TODO: edit with the correct redirect values
+        HorizontalLayout servCardDock = HorizontalLayoutCustom();
+        servCardDock.getStyle().set("margin", "0");
+        for (String[] imageInfo : pathImage) {
+            ComponentButton button = createServDockImage(new Image(imageInfo[0], imageInfo[1]), Key.NAVIGATE_NEXT);
+            RouterLink routerLink = new RouterLink("", MoodleView.class, tmp);
+            linkRouteurImge(servCardDock, button, routerLink);
+        }
+        addToNavbar(servCardDock);
+    }
+
+    /**
+     * Create an empty dock to later put buttons to allow the user to navigate in the application
+     *
+     * @return an empty dock with a style
+     */
+    private HorizontalLayout HorizontalLayoutCustom() {
+        HorizontalLayout servCardDock = new HorizontalLayout();
+        servCardDock.getStyle()
+                .set("vertical-align", "middle")
+                .set("margin", "auto");
+        return servCardDock;
+    }
+
+    /**
+     * Create a button in one of the docks of the navigation bar
+     *
+     * @param img      Server image
+     * @param shortCut shortcuts to access the server
+     * @return the button of a server to be able to access it
+     */
+    public static ComponentButton createServDockImage(Image img, Key shortCut) {
+        img.setHeightFull();
+        img.setWidthFull();
+        ComponentButton imgButton = new ComponentButton(img);
+        imgButton.getStyle()
+                .set("padding", "0")
+                .set("margin", "12px 6px 6px 6px")
+                .set("height", "50px")
+                .set("width", "50px")
+                .set("border-radius", "10px")
+                .set("cursor", "pointer");
+        imgButton.addFocusShortcut(shortCut, KeyModifier.ALT);
+        return imgButton;
+    }
+
+    /*formerly in Componenent Builder*/
+
+    /**
+     * Links an image a button and a link router to have a clickable button redirecting to a server
+     *
+     * @param servCardDock navig ation menu
+     * @param button       clickable button
+     * @param routerLink   link to server
+     */
+    private void linkRouteurImge(HorizontalLayout servCardDock, ComponentButton button, RouterLink routerLink) {
+        button.getStyle().set("overflow", "hidden");
+        routerLink.getElement().appendChild(button.getElement());
+        servCardDock.add(routerLink);
     }
 }
-

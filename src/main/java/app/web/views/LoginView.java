@@ -1,6 +1,6 @@
 package app.web.views;
 
-import app.security.CustomRequestCache;
+import app.controller.security.CustomRequestCache;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.login.LoginOverlay;

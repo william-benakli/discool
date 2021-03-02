@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import javax.transaction.Transactional;
 import java.util.HashSet;
@@ -34,7 +35,9 @@ public class UserDetailsServiceImplementation implements UserDetailsService {
         // TODO : implement passwords
         // the weird string is the encoded version of "password"
         // (aka to log in, put a valid username and "password" as the password)
-        UserDetails user = User.withUsername(person.getUsername()).password("$2a$10$lSTd/IJRB7IU9a43gXKpUeQT2oiXH9H8PUWf0786VoVWv4KzJZh0m")
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        UserDetails user = User.withUsername(person.getUsername())
+                .password(encoder.encode("password"))
                 .authorities(grantedAuthorities).build();
         return user;
     }
