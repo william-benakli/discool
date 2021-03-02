@@ -15,18 +15,18 @@ public class Controller {
 
     private final TextChannelRepository textChannelRepository;
     private final PublicChatMessageRepository publicChatMessageRepository;
-    private final UserRepository userRepository;
+    private final PersonRepository personRepository;
     private final CourseRepository courseRepository;
     private final CourseSectionRepository courseSectionRepository;
 
-    public Controller(UserRepository userRepository,
+    public Controller(PersonRepository personRepository,
                       TextChannelRepository textChannelRepository,
                       PublicChatMessageRepository publicChatMessageRepository,
                       CourseRepository courseRepository,
                       CourseSectionRepository courseSectionRepository) {
         this.publicChatMessageRepository = publicChatMessageRepository;
         this.textChannelRepository = textChannelRepository;
-        this.userRepository = userRepository;
+        this.personRepository = personRepository;
         this.courseRepository = courseRepository;
         this.courseSectionRepository = courseSectionRepository;
     }
@@ -65,7 +65,7 @@ public class Controller {
     }
 
     public String getUsernameOfSender(PublicChatMessage publicChatMessage) {
-        return userRepository.findById(publicChatMessage.getSender()).getUsername();
+        return personRepository.findById(publicChatMessage.getSender()).getUsername();
     }
 
     public ArrayList<PublicChatMessage> getChatMessagesForChannel(long channelId) {

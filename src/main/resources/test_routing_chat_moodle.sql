@@ -1,8 +1,10 @@
+USE discool;
+
 INSERT INTO users VALUES (1, "teacher1", 1, "t1firstname", "t1lastname", "teacher1email", "description teacher 1", "website teacher1", 0, 0, 0);
 INSERT INTO courses VALUES 
-    (NULL, "course1", 1),
-    (NULL, "course 2", 1),
-    (NULL, "course 3", 1);
+    (NULL, "course1", 1, "course_pic/course1.png"),
+    (NULL, "course 2", 1, "course_pic/course2.png"),
+    (NULL, "course 3", 1, "course_pic/course3.png");
 
 INSERT INTO channels VALUES 
     (NULL, 1, "text chat 1"),

@@ -11,7 +11,7 @@ import javax.persistence.*;
 @Setter
 @Entity(name = "users")
 @Table(name = "users")
-public class User {
+public class Person {
 
     @Id // to say this is the primary key in the database
     @GeneratedValue(strategy = GenerationType.IDENTITY) // to generate the id
@@ -81,4 +81,8 @@ public class User {
 
     // TODO : make sure it converts to an int when saving to the database
     private enum Role {ADMIN, TEACHER, STUDENT}
+
+    public String getRoleAsString() {
+        return role.toString();
+    }
 }

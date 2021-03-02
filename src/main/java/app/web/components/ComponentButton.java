@@ -55,6 +55,12 @@ public class ComponentButton extends Button {
 
     }
 
+    public ComponentButton(Image imgServ){
+        SetStyle(imgServ).setHeightFull();
+        SetStyle(imgServ).setWidthFull();
+        setIcon(imgServ);
+    }
+
     /**
      * Add css properties to the image of a button
      *
