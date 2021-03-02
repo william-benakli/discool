@@ -34,7 +34,8 @@ public class UserDetailsServiceImplementation implements UserDetailsService {
         // TODO : implement passwords
         // the weird string is the encoded version of "password"
         // (aka to log in, put a valid username and "password" as the password)
-        UserDetails user = User.withUsername(person.getUsername()).password("$2a$10$lSTd/IJRB7IU9a43gXKpUeQT2oiXH9H8PUWf0786VoVWv4KzJZh0m").authorities(grantedAuthorities).build();
+        UserDetails user = User.withUsername(person.getUsername()).password("$2a$10$lSTd/IJRB7IU9a43gXKpUeQT2oiXH9H8PUWf0786VoVWv4KzJZh0m")
+                .authorities(grantedAuthorities).build();
         return user;
     }
 }

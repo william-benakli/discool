@@ -1,6 +1,8 @@
 package app.web.layout;
 
 import app.jpa_repo.CourseRepository;
+import app.jpa_repo.GroupMembersRepository;
+import app.jpa_repo.GroupRepository;
 import app.model.courses.Course;
 import app.web.views.MoodleView;
 import com.vaadin.flow.component.Component;
@@ -22,9 +24,15 @@ import java.util.ArrayList;
 public class Navbar extends AppLayout {
 
     private final CourseRepository courseRepository;
+    private final GroupMembersRepository groupMembersRepository;
+    private final GroupRepository groupRepository;
 
-    public Navbar(@Autowired CourseRepository courseRepository) {
+    public Navbar(@Autowired CourseRepository courseRepository,
+                  @Autowired GroupMembersRepository groupMembersRepository,
+                  @Autowired GroupRepository groupRepository) {
         this.courseRepository = courseRepository;
+        this.groupMembersRepository = groupMembersRepository;
+        this.groupRepository = groupRepository;
         setPrimarySection(AppLayout.Section.NAVBAR);
         // create logo
         Image img = new Image("img/Discool.svg", "Discool Logo");
