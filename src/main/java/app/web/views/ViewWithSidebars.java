@@ -24,7 +24,7 @@ public abstract class ViewWithSidebars extends VerticalLayout {
         layout.setWidthFull();
         layout.getStyle()
                 .set("position", "absolute")
-                .set("top", "125px")
+                .set("top", "75px")
                 .set("bottom", "0")
                 .set("margin", "0")
                 .set("padding", "0");
@@ -36,7 +36,7 @@ public abstract class ViewWithSidebars extends VerticalLayout {
         membersBar = new FlexLayout();
         membersBar.addClassName("card");
         membersBar.addClassName("cardCenter");
-        setCardStyle(membersBar, "20%", ColorHTML.DARKGRAY);
+        setCardStyle(membersBar, "20%", ColorHTML.DARKGREY);
         // TODO add the members for the chat/course
     }
 
@@ -67,20 +67,39 @@ public abstract class ViewWithSidebars extends VerticalLayout {
     public void createSidebar(long courseId) {
         sideBar = new FlexLayout();
         // add the RouterLinks
-        sideBar.add(new RouterLink("Page d'accueil", MoodleView.class, courseId));
+        RouterLink linkHome=new RouterLink("Page d'accueil", MoodleView.class, courseId);
+        linkHome.getStyle()
+                .set("border-bottom","1px solid rgba(112, 112, 122, .75)")
+                .set("color",ColorHTML.TEXTGREY.getColorHtml())
+                .set("padding-left","25px")
+                .set("margin","20px 10px 10px -8px")
+                .set("font-weight","700")
+                .set("pointer-event","none");
+        sideBar.add(linkHome);
         ArrayList<TextChannel> textChannels = controller.getAllChannelsForCourse(courseId);
-        textChannels.forEach(channel -> sideBar.add(new RouterLink(channel.getName(), TextChannelView.class, channel.getId())));
+
+        textChannels.forEach(channel -> {
+            RouterLink link=new RouterLink(channel.getName(), TextChannelView.class, channel.getId());
+            link.getStyle()
+                    .set("color",ColorHTML.TEXTGREY.getColorHtml())
+                    .set("padding-left","35px")
+                    .set("font-weight","700")
+                    .set("pointer-event","none")
+                    .set("padding-bottom","2.5px");
+            sideBar.add(link);
+        });
         // add the style
         sideBar.addClassName("card");
         sideBar.addClassName("cardLeft");
-        setCardStyle(sideBar, "20%", TextChannelView.ColorHTML.DARKGRAY);
+        setCardStyle(sideBar, "20%", TextChannelView.ColorHTML.DARKGREY);
     }
 
     public enum ColorHTML {
         PURPLE("#7510F7"),
         WHITE("#FFFFFF"),
         GREY("#EAEAEA"),
-        DARKGRAY("#DEDEDE");
+        DARKGREY("#DEDEDE"),
+        TEXTGREY("#707070");
 
         @Getter
         private final String colorHtml;

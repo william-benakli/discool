@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36">
+  <g id="chat_bubble_outline-24px" transform="translate(-0.19 -0.143)">
+    <g id="Groupe_256" data-name="Groupe 256" transform="translate(0 0)">
+      <rect id="Rectangle_327" data-name="Rectangle 327" width="36" height="36" transform="translate(0.19 0.143)" fill="none"/>
+    </g>
+    <g id="Groupe_258" data-name="Groupe 258" transform="translate(2.966 3.401)">
+      <g id="Groupe_257" data-name="Groupe 257">
+        <path id="Tracé_2402" data-name="Tracé 2402" d="M28.6,4.956V22.693H6.685L4.956,24.422V4.956H28.6M28.6,2H4.956A2.965,2.965,0,0,0,2,4.956V28a1.483,1.483,0,0,0,2.527,1.049l3.385-3.4H28.6a2.965,2.965,0,0,0,2.956-2.956V4.956A2.965,2.965,0,0,0,28.6,2Z" transform="translate(-2 -2)" fill="#7510f7"/>
+      </g>
+    </g>
+  </g>
+</svg>
