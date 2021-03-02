@@ -1,4 +1,4 @@
-package app.security;
+package app.controller.security;
 
 import app.web.views.HomeView;
 import app.web.views.LoginView;

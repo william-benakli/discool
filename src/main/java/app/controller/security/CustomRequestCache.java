@@ -1,4 +1,4 @@
-package app.security;
+package app.controller.security;
 
 import com.vaadin.flow.server.VaadinServletRequest;
 import com.vaadin.flow.server.VaadinServletResponse;

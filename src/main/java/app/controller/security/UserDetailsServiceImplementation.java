@@ -1,4 +1,4 @@
-package app.security;
+package app.controller.security;
 
 import app.jpa_repo.PersonRepository;
 import app.model.users.Person;
