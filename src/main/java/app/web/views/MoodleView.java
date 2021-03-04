@@ -163,10 +163,10 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
         private void createModifyPopup() {
             FormLayout popupContent = new FormLayout();
             Label label = new Label("Modify the section here");
-            TextField title = new TextField();
-            title.setPlaceholder("Title of the section");
-            TextArea content = new TextArea();
-            content.setPlaceholder("The content of your section");
+            TextField title = new TextField("Title");
+            title.setValue(section.getTitle());
+            TextArea content = new TextArea("Content");
+            content.setValue(section.getContent());
             ComponentButton okButton = new ComponentButton("img/DDiscool", "img/DDiscool",
                                                            "ok", "ok", null);
             okButton.addClickListener(event -> {
