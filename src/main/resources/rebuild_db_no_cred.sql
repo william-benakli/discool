@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS courses (
 CREATE TABLE IF NOT EXISTS course_sections (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE,
     courseid BIGINT UNSIGNED NOT NULL,
-    parentid BIGINT UNSIGNED NOT NULL,
+    parentid BIGINT UNSIGNED,
     title VARCHAR(255) NOT NULL,
     content TEXT NOT NULL,
 
@@ -127,8 +127,8 @@ INSERT INTO users VALUES (2, "teacher1", 1, "teacher1_fn", "teacher1_ln", "teach
 INSERT INTO users VALUES (3, "teacher2", 1, "teacher2_fn", "teacher2_ln", "teacher2email", "description teacher 2", "website teacher2", 0, 0, 0);
 INSERT INTO users VALUES (4, "teacher3", 1, "teacher3_fn", "teacher3_ln", "teacher3email", "description teacher 3", "website teacher3", 0, 0, 0);
 INSERT INTO users VALUES (5, "student1", 1, "student1_fn", "student1_ln", "student1email", "description student 1", "", 0, 0, 0);
-INSERT INTO users VALUES (6, "student2", 1, "student2_fn", "student2_ln", "student1email", "description student 2", "", 0, 0, 0);
-INSERT INTO users VALUES (7, "student3", 1, "student3_fn", "student3_ln", "student1email", "description student 3", "", 0, 0, 0);
+INSERT INTO users VALUES (6, "student2", 1, "student2_fn", "student2_ln", "student2email", "description student 2", "", 0, 0, 0);
+INSERT INTO users VALUES (7, "student3", 1, "student3_fn", "student3_ln", "student3email", "description student 3", "", 0, 0, 0);
 
 INSERT INTO courses VALUES
     (NULL, "course1", 1, "course_pic/course1.png"),
@@ -145,15 +145,15 @@ INSERT INTO channels VALUES
     (NULL, 3, "chat course 3");
 
 INSERT INTO course_sections VALUES
-    (NULL, 1, 1, "course 1 *section* 1", "course 1 **section** 1 content"),
+    (NULL, 1, NULL, "course 1 *section* 1", "course 1 **section** 1 content"),
     (NULL, 1, 1, "course 1 ~section~ 2", "course 1 ~~section 2~~ content"),
     (NULL, 1, 2, "course 1 section 3", "link : [link to google.fr](http://google.fr)"),
     (NULL, 1, 3, "course 1 section 4", "course 1 section 4 content"),
-    (NULL, 2, 5, "course 2 section 1", "course 2 section 1 content"),
+    (NULL, 2, NULL, "course 2 section 1", "course 2 section 1 content"),
     (NULL, 2, 5, "course 2 section 2", "course 2 section 2 content"),
     (NULL, 2, 6, "course 2 section 3", "course 2 section 3 content"),
     (NULL, 2, 7, "course 2 section 4", "course 2 section 4 content"),
-    (NULL, 3, 9, "course 3 section 1", "course 3 section 1 content"),
+    (NULL, 3, NULL, "course 3 section 1", "course 3 section 1 content"),
     (NULL, 3, 9, "course 3 section 2", "course 3 section 2 content"),
     (NULL, 3, 10, "course 3 section 3", "course 3 section 3 content"),
     (NULL, 3, 11, "course 3 section 4", "course 3 section 4 content");

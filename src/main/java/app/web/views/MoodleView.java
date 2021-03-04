@@ -2,12 +2,14 @@ package app.web.views;
 
 import app.controller.Controller;
 import app.controller.Markdown;
+import app.controller.MoodleBroadcaster;
 import app.jpa_repo.CourseRepository;
 import app.jpa_repo.CourseSectionRepository;
 import app.jpa_repo.PersonRepository;
 import app.jpa_repo.TextChannelRepository;
 import app.model.courses.Course;
 import app.model.courses.CourseSection;
+import app.web.components.ComponentButton;
 import app.web.layout.Navbar;
 import com.vaadin.flow.component.HasText;
 import com.vaadin.flow.component.html.H1;
@@ -47,6 +49,20 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
                                      courseRepository, courseSectionRepository));
     }
 
+    /**
+     * Creates the center panel that contains the Moodle sections
+     */
+    public void createMoodleBar() {
+        moodleBar.removeAll();
+        setCardStyle(moodleBar, "60%", ColorHTML.GREY);
+        H1 title = new H1(getController().getTitleCourse(course.getId()));
+        moodleBar.add(title);
+        LinkedList<CourseSection> listOfSections = getController().getAllSectionsInOrder(course.getId());
+        for (CourseSection section : listOfSections) {
+            SectionLayout sectionLayout = new SectionLayout(section);
+            moodleBar.add(sectionLayout);
+        }
+    }
 
     @SneakyThrows // so that javac doesn't complain about not catching the exception
     @Override
@@ -62,18 +78,6 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
         createMembersBar(course.getId());
         createMoodleBar();
         createLayout(moodleBar);
-    }
-
-    public void createMoodleBar() {
-        moodleBar.removeAll();
-        setCardStyle(moodleBar, "60%", ColorHTML.GREY);
-        H1 title = new H1(getController().getTitleCourse(course.getId()));
-        moodleBar.add(title);
-        LinkedList<CourseSection> listOfSections = getController().getAllSectionsInOrder(course.getId());
-        for (CourseSection section : listOfSections) {
-            SectionLayout sectionLayout = new SectionLayout(section);
-            moodleBar.add(sectionLayout);
-        }
     }
 
     @Override
@@ -93,16 +97,43 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
      * - the delete button
      * - the modify button
      */
-    public static class SectionLayout extends VerticalLayout implements HasText {
+    public class SectionLayout extends VerticalLayout implements HasText {
+        private CourseSection section;
+
+        private H2 title = new H2();
+        private Paragraph content = new Paragraph();
+
+        private ComponentButton deleteButton;
+        private ComponentButton modifyButton;
+
         public SectionLayout(CourseSection section) {
-            H2 title = new H2();
-            Paragraph content = new Paragraph();
+            this.section = section;
+            if (section == null) return;
+            initContent();
+            createDeleteButton();
+            createModifyButton();
+        }
+
+        private void initContent() {
             title.add(Markdown.getHtmlFromMarkdown(section.getTitle()));
             content.add(Markdown.getHtmlFromMarkdown(section.getContent()));
             add(title);
             add(content);
         }
 
+        private void createDeleteButton() {
+            // TODO : add pictures
+            deleteButton = new ComponentButton("img/DDiscool", "img/DDiscool", "delete", "delete", null);
+            deleteButton.addClickListener(event -> {
+                getController().deleteSection(section);
+                MoodleBroadcaster.broadcast("");
+            });
+            this.add(deleteButton);
+        }
+
+        private void createModifyButton() {
+
+        }
     }
 
 }

@@ -64,6 +64,29 @@ public class Controller {
         publicChatMessageRepository.updateDeletedById(message.getId());
     }
 
+    public void deleteSection(CourseSection section) {
+        if (section.getParentId() == null) { // the section to delete is the first section
+//            ArrayList<CourseSection> s = courseSectionRepository.findAllSectionsByCourseId(section.getCourseId());
+//            System.out.println("BEFORE");
+//            for (CourseSection c : s) {
+//                System.out.println(c.getParentId());
+//            }
+//            System.out.println();
+
+            courseSectionRepository.updateParentId(section.getId(), null);
+//            s = courseSectionRepository.findAllSectionsByCourseId(section.getCourseId());
+//            System.out.println("AFTER");
+//            for (CourseSection c : s) {
+//                System.out.println(c.getParentId());
+//            }
+        } else { // else just update the parentId
+            courseSectionRepository.updateParentId(section.getId(), section.getParentId());
+        }
+//        System.out.println("Section parent id : " + section.getParentId());
+//        System.out.println("Section id : " + section.getId());
+        courseSectionRepository.delete(section);
+    }
+
     public String getUsernameOfSender(PublicChatMessage publicChatMessage) {
         return personRepository.findById(publicChatMessage.getSender()).getUsername();
     }
