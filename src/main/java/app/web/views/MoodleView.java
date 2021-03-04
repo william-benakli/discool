@@ -11,7 +11,10 @@ import app.model.courses.Course;
 import app.model.courses.CourseSection;
 import app.web.components.ComponentButton;
 import app.web.layout.Navbar;
+import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.HasText;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
@@ -21,23 +24,23 @@ import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.HasDynamicTitle;
 import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.shared.Registration;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.LinkedList;
 import java.util.Optional;
 
-/**
- * test class to try to display a Moodle page
- */
 @Route(value = "moodle", layout = Navbar.class)
 public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, HasUrlParameter<Long> {
+
     private final CourseSectionRepository courseSectionRepository;
     private final CourseRepository courseRepository;
     private Course course;
 
     private final FlexLayout moodleBar = new FlexLayout();
 
+    private Registration broadcasterRegistration;
 
     public MoodleView(@Autowired CourseSectionRepository courseSectionRepository,
                       @Autowired CourseRepository courseRepository,
@@ -47,6 +50,20 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
         this.courseRepository = courseRepository;
         setController(new Controller(personRepository, textChannelRepository, null,
                                      courseRepository, courseSectionRepository));
+    }
+
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        UI ui = attachEvent.getUI();
+        broadcasterRegistration = MoodleBroadcaster.register(newMessage -> {
+            ui.access(this::createMoodleBar);
+        });
+    }
+
+    @Override
+    protected void onDetach(DetachEvent detachEvent) {
+        broadcasterRegistration.remove();
+        broadcasterRegistration = null;
     }
 
     /**
@@ -85,11 +102,6 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
         return course.getName();
     }
 
-    private void refresh() {
-        createMoodleBar();
-    }
-
-
     /**
      * The Layout that contains for each section :
      * - the title
@@ -126,7 +138,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             deleteButton = new ComponentButton("img/DDiscool", "img/DDiscool", "delete", "delete", null);
             deleteButton.addClickListener(event -> {
                 getController().deleteSection(section);
-                MoodleBroadcaster.broadcast("");
+                MoodleBroadcaster.broadcast("SECTION_DELETED");
             });
             this.add(deleteButton);
         }

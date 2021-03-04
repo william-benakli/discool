@@ -12,10 +12,8 @@ public class MoodleBroadcaster {
 
     static LinkedList<Consumer<String>> listeners = new LinkedList<>();
 
-    public static synchronized Registration register(
-            Consumer<String> listener) {
+    public static synchronized Registration register(Consumer<String> listener) {
         listeners.add(listener);
-
         return () -> {
             synchronized (MoodleBroadcaster.class) {
                 listeners.remove(listener);

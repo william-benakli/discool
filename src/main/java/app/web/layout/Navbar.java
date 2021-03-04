@@ -12,11 +12,13 @@ import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.page.Push;
 import com.vaadin.flow.router.RouterLink;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 
+@Push
 @CssImport("./styles/style.css")
 @StyleSheet("https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap")
 public class Navbar extends AppLayout {

@@ -44,6 +44,9 @@ dependencies {
     testImplementation 'org.springframework.security:spring-security-test'
     implementation 'org.springframework.session:spring-session-core'
 
+    // to push to UI from the server
+    implementation group: 'com.vaadin', name: 'vaadin-push', version: '8.1.3'
+
     // for Markdown interpretation
     compile 'com.vladsch.flexmark:flexmark-all:0.62.2'
 
