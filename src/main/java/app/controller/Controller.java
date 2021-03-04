@@ -33,11 +33,7 @@ public class Controller {
 
     public String getTitleCourse(long id) {
         Optional<Course> c = courseRepository.findById(id);
-        if (c.isPresent()) {
-            return c.get().getName();
-        } else {
-            return null;
-        }
+        return c.map(Course::getName).orElse(null);
     }
 
     public void saveMessage(String message, long channelId, long parentId, long userId) {
@@ -66,24 +62,10 @@ public class Controller {
 
     public void deleteSection(CourseSection section) {
         if (section.getParentId() == null) { // the section to delete is the first section
-//            ArrayList<CourseSection> s = courseSectionRepository.findAllSectionsByCourseId(section.getCourseId());
-//            System.out.println("BEFORE");
-//            for (CourseSection c : s) {
-//                System.out.println(c.getParentId());
-//            }
-//            System.out.println();
-
             courseSectionRepository.updateParentId(section.getId(), null);
-//            s = courseSectionRepository.findAllSectionsByCourseId(section.getCourseId());
-//            System.out.println("AFTER");
-//            for (CourseSection c : s) {
-//                System.out.println(c.getParentId());
-//            }
         } else { // else just update the parentId
             courseSectionRepository.updateParentId(section.getId(), section.getParentId());
         }
-//        System.out.println("Section parent id : " + section.getParentId());
-//        System.out.println("Section id : " + section.getId());
         courseSectionRepository.delete(section);
     }
 
