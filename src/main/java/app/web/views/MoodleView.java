@@ -19,6 +19,7 @@ import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -114,11 +115,13 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
      * - the modify button
      */
     public class SectionLayout extends VerticalLayout implements HasText {
-        private CourseSection section;
+        private final CourseSection section;
+
+        // TODO : add icons for the buttons
 
         private final H2 title = new H2();
         private final Paragraph content = new Paragraph();
-        private Dialog modifyPopup = new Dialog();
+        private final Dialog modifyPopup = new Dialog();
 
         public SectionLayout(CourseSection section) {
             this.section = section;
@@ -137,11 +140,10 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
         }
 
         private void createDeleteButton() {
-            // TODO : add icons for the buttons
             ComponentButton deleteButton = new ComponentButton("img/DDiscool", "img/DDiscool", "delete", "delete", null);
             deleteButton.addClickListener(event -> {
                 getController().deleteSection(section);
-                MoodleBroadcaster.broadcast("SECTION_DELETED");
+                MoodleBroadcaster.broadcast("UPDATE_SECTION_DELETED");
             });
             this.add(deleteButton);
         }
@@ -160,7 +162,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
          */
         private void createModifyPopup() {
             FormLayout popupContent = new FormLayout();
-
+            Label label = new Label("Modify the section here");
             TextField title = new TextField();
             title.setPlaceholder("Title of the section");
             TextArea content = new TextArea();
@@ -170,9 +172,10 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             okButton.addClickListener(event -> {
                 getController().updateSection(section, title.getValue(), content.getValue());
                 modifyPopup.close();
+                MoodleBroadcaster.broadcast("UPDATE_SECTION_UPDATED");
             });
 
-            popupContent.add(title, content, okButton);
+            popupContent.add(label, title, content, okButton);
             modifyPopup.add(popupContent);
         }
 
