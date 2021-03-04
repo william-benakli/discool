@@ -15,11 +15,15 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.HasText;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextArea;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.HasDynamicTitle;
 import com.vaadin.flow.router.HasUrlParameter;
@@ -112,11 +116,9 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
     public class SectionLayout extends VerticalLayout implements HasText {
         private CourseSection section;
 
-        private H2 title = new H2();
-        private Paragraph content = new Paragraph();
-
-        private ComponentButton deleteButton;
-        private ComponentButton modifyButton;
+        private final H2 title = new H2();
+        private final Paragraph content = new Paragraph();
+        private Dialog modifyPopup = new Dialog();
 
         public SectionLayout(CourseSection section) {
             this.section = section;
@@ -124,6 +126,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             initContent();
             createDeleteButton();
             createModifyButton();
+            createModifyPopup();
         }
 
         private void initContent() {
@@ -134,8 +137,8 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
         }
 
         private void createDeleteButton() {
-            // TODO : add pictures
-            deleteButton = new ComponentButton("img/DDiscool", "img/DDiscool", "delete", "delete", null);
+            // TODO : add icons for the buttons
+            ComponentButton deleteButton = new ComponentButton("img/DDiscool", "img/DDiscool", "delete", "delete", null);
             deleteButton.addClickListener(event -> {
                 getController().deleteSection(section);
                 MoodleBroadcaster.broadcast("SECTION_DELETED");
@@ -144,8 +147,35 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
         }
 
         private void createModifyButton() {
-
+            ComponentButton modifyButton = new ComponentButton("img/Discool", "img/Discool",
+                                                               "modify", "modify", null);
+            modifyButton.addClickListener(event -> {
+                modifyPopup.open();
+            });
+            this.add(modifyButton);
         }
+
+        /**
+         * The created pop-up is invisible until the open() method is called.
+         */
+        private void createModifyPopup() {
+            FormLayout popupContent = new FormLayout();
+
+            TextField title = new TextField();
+            title.setPlaceholder("Title of the section");
+            TextArea content = new TextArea();
+            content.setPlaceholder("The content of your section");
+            ComponentButton okButton = new ComponentButton("img/DDiscool", "img/DDiscool",
+                                                           "ok", "ok", null);
+            okButton.addClickListener(event -> {
+                getController().updateSection(section, title.getValue(), content.getValue());
+                modifyPopup.close();
+            });
+
+            popupContent.add(title, content, okButton);
+            modifyPopup.add(popupContent);
+        }
+
     }
 
 }

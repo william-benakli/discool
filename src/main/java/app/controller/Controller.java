@@ -105,4 +105,15 @@ public class Controller {
         return sortedList;
     }
 
+    public void updateSection(CourseSection section, String title, String... content) {
+        section.setTitle(title);
+        StringBuilder str = new StringBuilder();
+        for (String s : content) {
+            str.append(s);
+            str.append("\n\n");
+        }
+        section.setContent(str.toString());
+        courseSectionRepository.save(section);
+    }
+
 }
