@@ -33,11 +33,7 @@ public class Controller {
 
     public String getTitleCourse(long id) {
         Optional<Course> c = courseRepository.findById(id);
-        if (c.isPresent()) {
-            return c.get().getName();
-        } else {
-            return null;
-        }
+        return c.map(Course::getName).orElse(null);
     }
 
     public void saveMessage(String message, long channelId, long parentId, long userId) {
@@ -64,6 +60,15 @@ public class Controller {
         publicChatMessageRepository.updateDeletedById(message.getId());
     }
 
+    public void deleteSection(CourseSection section) {
+        if (section.getParentId() == null) { // the section to delete is the first section
+            courseSectionRepository.updateParentId(section.getId(), null);
+        } else { // else just update the parentId
+            courseSectionRepository.updateParentId(section.getId(), section.getParentId());
+        }
+        courseSectionRepository.delete(section);
+    }
+
     public String getUsernameOfSender(PublicChatMessage publicChatMessage) {
         return personRepository.findById(publicChatMessage.getSender()).getUsername();
     }
@@ -80,6 +85,17 @@ public class Controller {
         list.forEach(courseSection -> courseSection.addParent(courseSectionRepository)); // add the parent for each element
         LinkedList<CourseSection> sortedList = CourseSection.sort(list); // sort the sections in the right order
         return sortedList;
+    }
+
+    public void updateSection(CourseSection section, String title, String... content) {
+        section.setTitle(title);
+        StringBuilder str = new StringBuilder();
+        for (String s : content) {
+            str.append(s);
+            str.append("\n\n");
+        }
+        section.setContent(str.toString());
+        courseSectionRepository.save(section);
     }
 
 }

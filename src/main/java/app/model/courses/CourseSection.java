@@ -33,10 +33,9 @@ public class CourseSection {
     private long courseId;
 
     @Column(
-            name = "parentid",
-            nullable = false
+            name = "parentid"
     )
-    private long parentId;
+    private Long parentId;
 
     @Column(
             name = "title",
@@ -81,14 +80,14 @@ public class CourseSection {
     }
 
     /**
-     * Returns the element that is at the top of the list (when parent is null) and removes this element from the list
+     * Returns the element that is at the top of the list (when parentId is -1) and removes this element from the list
      *
      * @param list The ArrayList that contains all the values
      * @return The CourseSection that is at the top (or null)
      */
     private static CourseSection findHead(ArrayList<CourseSection> list) {
         for (CourseSection c : list) {
-            if (c.id == c.parentId) {
+            if (c.parentId == null) {
                 list.remove(c);
                 return c;
             }
@@ -102,6 +101,7 @@ public class CourseSection {
      * @param repository The JPA repo to get the parent from
      */
     public void addParent(CourseSectionRepository repository) {
+        if (parentId == null) return;
         Optional<CourseSection> courseSectionParent = repository.findById(parentId);
         parent = courseSectionParent.orElse(null);
     }

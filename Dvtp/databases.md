@@ -86,7 +86,7 @@ This contains all the info and the content for sections in a course's homepage.
 |----------|-----------|----------|---------------------------------------------------------------------------------------------------------------------------------|
 | id       | BIG INT   | NOT NULL | the row's id                                                                                                                    |
 | courseid | BIG INT   | NOT NULL | foreign key to course.id                                                                                                        |
-| parent   | BIG INT   | NOT NULL | foreign key to course_sections.id This is the id of the section that comes right before this one. -1 if this is the top section |
+| parent   | BIG INT   | NOT NULL | foreign key to course_sections.id This is the id of the section that comes right before this one. If this is the top section, parentId = id |
 | title    | VARCHAR   | NOT NULL | the title of this section                                                                                                       |
 | content  | LONG TEXT | NOT NULL | the content of the section                                                                                                      |
 
