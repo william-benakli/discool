@@ -2,14 +2,19 @@ package app.web.views;
 
 import app.controller.Controller;
 import app.controller.Markdown;
+import app.controller.PublicMessagesBroadcaster;
 import app.jpa_repo.PersonRepository;
 import app.jpa_repo.PublicChatMessageRepository;
 import app.jpa_repo.TextChannelRepository;
 import app.model.chat.PublicChatMessage;
 import app.model.chat.TextChannel;
+import app.model.users.Person;
 import app.web.components.ComponentButton;
 import app.web.layout.Navbar;
+import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.Key;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
@@ -20,8 +25,11 @@ import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.HasDynamicTitle;
 import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.shared.Registration;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.ArrayList;
 import java.util.Optional;
@@ -30,6 +38,7 @@ import java.util.Optional;
 @Route(value = "channels", layout = Navbar.class)
 public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle, HasUrlParameter<Long> {
     private final TextChannelRepository textChannelRepository;
+    private final PersonRepository personRepository;
     private TextChannel textChannel;
     private final TextField messageTextField;
     private final FlexLayout chatBar = new FlexLayout();
@@ -37,17 +46,59 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
     private ComponentButton muteHeadphone;
     private Button exitButton;
     private Button sendMessage;
+    FlexLayout messageContainer = new FlexLayout();
+
+    private Registration broadcasterRegistration;
 
 
     public TextChannelView(@Autowired TextChannelRepository textChannelRepository,
                            @Autowired PublicChatMessageRepository publicChatMessageRepository,
                            @Autowired PersonRepository personRepository) {
         this.textChannelRepository = textChannelRepository;
+        this.personRepository = personRepository;
         setController(new Controller(personRepository, textChannelRepository, publicChatMessageRepository,
                                      null, null));
         messageTextField = createTextField();
         createVoiceChatButtons();
         createSendMessageButton();
+    }
+
+    private void createSendMessageButton() {
+        sendMessage = createButtonWithLabel("Envoyer", "#000");
+        sendMessage.addClickShortcut(Key.ENTER);
+
+        sendMessage.addClickListener(event -> {
+            if (!messageTextField.isEmpty()) {
+                // TODO : set the parentId and the userId
+                Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+                String username = authentication.getName();
+                Person sender = personRepository.findByUsername(username);
+                PublicChatMessage newMessage = getController().saveMessage(messageTextField.getValue(), textChannel.getId(), 1, sender.getId());
+                messageTextField.clear();
+                messageTextField.focus();
+                PublicMessagesBroadcaster.broadcast("NEW_MESSAGE", newMessage);
+            }
+        });
+    }
+
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        UI ui = attachEvent.getUI();
+        broadcasterRegistration = PublicMessagesBroadcaster.register((type, publicChatMessage) -> {
+            ui.access(() -> receiveBroadcast(type, publicChatMessage));
+        });
+    }
+
+    private void receiveBroadcast(String type, PublicChatMessage publicChatMessage) {
+        switch (type) {
+            case "NEW_MESSAGE":
+                messageContainer.add(new MessageLayout(publicChatMessage));
+                break;
+            case "DELETE_MESSAGE":
+                break;
+            default:
+                break;
+        }
     }
 
     @Override
@@ -64,19 +115,10 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         return textField;
     }
 
-    private void createSendMessageButton() {
-        sendMessage = createButtonWithLabel("Envoyer", "#000");
-        sendMessage.addClickShortcut(Key.ENTER);
-
-        sendMessage.addClickListener(event -> {
-            if (!messageTextField.isEmpty()) {
-                // TODO : set the parentId and the userId depending on context
-                getController().saveMessage(messageTextField.getValue(), textChannel.getId(), 1, 1);
-                messageTextField.clear();
-                messageTextField.focus();
-                refresh();
-            }
-        });
+    @Override
+    protected void onDetach(DetachEvent detachEvent) {
+        broadcasterRegistration.remove();
+        broadcasterRegistration = null;
     }
 
     private void createVoiceChatButtons() {
@@ -119,7 +161,6 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                 chatButtonContainer
         );
 
-        FlexLayout messageContainer = new FlexLayout();
         setCardStyle(messageContainer, "60%", ColorHTML.GREY);
         messageContainer.setHeightFull();
         messageContainer.getStyle()
