@@ -16,7 +16,9 @@ import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -37,6 +39,7 @@ import java.util.Optional;
 
 @Route(value = "channels", layout = Navbar.class)
 public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle, HasUrlParameter<Long> {
+
     private final TextChannelRepository textChannelRepository;
     private final PersonRepository personRepository;
     private TextChannel textChannel;
@@ -46,6 +49,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
     private ComponentButton muteHeadphone;
     private Button exitButton;
     private Button sendMessage;
+
     FlexLayout messageContainer = new FlexLayout();
 
     private Registration broadcasterRegistration;
@@ -57,10 +61,11 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         this.textChannelRepository = textChannelRepository;
         this.personRepository = personRepository;
         setController(new Controller(personRepository, textChannelRepository, publicChatMessageRepository,
-                                     null, null));
-        messageTextField = createTextField();
+                null, null));
+        this.messageTextField = createTextField();
         createVoiceChatButtons();
         createSendMessageButton();
+        createChatBar();
     }
 
     private void createSendMessageButton() {
@@ -79,6 +84,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                 PublicMessagesBroadcaster.broadcast("NEW_MESSAGE", newMessage);
             }
         });
+
     }
 
     @Override
@@ -112,6 +118,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         textField.setWidthFull();
         //textField.addFocusShortcut(Key.KEY_T, KeyModifier.ALT);
         textField.getStyle().set("margin", "0 2.5px");
+        System.out.println("test");
         return textField;
     }
 
@@ -136,9 +143,6 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         });
     }
 
-    public void refresh() {
-        createChatBar();
-    }
 
     public void createChatBar() {
         chatBar.removeAll();
@@ -156,10 +160,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         chatButtonContainer.add(sendMessage, muteMicrophone, muteHeadphone, exitButton);
 
         FlexLayout messageInputBar = new FlexLayout();
-        messageInputBar.add(
-                messageTextField,
-                chatButtonContainer
-        );
+        messageInputBar.add(messageTextField, chatButtonContainer);
 
         setCardStyle(messageContainer, "60%", ColorHTML.GREY);
         messageContainer.setHeightFull();
@@ -210,31 +211,53 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
     }
 
     class MessageLayout extends HorizontalLayout {
+        private Paragraph metaData;
+        private Paragraph message;
+        private Button delete;
+        private Dialog dialog = new Dialog();
+
 
         public MessageLayout(PublicChatMessage publicMessage) {
-            Paragraph metaData = new Paragraph();
+            this.metaData = new Paragraph();
             metaData.setText(getController().getUsernameOfSender(publicMessage) + " " + publicMessage.getTimeCreated());
             metaData.getStyle().set("border", "none");
             metaData.getStyle().set("border-width", "0px");
             metaData.getStyle().set("outline", "none");
             this.add(metaData);
 
-            Paragraph message = new Paragraph();
+            this.message = new Paragraph();
             message.add(Markdown.getHtmlFromMarkdown(publicMessage.getMessage()));
             message.getStyle().set("border", "none");
             message.getStyle().set("border-width", "0px");
             message.getStyle().set("outline", "none");
             this.add(message);
 
-            Button delete = new Button("Suppression");
+            delete = new Button("Suppression");
 
             delete.addClickListener(event -> {
-                getController().deleteMessage(publicMessage);
-                refresh();
+                dialog.removeAll();
+                dialog.add(new Paragraph("Voulez vous vraimment supprimer votre message ?"));
+                Button oui = new Button("Oui");
+                Button non = new Button("Non");
+                dialog.add(non);
+                dialog.add(oui);
+                dialog.open();
+
+                oui.addClickListener(ev -> {
+                    getController().deleteMessage(publicMessage);
+                    dialog.close();
+                    Notification.show("Vous avez supprimé votre message");
+                });
+
+                non.addClickListener(ev -> {
+                    dialog.close();
+                });
+
             });
 
             Button modify = new Button("Modification");
             // TODO : add listener to change the text
+
 
             VerticalLayout layout = new VerticalLayout();
             layout.add(modify);
