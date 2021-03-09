@@ -5,6 +5,7 @@ import app.model.courses.Course;
 import app.web.components.ComponentButton;
 import app.web.views.HomeView;
 import app.web.views.MoodleView;
+import app.web.views.ViewWithSidebars;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.KeyModifier;
 import com.vaadin.flow.component.applayout.AppLayout;
@@ -46,12 +47,13 @@ public class Navbar extends AppLayout {
     private void subMenuLeft() {
         HorizontalLayout servCardDock = HorizontalLayoutCustom();
         servCardDock.getStyle().set("margin", "0");
-        ComponentButton button = createServDockImage(new Image("img/Discool.svg", "créer un serveur"), Key.NAVIGATE_NEXT);
+        ComponentButton button = createServDockImage(new Image("img/Discool.png", "créer un serveur"), Key.NAVIGATE_NEXT);
         button.getStyle()
                 .set("width", "200px")
-                .set("margin-top", "10px")
-                .set("margin-left", "18px");//TODO: check
+                .set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml());
         RouterLink routerLink = new RouterLink("", HomeView.class);
+        routerLink.getStyle()
+                .set("margin-left", "16px");
         linkRouteurImge(servCardDock, button, routerLink);
         addToNavbar(servCardDock);
     }
@@ -69,10 +71,14 @@ public class Navbar extends AppLayout {
                             (c.getPathIcon().length() != 0) ? c.getPathIcon() : "img/DDiscool.svg",
                             (c.getPathIcon().length() != 0) ? c.getName() : "DDiscool"
                     ), Key.NAVIGATE_NEXT);
+            button.getStyle()
+                    .set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml());
             RouterLink routerLink = new RouterLink("", MoodleView.class, c.getId());
             linkRouteurImge(servCardDock, button, routerLink);
         }
         ComponentButton button = createServDockImage(new Image("img/add.svg", "Create serveur"), Key.NAVIGATE_NEXT);
+        button.getStyle()
+                .set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml());
         RouterLink routerLink = new RouterLink("", MoodleView.class, tmp);
         linkRouteurImge(servCardDock, button, routerLink);
         addToNavbar(servCardDock);
@@ -87,6 +93,8 @@ public class Navbar extends AppLayout {
         servCardDock.getStyle().set("margin", "0");
         for (String[] imageInfo : pathImage) {
             ComponentButton button = createServDockImage(new Image(imageInfo[0], imageInfo[1]), Key.NAVIGATE_NEXT);
+            button.getStyle()
+                    .set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml());
             RouterLink routerLink = new RouterLink("", MoodleView.class, tmp);
             linkRouteurImge(servCardDock, button, routerLink);
         }
