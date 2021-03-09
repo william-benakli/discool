@@ -2,6 +2,7 @@ package app.web.views;
 
 import app.controller.Controller;
 import app.model.chat.TextChannel;
+import app.model.users.Person;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -24,6 +25,8 @@ public abstract class ViewWithSidebars extends VerticalLayout {
     private FlexLayout sideBar;
     private FlexLayout membersBar;
 
+    //private String switchCSS;
+
     public void createLayout(FlexLayout centerElement) {
         HorizontalLayout layout = new HorizontalLayout();
         layout.setWidthFull();
@@ -39,8 +42,12 @@ public abstract class ViewWithSidebars extends VerticalLayout {
 
     public void createMembersBar(long courseId) {
         membersBar = new FlexLayout();
+
+        //ArrayList<Person> usersList = controller.get;
+
+
         membersBar.addClassName("card");
-        membersBar.addClassName("cardCenter");
+        membersBar.addClassName("cardRight");
         setCardStyle(membersBar, "20%", ColorHTML.DARKGREY);
         // TODO add the members for the chat/course
     }
@@ -76,6 +83,7 @@ public abstract class ViewWithSidebars extends VerticalLayout {
         URI uri = new URI(uriString.toString());//TODO: Del
         String s=uri.toString();
         String t=s.substring(s.length()-1);//TODO: edit with the correct redirect values
+        String[] s2=s.split("/");
 
         sideBar = new FlexLayout();
         // add the RouterLinks
@@ -106,8 +114,9 @@ public abstract class ViewWithSidebars extends VerticalLayout {
                     .set("background","none")
                     .set("cursor","pointer");
             button.addClassName("color"+channel.getId());
-            if (t.equals(channel.getId()+""))button.getStyle().set("color",ColorHTML.PURPLE.getColorHtml());
-            else button.getStyle().set("color",ColorHTML.TEXTGREY.getColorHtml());
+            if (s2.length>=4 && s2[3].equals("channels") && t.equals(channel.getId()+"")){
+                button.getStyle().set("color",ColorHTML.PURPLE.getColorHtml());
+            }else button.getStyle().set("color",ColorHTML.TEXTGREY.getColorHtml());
             sideBar.add(link);
         });
         // add the style

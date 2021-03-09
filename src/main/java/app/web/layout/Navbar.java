@@ -72,8 +72,7 @@ public class Navbar extends AppLayout {
         URI uri = new URI(uriString.toString());
         String s=uri.toString();
         String t=s.substring(s.length()-1);//TODO: edit with the correct redirect values
-        //System.out.println(s);
-        //System.out.println(t);
+        String[] s2=s.split("/");
 
         long tmp = 0;//TODO: edit with the correct redirect values
         HorizontalLayout servCardDock = HorizontalLayoutCustom();
@@ -89,7 +88,7 @@ public class Navbar extends AppLayout {
             RouterLink routerLink = new RouterLink("", MoodleView.class, c.getId());
             linkRouteurImge(servCardDock, button, routerLink);
 /**/
-            if (t.equals(c.getId()+"")){//TODO: edit with the correct redirect values
+            if (s2.length>=4 && s2[3].equals("moodle") && t.equals(c.getId()+"")){//TODO: edit with the correct redirect values
                 routerLink.getStyle()
                         .set("border-radius","10px 10px 0 0")
                         .set("padding","0 10px")
