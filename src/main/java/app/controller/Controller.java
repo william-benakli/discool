@@ -49,6 +49,10 @@ public class Controller {
         return messageToSave;
     }
 
+    public void changeMessage(PublicChatMessage publicChatMessage, String messageText) {
+        publicChatMessageRepository.updateMessageById(publicChatMessage.getId(), messageText);
+    }
+
     public void saveMessage(PublicChatMessage message) {
         publicChatMessageRepository.save(message);
     }

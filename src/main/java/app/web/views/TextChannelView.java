@@ -256,14 +256,14 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                 non.addClickListener(ev -> {
                     dialog.close();
                 });
-
-
             });
 
-
-            //    Button modify = new Button("Modification");
+            Button modify = new Button("Modification");
             // TODO : add listener to change the text
 
+            modify.addClickListener(event -> {
+                getController().changeMessage(publicMessage, "changement de text");
+            });
 
             VerticalLayout layout = new VerticalLayout();
             //   layout.add(modify);
