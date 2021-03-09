@@ -15,8 +15,12 @@ import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.page.Push;
 import com.vaadin.flow.router.RouterLink;
+import com.vaadin.flow.server.VaadinService;
+import com.vaadin.flow.server.VaadinServletRequest;
+import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.net.URI;
 import java.util.ArrayList;
 
 @Push
@@ -61,7 +65,16 @@ public class Navbar extends AppLayout {
     /**
      * Generates the main sub-menu of the navigation bar which contains the list of servers joined by the user as well as a button to create servers
      */
+    @SneakyThrows
     private void printCourseBar() {
+        VaadinServletRequest req = (VaadinServletRequest) VaadinService.getCurrentRequest();
+        StringBuffer uriString = req.getRequestURL();
+        URI uri = new URI(uriString.toString());
+        String s=uri.toString();
+        String t=s.substring(s.length()-1);//TODO: edit with the correct redirect values
+        //System.out.println(s);
+        //System.out.println(t);
+
         long tmp = 0;//TODO: edit with the correct redirect values
         HorizontalLayout servCardDock = HorizontalLayoutCustom();
         ArrayList<Course> courses = (ArrayList<Course>) courseRepository.findAll();
@@ -75,11 +88,28 @@ public class Navbar extends AppLayout {
                     .set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml());
             RouterLink routerLink = new RouterLink("", MoodleView.class, c.getId());
             linkRouteurImge(servCardDock, button, routerLink);
+/**/
+            if (t.equals(c.getId()+"")){//TODO: edit with the correct redirect values
+                routerLink.getStyle()
+                        .set("border-radius","10px 10px 0 0")
+                        .set("padding","0 10px")
+                        .set("background-color", ViewWithSidebars.ColorHTML.GREY.getColorHtml());
+            }
+
         }
         ComponentButton button = createServDockImage(new Image("img/add.svg", "Create serveur"), Key.NAVIGATE_NEXT);
         button.getStyle()
                 .set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml());
         RouterLink routerLink = new RouterLink("", MoodleView.class, tmp);
+/**/
+        if (t.equals(0+"")){//TODO: edit with the correct redirect values
+            routerLink.getStyle()
+                    .set("border-radius","10px 10px 0 0")
+                    .set("padding","0 10px")
+                    .set("background-color", ViewWithSidebars.ColorHTML.GREY.getColorHtml());
+        }
+        routerLink.addClassName("colored");//TODO: Supp
+
         linkRouteurImge(servCardDock, button, routerLink);
         addToNavbar(servCardDock);
     }
