@@ -65,7 +65,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         this.messageTextField = createTextField();
         createVoiceChatButtons();
         createSendMessageButton();
-        createChatBar();
+    //    createChatBar();
     }
 
     private void createSendMessageButton() {
@@ -81,7 +81,8 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                 PublicChatMessage newMessage = getController().saveMessage(messageTextField.getValue(), textChannel.getId(), 1, sender.getId());
                 messageTextField.clear();
                 messageTextField.focus();
-                PublicMessagesBroadcaster.broadcast("NEW_MESSAGE", newMessage);
+
+                PublicMessagesBroadcaster.broadcast("NEW_MESSAGE", new MessageLayout(newMessage));
             }
         });
 
@@ -90,17 +91,18 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         UI ui = attachEvent.getUI();
-        broadcasterRegistration = PublicMessagesBroadcaster.register((type, publicChatMessage) -> {
-            ui.access(() -> receiveBroadcast(type, publicChatMessage));
+        broadcasterRegistration = PublicMessagesBroadcaster.register((type, messageLayoutPublicChatMessage) -> {
+            ui.access(() -> receiveBroadcast(type, messageLayoutPublicChatMessage));
         });
     }
 
-    private void receiveBroadcast(String type, PublicChatMessage publicChatMessage) {
+    private void receiveBroadcast(String type, MessageLayout messageLayout) {
         switch (type) {
             case "NEW_MESSAGE":
-                messageContainer.add(new MessageLayout(publicChatMessage));
+                messageContainer.add(messageLayout);
                 break;
             case "DELETE_MESSAGE":
+                messageContainer.remove(messageLayout);
                 break;
             default:
                 break;
@@ -160,7 +162,8 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         chatButtonContainer.add(sendMessage, muteMicrophone, muteHeadphone, exitButton);
 
         FlexLayout messageInputBar = new FlexLayout();
-        messageInputBar.add(messageTextField, chatButtonContainer);
+
+        messageInputBar.add(createTextField(), chatButtonContainer);
 
         setCardStyle(messageContainer, "60%", ColorHTML.GREY);
         messageContainer.setHeightFull();
@@ -197,9 +200,9 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
     @SneakyThrows // so that javac doesn't complain about dirty exception throwing
     @Override
     public void setParameter(BeforeEvent event, Long parameter) {
-        Optional<TextChannel> c = textChannelRepository.findById(parameter);
-        if (c.isPresent()) {
-            textChannel = c.get();
+        Optional<TextChannel> channel = textChannelRepository.findById(parameter);
+        if (channel.isPresent()) {
+            textChannel = channel.get();
         } else {
             throw new Exception("There is no channel with this ID.");
             // TODO : take care of the exception
@@ -210,7 +213,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         createLayout(chatBar);
     }
 
-    class MessageLayout extends HorizontalLayout {
+    public class MessageLayout extends HorizontalLayout {
         private Paragraph metaData;
         private Paragraph message;
         private Button delete;
@@ -236,7 +239,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
 
             delete.addClickListener(event -> {
                 dialog.removeAll();
-                dialog.add(new Paragraph("Voulez vous vraimment supprimer votre message ?"));
+                dialog.add(new Paragraph("Voulez vous vraiment supprimer votre message ?"));
                 Button oui = new Button("Oui");
                 Button non = new Button("Non");
                 dialog.add(non);
@@ -245,6 +248,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
 
                 oui.addClickListener(ev -> {
                     getController().deleteMessage(publicMessage);
+                    PublicMessagesBroadcaster.broadcast("DELETE_MESSAGE", this);
                     dialog.close();
                     Notification.show("Vous avez supprimé votre message");
                 });
@@ -253,14 +257,16 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                     dialog.close();
                 });
 
+
             });
 
-            Button modify = new Button("Modification");
+
+            //    Button modify = new Button("Modification");
             // TODO : add listener to change the text
 
 
             VerticalLayout layout = new VerticalLayout();
-            layout.add(modify);
+            //   layout.add(modify);
             layout.add(delete);
             this.add(layout);
 
