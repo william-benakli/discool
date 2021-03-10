@@ -11,10 +11,7 @@ import app.model.chat.TextChannel;
 import app.model.users.Person;
 import app.web.components.ComponentButton;
 import app.web.layout.Navbar;
-import com.vaadin.flow.component.AttachEvent;
-import com.vaadin.flow.component.DetachEvent;
-import com.vaadin.flow.component.Key;
-import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Paragraph;
@@ -33,7 +30,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import java.util.ArrayList;
 import java.util.Optional;
 
 
@@ -50,7 +46,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
     private Button exitButton;
     private Button sendMessage;
 
-    FlexLayout messageContainer = new FlexLayout();
+    private FlexLayout messageContainer = new FlexLayout();
 
     private Registration broadcasterRegistration;
 
@@ -65,7 +61,6 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         this.messageTextField = createTextField();
         createVoiceChatButtons();
         createSendMessageButton();
-    //    createChatBar();
     }
 
     private void createSendMessageButton() {
@@ -73,17 +68,16 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         sendMessage.addClickShortcut(Key.ENTER);
 
         sendMessage.addClickListener(event -> {
-            if (!messageTextField.isEmpty()) {
-                // TODO : set the parentId and the userId
+            //     if (!messageTextField.isEmpty()) {
+            // TODO : set the parentId and the userId
                 Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
                 String username = authentication.getName();
-                Person sender = personRepository.findByUsername(username);
-                PublicChatMessage newMessage = getController().saveMessage(messageTextField.getValue(), textChannel.getId(), 1, sender.getId());
+            Person sender = personRepository.findByUsername(username);
+            PublicChatMessage newMessage = getController().saveMessage("test", textChannel.getId(), 1, sender.getId());
                 messageTextField.clear();
                 messageTextField.focus();
-
                 PublicMessagesBroadcaster.broadcast("NEW_MESSAGE", new MessageLayout(newMessage));
-            }
+            //     }
         });
 
     }
@@ -104,6 +98,9 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
             case "DELETE_MESSAGE":
                 messageContainer.remove(messageLayout);
                 break;
+            case "UPDATE_MESSAGE":
+                //TODO: mettre à jour le message envoyé
+                break;
             default:
                 break;
         }
@@ -116,11 +113,13 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
 
     public TextField createTextField() {
         TextField textField = new TextField();
+        textField.setVisible(true);
+        textField.getStyle().set("color", "blue");
         textField.setPlaceholder("Envoyer un message");
         textField.setWidthFull();
-        //textField.addFocusShortcut(Key.KEY_T, KeyModifier.ALT);
+        textField.addFocusShortcut(Key.KEY_T, KeyModifier.ALT);
         textField.getStyle().set("margin", "0 2.5px");
-        System.out.println("test");
+        System.out.println("test textInPuntFile");
         return textField;
     }
 
@@ -147,7 +146,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
 
 
     public void createChatBar() {
-        chatBar.removeAll();
+        //chatBar.removeAll();
         chatBar.getStyle()
                 .set("overflow", "auto")
                 .set("width", "60%")
@@ -163,7 +162,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
 
         FlexLayout messageInputBar = new FlexLayout();
 
-        messageInputBar.add(createTextField(), chatButtonContainer);
+        messageInputBar.add(messageTextField, chatButtonContainer);
 
         setCardStyle(messageContainer, "60%", ColorHTML.GREY);
         messageContainer.setHeightFull();
@@ -171,14 +170,12 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                 .set("position", "-webkit-sticky")
                 .set("position", "sticky")
                 .set("bottom", "0px")
-                .set("background-color", ColorHTML.GREY.getColorHtml());
+                .set("background-color", ColorHTML.GREY.getColorHtml())
+                .set("flex-direction", "column");
 
-        ArrayList<PublicChatMessage> messageList = getController().getChatMessagesForChannel(textChannel.getId());
-        for (PublicChatMessage message : messageList) {
-            MessageLayout messageLayout = new MessageLayout(message);
-            messageContainer.add(messageLayout);
-        }
-        messageContainer.getStyle().set("flex-direction", "column");
+        for (PublicChatMessage message : getController().getChatMessagesForChannel(textChannel.getId()))
+            messageContainer.add(new MessageLayout(message));
+
         chatBar.add(messageContainer, messageInputBar);
     }
 
@@ -209,16 +206,16 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         }
         createSidebar(textChannel.getCourseId());
         createMembersBar(textChannel.getCourseId());
-        createChatBar();
         createLayout(chatBar);
+        createChatBar();
     }
+
 
     public class MessageLayout extends HorizontalLayout {
         private Paragraph metaData;
         private Paragraph message;
         private Button delete;
-        private Dialog dialog = new Dialog();
-
+        private Button modify;
 
         public MessageLayout(PublicChatMessage publicMessage) {
             this.metaData = new Paragraph();
@@ -238,7 +235,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
             delete = new Button("Suppression");
 
             delete.addClickListener(event -> {
-                dialog.removeAll();
+                Dialog dialog = new Dialog();
                 dialog.add(new Paragraph("Voulez vous vraiment supprimer votre message ?"));
                 Button oui = new Button("Oui");
                 Button non = new Button("Non");
@@ -258,11 +255,10 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                 });
             });
 
-            Button modify = new Button("Modification");
-            // TODO : add listener to change the text
+            modify = new Button("Modification");
 
             modify.addClickListener(event -> {
-                dialog.removeAll();
+                Dialog dialog = new Dialog();
 
                 Button oui = new Button("Valider");
                 Button non = new Button("Annuler");
@@ -279,6 +275,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                 oui.addClickListener(ev -> {
                     if (!messageUpdate.getValue().equals(publicMessage.getMessage())) {
                         getController().changeMessage(publicMessage, messageUpdate.getValue());
+                        PublicMessagesBroadcaster.broadcast("UPDATE_MESSAGE", this);
                         Notification.show("Vous avez modifié votre message");
                     }
                     dialog.close();
@@ -289,10 +286,16 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                 });
             });
 
-            VerticalLayout layout = new VerticalLayout();
-            //   layout.add(modify);
-            layout.add(delete);
-            this.add(layout);
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            long id = personRepository.findIdByUsername(authentication.getName());
+
+            //Protection si l'utilisateur est bien le createur du message
+            if (id == publicMessage.getSender()) {
+                VerticalLayout layout = new VerticalLayout();
+                layout.add(modify);
+                layout.add(delete);
+                add(layout);
+            }
 
         }
     }
