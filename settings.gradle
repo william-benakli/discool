@@ -1,4 +1,3 @@
 rootProject.name = 'discool'
 include 'web'
 include 'model'
-

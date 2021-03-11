@@ -57,9 +57,9 @@
     "lit-element": "^2.2.1",
     "@polymer/polymer": "3.2.0",
     "@webcomponents/webcomponentsjs": "^2.2.10",
-    "@vaadin/vaadin-app-layout": "2.2.0",
     "@vaadin/vaadin-ordered-layout": "1.4.0",
-    "@vaadin/vaadin-button": "2.4.0"
+    "@vaadin/vaadin-button": "2.4.0",
+    "@vaadin/vaadin-app-layout": "2.2.0"
   },
   "devDependencies": {
     "webpack-babel-multi-target-plugin": "2.3.3",
