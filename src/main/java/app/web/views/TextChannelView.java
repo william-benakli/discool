@@ -45,9 +45,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
     private ComponentButton muteHeadphone;
     private Button exitButton;
     private Button sendMessage;
-
     private FlexLayout messageContainer = new FlexLayout();
-
     private Registration broadcasterRegistration;
 
 
@@ -68,16 +66,16 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         sendMessage.addClickShortcut(Key.ENTER);
 
         sendMessage.addClickListener(event -> {
-            //     if (!messageTextField.isEmpty()) {
-            // TODO : set the parentId and the userId
-                Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-                String username = authentication.getName();
-            Person sender = personRepository.findByUsername(username);
-            PublicChatMessage newMessage = getController().saveMessage("test", textChannel.getId(), 1, sender.getId());
-                messageTextField.clear();
-                messageTextField.focus();
-                PublicMessagesBroadcaster.broadcast("NEW_MESSAGE", new MessageLayout(newMessage));
-            //     }
+           if (!messageTextField.isEmpty()) {
+               // TODO : set the parentId and the userId
+               Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+               String username = authentication.getName();
+               Person sender = personRepository.findByUsername(username);
+               PublicChatMessage newMessage = getController().saveMessage(messageTextField.getValue(), textChannel.getId(), 1, sender.getId());
+               messageTextField.clear();
+               messageTextField.focus();
+               PublicMessagesBroadcaster.broadcast("NEW_MESSAGE", new MessageLayout(newMessage));
+           }
         });
 
     }
@@ -285,12 +283,11 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                     dialog.close();
                 });
             });
-
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            long id = personRepository.findIdByUsername(authentication.getName());
+            Person id = personRepository.findByUsername(authentication.getName());
 
             //Protection si l'utilisateur est bien le createur du message
-            if (id == publicMessage.getSender()) {
+            if (id.getId() == publicMessage.getSender()) {
                 VerticalLayout layout = new VerticalLayout();
                 layout.add(modify);
                 layout.add(delete);
