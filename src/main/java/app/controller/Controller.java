@@ -98,4 +98,12 @@ public class Controller {
         courseSectionRepository.save(section);
     }
 
+    public void clearMessageChat() {
+        publicChatMessageRepository.updateDeletedAll();
+    }
+
+    public void clearMessageChat(int value) {
+        publicChatMessageRepository.updateDeleted(value);
+    }
+
 }
