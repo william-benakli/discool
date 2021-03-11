@@ -296,7 +296,5 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
 
         }
     }
-
-
 }
 
