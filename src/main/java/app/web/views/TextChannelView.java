@@ -72,15 +72,15 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                String username = authentication.getName();
                Person sender = personRepository.findByUsername(username);
                // TODO : set the parentId and the userId
-
+               PublicChatMessage newMessage = getController().saveMessage(messageTextField.getValue(), textChannel.getId(), 1, sender.getId());
                if (!messageTextField.getValue().startsWith("/")) {
-                   PublicChatMessage newMessage = getController().saveMessage(messageTextField.getValue(), textChannel.getId(), 1, sender.getId());
-                   messageTextField.clear();
-                   messageTextField.focus();
                    PublicMessagesBroadcaster.broadcast("NEW_MESSAGE", new MessageLayout(newMessage));
                } else {
                    new CommandsClearChat(this.getController(), sender.getId(), textChannel.getId(), messageTextField.getValue());
+                   PublicMessagesBroadcaster.broadcast("UPDATE_ALL", new MessageLayout(newMessage));
                }
+               messageTextField.clear();
+               messageTextField.focus();
            }
         });
 
@@ -103,7 +103,13 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                 messageContainer.remove(messageLayout);
                 break;
             case "UPDATE_MESSAGE":
+                //messageContainer.getComponentAt(messageLayout.getId()).getElement();
                 //TODO: mettre à jour le message envoyé
+                break;
+            case "UPDATE_ALL":
+                messageContainer.removeAll();
+                for (PublicChatMessage message : getController().getChatMessagesForChannel(textChannel.getId()))
+                    messageContainer.add(new MessageLayout(message));
                 break;
             default:
                 break;
