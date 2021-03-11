@@ -3,6 +3,7 @@ package app.web.views;
 import app.controller.Controller;
 import app.controller.Markdown;
 import app.controller.PublicMessagesBroadcaster;
+import app.controller.commands.CommandsClearChat;
 import app.jpa_repo.PersonRepository;
 import app.jpa_repo.PublicChatMessageRepository;
 import app.jpa_repo.TextChannelRepository;
@@ -67,14 +68,19 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
 
         sendMessage.addClickListener(event -> {
            if (!messageTextField.isEmpty()) {
-               // TODO : set the parentId and the userId
                Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
                String username = authentication.getName();
                Person sender = personRepository.findByUsername(username);
-               PublicChatMessage newMessage = getController().saveMessage(messageTextField.getValue(), textChannel.getId(), 1, sender.getId());
-               messageTextField.clear();
-               messageTextField.focus();
-               PublicMessagesBroadcaster.broadcast("NEW_MESSAGE", new MessageLayout(newMessage));
+               // TODO : set the parentId and the userId
+
+               if (!messageTextField.getValue().startsWith("/")) {
+                   PublicChatMessage newMessage = getController().saveMessage(messageTextField.getValue(), textChannel.getId(), 1, sender.getId());
+                   messageTextField.clear();
+                   messageTextField.focus();
+                   PublicMessagesBroadcaster.broadcast("NEW_MESSAGE", new MessageLayout(newMessage));
+               } else {
+                   new CommandsClearChat(this.getController(), sender.getId(), textChannel.getId(), messageTextField.getValue());
+               }
            }
         });
 
