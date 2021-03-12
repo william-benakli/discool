@@ -8,6 +8,14 @@ import com.vaadin.flow.component.html.Paragraph;
 public class CommandsClearChat {
 
 
+    /**
+     * Verification des la commandes entrée et application des changements de la command
+     *
+     * @param controller permet d'avoir un acces direct au controller
+     * @param sender     id de l'utilisateur
+     * @param channel    id du channel concernée
+     * @param arg        le nombre d'argument dans un tableau
+     */
     public CommandsClearChat(Controller controller, long sender, long channel, String arg[]) {
         if (arg.length <= 0 || arg.length > 3) return;
         //TODO: verification à finaliser
@@ -37,6 +45,12 @@ public class CommandsClearChat {
 
     }
 
+    /**
+     * Verification des Integers
+     *
+     * @param String Valeur String attendu
+     * @return Un boolean qui informe si un String est un integer ou pas (true or false)
+     */
     public static boolean isInteger(String s) {
         try {
             Integer.parseInt(s);
@@ -48,6 +62,9 @@ public class CommandsClearChat {
         return true;
     }
 
+    /**
+     * Creation d'une affichage d'aide par un dialog d
+     */
     public void displayHelp() {
         Dialog d = new Dialog();
         Button valider = new Button("Valider");
@@ -62,6 +79,9 @@ public class CommandsClearChat {
         });
     }
 
+    /**
+     * Creation d'une affichage d'erreur par un dialog
+     */
     public void displayErreur(String erreur) {
         Dialog d = new Dialog();
         Button valider = new Button("Valider");

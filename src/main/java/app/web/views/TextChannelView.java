@@ -62,32 +62,37 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         createSendMessageButton();
     }
 
+
+    /*
+      Cette fonction permet de creer un button d'envoie, elle comprend aussi la gestion
+      des entrée et des commands par l'utilisateur.
+     */
     private void createSendMessageButton() {
         sendMessage = createButtonWithLabel("Envoyer", "#000");
         sendMessage.addClickShortcut(Key.ENTER);
 
         sendMessage.addClickListener(event -> {
-           if (!messageTextField.isEmpty()) {
-               Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-               String username = authentication.getName();
-               Person sender = personRepository.findByUsername(username);
-               // TODO : set the parentId and the userId
-               PublicChatMessage newMessage = getController().saveMessage(messageTextField.getValue(), textChannel.getId(), 1, sender.getId());
-               if (!messageTextField.getValue().startsWith("/")) {
-                   PublicMessagesBroadcaster.broadcast("NEW_MESSAGE", new MessageLayout(newMessage));
-               } else {
-                   String[] arg = messageTextField.getValue().split(" ");
-                   switch (arg[0]) {
-                       case "/clear":
-                           new CommandsClearChat(this.getController(), sender.getId(), textChannel.getId(), arg);
-                           break;
-                   }
-                   PublicMessagesBroadcaster.broadcast("UPDATE_ALL", new MessageLayout(newMessage));
-                   Notification.show("Vous executez une command");
-               }
-               messageTextField.clear();
-               messageTextField.focus();
-           }
+            if (!messageTextField.isEmpty()) {
+                Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+                String username = authentication.getName();
+                Person sender = personRepository.findByUsername(username);
+                // TODO : set the parentId and the userId
+                PublicChatMessage newMessage = getController().saveMessage(messageTextField.getValue(), textChannel.getId(), 1, sender.getId());
+                if (!messageTextField.getValue().startsWith("/")) {
+                    PublicMessagesBroadcaster.broadcast("NEW_MESSAGE", new MessageLayout(newMessage));
+                } else {
+                    String[] arg = messageTextField.getValue().split(" ");
+                    switch (arg[0]) {
+                        case "/clear":
+                            new CommandsClearChat(this.getController(), sender.getId(), textChannel.getId(), arg);
+                            break;
+                    }
+                    PublicMessagesBroadcaster.broadcast("UPDATE_ALL", new MessageLayout(newMessage));
+                    Notification.show("Vous executez une command");
+                }
+                messageTextField.clear();
+                messageTextField.focus();
+            }
         });
     }
 
@@ -140,6 +145,8 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         broadcasterRegistration = null;
     }
 
+
+    //    Cette fonction créer un button mute / son et quitté
     private void createVoiceChatButtons() {
         muteMicrophone = new ComponentButton("img/micOn.svg", "img/micOff.svg", "unmute microphone", "mute microphone", Key.DIGIT_1);
         muteMicrophone.addClickListener(muteMicrophone::changeStatus);
@@ -156,8 +163,11 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
     }
 
 
+    /*
+        Cette fonction permet de creer la tchat bar
+     */
     public void createChatBar() {
-        //chatBar.removeAll();
+        chatBar.removeAll();
         chatBar.getStyle()
                 .set("overflow", "auto")
                 .set("width", "60%")
@@ -172,9 +182,8 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         chatButtonContainer.add(sendMessage, muteMicrophone, muteHeadphone, exitButton);
 
         FlexLayout messageInputBar = new FlexLayout();
-
+        //TODO: Faire que le message TextField apparaisse
         messageInputBar.add(messageTextField, chatButtonContainer);
-
         setCardStyle(messageContainer, "60%", ColorHTML.GREY);
         messageContainer.setHeightFull();
         messageContainer.getStyle()
@@ -186,7 +195,6 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
 
         for (PublicChatMessage message : getController().getChatMessagesForChannel(textChannel.getId()))
             messageContainer.add(new MessageLayout(message));
-
         chatBar.add(messageContainer, messageInputBar);
     }
 
@@ -306,7 +314,6 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                 layout.add(delete);
                 add(layout);
             }
-
         }
     }
 }
