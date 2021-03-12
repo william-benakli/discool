@@ -1,4 +1,4 @@
-plugins {
+    plugins {
     id 'org.springframework.boot' version '2.4.2'
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
     id 'com.vaadin' version '0.14.3.7'
@@ -20,7 +20,7 @@ repositories {
 }
 
 ext {
-    set('vaadinVersion', "14.4.7")
+    set('vaadinVersion', "14.4.9")
 }
 
 dependencies {
