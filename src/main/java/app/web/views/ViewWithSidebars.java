@@ -2,13 +2,19 @@ package app.web.views;
 
 import app.controller.Controller;
 import app.model.chat.TextChannel;
+import app.model.users.Person;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.RouterLink;
+import com.vaadin.flow.server.VaadinService;
+import com.vaadin.flow.server.VaadinServletRequest;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.SneakyThrows;
 
+import java.net.URI;
 import java.util.ArrayList;
 
 public abstract class ViewWithSidebars extends VerticalLayout {
@@ -18,6 +24,8 @@ public abstract class ViewWithSidebars extends VerticalLayout {
 
     private FlexLayout sideBar;
     private FlexLayout membersBar;
+
+    //private String switchCSS;
 
     public void createLayout(FlexLayout centerElement) {
         HorizontalLayout layout = new HorizontalLayout();
@@ -34,8 +42,12 @@ public abstract class ViewWithSidebars extends VerticalLayout {
 
     public void createMembersBar(long courseId) {
         membersBar = new FlexLayout();
+
+        //ArrayList<Person> usersList = controller.get;
+
+
         membersBar.addClassName("card");
-        membersBar.addClassName("cardCenter");
+        membersBar.addClassName("cardRight");
         setCardStyle(membersBar, "20%", ColorHTML.DARKGREY);
         // TODO add the members for the chat/course
     }
@@ -64,7 +76,15 @@ public abstract class ViewWithSidebars extends VerticalLayout {
      *
      * @param courseId The id of the course
      */
+    @SneakyThrows
     public void createSidebar(long courseId) {
+        VaadinServletRequest req = (VaadinServletRequest) VaadinService.getCurrentRequest();
+        StringBuffer uriString = req.getRequestURL();
+        URI uri = new URI(uriString.toString());//TODO: Del
+        String s=uri.toString();
+        String t=s.substring(s.length()-1);//TODO: edit with the correct redirect values
+        String[] s2=s.split("/");
+
         sideBar = new FlexLayout();
         // add the RouterLinks
         RouterLink linkHome=new RouterLink("Page d'accueil", MoodleView.class, courseId);
@@ -79,13 +99,24 @@ public abstract class ViewWithSidebars extends VerticalLayout {
         ArrayList<TextChannel> textChannels = controller.getAllChannelsForCourse(courseId);
 
         textChannels.forEach(channel -> {
-            RouterLink link=new RouterLink(channel.getName(), TextChannelView.class, channel.getId());
+            RouterLink link=new RouterLink("", TextChannelView.class, channel.getId());
+            Button button = new Button(channel.getName());
+            button.addClassName(channel.getId()+"");
+            link.getElement().appendChild(button.getElement());
             link.getStyle()
-                    .set("color",ColorHTML.TEXTGREY.getColorHtml())
-                    .set("padding-left","35px")
-                    .set("font-weight","700")
                     .set("pointer-event","none")
-                    .set("padding-bottom","2.5px");
+                    .set("padding-bottom","2.5px")
+                    .set("background","none")
+                    .set("margin-left","-60px");
+            button.getStyle()
+                    .set("font-weight","700")
+                    .set("width","100%")
+                    .set("background","none")
+                    .set("cursor","pointer");
+            button.addClassName("color"+channel.getId());
+            if (s2.length>=4 && s2[3].equals("channels") && t.equals(channel.getId()+"")){
+                button.getStyle().set("color",ColorHTML.PURPLE.getColorHtml());
+            }else button.getStyle().set("color",ColorHTML.TEXTGREY.getColorHtml());
             sideBar.add(link);
         });
         // add the style
