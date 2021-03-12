@@ -5,6 +5,7 @@ import app.model.courses.Course;
 import app.web.components.ComponentButton;
 import app.web.views.HomeView;
 import app.web.views.MoodleView;
+import app.web.views.ViewWithSidebars;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.KeyModifier;
 import com.vaadin.flow.component.applayout.AppLayout;
@@ -14,8 +15,12 @@ import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.page.Push;
 import com.vaadin.flow.router.RouterLink;
+import com.vaadin.flow.server.VaadinService;
+import com.vaadin.flow.server.VaadinServletRequest;
+import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.net.URI;
 import java.util.ArrayList;
 
 @Push
@@ -46,12 +51,13 @@ public class Navbar extends AppLayout {
     private void subMenuLeft() {
         HorizontalLayout servCardDock = HorizontalLayoutCustom();
         servCardDock.getStyle().set("margin", "0");
-        ComponentButton button = createServDockImage(new Image("img/Discool.svg", "créer un serveur"), Key.NAVIGATE_NEXT);
+        ComponentButton button = createServDockImage(new Image("img/Discool.png", "créer un serveur"), Key.NAVIGATE_NEXT);
         button.getStyle()
                 .set("width", "200px")
-                .set("margin-top", "10px")
-                .set("margin-left", "18px");//TODO: check
+                .set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml());
         RouterLink routerLink = new RouterLink("", HomeView.class);
+        routerLink.getStyle()
+                .set("margin-left", "16px");
         linkRouteurImge(servCardDock, button, routerLink);
         addToNavbar(servCardDock);
     }
@@ -59,7 +65,15 @@ public class Navbar extends AppLayout {
     /**
      * Generates the main sub-menu of the navigation bar which contains the list of servers joined by the user as well as a button to create servers
      */
+    @SneakyThrows
     private void printCourseBar() {
+        VaadinServletRequest req = (VaadinServletRequest) VaadinService.getCurrentRequest();
+        StringBuffer uriString = req.getRequestURL();
+        URI uri = new URI(uriString.toString());
+        String s=uri.toString();
+        String t=s.substring(s.length()-1);//TODO: edit with the correct redirect values
+        String[] s2=s.split("/");
+
         long tmp = 0;//TODO: edit with the correct redirect values
         HorizontalLayout servCardDock = HorizontalLayoutCustom();
         ArrayList<Course> courses = (ArrayList<Course>) courseRepository.findAll();
@@ -69,11 +83,32 @@ public class Navbar extends AppLayout {
                             (c.getPathIcon().length() != 0) ? c.getPathIcon() : "img/DDiscool.svg",
                             (c.getPathIcon().length() != 0) ? c.getName() : "DDiscool"
                     ), Key.NAVIGATE_NEXT);
+            button.getStyle()
+                    .set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml());
             RouterLink routerLink = new RouterLink("", MoodleView.class, c.getId());
             linkRouteurImge(servCardDock, button, routerLink);
+/**/
+            if (s2.length>=4 && s2[3].equals("moodle") && t.equals(c.getId()+"")){//TODO: edit with the correct redirect values
+                routerLink.getStyle()
+                        .set("border-radius","10px 10px 0 0")
+                        .set("padding","0 10px")
+                        .set("background-color", ViewWithSidebars.ColorHTML.GREY.getColorHtml());
+            }
+
         }
         ComponentButton button = createServDockImage(new Image("img/add.svg", "Create serveur"), Key.NAVIGATE_NEXT);
+        button.getStyle()
+                .set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml());
         RouterLink routerLink = new RouterLink("", MoodleView.class, tmp);
+/**/
+        if (t.equals(0+"")){//TODO: edit with the correct redirect values
+            routerLink.getStyle()
+                    .set("border-radius","10px 10px 0 0")
+                    .set("padding","0 10px")
+                    .set("background-color", ViewWithSidebars.ColorHTML.GREY.getColorHtml());
+        }
+        routerLink.addClassName("colored");//TODO: Supp
+
         linkRouteurImge(servCardDock, button, routerLink);
         addToNavbar(servCardDock);
     }
@@ -87,6 +122,8 @@ public class Navbar extends AppLayout {
         servCardDock.getStyle().set("margin", "0");
         for (String[] imageInfo : pathImage) {
             ComponentButton button = createServDockImage(new Image(imageInfo[0], imageInfo[1]), Key.NAVIGATE_NEXT);
+            button.getStyle()
+                    .set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml());
             RouterLink routerLink = new RouterLink("", MoodleView.class, tmp);
             linkRouteurImge(servCardDock, button, routerLink);
         }
