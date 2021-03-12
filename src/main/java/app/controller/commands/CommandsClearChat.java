@@ -32,7 +32,7 @@ public class CommandsClearChat {
             if (isInteger(arg[1])) {
                 int value = Integer.valueOf(arg[1]);
                 if (value >= 1 || value <= 50) {
-                    controller.clearMessageChat(value);
+                    controller.clearMessageChat(value, channel);
                 } else {
                     displayErreur("Nombre trop grand");
                 }
@@ -48,7 +48,7 @@ public class CommandsClearChat {
     /**
      * Verification des Integers
      *
-     * @param String Valeur String attendu
+     * @param s Valeur String attendu
      * @return Un boolean qui informe si un String est un integer ou pas (true or false)
      */
     public static boolean isInteger(String s) {

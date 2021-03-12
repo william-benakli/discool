@@ -31,8 +31,7 @@ public interface PublicChatMessageRepository extends JpaRepository<PublicChatMes
 
     @Modifying
     @Transactional
-    @Query(value = "UPDATE posts set DELETED = 1 ORDER BY ID LIMIT :limitation")
-    void updateDeleted(@Param("limitation") int limitation);
-
+    @Query(value = "UPDATE posts SET DELETED = 1 WHERE channelid = :idchannel ORDER BY ID DESC LIMIT :limitation", nativeQuery = true)
+    void updateDeleted(@Param("idchannel") long channel, @Param("limitation") int limit);
 
 }

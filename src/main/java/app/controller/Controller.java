@@ -102,8 +102,8 @@ public class Controller {
         publicChatMessageRepository.updateDeletedAll();
     }
 
-    public void clearMessageChat(int value) {
-        publicChatMessageRepository.updateDeleted(value);
+    public void clearMessageChat(int value, long channelid) {
+        publicChatMessageRepository.updateDeleted(channelid, value);
     }
 
 }
