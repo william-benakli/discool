@@ -76,14 +76,18 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                if (!messageTextField.getValue().startsWith("/")) {
                    PublicMessagesBroadcaster.broadcast("NEW_MESSAGE", new MessageLayout(newMessage));
                } else {
-                   new CommandsClearChat(this.getController(), sender.getId(), textChannel.getId(), messageTextField.getValue());
+                   String[] arg = messageTextField.getValue().split(" ");
+                   switch (arg[0]) {
+                       case "/clear":
+                           new CommandsClearChat(this.getController(), sender.getId(), textChannel.getId(), arg);
+                           break;
+                   }
                    PublicMessagesBroadcaster.broadcast("UPDATE_ALL", new MessageLayout(newMessage));
                }
                messageTextField.clear();
                messageTextField.focus();
            }
         });
-
     }
 
     @Override
@@ -101,10 +105,6 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                 break;
             case "DELETE_MESSAGE":
                 messageContainer.remove(messageLayout);
-                break;
-            case "UPDATE_MESSAGE":
-                //messageContainer.getComponentAt(messageLayout.getId()).getElement();
-                //TODO: mettre à jour le message envoyé
                 break;
             case "UPDATE_ALL":
                 messageContainer.removeAll();
@@ -285,7 +285,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                 oui.addClickListener(ev -> {
                     if (!messageUpdate.getValue().equals(publicMessage.getMessage())) {
                         getController().changeMessage(publicMessage, messageUpdate.getValue());
-                        PublicMessagesBroadcaster.broadcast("UPDATE_MESSAGE", this);
+                        this.message.setText(messageUpdate.getValue());
                         Notification.show("Vous avez modifié votre message");
                     }
                     dialog.close();

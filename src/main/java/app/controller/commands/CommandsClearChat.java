@@ -8,8 +8,7 @@ import com.vaadin.flow.component.html.Paragraph;
 public class CommandsClearChat {
 
 
-    public CommandsClearChat(Controller controller, long sender, long channel, String command) {
-        String arg[] = command.split(" ");
+    public CommandsClearChat(Controller controller, long sender, long channel, String arg[]) {
         if (arg.length <= 0 || arg.length > 3) return;
         //TODO: verification à finaliser
         //if(channel.exist())
