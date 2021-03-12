@@ -83,6 +83,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                            break;
                    }
                    PublicMessagesBroadcaster.broadcast("UPDATE_ALL", new MessageLayout(newMessage));
+                   Notification.show("Vous executez une command");
                }
                messageTextField.clear();
                messageTextField.focus();
