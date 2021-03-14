@@ -36,7 +36,7 @@ public class Controller {
         return c.map(Course::getName).orElse(null);
     }
 
-    public void saveMessage(String message, long channelId, long parentId, long userId) {
+    public PublicChatMessage saveMessage(String message, long channelId, long parentId, long userId) {
         PublicChatMessage messageToSave = PublicChatMessage.builder()
                 .message(message)
                 .channelid(channelId)
@@ -46,6 +46,11 @@ public class Controller {
                 .deleted(false)
                 .build();
         publicChatMessageRepository.save(messageToSave);
+        return messageToSave;
+    }
+
+    public void changeMessage(PublicChatMessage publicChatMessage, String messageText) {
+        publicChatMessageRepository.updateMessageById(publicChatMessage.getId(), messageText);
     }
 
     public void saveMessage(PublicChatMessage message) {
@@ -87,15 +92,18 @@ public class Controller {
         return sortedList;
     }
 
-    public void updateSection(CourseSection section, String title, String... content) {
+    public void updateSection(CourseSection section, String title, String content) {
         section.setTitle(title);
-        StringBuilder str = new StringBuilder();
-        for (String s : content) {
-            str.append(s);
-            str.append("\n\n");
-        }
-        section.setContent(str.toString());
+        section.setContent(content);
         courseSectionRepository.save(section);
+    }
+
+    public void clearMessageChat() {
+        publicChatMessageRepository.updateDeletedAll();
+    }
+
+    public void clearMessageChat(int value, long channelid) {
+        publicChatMessageRepository.updateDeleted(channelid, value);
     }
 
 }

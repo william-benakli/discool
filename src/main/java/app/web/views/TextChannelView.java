@@ -2,16 +2,21 @@ package app.web.views;
 
 import app.controller.Controller;
 import app.controller.Markdown;
+import app.controller.PublicMessagesBroadcaster;
+import app.controller.commands.CommandsClearChat;
 import app.jpa_repo.PersonRepository;
 import app.jpa_repo.PublicChatMessageRepository;
 import app.jpa_repo.TextChannelRepository;
 import app.model.chat.PublicChatMessage;
 import app.model.chat.TextChannel;
+import app.model.users.Person;
 import app.web.components.ComponentButton;
 import app.web.layout.Navbar;
-import com.vaadin.flow.component.Key;
+import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -20,16 +25,20 @@ import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.HasDynamicTitle;
 import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.shared.Registration;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
-import java.util.ArrayList;
 import java.util.Optional;
 
 
 @Route(value = "channels", layout = Navbar.class)
 public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle, HasUrlParameter<Long> {
+
     private final TextChannelRepository textChannelRepository;
+    private final PersonRepository personRepository;
     private TextChannel textChannel;
     private final TextField messageTextField;
     private final FlexLayout chatBar = new FlexLayout();
@@ -37,17 +46,80 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
     private ComponentButton muteHeadphone;
     private Button exitButton;
     private Button sendMessage;
+    private FlexLayout messageContainer = new FlexLayout();
+    private Registration broadcasterRegistration;
 
 
     public TextChannelView(@Autowired TextChannelRepository textChannelRepository,
                            @Autowired PublicChatMessageRepository publicChatMessageRepository,
                            @Autowired PersonRepository personRepository) {
         this.textChannelRepository = textChannelRepository;
+        this.personRepository = personRepository;
         setController(new Controller(personRepository, textChannelRepository, publicChatMessageRepository,
-                                     null, null));
-        messageTextField = createTextField();
+                null, null));
+        this.messageTextField = createTextField();
         createVoiceChatButtons();
         createSendMessageButton();
+    }
+
+
+    /*
+      Cette fonction permet de creer un button d'envoie, elle comprend aussi la gestion
+      des entrée et des commands par l'utilisateur.
+     */
+    private void createSendMessageButton() {
+        sendMessage = createButtonWithLabel("Envoyer", "#000");
+        sendMessage.addClickShortcut(Key.ENTER);
+
+        sendMessage.addClickListener(event -> {
+            if (!messageTextField.isEmpty()) {
+                Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+                String username = authentication.getName();
+                Person sender = personRepository.findByUsername(username);
+                // TODO : set the parentId and the userId
+                PublicChatMessage newMessage = getController().saveMessage(messageTextField.getValue(), textChannel.getId(), 1, sender.getId());
+                if (!messageTextField.getValue().startsWith("/")) {
+                    PublicMessagesBroadcaster.broadcast("NEW_MESSAGE", new MessageLayout(newMessage));
+                } else {
+                    String[] arg = messageTextField.getValue().split(" ");
+                    switch (arg[0]) {
+                        case "/clear":
+                            new CommandsClearChat(this.getController(), sender.getId(), textChannel.getId(), arg);
+                            break;
+                    }
+                    PublicMessagesBroadcaster.broadcast("UPDATE_ALL", new MessageLayout(newMessage));
+                    Notification.show("Vous executez une command");
+                }
+                messageTextField.clear();
+                messageTextField.focus();
+            }
+        });
+    }
+
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        UI ui = attachEvent.getUI();
+        broadcasterRegistration = PublicMessagesBroadcaster.register((type, messageLayoutPublicChatMessage) -> {
+            ui.access(() -> receiveBroadcast(type, messageLayoutPublicChatMessage));
+        });
+    }
+
+    private void receiveBroadcast(String type, MessageLayout messageLayout) {
+        switch (type) {
+            case "NEW_MESSAGE":
+                messageContainer.add(messageLayout);
+                break;
+            case "DELETE_MESSAGE":
+                messageContainer.remove(messageLayout);
+                break;
+            case "UPDATE_ALL":
+                messageContainer.removeAll();
+                for (PublicChatMessage message : getController().getChatMessagesForChannel(textChannel.getId()))
+                    messageContainer.add(new MessageLayout(message));
+                break;
+            default:
+                break;
+        }
     }
 
     @Override
@@ -57,28 +129,24 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
 
     public TextField createTextField() {
         TextField textField = new TextField();
+        textField.setVisible(true);
+        textField.getStyle().set("color", "blue");
         textField.setPlaceholder("Envoyer un message");
         textField.setWidthFull();
-        //textField.addFocusShortcut(Key.KEY_T, KeyModifier.ALT);
+        textField.addFocusShortcut(Key.KEY_T, KeyModifier.ALT);
         textField.getStyle().set("margin", "0 2.5px");
+        System.out.println("test textInPuntFile");
         return textField;
     }
 
-    private void createSendMessageButton() {
-        sendMessage = createButtonWithLabel("Envoyer", "#000");
-        sendMessage.addClickShortcut(Key.ENTER);
-
-        sendMessage.addClickListener(event -> {
-            if (!messageTextField.isEmpty()) {
-                // TODO : set the parentId and the userId depending on context
-                getController().saveMessage(messageTextField.getValue(), textChannel.getId(), 1, 1);
-                messageTextField.clear();
-                messageTextField.focus();
-                refresh();
-            }
-        });
+    @Override
+    protected void onDetach(DetachEvent detachEvent) {
+        broadcasterRegistration.remove();
+        broadcasterRegistration = null;
     }
 
+
+    //    Cette fonction créer un button mute / son et quitté
     private void createVoiceChatButtons() {
         muteMicrophone = new ComponentButton("img/micOn.svg", "img/micOff.svg", "unmute microphone", "mute microphone", Key.DIGIT_1);
         muteMicrophone.addClickListener(muteMicrophone::changeStatus);
@@ -94,10 +162,10 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         });
     }
 
-    public void refresh() {
-        createChatBar();
-    }
 
+    /*
+        Cette fonction permet de creer la tchat bar
+     */
     public void createChatBar() {
         chatBar.removeAll();
         chatBar.getStyle()
@@ -114,26 +182,19 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         chatButtonContainer.add(sendMessage, muteMicrophone, muteHeadphone, exitButton);
 
         FlexLayout messageInputBar = new FlexLayout();
-        messageInputBar.add(
-                messageTextField,
-                chatButtonContainer
-        );
-
-        FlexLayout messageContainer = new FlexLayout();
+        //TODO: Faire que le message TextField apparaisse
+        messageInputBar.add(messageTextField, chatButtonContainer);
         setCardStyle(messageContainer, "60%", ColorHTML.GREY);
         messageContainer.setHeightFull();
         messageContainer.getStyle()
                 .set("position", "-webkit-sticky")
                 .set("position", "sticky")
                 .set("bottom", "0px")
-                .set("background-color", ColorHTML.GREY.getColorHtml());
+                .set("background-color", ColorHTML.GREY.getColorHtml())
+                .set("flex-direction", "column");
 
-        ArrayList<PublicChatMessage> messageList = getController().getChatMessagesForChannel(textChannel.getId());
-        for (PublicChatMessage message : messageList) {
-            MessageLayout messageLayout = new MessageLayout(message);
-            messageContainer.add(messageLayout);
-        }
-        messageContainer.getStyle().set("flex-direction", "column");
+        for (PublicChatMessage message : getController().getChatMessagesForChannel(textChannel.getId()))
+            messageContainer.add(new MessageLayout(message));
         chatBar.add(messageContainer, messageInputBar);
     }
 
@@ -155,54 +216,105 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
     @SneakyThrows // so that javac doesn't complain about dirty exception throwing
     @Override
     public void setParameter(BeforeEvent event, Long parameter) {
-        Optional<TextChannel> c = textChannelRepository.findById(parameter);
-        if (c.isPresent()) {
-            textChannel = c.get();
+        Optional<TextChannel> channel = textChannelRepository.findById(parameter);
+        if (channel.isPresent()) {
+            textChannel = channel.get();
         } else {
             throw new Exception("There is no channel with this ID.");
             // TODO : take care of the exception
         }
         createSidebar(textChannel.getCourseId());
         createMembersBar(textChannel.getCourseId());
-        createChatBar();
         createLayout(chatBar);
+        createChatBar();
     }
 
-    class MessageLayout extends HorizontalLayout {
+
+    public class MessageLayout extends HorizontalLayout {
+        private Paragraph metaData;
+        private Paragraph message;
+        private Button delete;
+        private Button modify;
 
         public MessageLayout(PublicChatMessage publicMessage) {
-            Paragraph metaData = new Paragraph();
+            this.metaData = new Paragraph();
             metaData.setText(getController().getUsernameOfSender(publicMessage) + " " + publicMessage.getTimeCreated());
             metaData.getStyle().set("border", "none");
             metaData.getStyle().set("border-width", "0px");
             metaData.getStyle().set("outline", "none");
             this.add(metaData);
 
-            Paragraph message = new Paragraph();
+            this.message = new Paragraph();
             message.add(Markdown.getHtmlFromMarkdown(publicMessage.getMessage()));
             message.getStyle().set("border", "none");
             message.getStyle().set("border-width", "0px");
             message.getStyle().set("outline", "none");
             this.add(message);
 
-            Button delete = new Button("Suppression");
+            delete = new Button("Suppression");
 
             delete.addClickListener(event -> {
-                getController().deleteMessage(publicMessage);
-                refresh();
+                Dialog dialog = new Dialog();
+                dialog.add(new Paragraph("Voulez vous vraiment supprimer votre message ?"));
+                Button oui = new Button("Oui");
+                Button non = new Button("Non");
+                dialog.add(non);
+                dialog.add(oui);
+                dialog.open();
+
+                oui.addClickListener(ev -> {
+                    getController().deleteMessage(publicMessage);
+                    PublicMessagesBroadcaster.broadcast("DELETE_MESSAGE", this);
+                    dialog.close();
+                    Notification.show("Vous avez supprimé votre message");
+                });
+
+                non.addClickListener(ev -> {
+                    dialog.close();
+                });
             });
 
-            Button modify = new Button("Modification");
-            // TODO : add listener to change the text
+            modify = new Button("Modification");
 
-            VerticalLayout layout = new VerticalLayout();
-            layout.add(modify);
-            layout.add(delete);
-            this.add(layout);
+            modify.addClickListener(event -> {
+                Dialog dialog = new Dialog();
 
+                Button oui = new Button("Valider");
+                Button non = new Button("Annuler");
+
+                TextField messageUpdate = new TextField();
+                messageUpdate.setValue(message.getText());
+                dialog.add(new Paragraph("Modifiez votre message ?"));
+                dialog.add(messageUpdate);
+
+                dialog.add(oui);
+                dialog.add(non);
+                dialog.open();
+
+                oui.addClickListener(ev -> {
+                    if (!messageUpdate.getValue().equals(publicMessage.getMessage())) {
+                        getController().changeMessage(publicMessage, messageUpdate.getValue());
+                        this.message.setText(messageUpdate.getValue());
+                        Notification.show("Vous avez modifié votre message");
+                    }
+                    dialog.close();
+                });
+
+                non.addClickListener(ev -> {
+                    dialog.close();
+                });
+            });
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            Person id = personRepository.findByUsername(authentication.getName());
+
+            //Protection si l'utilisateur est bien le createur du message
+            if (id.getId() == publicMessage.getSender()) {
+                VerticalLayout layout = new VerticalLayout();
+                layout.add(modify);
+                layout.add(delete);
+                add(layout);
+            }
         }
     }
-
-
 }
 
