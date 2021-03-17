@@ -4,15 +4,20 @@ import app.controller.Controller;
 import app.model.chat.TextChannel;
 import app.model.users.Person;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinServletRequest;
+import com.vaadin.flow.server.VaadinSession;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -43,8 +48,35 @@ public abstract class ViewWithSidebars extends VerticalLayout {
     public void createMembersBar(long courseId) {
         membersBar = new FlexLayout();
 
-        //ArrayList<Person> usersList = controller.get;
-
+        ArrayList<Person> usersList = controller.getAllUser();
+        for (Person p : usersList){
+            if (p.isConected()){
+                FlexLayout div = new FlexLayout();
+                div.getStyle()
+                        .set("display","flex")
+                        .set("flex-direction","column")
+                        .set("margin","5px 0");
+                Paragraph pseudo = new Paragraph(p.getUsername());
+                pseudo.getStyle()
+                        .set("color",ColorHTML.PURPLE.getColorHtml())
+                        .set("font-weight","700")
+                        .set("margin","0");
+                FlexLayout divstatus = new FlexLayout();
+                Paragraph status = new Paragraph("En ligne");
+                status.getStyle()
+                        .set("color", ColorHTML.TEXTGREY.getColorHtml())
+                        .set("margin","0");
+                Image img=new Image("img/dotgreen.svg","Status");
+                img.getStyle()
+                        .set("margin-right","5px")
+                        .set("margin-top","-2.5px");
+                divstatus.add(img);
+                divstatus.add(status);
+                div.add(pseudo);
+                div.add(divstatus);
+                membersBar.add(div);
+            }
+        }
 
         membersBar.addClassName("card");
         membersBar.addClassName("cardRight");
