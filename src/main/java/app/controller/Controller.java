@@ -6,6 +6,7 @@ import app.model.chat.PublicChatMessage;
 import app.model.chat.TextChannel;
 import app.model.courses.Course;
 import app.model.courses.CourseSection;
+import app.model.users.Person;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -34,6 +35,10 @@ public class Controller {
     public String getTitleCourse(long id) {
         Optional<Course> c = courseRepository.findById(id);
         return c.map(Course::getName).orElse(null);
+    }
+
+    public ArrayList<Person> getAllUser(){
+        return personRepository.findAll();
     }
 
     public PublicChatMessage saveMessage(String message, long channelId, long parentId, long userId) {
