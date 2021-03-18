@@ -45,38 +45,40 @@ public abstract class ViewWithSidebars extends VerticalLayout {
         this.add(layout);
     }
 
+    public FlexLayout styleStatusUsers(Person p){
+        FlexLayout div = new FlexLayout();
+        div.getStyle()
+                .set("display","flex")
+                .set("flex-direction","column")
+                .set("margin","5px 0");
+        Paragraph pseudo = new Paragraph(p.getUsername());
+        pseudo.getStyle()
+                .set("color",ColorHTML.PURPLE.getColorHtml())
+                .set("font-weight","700")
+                .set("margin","0");
+        FlexLayout divstatus = new FlexLayout();
+        Paragraph status = new Paragraph((p.isConected())?"En ligne":"Hors-ligne");
+        status.getStyle()
+                .set("color", ColorHTML.TEXTGREY.getColorHtml())
+                .set("margin","0");
+        Image img=new Image((p.isConected())?"img/dotgreen.svg":"img/dotred.svg","Status");
+        img.getStyle()
+                .set("margin-right","5px")
+                .set("margin-top","-2.5px");
+        divstatus.add(img);
+        divstatus.add(status);
+        div.add(pseudo);
+        div.add(divstatus);
+        return div;
+    }
+
     public void createMembersBar(long courseId) {
         membersBar = new FlexLayout();
 
         ArrayList<Person> usersList = controller.getAllUser();
-        for (Person p : usersList){
-            if (p.isConected()){
-                FlexLayout div = new FlexLayout();
-                div.getStyle()
-                        .set("display","flex")
-                        .set("flex-direction","column")
-                        .set("margin","5px 0");
-                Paragraph pseudo = new Paragraph(p.getUsername());
-                pseudo.getStyle()
-                        .set("color",ColorHTML.PURPLE.getColorHtml())
-                        .set("font-weight","700")
-                        .set("margin","0");
-                FlexLayout divstatus = new FlexLayout();
-                Paragraph status = new Paragraph("En ligne");
-                status.getStyle()
-                        .set("color", ColorHTML.TEXTGREY.getColorHtml())
-                        .set("margin","0");
-                Image img=new Image("img/dotgreen.svg","Status");
-                img.getStyle()
-                        .set("margin-right","5px")
-                        .set("margin-top","-2.5px");
-                divstatus.add(img);
-                divstatus.add(status);
-                div.add(pseudo);
-                div.add(divstatus);
-                membersBar.add(div);
-            }
-        }
+
+        for (Person p : usersList) if (p.isConected()) membersBar.add(styleStatusUsers(p));
+        for (Person p : usersList) if (!p.isConected()) membersBar.add(styleStatusUsers(p));
 
         membersBar.addClassName("card");
         membersBar.addClassName("cardRight");
