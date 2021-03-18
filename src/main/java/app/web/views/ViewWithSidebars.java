@@ -26,11 +26,8 @@ public abstract class ViewWithSidebars extends VerticalLayout {
     @Getter
     @Setter
     private Controller controller;
-
     private FlexLayout sideBar;
     private FlexLayout membersBar;
-
-    //private String switchCSS;
 
     public void createLayout(FlexLayout centerElement) {
         HorizontalLayout layout = new HorizontalLayout();
@@ -45,6 +42,12 @@ public abstract class ViewWithSidebars extends VerticalLayout {
         this.add(layout);
     }
 
+    /**
+     *Take a user as a parameter and display his information
+     *
+     * @param p The user and his information
+     * @return a card containing a user and his connection status
+     */
     public FlexLayout styleStatusUsers(Person p){
         FlexLayout divUser = new FlexLayout();
         FlexLayout div = new FlexLayout();
@@ -84,14 +87,16 @@ public abstract class ViewWithSidebars extends VerticalLayout {
         return divUser;
     }
 
+    /**
+     * Adding members to the right navigation bar
+     *
+     * @param courseId id of the course concerned
+     */
     public void createMembersBar(long courseId) {
         membersBar = new FlexLayout();
-
         ArrayList<Person> usersList = controller.getAllUser();
-
         for (Person p : usersList) if (p.isConected()) membersBar.add(styleStatusUsers(p));
         for (Person p : usersList) if (!p.isConected()) membersBar.add(styleStatusUsers(p));
-
         membersBar.addClassName("card");
         membersBar.addClassName("cardRight");
         setCardStyle(membersBar, "20%", ColorHTML.DARKGREY);
