@@ -46,6 +46,7 @@ public abstract class ViewWithSidebars extends VerticalLayout {
     }
 
     public FlexLayout styleStatusUsers(Person p){
+        FlexLayout divUser = new FlexLayout();
         FlexLayout div = new FlexLayout();
         div.getStyle()
                 .set("display","flex")
@@ -55,7 +56,8 @@ public abstract class ViewWithSidebars extends VerticalLayout {
         pseudo.getStyle()
                 .set("color",ColorHTML.PURPLE.getColorHtml())
                 .set("font-weight","700")
-                .set("margin","0");
+                .set("margin","0")
+                .set("margin-top","5px");
         FlexLayout divstatus = new FlexLayout();
         Paragraph status = new Paragraph((p.isConected())?"En ligne":"Hors-ligne");
         status.getStyle()
@@ -69,7 +71,17 @@ public abstract class ViewWithSidebars extends VerticalLayout {
         divstatus.add(status);
         div.add(pseudo);
         div.add(divstatus);
-        return div;
+        //TODO: support the management of the icon in the database
+        Image iconUser = new Image("img/books.jpg","Status");
+        iconUser.getStyle()
+                .set("width","50px")
+                .set("height","50px")
+                .set("margin","10px")
+                .set("border-radius","25px");
+
+        divUser.add(iconUser);
+        divUser.add(div);
+        return divUser;
     }
 
     public void createMembersBar(long courseId) {
