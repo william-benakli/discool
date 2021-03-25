@@ -43,4 +43,29 @@ public final class SecurityUtils {
 				&& !(authentication instanceof AnonymousAuthenticationToken)
 				&& authentication.isAuthenticated();
 	}
+
+	/**
+	 * Returns the current user
+	 * @param personRepository the JPA repo to search the user in
+	 * @return	the current user
+	 */
+	public static Person getCurrentUser(PersonRepository personRepository) {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		return personRepository.findByUsername(authentication.getName());
+	}
+
+	public static boolean isUserTeacher(PersonRepository personRepository) {
+		Person currentUser = getCurrentUser(personRepository);
+		return currentUser.getRole() == Person.Role.TEACHER;
+	}
+
+	public static boolean isUserAdmin(PersonRepository personRepository) {
+		Person currentUser = getCurrentUser(personRepository);
+		return currentUser.getRole() == Person.Role.ADMIN;
+	}
+
+	public static boolean isUserStudent(PersonRepository personRepository) {
+		Person currentUser = getCurrentUser(personRepository);
+		return currentUser.getRole() == Person.Role.STUDENT;
+	}
 }

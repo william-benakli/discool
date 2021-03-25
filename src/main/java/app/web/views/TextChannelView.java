@@ -60,7 +60,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         this.personRepository = personRepository;
         this.targetResponseMessage = 0;
         setController(new Controller(personRepository, textChannelRepository, publicChatMessageRepository,
-                null, null));
+                                     null, null));
         this.messageTextField = createTextField();
         createVoiceChatButtons();
         createSendMessageButton();

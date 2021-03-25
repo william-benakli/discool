@@ -1,44 +1,74 @@
 package app.web.views;
 
+import app.controller.AssignmentController;
 import app.controller.Controller;
-import app.jpa_repo.CourseRepository;
+import app.controller.security.SecurityUtils;
+import app.jpa_repo.*;
+import app.model.courses.Assignment;
 import app.model.courses.Course;
+import app.model.users.Person;
+import app.web.components.UploadComponent;
 import app.web.layout.Navbar;
+import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.upload.FailedEvent;
+import com.vaadin.flow.component.upload.Upload;
+import com.vaadin.flow.component.upload.receivers.MultiFileMemoryBuffer;
 import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.HasDynamicTitle;
 import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.Route;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.Optional;
 
-@Route(value = "assignement", layout = Navbar.class)
+@Route(value = "assignment", layout = Navbar.class)
 public class StudentAssignmentView extends ViewWithSidebars implements HasDynamicTitle, HasUrlParameter<Long> {
 
+    private final AssignmentRepository assignmentRepository;
+    private final StudentAssignmentsUploadsRepository studentAssignmentsUploadsRepository;
     private final CourseRepository courseRepository;
+    private final PersonRepository personRepository;
+    private final AssignmentController assignmentController;
     private Course course;
+    private Assignment assignment;
 
-    private FlexLayout assignmentBar;
+    private FlexLayout assignmentBar = new FlexLayout();
 
-    public StudentAssignmentView(@Autowired CourseRepository courseRepository) {
+    public StudentAssignmentView(@Autowired CourseRepository courseRepository,
+                                 @Autowired TextChannelRepository textChannelRepository,
+                                 @Autowired AssignmentRepository assignmentRepository,
+                                 @Autowired PersonRepository personRepository,
+                                 @Autowired StudentAssignmentsUploadsRepository studentAssignmentsUploadsRepository) {
+        this.assignmentRepository = assignmentRepository;
+        this.studentAssignmentsUploadsRepository = studentAssignmentsUploadsRepository;
         this.courseRepository = courseRepository;
-        setController(new Controller(null, null, null,
+        this.personRepository = personRepository;
+        this.assignmentController = new AssignmentController(personRepository, assignmentRepository,
+                                                             studentAssignmentsUploadsRepository, courseRepository);
+        setController(new Controller(personRepository, textChannelRepository, null,
                                      courseRepository, null));
-    }
-
-    private void createAssignmentBar() {
-
     }
 
     @SneakyThrows // so that javac doesn't complain about not catching the exception
     @Override
     public void setParameter(BeforeEvent event, Long parameter) {
-        Optional<Course> c = courseRepository.findById(parameter);
-        if (c.isPresent()) {
-            course = c.get();
-        } else {
+        Optional<Assignment> a = assignmentRepository.findById(parameter);
+        assignment = a.orElse(null);
+        if (assignment == null) {
+            throw new Exception("There is no course with this ID.");
+            // TODO : take care of the exception (issue 28)
+        }
+        Optional<Course> c = courseRepository.findById(assignment.getCourseId());
+        course = c.orElse(null);
+        if (course == null) {
             throw new Exception("There is no course with this ID.");
             // TODO : take care of the exception (issue 28)
         }
@@ -51,5 +81,56 @@ public class StudentAssignmentView extends ViewWithSidebars implements HasDynami
     @Override
     public String getPageTitle() {
         return course.getName();
+    }
+
+
+    private void createAssignmentBar() {
+        assignmentBar.removeAll();
+        setCardStyle(assignmentBar, "60%", ColorHTML.GREY);
+        H1 title = new H1(assignment.getName());
+        assignmentBar.add(title);
+        StudentAssignmentLayout layout = new StudentAssignmentLayout(assignment);
+        assignmentBar.add(layout);
+
+    }
+
+    private class StudentAssignmentLayout extends VerticalLayout {
+        private final Assignment assignment;
+
+        public StudentAssignmentLayout(Assignment assignment) {
+            this.assignment = assignment;
+            writeInfo();
+            createUploadZone();
+        }
+
+        private void writeInfo() {
+            this.add(new Paragraph(assignment.getDescription()));
+            this.add(new Paragraph("due date : " + assignment.getDuedate()));
+            if (assignment.getAllowLate() == 1) {
+                this.add(new Paragraph("cut off date : " + assignment.getCutoffdate()));
+            }
+            this.add(new Paragraph("max number of attempts : " + assignment.getMaxAttempts()));
+            this.add(new Paragraph("max grade : " + assignment.getMaxGrade()));
+        }
+
+        private void createUploadZone() {
+            MultiFileMemoryBuffer buffer = new MultiFileMemoryBuffer();
+//            Upload upload = new Upload(buffer);
+//            upload.setMaxFileSize(20971520);
+            UploadComponent upload = new UploadComponent("200px","200px", 3,
+                                                         30000000, null);
+            upload.addSucceededListener(event -> {
+                assignmentController.save(assignment.getId(), assignment.getCourseId(), 1);
+                Notification.show("You successfully uploaded your file !");
+            });
+            upload.addFileRejectedListener(event -> Notification.show("Couldn't upload the file"));
+            this.add(upload);
+        }
+    }
+
+    private class AdminAssignmentLayout extends VerticalLayout{
+        public AdminAssignmentLayout(Assignment assignment) {
+
+        }
     }
 }
