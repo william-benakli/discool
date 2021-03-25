@@ -15,6 +15,7 @@ import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
@@ -192,7 +193,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         FlexLayout messageInputBar = new FlexLayout();
         //TODO: Faire que le message TextField apparaisse
         messageInputBar.add(messageTextField, chatButtonContainer);
-        setCardStyle(messageContainer, "100%", ColorHTML.GREY);
+        setCardStyle(messageContainer, "99%", ColorHTML.GREY);
         messageContainer.setHeightFull();
         messageContainer.getStyle()
                 .set("position", "-webkit-sticky")
@@ -261,7 +262,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
          */
         private Paragraph metaData;
         private Paragraph message;
-        private ComponentButton profilPicture;
+        private Image profilPicture;
 
         /*
             Button interection de l'utilisateur
@@ -271,13 +272,15 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         private Button modify;
 
         public MessageLayout(PublicChatMessage publicMessage) {
-            this.profilPicture = new ComponentButton("img/Chien 3.jpg", "profilPicture", 50, 50);
             this.chatUserInformation = new VerticalLayout();
+            setPadding(false);
+            setSpacing(false);
             this.layoutPop = new PopAbsoluteLayout();
             this.optionMenu = new FlexLayout();
             this.optionsUser = new HorizontalLayout();
             optionsUser.setSpacing(false);
             optionsUser.setPadding(false);
+            createPictureSetting();
 
             getElement().addEventListener("mouseover", e -> {
                 this.getStyle().set("background-color", ColorHTML.DARKGREY.getColorHtml());
@@ -288,7 +291,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                 layoutPop.setVisible(false);
             });
 
-            this.metaData = createParagrapheAmelioration(getController().getUsernameOfSender(publicMessage) + " " + convertLongToDate(publicMessage.getTimeCreated()));
+            this.metaData = createParagrapheAmelioration(getController().getUsernameOfSender(publicMessage) + " | " + convertLongToDate(publicMessage.getTimeCreated()));
             chatUserInformation.add(metaData);
 
             this.message = createParagrapheAmelioration(publicMessage.getMessage());
@@ -364,6 +367,15 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                 optionMenu.add(layoutPop);
                 add(optionMenu);
             }
+        }
+
+        private void createPictureSetting() {
+            this.profilPicture = new Image("img/Chien 3.jpg", "profilPicture");
+            this.profilPicture.setWidth("60px");
+            this.profilPicture.setHeight("60px");
+            this.profilPicture.getStyle().set("border-radius", "40px");
+            this.profilPicture.getStyle().set("margin", "0px 0px 0px 0px");
+            this.profilPicture.getStyle().set("padding", "10px");
         }
 
         public Paragraph createParagrapheAmelioration(String text) {
