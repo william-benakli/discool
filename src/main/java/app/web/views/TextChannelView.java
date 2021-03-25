@@ -1,7 +1,6 @@
 package app.web.views;
 
 import app.controller.Controller;
-import app.controller.Markdown;
 import app.controller.PublicMessagesBroadcaster;
 import app.controller.commands.CommandsClearChat;
 import app.jpa_repo.PersonRepository;
@@ -15,6 +14,8 @@ import app.web.layout.Navbar;
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
@@ -31,6 +32,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Optional;
 
 
@@ -77,9 +80,11 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                 String username = authentication.getName();
                 Person sender = personRepository.findByUsername(username);
                 // TODO : set the parentId and the userId
-                PublicChatMessage newMessage = getController().saveMessage(messageTextField.getValue(), textChannel.getId(), 1, sender.getId());
+                PublicChatMessage newMessage = getController().saveMessage(messageTextField.getValue(), System.currentTimeMillis(), textChannel.getId(), 1, sender.getId());
                 if (!messageTextField.getValue().startsWith("/")) {
-                    PublicMessagesBroadcaster.broadcast("NEW_MESSAGE", new MessageLayout(newMessage));
+                    MessageLayout message = new MessageLayout(newMessage);
+                    PublicMessagesBroadcaster.broadcast("NEW_MESSAGE", message);
+                    //  message.focus();
                 } else {
                     String[] arg = messageTextField.getValue().split(" ");
                     switch (arg[0]) {
@@ -88,7 +93,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                             break;
                     }
                     PublicMessagesBroadcaster.broadcast("UPDATE_ALL", new MessageLayout(newMessage));
-                    Notification.show("Vous executez une command");
+                    Notification.show("Vous executez une commande");
                 }
                 messageTextField.clear();
                 messageTextField.focus();
@@ -96,11 +101,14 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         });
     }
 
+
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         UI ui = attachEvent.getUI();
         broadcasterRegistration = PublicMessagesBroadcaster.register((type, messageLayoutPublicChatMessage) -> {
-            ui.access(() -> receiveBroadcast(type, messageLayoutPublicChatMessage));
+            if (ui.isEnabled() && ui.getUI().isPresent()) {
+                ui.access(() -> receiveBroadcast(type, messageLayoutPublicChatMessage));
+            }
         });
     }
 
@@ -184,7 +192,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         FlexLayout messageInputBar = new FlexLayout();
         //TODO: Faire que le message TextField apparaisse
         messageInputBar.add(messageTextField, chatButtonContainer);
-        setCardStyle(messageContainer, "60%", ColorHTML.GREY);
+        setCardStyle(messageContainer, "98%", ColorHTML.GREY);
         messageContainer.setHeightFull();
         messageContainer.getStyle()
                 .set("position", "-webkit-sticky")
@@ -231,27 +239,54 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
 
 
     public class MessageLayout extends HorizontalLayout {
+        /*
+            Layout composant
+        */
+        private VerticalLayout chatUserInformation;
+        private HorizontalLayout optionsUser;
+        private PopAbsoluteLayout layoutPop;
+
+        /*
+           Information comportenant du data
+         */
         private Paragraph metaData;
         private Paragraph message;
+        private ComponentButton profilPicture;
+
+        /*
+            Button interection de l'utilisateur
+        */
+        private Button response;
         private Button delete;
         private Button modify;
 
         public MessageLayout(PublicChatMessage publicMessage) {
-            this.metaData = new Paragraph();
-            metaData.setText(getController().getUsernameOfSender(publicMessage) + " " + publicMessage.getTimeCreated());
-            metaData.getStyle().set("border", "none");
-            metaData.getStyle().set("border-width", "0px");
-            metaData.getStyle().set("outline", "none");
-            this.add(metaData);
+            this.profilPicture = new ComponentButton(new Image("img/add.svg", ""));
+            this.chatUserInformation = new VerticalLayout();
+            this.layoutPop = new PopAbsoluteLayout();
+            this.optionsUser = new HorizontalLayout();
 
-            this.message = new Paragraph();
-            message.add(Markdown.getHtmlFromMarkdown(publicMessage.getMessage()));
-            message.getStyle().set("border", "none");
-            message.getStyle().set("border-width", "0px");
-            message.getStyle().set("outline", "none");
-            this.add(message);
+            getElement().addEventListener("mouseover", e -> {
+                this.getStyle().set("background-color", ColorHTML.DARKGREY.getColorHtml());
+                layoutPop.setVisible(true);
+            });
+            getElement().addEventListener("mouseleave", e -> {
+                this.getStyle().set("background-color", ColorHTML.GREY.getColorHtml());
+                layoutPop.setVisible(false);
+            });
 
-            delete = new Button("Suppression");
+            this.response = new Button("R");
+            this.metaData = createParagrapheAmelioration(getController().getUsernameOfSender(publicMessage) + " " + convertLongToDate(publicMessage.getTimeCreated()));
+            chatUserInformation.add(metaData);
+
+            this.message = createParagrapheAmelioration(publicMessage.getMessage());
+            chatUserInformation.add(message);
+
+            add(profilPicture);
+            add(chatUserInformation);
+
+
+            delete = new Button("S");
 
             delete.addClickListener(event -> {
                 Dialog dialog = new Dialog();
@@ -274,7 +309,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                 });
             });
 
-            modify = new Button("Modification");
+            modify = new Button("M");
 
             modify.addClickListener(event -> {
                 Dialog dialog = new Dialog();
@@ -310,11 +345,47 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
             //Protection si l'utilisateur est bien le createur du message
             if (id.getId() == publicMessage.getSender()) {
                 VerticalLayout layout = new VerticalLayout();
-                layout.add(modify);
-                layout.add(delete);
-                add(layout);
+                optionsUser.add(response);
+                optionsUser.add(modify);
+                optionsUser.add(delete);
+                layoutPop.add(optionsUser);
+                add(layoutPop);
             }
         }
+
+        public String convertLongToDate(long dateLong) {
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+            SimpleDateFormat heure = new SimpleDateFormat("HH:mm");
+            Date date = new Date(dateLong);
+            if (formatter.format(date).equals(formatter.format(new Date(System.currentTimeMillis()))))
+                return "Aujourd'hui à " + heure.format(date);
+            return formatter.format(date) + " à " + heure.format(date);
+        }
+
+        public Paragraph createParagrapheAmelioration(String text) {
+            Paragraph Data = new Paragraph();
+            Data.setText(text);
+            Data.getStyle().set("border", "none");
+            Data.getStyle().set("border-width", "0px");
+            Data.getStyle().set("outline", "none");
+            return Data;
+        }
+
+        public class PopAbsoluteLayout extends Div {
+
+            public PopAbsoluteLayout() {
+                this.getElement().getStyle().set("position", "absolute");
+                this.getElement().getStyle().set("z-index", "2");
+                this.getElement().getStyle().set("box-shadow", "-8px 12px 9px -5px rgba(0,0,0,0.20)");
+                this.getStyle().set("background-color", ColorHTML.GREY.getColorHtml());
+                this.getStyle().set("border-radius", "10px");
+                this.setWidth("200px");
+                this.setHeight("60px");
+                this.setVisible(false);
+            }
+
+        }
+
     }
 }
 
