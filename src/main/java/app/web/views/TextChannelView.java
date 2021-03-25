@@ -15,7 +15,6 @@ import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
@@ -130,6 +129,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         }
     }
 
+
     @Override
     public String getPageTitle() {
         return textChannel.getName();
@@ -240,10 +240,18 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
 
     public class MessageLayout extends HorizontalLayout {
         /*
+
+            Attribue Java
+         */
+
+        private int SIZEWITDH = 40;
+        private int SIZEHEIGHT = 40;
+        /*
             Layout composant
         */
         private VerticalLayout chatUserInformation;
         private HorizontalLayout optionsUser;
+        private FlexLayout optionMenu;
         private PopAbsoluteLayout layoutPop;
 
         /*
@@ -261,10 +269,13 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         private Button modify;
 
         public MessageLayout(PublicChatMessage publicMessage) {
-            this.profilPicture = new ComponentButton(new Image("img/add.svg", ""));
+            this.profilPicture = new ComponentButton("img/Chien 3.jpg", "profilPicture", 50, 50);
             this.chatUserInformation = new VerticalLayout();
             this.layoutPop = new PopAbsoluteLayout();
+            this.optionMenu = new FlexLayout();
             this.optionsUser = new HorizontalLayout();
+            optionsUser.setSpacing(false);
+            optionsUser.setPadding(false);
 
             getElement().addEventListener("mouseover", e -> {
                 this.getStyle().set("background-color", ColorHTML.DARKGREY.getColorHtml());
@@ -284,8 +295,8 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
             add(profilPicture);
             add(chatUserInformation);
 
-            response = createButtonImage("img/repondre.svg", "");
-            delete = createButtonImage("img/corbeille.svg", "");
+            response = new ComponentButton("img/repondre.svg", "Repondre à ce message", SIZEWITDH, SIZEHEIGHT);
+            delete = new ComponentButton("img/corbeille.svg", "Supprimez votre message", SIZEWITDH, SIZEHEIGHT);
 
             delete.addClickListener(event -> {
                 Dialog dialog = new Dialog();
@@ -308,7 +319,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                 });
             });
 
-            modify = createButtonImage("img/editer.svg", "");
+            modify = new ComponentButton("img/editer.svg", "Editez votre message", SIZEWITDH, SIZEHEIGHT);
 
             modify.addClickListener(event -> {
                 Dialog dialog = new Dialog();
@@ -348,17 +359,9 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                 optionsUser.add(modify);
                 optionsUser.add(delete);
                 layoutPop.add(optionsUser);
-                add(layoutPop);
+                optionMenu.add(layoutPop);
+                add(optionMenu);
             }
-        }
-
-        public String convertLongToDate(long dateLong) {
-            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-            SimpleDateFormat heure = new SimpleDateFormat("HH:mm");
-            Date date = new Date(dateLong);
-            if (formatter.format(date).equals(formatter.format(new Date(System.currentTimeMillis()))))
-                return "Aujourd'hui à " + heure.format(date);
-            return formatter.format(date) + " à " + heure.format(date);
         }
 
         public Paragraph createParagrapheAmelioration(String text) {
@@ -370,24 +373,31 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
             return Data;
         }
 
-        public Button createButtonImage(String chemin, String text) {
-            Button button = new Button(text);
-            button.setIcon(new Image(chemin, ""));
-            button.setHeightFull();
-            button.setWidthFull();
-            return button;
+
+        public String convertLongToDate(long dateLong) {
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+            SimpleDateFormat heure = new SimpleDateFormat("HH:mm");
+            Date date = new Date(dateLong);
+            if (formatter.format(date).equals(formatter.format(new Date(System.currentTimeMillis()))))
+                return "Aujourd'hui à " + heure.format(date);
+            return formatter.format(date) + " à " + heure.format(date);
         }
+
 
         public class PopAbsoluteLayout extends Div {
 
             public PopAbsoluteLayout() {
-                this.getElement().getStyle().set("position", "absolute");
-                this.getElement().getStyle().set("z-index", "2");
-                this.getElement().getStyle().set("box-shadow", "-8px 12px 9px -5px rgba(0,0,0,0.20)");
-                this.getStyle().set("background-color", ColorHTML.GREY.getColorHtml());
-                this.getStyle().set("border-radius", "10px");
-                this.setWidth("200px");
-                this.setHeight("60px");
+                this.getElement().getStyle()
+                        .set("position", "absolute")
+                        .set("z-index", "1")
+                        .set("box-shadow", "-8px 12px 9px -5px rgba(0,0,0,0.20)")
+                        .set("background-color", ColorHTML.GREY.getColorHtml())
+                        .set("right", "25px")
+                        .set("border-radius", "5px");
+                //Le nombre d elements mutiliplie par la taille definit
+                //(SIZEWITDH * this.getElement().getChildCount() + 20)
+                this.setWidth("150px");
+                this.setHeight((SIZEHEIGHT + 2) + "px");
                 this.setVisible(false);
             }
 
