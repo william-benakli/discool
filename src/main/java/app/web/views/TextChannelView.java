@@ -275,7 +275,6 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                 layoutPop.setVisible(false);
             });
 
-            this.response = new Button("R");
             this.metaData = createParagrapheAmelioration(getController().getUsernameOfSender(publicMessage) + " " + convertLongToDate(publicMessage.getTimeCreated()));
             chatUserInformation.add(metaData);
 
@@ -285,8 +284,8 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
             add(profilPicture);
             add(chatUserInformation);
 
-
-            delete = new Button("S");
+            response = createButtonImage("img/repondre.svg", "");
+            delete = createButtonImage("img/corbeille.svg", "");
 
             delete.addClickListener(event -> {
                 Dialog dialog = new Dialog();
@@ -309,7 +308,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                 });
             });
 
-            modify = new Button("M");
+            modify = createButtonImage("img/editer.svg", "");
 
             modify.addClickListener(event -> {
                 Dialog dialog = new Dialog();
@@ -369,6 +368,14 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
             Data.getStyle().set("border-width", "0px");
             Data.getStyle().set("outline", "none");
             return Data;
+        }
+
+        public Button createButtonImage(String chemin, String text) {
+            Button button = new Button(text);
+            button.setIcon(new Image(chemin, ""));
+            button.setHeightFull();
+            button.setWidthFull();
+            return button;
         }
 
         public class PopAbsoluteLayout extends Div {
