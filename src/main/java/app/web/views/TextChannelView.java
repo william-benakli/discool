@@ -192,12 +192,14 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         FlexLayout messageInputBar = new FlexLayout();
         //TODO: Faire que le message TextField apparaisse
         messageInputBar.add(messageTextField, chatButtonContainer);
-        setCardStyle(messageContainer, "98%", ColorHTML.GREY);
+        setCardStyle(messageContainer, "100%", ColorHTML.GREY);
         messageContainer.setHeightFull();
         messageContainer.getStyle()
                 .set("position", "-webkit-sticky")
                 .set("position", "sticky")
                 .set("bottom", "0px")
+                .set("scrollbar-width", "thin")
+                .set("scrollbar-color", ColorHTML.DARKGREY.getColorHtml())
                 .set("background-color", ColorHTML.GREY.getColorHtml())
                 .set("flex-direction", "column");
 
