@@ -54,17 +54,17 @@ public class Assignment {
             name = "allowlate",
             nullable = false
     )
-    private boolean allowLate;
+    private short allowLate; // 0 for false, 1 for true
 
     @Column(
             name = "maxgrade"
     )
-    private int maxGrade;
+    private short maxGrade;
 
     @Column(
             name = "maxattempts",
             nullable = false
     )
-    private int maxAttempts;
+    private short maxAttempts;
 
 }
