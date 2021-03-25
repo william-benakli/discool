@@ -98,9 +98,9 @@ The table contains the info about assignments.
 | id                        | BIG INT      | NOT NULL | the row's id                                                                      |
 | courseid                  | BIG INT      | NOT NULL | foreign key to courses.id                                                         |
 | name                      | VARCHAR(255) | NOT NULL | the name of the assignment                                                        |
-| intro                     | LONGTEXT     | NULL     | the description of the assignment                                                 |
+| description                     | LONGTEXT     | NULL     | the description of the assignment                                                 |
 | duedate                   | BIG INT      | NOT NULL | the due date of the assignment                                                    |
-| allowsubmissionsafterdate | TINY INT     | NULL     | 1 if you allow assignments to be uploaded after the due date, 0 otherwise         |
+| allowlate | TINY INT     | NULL     | 1 if you allow assignments to be uploaded after the due date, 0 otherwise         |
 | cutoffdate                | BIG INT      | NOT NULL | the final date after which you don't allow submissions                            |
 | grade                     | BIG INT      | NOT NULL | the max grade for this assignment                                                 |
 | maxattempts               | MEDIUM INT   | NOT NULL | the number of time the student can try to submit the assignment. -1 for infinite. |
