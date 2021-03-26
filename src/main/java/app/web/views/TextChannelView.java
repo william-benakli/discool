@@ -127,7 +127,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                 for (Object obj : messageContainer.getChildren().toArray()) {
                     if (obj instanceof MessageLayout) {
                         if (((MessageLayout) obj) == messageLayout) {
-                            messageContainer.replace((MessageLayout) obj, new Paragraph("Oui"));
+                            messageContainer.replace((MessageLayout) obj, new Paragraph("oui"));
                         }
                     }
                 }
@@ -285,27 +285,19 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
             this.optionsUser = new HorizontalLayout();
             optionsUser.setSpacing(false);
             optionsUser.setPadding(false);
+            onHover();
             createPictureSetting();
-
-            getElement().addEventListener("mouseover", e -> {
-                this.getStyle().set("background-color", ColorHTML.DARKGREY.getColorHtml());
-                layoutPop.setVisible(true);
-            });
-            getElement().addEventListener("mouseleave", e -> {
-                this.getStyle().set("background-color", ColorHTML.GREY.getColorHtml());
-                layoutPop.setVisible(false);
-            });
-
-            this.metaData = createParagrapheAmelioration(getController().getUsernameOfSender(publicMessage) + " | " + convertLongToDate(publicMessage.getTimeCreated()));
-            chatUserInformation.add(metaData);
-
-            this.message = createParagrapheAmelioration(publicMessage.getMessage());
-            chatUserInformation.add(message);
+            createDeleteButton(publicMessage);
+            createModifyButton(publicMessage);
+            createPopMessage(publicMessage);
+            createChatBlock(publicMessage);
 
             add(profilPicture);
             add(chatUserInformation);
 
-            response = new ComponentButton("img/repondre.svg", "Repondre à ce message", SIZEWIDTH, SIZEHEIGHT);
+        }
+
+        private void createDeleteButton(PublicChatMessage publicChatMessage) {
             delete = new ComponentButton("img/corbeille.svg", "Supprimez votre message", SIZEWIDTH, SIZEHEIGHT);
 
             delete.addClickListener(event -> {
@@ -319,7 +311,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                 dialog.open();
 
                 oui.addClickListener(ev -> {
-                    getController().deleteMessage(publicMessage);
+                    getController().deleteMessage(publicChatMessage);
                     PublicMessagesBroadcaster.broadcast("DELETE_MESSAGE", this);
                     dialog.close();
                     Notification.show("Vous avez supprimé votre message");
@@ -329,7 +321,9 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                     dialog.close();
                 });
             });
+        }
 
+        private void createModifyButton(PublicChatMessage publicMessage) {
             modify = new ComponentButton("img/editer.svg", "Editez votre message", SIZEWIDTH, SIZEHEIGHT);
 
             modify.addClickListener(event -> {
@@ -361,6 +355,12 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                     dialog.close();
                 });
             });
+        }
+
+        public void createPopMessage(PublicChatMessage publicMessage) {
+
+            response = new ComponentButton("img/repondre.svg", "Repondre à ce message", SIZEWIDTH, SIZEHEIGHT);
+
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             Person id = personRepository.findByUsername(authentication.getName());
 
@@ -376,7 +376,14 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
 
             optionMenu.add(layoutPop);
             add(optionMenu);
+        }
 
+
+        private void createChatBlock(PublicChatMessage publicMessage) {
+            this.metaData = createParagrapheAmelioration(getController().getUsernameOfSender(publicMessage) + " | " + convertLongToDate(publicMessage.getTimeCreated()));
+            chatUserInformation.add(metaData);
+            this.message = createParagrapheAmelioration(publicMessage.getMessage());
+            chatUserInformation.add(message);
         }
 
         private void createPictureSetting() {
@@ -388,7 +395,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
             this.profilPicture.getStyle().set("padding", "10px");
         }
 
-        public Paragraph createParagrapheAmelioration(String text) {
+        private Paragraph createParagrapheAmelioration(String text) {
             Paragraph Data = new Paragraph();
             Data.setText(text);
             Data.getStyle().set("border", "none");
@@ -398,7 +405,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         }
 
 
-        public String convertLongToDate(long dateLong) {
+        private String convertLongToDate(long dateLong) {
             SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
             SimpleDateFormat heure = new SimpleDateFormat("HH:mm");
             Date date = new Date(dateLong);
@@ -407,8 +414,18 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
             return formatter.format(date) + " à " + heure.format(date);
         }
 
+        private void onHover() {
+            getElement().addEventListener("mouseover", e -> {
+                this.getStyle().set("background-color", ColorHTML.DARKGREY.getColorHtml());
+                layoutPop.setVisible(true);
+            });
+            getElement().addEventListener("mouseleave", e -> {
+                this.getStyle().set("background-color", ColorHTML.GREY.getColorHtml());
+                layoutPop.setVisible(false);
+            });
+        }
 
-        public class PopAbsoluteLayout extends Div {
+        private class PopAbsoluteLayout extends Div {
 
             public PopAbsoluteLayout() {
                 this.getElement().getStyle()
