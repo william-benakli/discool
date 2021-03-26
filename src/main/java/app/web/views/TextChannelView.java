@@ -81,11 +81,12 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                 Person sender = personRepository.findByUsername(username);
                 // TODO : set the parentId and the userId
                 PublicChatMessage newMessage = getController().saveMessage(messageTextField.getValue(), System.currentTimeMillis(), textChannel.getId(), 1, sender.getId());
+
                 if (!messageTextField.getValue().startsWith("/")) {
                     MessageLayout message = new MessageLayout(newMessage);
                     PublicMessagesBroadcaster.broadcast("NEW_MESSAGE", message);
-                    //  message.focus();
                 } else {
+
                     String[] arg = messageTextField.getValue().split(" ");
                     switch (arg[0]) {
                         case "/clear":
@@ -94,7 +95,9 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                     }
                     PublicMessagesBroadcaster.broadcast("UPDATE_ALL", new MessageLayout(newMessage));
                     Notification.show("Vous executez une commande");
+
                 }
+
                 messageTextField.clear();
                 messageTextField.focus();
             }
@@ -120,10 +123,21 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
             case "DELETE_MESSAGE":
                 messageContainer.remove(messageLayout);
                 break;
+            case "UPDATE_MESSAGE":
+                for (Object obj : messageContainer.getChildren().toArray()) {
+                    if (obj instanceof MessageLayout) {
+                        if (((MessageLayout) obj) == messageLayout) {
+                            messageContainer.replace((MessageLayout) obj, new Paragraph("Oui"));
+                        }
+                    }
+                }
+                break;
             case "UPDATE_ALL":
                 messageContainer.removeAll();
-                for (PublicChatMessage message : getController().getChatMessagesForChannel(textChannel.getId()))
+                for (PublicChatMessage message : getController().getChatMessagesForChannel(textChannel.getId())) {
+                    System.out.println("Message" + message.getMessage());
                     messageContainer.add(new MessageLayout(message));
+                }
                 break;
             default:
                 break;
@@ -242,37 +256,27 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
 
 
     public class MessageLayout extends HorizontalLayout {
-        /*
-
-            Attribue Java
-         */
-
+        /* Attribue Java */
         private int SIZEWIDTH = 40;
         private int SIZEHEIGHT = 40;
-        /*
-            Layout composant
-        */
+
+        /* Layout composant */
         private VerticalLayout chatUserInformation;
         private HorizontalLayout optionsUser;
         private FlexLayout optionMenu;
         private PopAbsoluteLayout layoutPop;
 
-        /*
-           Information comportenant du data
-         */
+        /* Information comportenant du data */
         private Paragraph metaData;
         private Paragraph message;
         private Image profilPicture;
 
-        /*
-            Button interection de l'utilisateur
-        */
+        /* Button interection de l'utilisateur */
         private Button response;
         private Button delete;
         private Button modify;
 
         public MessageLayout(PublicChatMessage publicMessage) {
-            ;
             this.chatUserInformation = new VerticalLayout();
             setPadding(false);
             setSpacing(false);
@@ -309,8 +313,9 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                 dialog.add(new Paragraph("Voulez vous vraiment supprimer votre message ?"));
                 Button oui = new Button("Oui");
                 Button non = new Button("Non");
-                dialog.add(non);
+
                 dialog.add(oui);
+                dialog.add(non);
                 dialog.open();
 
                 oui.addClickListener(ev -> {
@@ -346,6 +351,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                     if (!messageUpdate.getValue().equals(publicMessage.getMessage())) {
                         getController().changeMessage(publicMessage, messageUpdate.getValue());
                         this.message.setText(messageUpdate.getValue());
+                        PublicMessagesBroadcaster.broadcast("UPDATE_MESSAGE", this);
                         Notification.show("Vous avez modifié votre message");
                     }
                     dialog.close();
