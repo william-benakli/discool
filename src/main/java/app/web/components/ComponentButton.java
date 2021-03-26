@@ -64,7 +64,10 @@ public class ComponentButton extends Button {
 
     public ComponentButton(String cheminImage, String alt, int sizeWitdh, int sizeHeight) {
         Image imgServ = new Image(cheminImage, alt);
-        imgServ.getStyle().set("width", String.valueOf(sizeWitdh) + "px").set("height", String.valueOf(sizeHeight) + "px");
+        imgServ.getStyle()
+                .set("width", String.valueOf(sizeWitdh) + "px")
+                .set("height", String.valueOf(sizeHeight) + "px")
+                .set("border-radius", "0px");
         setIcon(imgServ);
         getStyle().set("background-color", ViewWithSidebars.ColorHTML.GREY.getColorHtml());
     }

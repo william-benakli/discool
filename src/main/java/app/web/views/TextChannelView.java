@@ -247,7 +247,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
             Attribue Java
          */
 
-        private int SIZEWITDH = 40;
+        private int SIZEWIDTH = 40;
         private int SIZEHEIGHT = 40;
         /*
             Layout composant
@@ -272,6 +272,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         private Button modify;
 
         public MessageLayout(PublicChatMessage publicMessage) {
+            ;
             this.chatUserInformation = new VerticalLayout();
             setPadding(false);
             setSpacing(false);
@@ -300,8 +301,8 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
             add(profilPicture);
             add(chatUserInformation);
 
-            response = new ComponentButton("img/repondre.svg", "Repondre à ce message", SIZEWITDH, SIZEHEIGHT);
-            delete = new ComponentButton("img/corbeille.svg", "Supprimez votre message", SIZEWITDH, SIZEHEIGHT);
+            response = new ComponentButton("img/repondre.svg", "Repondre à ce message", SIZEWIDTH, SIZEHEIGHT);
+            delete = new ComponentButton("img/corbeille.svg", "Supprimez votre message", SIZEWIDTH, SIZEHEIGHT);
 
             delete.addClickListener(event -> {
                 Dialog dialog = new Dialog();
@@ -324,7 +325,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                 });
             });
 
-            modify = new ComponentButton("img/editer.svg", "Editez votre message", SIZEWITDH, SIZEHEIGHT);
+            modify = new ComponentButton("img/editer.svg", "Editez votre message", SIZEWIDTH, SIZEHEIGHT);
 
             modify.addClickListener(event -> {
                 Dialog dialog = new Dialog();
@@ -357,16 +358,19 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             Person id = personRepository.findByUsername(authentication.getName());
 
+
             //Protection si l'utilisateur est bien le createur du message
+            optionsUser.add(response);
             if (id.getId() == publicMessage.getSender()) {
-                VerticalLayout layout = new VerticalLayout();
-                optionsUser.add(response);
                 optionsUser.add(modify);
                 optionsUser.add(delete);
-                layoutPop.add(optionsUser);
-                optionMenu.add(layoutPop);
-                add(optionMenu);
             }
+            layoutPop.add(optionsUser);
+            layoutPop.resize();
+
+            optionMenu.add(layoutPop);
+            add(optionMenu);
+
         }
 
         private void createPictureSetting() {
@@ -408,11 +412,13 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                         .set("background-color", ColorHTML.GREY.getColorHtml())
                         .set("right", "25px")
                         .set("border-radius", "5px");
+            }
+
+            public void resize() {
                 //Le nombre d elements mutiliplie par la taille definit
-                //(SIZEWITDH * this.getElement().getChildCount() + 20)
-                this.setWidth("150px");
-                this.setHeight((SIZEHEIGHT + 2) + "px");
-                this.setVisible(false);
+                setWidth(SIZEWIDTH * this.getElement().getChildren().findAny().get().getChildCount() + 20 + "px");
+                setHeight((SIZEHEIGHT + 2) + "px");
+                setVisible(false);
             }
 
         }
