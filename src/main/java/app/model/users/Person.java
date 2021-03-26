@@ -85,4 +85,7 @@ public class Person {
     public String getRoleAsString() {
         return role.toString();
     }
+
+    //TODO: use lastlogin and first login to see if the user is logged in
+    public boolean isConected(){ return true; }
 }
