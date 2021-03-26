@@ -52,7 +52,6 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
     private FlexLayout messageContainer = new FlexLayout();
     private Registration broadcasterRegistration;
 
-
     public TextChannelView(@Autowired TextChannelRepository textChannelRepository,
                            @Autowired PublicChatMessageRepository publicChatMessageRepository,
                            @Autowired PersonRepository personRepository) {
@@ -85,6 +84,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                 if (!messageTextField.getValue().startsWith("/")) {
                     MessageLayout message = new MessageLayout(newMessage);
                     PublicMessagesBroadcaster.broadcast("NEW_MESSAGE", message);
+                    messageContainer.getElement().executeJs("this.scrollTop = this.scrollHeight;");
                 } else {
 
                     String[] arg = messageTextField.getValue().split(" ");
@@ -342,7 +342,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                 dialog.open();
 
                 oui.addClickListener(ev -> {
-                    if (!messageUpdate.getValue().equals(publicMessage.getMessage())) {
+                    if (!messageUpdate.getValue().equals(publicMessage.getMessage()) && !messageUpdate.isEmpty()) {
                         getController().changeMessage(publicMessage, messageUpdate.getValue());
                         this.message.setText(messageUpdate.getValue());
                         PublicMessagesBroadcaster.broadcast("UPDATE_MESSAGE", this);
