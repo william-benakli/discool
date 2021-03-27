@@ -29,7 +29,9 @@ public class PanelAdminView extends VerticalLayout {
             grid.addColumn(Person::getUsername).setHeader("Nom");
             grid.addColumn(Person::getLastName).setHeader("LastName");
             grid.addColumn(Person::getEmail).setHeader("Email");
+            grid.addColumn(Person::getDescription).setHeader("description");
             grid.addColumn(Person::getRole).setHeader("Role");
+            grid.addColumn(Person::getWebsite).setHeader("website");
             grid.addThemeVariants(GridVariant.LUMO_NO_BORDER,
                     GridVariant.LUMO_NO_ROW_BORDERS, GridVariant.LUMO_ROW_STRIPES);
             add(grid);
