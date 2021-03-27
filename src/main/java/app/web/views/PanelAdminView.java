@@ -37,7 +37,15 @@ public class PanelAdminView extends VerticalLayout {
                     GridVariant.LUMO_NO_ROW_BORDERS, GridVariant.LUMO_ROW_STRIPES);
             add(grid);
         }
-
+        else{
+            this.personRepository = personRepository;
+            grid.setItems(personRepository.findAll());
+            grid.addColumn(Person::getUsername).setHeader("Nom");
+            grid.addColumn(Person::getRole).setHeader("Role");
+            grid.addThemeVariants(GridVariant.LUMO_NO_BORDER,
+                    GridVariant.LUMO_NO_ROW_BORDERS, GridVariant.LUMO_ROW_STRIPES);
+            add(grid);
+        }
     }
 }
 
