@@ -49,6 +49,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
     private ComponentButton muteHeadphone;
     private Button exitButton;
     private Button sendMessage;
+    private long targetResponseMessage;
     private FlexLayout messageContainer = new FlexLayout();
     private Registration broadcasterRegistration;
 
@@ -57,6 +58,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                            @Autowired PersonRepository personRepository) {
         this.textChannelRepository = textChannelRepository;
         this.personRepository = personRepository;
+        this.targetResponseMessage = 0;
         setController(new Controller(personRepository, textChannelRepository, publicChatMessageRepository,
                 null, null));
         this.messageTextField = createTextField();
@@ -78,13 +80,23 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                 Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
                 String username = authentication.getName();
                 Person sender = personRepository.findByUsername(username);
-                // TODO : set the parentId and the userId
-                PublicChatMessage newMessage = getController().saveMessage(messageTextField.getValue(), System.currentTimeMillis(), textChannel.getId(), 1, sender.getId());
 
                 if (!messageTextField.getValue().startsWith("/")) {
-                    MessageLayout message = new MessageLayout(newMessage);
-                    PublicMessagesBroadcaster.broadcast("NEW_MESSAGE", message);
+
+                    PublicChatMessage newMessage;
+
+                    if (targetResponseMessage == 0) {
+                        newMessage = getController().saveMessage(messageTextField.getValue(), System.currentTimeMillis(), textChannel.getId(), 1, sender.getId());
+                        MessageLayout message = new MessageLayout(newMessage);
+                        PublicMessagesBroadcaster.broadcast("NEW_MESSAGE", message);
+                    } else {
+                        newMessage = getController().saveMessage(messageTextField.getValue(), System.currentTimeMillis(), textChannel.getId(), targetResponseMessage, sender.getId());
+                        MessageLayout message = new MessageLayout(newMessage);
+                        PublicMessagesBroadcaster.broadcast("NEW_MESSAGE", message);
+                        targetResponseMessage = 0;
+                    }
                     messageContainer.getElement().executeJs("this.scrollTop = this.scrollHeight;");
+
                 } else {
                     String[] arg = messageTextField.getValue().split(" ");
                     switch (arg[0]) {
@@ -92,7 +104,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                             new CommandsClearChat(this.getController(), sender.getId(), textChannel.getId(), arg);
                             break;
                     }
-                    PublicMessagesBroadcaster.broadcast("UPDATE_ALL", new MessageLayout(newMessage));
+                    //   PublicMessagesBroadcaster.broadcast("UPDATE_ALL", new MessageLayout(newMessage));
                     Notification.show("Vous executez une commande");
 
                 }
@@ -293,6 +305,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
             createPictureSetting();
             createDeleteButton(publicMessage);
             createModifyButton(publicMessage);
+            createResponseButton(publicMessage);
             createPopMessage(publicMessage);
             createChatBlock(publicMessage);
             messageFullLayout.add(profilPicture);
@@ -375,13 +388,18 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
             });
         }
 
-        public void createPopMessage(PublicChatMessage publicMessage) {
-
+        public void createResponseButton(PublicChatMessage publicMessage) {
             response = new ComponentButton("img/repondre.svg", "Repondre", SIZEWIDTH, SIZEHEIGHT);
+            response.addClickListener(ev -> {
+                targetResponseMessage = publicMessage.getId();
+                messageContainer.getElement().executeJs("this.scrollTop = this.scrollHeight;");
+            });
+        }
+
+        public void createPopMessage(PublicChatMessage publicMessage) {
 
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             Person id = personRepository.findByUsername(authentication.getName());
-
 
             //Protection si l'utilisateur est bien le createur du message
             optionsUser.add(response);
@@ -392,7 +410,6 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
             layoutPop.add(optionsUser);
             layoutPop.resize();
 
-            //  optionMenu.add(layoutPop);
             messageFullLayout.add(optionMenu);
         }
 
