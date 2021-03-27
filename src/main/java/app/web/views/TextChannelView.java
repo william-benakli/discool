@@ -308,8 +308,8 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
             if (publicMessage.getParentId() != 1) {
                 PublicChatMessage messageParent = getController().getMessageById(publicMessage.getParentId());
                 if (messageParent != null) {
-                    Paragraph messageReponse = new Paragraph("Reponse à :" + personRepository.findById(messageParent.getSender()).getUsername() + " | "
-                            + ((messageParent.getMessage().length() > 15) ? messageParent.getMessage().substring(15) + "..." : messageParent.getMessage()));
+                    Paragraph messageReponse = new Paragraph("Reponse à " + personRepository.findById(messageParent.getSender()).getUsername() + " | "
+                            + ((messageParent.getMessage().length() > 50) ? messageParent.getMessage().substring(0, 50) + "..." : messageParent.getMessage()));
                     messageFullWithResponseLayout.add(messageReponse);
                 }
             }
