@@ -111,4 +111,8 @@ public class Controller {
         publicChatMessageRepository.updateDeleted(channelid, value);
     }
 
+    public PublicChatMessage getMessageById(long id) {
+        return publicChatMessageRepository.findById(id);
+    }
+
 }
