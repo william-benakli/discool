@@ -87,6 +87,10 @@ public class Controller {
         return publicChatMessageRepository.findAllByChannelid(channelId);
     }
 
+    public ArrayList<Person> getAllUser() {
+        return personRepository.findAll();
+    }
+
     /**
      * @return all the course sections in the right order
      */
