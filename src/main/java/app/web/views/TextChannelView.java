@@ -86,7 +86,6 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                     PublicMessagesBroadcaster.broadcast("NEW_MESSAGE", message);
                     messageContainer.getElement().executeJs("this.scrollTop = this.scrollHeight;");
                 } else {
-
                     String[] arg = messageTextField.getValue().split(" ");
                     switch (arg[0]) {
                         case "/clear":
@@ -97,7 +96,6 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                     Notification.show("Vous executez une commande");
 
                 }
-
                 messageTextField.clear();
                 messageTextField.focus();
             }
@@ -261,6 +259,8 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         private int SIZEHEIGHT = 40;
 
         /* Layout composant */
+        private VerticalLayout messageFullWithResponseLayout;
+        private HorizontalLayout messageFullLayout;
         private VerticalLayout chatUserInformation;
         private HorizontalLayout optionsUser;
         private FlexLayout optionMenu;
@@ -283,22 +283,37 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
             this.layoutPop = new PopAbsoluteLayout();
             this.optionMenu = new FlexLayout();
             this.optionsUser = new HorizontalLayout();
+            this.messageFullLayout = new HorizontalLayout();
+            this.messageFullWithResponseLayout = new VerticalLayout();
+
             optionsUser.setSpacing(false);
             optionsUser.setPadding(false);
             onHover();
+            createResponseMessage(publicMessage);
             createPictureSetting();
             createDeleteButton(publicMessage);
             createModifyButton(publicMessage);
             createPopMessage(publicMessage);
             createChatBlock(publicMessage);
+            messageFullLayout.add(profilPicture);
+            messageFullLayout.add(chatUserInformation);
 
-            add(profilPicture);
-            add(chatUserInformation);
 
+            messageFullWithResponseLayout.add(messageFullLayout);
+            add(messageFullWithResponseLayout);
+            add(layoutPop);
+        }
+
+        private void createResponseMessage(PublicChatMessage publicMessage) {
+            if (publicMessage.getParentId() != 1) {
+                messageFullWithResponseLayout.add(new Paragraph("A repondu à votre message"));
+            } else {
+                messageFullWithResponseLayout.add(new Paragraph("A repondu à votre message"));
+            }
         }
 
         private void createDeleteButton(PublicChatMessage publicChatMessage) {
-            delete = new ComponentButton("img/corbeille.svg", "Supprimez votre message", SIZEWIDTH, SIZEHEIGHT);
+            delete = new ComponentButton("img/corbeille.svg", "Supprimer", SIZEWIDTH, SIZEHEIGHT);
 
             delete.addClickListener(event -> {
                 Dialog dialog = new Dialog();
@@ -324,7 +339,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         }
 
         private void createModifyButton(PublicChatMessage publicMessage) {
-            modify = new ComponentButton("img/editer.svg", "Editez votre message", SIZEWIDTH, SIZEHEIGHT);
+            modify = new ComponentButton("img/editer.svg", "Editer", SIZEWIDTH, SIZEHEIGHT);
 
             modify.addClickListener(event -> {
                 Dialog dialog = new Dialog();
@@ -359,7 +374,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
 
         public void createPopMessage(PublicChatMessage publicMessage) {
 
-            response = new ComponentButton("img/repondre.svg", "Repondre à ce message", SIZEWIDTH, SIZEHEIGHT);
+            response = new ComponentButton("img/repondre.svg", "Repondre", SIZEWIDTH, SIZEHEIGHT);
 
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             Person id = personRepository.findByUsername(authentication.getName());
@@ -374,8 +389,8 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
             layoutPop.add(optionsUser);
             layoutPop.resize();
 
-            optionMenu.add(layoutPop);
-            add(optionMenu);
+            //  optionMenu.add(layoutPop);
+            messageFullLayout.add(optionMenu);
         }
 
 
