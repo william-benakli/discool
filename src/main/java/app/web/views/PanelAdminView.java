@@ -23,10 +23,7 @@ public class PanelAdminView extends VerticalLayout {
     private PersonRepository personRepository;
 
     public PanelAdminView(@Autowired PersonRepository personRepository) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
-        Person sender = personRepository.findByUsername(username);
-        if(sender.getRole()==Person.Role.ADMIN) {
+
             this.personRepository = personRepository;
             grid.setItems(personRepository.findAll());
             grid.addColumn(Person::getUsername).setHeader("Nom");
@@ -36,16 +33,7 @@ public class PanelAdminView extends VerticalLayout {
             grid.addThemeVariants(GridVariant.LUMO_NO_BORDER,
                     GridVariant.LUMO_NO_ROW_BORDERS, GridVariant.LUMO_ROW_STRIPES);
             add(grid);
-        }
-        else{
-            this.personRepository = personRepository;
-            grid.setItems(personRepository.findAll());
-            grid.addColumn(Person::getUsername).setHeader("Nom");
-            grid.addColumn(Person::getRole).setHeader("Role");
-            grid.addThemeVariants(GridVariant.LUMO_NO_BORDER,
-                    GridVariant.LUMO_NO_ROW_BORDERS, GridVariant.LUMO_ROW_STRIPES);
-            add(grid);
-        }
+
     }
 }
 
