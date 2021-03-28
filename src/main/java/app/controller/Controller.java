@@ -37,17 +37,13 @@ public class Controller {
         return c.map(Course::getName).orElse(null);
     }
 
-    public ArrayList<Person> getAllUser(){
-        return personRepository.findAll();
-    }
-
     public PublicChatMessage saveMessage(String message, long channelId, long parentId, long userId) {
         PublicChatMessage messageToSave = PublicChatMessage.builder()
                 .message(message)
                 .channelid(channelId)
                 .parentId(parentId)
                 .sender(userId)
-                .timeCreated(000) // TODO add time of creation
+                .timeCreated(System.currentTimeMillis())
                 .deleted(false)
                 .build();
         publicChatMessageRepository.save(messageToSave);

@@ -50,7 +50,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
     private Button exitButton;
     private Button sendMessage;
     private long targetResponseMessage;
-    private FlexLayout messageContainer = new FlexLayout();
+    private final FlexLayout messageContainer = new FlexLayout();
     private Registration broadcasterRegistration;
 
     public TextChannelView(@Autowired TextChannelRepository textChannelRepository,
@@ -66,11 +66,6 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         createSendMessageButton();
     }
 
-
-    /*
-      Cette fonction permet de creer un button d'envoie, elle comprend aussi la gestion
-      des entrée et des commands par l'utilisateur.
-     */
     private void createSendMessageButton() {
         sendMessage = createButtonWithLabel("Envoyer", "#000");
         sendMessage.addClickShortcut(Key.ENTER);
@@ -86,11 +81,11 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                     PublicChatMessage newMessage;
 
                     if (targetResponseMessage == 0) {
-                        newMessage = getController().saveMessage(messageTextField.getValue(), System.currentTimeMillis(), textChannel.getId(), 1, sender.getId());
+                        newMessage = getController().saveMessage(messageTextField.getValue(), textChannel.getId(), 1, sender.getId());
                         MessageLayout message = new MessageLayout(newMessage);
                         PublicMessagesBroadcaster.broadcast("NEW_MESSAGE", message);
                     } else {
-                        newMessage = getController().saveMessage(messageTextField.getValue(), System.currentTimeMillis(), textChannel.getId(), targetResponseMessage, sender.getId());
+                        newMessage = getController().saveMessage(messageTextField.getValue(), textChannel.getId(), targetResponseMessage, sender.getId());
                         MessageLayout message = new MessageLayout(newMessage);
                         PublicMessagesBroadcaster.broadcast("NEW_MESSAGE", message);
                         targetResponseMessage = 0;
@@ -113,7 +108,6 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
             }
         });
     }
-
 
     @Override
     protected void onAttach(AttachEvent attachEvent) {
@@ -154,7 +148,6 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         }
     }
 
-
     @Override
     public String getPageTitle() {
         return textChannel.getName();
@@ -178,8 +171,6 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         broadcasterRegistration = null;
     }
 
-
-    //    Cette fonction créer un button mute / son et quitté
     private void createVoiceChatButtons() {
         muteMicrophone = new ComponentButton("img/micOn.svg", "img/micOff.svg", "unmute microphone", "mute microphone", Key.DIGIT_1);
         muteMicrophone.addClickListener(muteMicrophone::changeStatus);
@@ -195,10 +186,6 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         });
     }
 
-
-    /*
-        Cette fonction permet de creer la tchat bar
-     */
     public void createChatBar() {
         chatBar.removeAll();
         chatBar.getStyle()
@@ -215,7 +202,6 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         chatButtonContainer.add(sendMessage, muteMicrophone, muteHeadphone, exitButton);
 
         FlexLayout messageInputBar = new FlexLayout();
-        //TODO: Faire que le message TextField apparaisse
         messageInputBar.add(messageTextField, chatButtonContainer);
         setCardStyle(messageContainer, "99%", ColorHTML.GREY);
         messageContainer.setHeightFull();
@@ -266,24 +252,20 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
 
 
     public class MessageLayout extends HorizontalLayout {
-        /* Attribue Java */
-        private int SIZEWIDTH = 40;
-        private int SIZEHEIGHT = 40;
+        private final int SIZEWIDTH = 40;
+        private final int SIZEHEIGHT = 40;
 
-        /* Layout composant */
-        private VerticalLayout messageFullWithResponseLayout;
-        private HorizontalLayout messageFullLayout;
-        private VerticalLayout chatUserInformation;
-        private HorizontalLayout optionsUser;
-        private FlexLayout optionMenu;
-        private PopAbsoluteLayout layoutPop;
+        private final VerticalLayout messageFullWithResponseLayout;
+        private final HorizontalLayout messageFullLayout;
+        private final VerticalLayout chatUserInformation;
+        private final HorizontalLayout optionsUser;
+        private final FlexLayout optionMenu;
+        private final PopAbsoluteLayout layoutPop;
 
-        /* Information comportenant du data */
         private Paragraph metaData;
         private Paragraph message;
         private Image profilPicture;
 
-        /* Button interection de l'utilisateur */
         private Button response;
         private Button delete;
         private Button modify;
@@ -310,7 +292,6 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
             createChatBlock(publicMessage);
             messageFullLayout.add(profilPicture);
             messageFullLayout.add(chatUserInformation);
-
 
             messageFullWithResponseLayout.add(messageFullLayout);
             add(messageFullWithResponseLayout);
@@ -400,9 +381,9 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
 
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             Person id = personRepository.findByUsername(authentication.getName());
+            optionsUser.add(response);
 
             //Protection si l'utilisateur est bien le createur du message
-            optionsUser.add(response);
             if (id.getId() == publicMessage.getSender()) {
                 optionsUser.add(modify);
                 optionsUser.add(delete);
@@ -461,7 +442,6 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         }
 
         private class PopAbsoluteLayout extends Div {
-
             public PopAbsoluteLayout() {
                 this.getElement().getStyle()
                         .set("position", "absolute")
@@ -473,7 +453,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
             }
 
             public void resize() {
-                //Le nombre d elements mutiliplie par la taille definit
+                //Le nombre d elements mutiliplie par la taille definie
                 setWidth(SIZEWIDTH * this.getElement().getChildren().findAny().get().getChildCount() + 20 + "px");
                 setHeight((SIZEHEIGHT + 2) + "px");
                 setVisible(false);
