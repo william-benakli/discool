@@ -1,5 +1,6 @@
 package app.web.components;
 
+import app.web.views.ViewWithSidebars;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
@@ -55,11 +56,22 @@ public class ComponentButton extends Button {
 
     }
 
-    public ComponentButton(Image imgServ){
+    public ComponentButton(Image imgServ) {
         SetStyle(imgServ).setHeightFull();
         SetStyle(imgServ).setWidthFull();
         setIcon(imgServ);
     }
+
+    public ComponentButton(String cheminImage, String alt, int sizeWitdh, int sizeHeight) {
+        Image imgServ = new Image(cheminImage, alt);
+        imgServ.getStyle()
+                .set("width", String.valueOf(sizeWitdh) + "px")
+                .set("height", String.valueOf(sizeHeight) + "px")
+                .set("border-radius", "0px");
+        setIcon(imgServ);
+        getStyle().set("background-color", ViewWithSidebars.ColorHTML.GREY.getColorHtml());
+    }
+
 
     /**
      * Add css properties to the image of a button
@@ -67,7 +79,7 @@ public class ComponentButton extends Button {
      * @param img The image that will undergo styling changes
      * @return The image with new css properties
      */
-    public Image SetStyle(Image img){
+    public Image SetStyle(Image img) {
         img.getStyle()
                 .set("width","25px")
                 .set("vertical-align","middle")
