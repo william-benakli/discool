@@ -69,6 +69,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         this.messageTextField = createTextField();
         createVoiceChatButtons();
         createSendMessageButton();
+        scrollDownChat();
     }
 
     private void createSendMessageButton() {
@@ -95,7 +96,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                         PublicMessagesBroadcaster.broadcast("NEW_MESSAGE", message);
                         targetResponseMessage = 0;
                     }
-                    messageContainer.getElement().executeJs("this.scrollTop = this.scrollHeight;");
+                    scrollDownChat();
 
                 } else {
                     String[] arg = messageTextField.getValue().split(" ");
@@ -176,10 +177,13 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         broadcasterRegistration = null;
     }
 
+    public void scrollDownChat(){
+        messageContainer.getElement().executeJs("this.scrollTop = this.scrollHeight;");
+    }
+
     private void createVoiceChatButtons() {
         muteMicrophone = new ComponentButton("img/micOn.svg", "img/micOff.svg", "unmute microphone", "mute microphone", Key.DIGIT_1);
         muteMicrophone.addClickListener(muteMicrophone::changeStatus);
-
         muteHeadphone = new ComponentButton("img/headsetOn.svg", "img/headsetOff.svg", "unmute headphone", "mute headphone", Key.DIGIT_2);
         muteHeadphone.addClickListener(muteHeadphone::changeStatus);
 
@@ -378,7 +382,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
             response = new ComponentButton("img/repondre.svg", "Repondre", SIZEWIDTH, SIZEHEIGHT);
             response.addClickListener(ev -> {
                 targetResponseMessage = publicMessage.getId();
-                messageContainer.getElement().executeJs("this.scrollTop = this.scrollHeight;");
+                scrollDownChat();
             });
         }
 
