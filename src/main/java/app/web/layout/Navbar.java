@@ -17,6 +17,7 @@ import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.page.Push;
@@ -153,8 +154,34 @@ public class Navbar extends AppLayout {
 
                 layout.add(layoutL,layoutR);
 
-                layoutL.add(new Anchor("logout", "Log out"));
+                Button buttonlogout = new Button("Déconnexion");
+                buttonlogout.getStyle()
+                        .set("background-color", ViewWithSidebars.ColorHTML.DANGER.getColorHtml())
+                        .set("color", ViewWithSidebars.ColorHTML.WHITE.getColorHtml());
+                Anchor logout=new Anchor("logout", "");
 
+
+                logout.getStyle()
+                        .set("position","absolute")
+                        .set("bottom","24px")
+                        .set("width","25%")
+                        .set("text-align","center");
+
+                Paragraph paramUser = new Paragraph("Paramètres utilisateur");
+                paramUser.getStyle()
+                        .set("width","25%")
+                        .set("text-align","center")
+                        .set("position","absolute")
+                        .set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml())
+                        .set("font-weight","700");
+
+                logout.add(buttonlogout);
+
+                layoutL.add(paramUser, logout);
+                layoutL.getStyle()
+                        .set("flex-direction","column")
+                        .set("border-right","solid .5px #EAEAEA")
+                        .set("padding-right","36px");
                 dialog.add(layout);
                 dialog.setWidth("50%");
                 dialog.setHeight("65%");
