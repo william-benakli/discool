@@ -273,6 +273,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
 
         private Paragraph metaData;
         private Paragraph message;
+        private Paragraph messageReponse;
         private Image profilPicture;
 
         private Button response;
@@ -311,9 +312,14 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
             if (publicMessage.getParentId() != 1) {
                 PublicChatMessage messageParent = getController().getMessageById(publicMessage.getParentId());
                 if (messageParent != null) {
-                    Paragraph messageReponse = new Paragraph("Reponse à " + personRepository.findById(messageParent.getSender()).getUsername() + " | "
-                            + ((messageParent.getMessage().length() > 50) ? messageParent.getMessage().substring(0, 50) + "..." : messageParent.getMessage()));
+                    if(!messageParent.isDeleted()){
+                        messageReponse = new Paragraph("Reponse à " + personRepository.findById(messageParent.getSender()).getUsername() + " | "
+                                + ((messageParent.getMessage().length() > 50) ? messageParent.getMessage().substring(0, 50) + "..." : messageParent.getMessage()));
+                    }else{
+                        messageReponse = new Paragraph("Message suprimée par l'utilisateur");
+                    }
                     messageFullWithResponseLayout.add(messageReponse);
+
                 }
             }
         }
@@ -451,6 +457,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         }
 
         private class PopAbsoluteLayout extends Div {
+
             public PopAbsoluteLayout() {
                 this.getElement().getStyle()
                         .set("position", "absolute")
