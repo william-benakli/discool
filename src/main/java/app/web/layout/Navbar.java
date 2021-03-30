@@ -8,16 +8,24 @@ import app.web.views.MoodleView;
 import app.web.views.ViewWithSidebars;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.KeyModifier;
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.applayout.AppLayout;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.StyleSheet;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.page.Push;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinServletRequest;
 import com.vaadin.flow.shared.ui.Transport;
+import com.vaadin.flow.theme.NoTheme;
+import com.vaadin.flow.theme.Theme;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -125,8 +133,37 @@ public class Navbar extends AppLayout {
             ComponentButton button = createServDockImage(new Image(imageInfo[0], imageInfo[1]), Key.NAVIGATE_NEXT);
             button.getStyle()
                     .set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml());
-            RouterLink routerLink = new RouterLink("", MoodleView.class, tmp);
-            linkRouteurImge(servCardDock, button, routerLink);
+
+            if (imageInfo[0].equals("img/manageAccounts.svg")){
+                Dialog dialog  = new Dialog();
+
+                FlexLayout layout = new FlexLayout();
+                //layout.getStyle().set("background-color", ViewWithSidebars.ColorHTML.GREY.getColorHtml());
+                layout.setWidth("100%");
+                layout.setHeight("100%");
+                layout.getStyle().set("flex-direction","row");
+
+                FlexLayout layoutL = new FlexLayout();
+                FlexLayout layoutR = new FlexLayout();
+
+                layoutL.setHeight("100%");
+                layoutL.setWidth("25%");
+                layoutR.setHeight("100%");
+                layoutR.setWidth("75%");
+
+                layout.add(layoutL,layoutR);
+
+                layoutL.add(new Anchor("logout", "Log out"));
+
+                dialog.add(layout);
+                dialog.setWidth("50%");
+                dialog.setHeight("65%");
+                button.addClickListener(event -> dialog.open());
+                servCardDock.add(button);
+            }else{
+                RouterLink routerLink = new RouterLink("", MoodleView.class, tmp);
+                linkRouteurImge(servCardDock, button, routerLink);
+            }
         }
         addToNavbar(servCardDock);
     }
