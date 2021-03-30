@@ -1,6 +1,7 @@
 package app.web.views;
 
 import app.jpa_repo.PersonRepository;
+import app.model.courses.Course;
 import app.model.users.Person;
 import app.web.layout.Navbar;
 import com.vaadin.flow.component.grid.Grid;
@@ -20,10 +21,13 @@ import java.util.ArrayList;
 public class PanelAdminView extends VerticalLayout {
 
     private Grid<Person> grid = new Grid<>();
+    private Grid<Course> gridCourse = new Grid<>();
     private PersonRepository personRepository;
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    String username = authentication.getName();
+    Person sender = personRepository.findByUsername(username);
 
     public PanelAdminView(@Autowired PersonRepository personRepository) {
-
             this.personRepository = personRepository;
             grid.setItems(personRepository.findAll());
             grid.addColumn(Person::getUsername).setHeader("Nom");
@@ -35,7 +39,6 @@ public class PanelAdminView extends VerticalLayout {
             grid.addThemeVariants(GridVariant.LUMO_NO_BORDER,
                     GridVariant.LUMO_NO_ROW_BORDERS, GridVariant.LUMO_ROW_STRIPES);
             add(grid);
-
     }
 }
 
