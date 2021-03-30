@@ -15,12 +15,10 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.HasText;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
-import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.Label;
-import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
@@ -60,9 +58,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         UI ui = attachEvent.getUI();
-        broadcasterRegistration = MoodleBroadcaster.register(newMessage -> {
-            ui.access(this::createMoodleBar);
-        });
+        broadcasterRegistration = MoodleBroadcaster.register(newMessage -> ui.access(this::createMoodleBar));
     }
 
     @Override
@@ -127,8 +123,9 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             this.section = section;
             if (section == null) return;
             initContent();
-            createDeleteButton();
-            createModifyButton();
+            FlexLayout f=new FlexLayout();
+            f.add(createDeleteButton(), createModifyButton());
+            this.add(f);
             createModifyPopup();
         }
 
@@ -139,22 +136,29 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             add(content);
         }
 
-        private void createDeleteButton() {
-            ComponentButton deleteButton = new ComponentButton("img/DDiscool", "img/DDiscool", "delete", "delete", null);
+        private Button createDeleteButton() {
+            Button deleteButton = new Button();
+            Image img = new Image("img/corbeille.svg", "edition");
+            img.getStyle()
+                    .set("width","25px")
+                    .set("margin","auto");
+            deleteButton.setIcon(img);
             deleteButton.addClickListener(event -> {
                 getController().deleteSection(section);
                 MoodleBroadcaster.broadcast("UPDATE_SECTION_DELETED");
             });
-            this.add(deleteButton);
+            return deleteButton;
         }
 
-        private void createModifyButton() {
-            ComponentButton modifyButton = new ComponentButton("img/Discool", "img/Discool",
-                                                               "modify", "modify", null);
-            modifyButton.addClickListener(event -> {
-                modifyPopup.open();
-            });
-            this.add(modifyButton);
+        private Button createModifyButton() {
+            Button modifyButton = new Button();
+            Image img = new Image("img/editer.svg", "edition");
+            img.getStyle()
+                    .set("width","25px")
+                    .set("margin","auto");
+            modifyButton.setIcon(img);
+            modifyButton.addClickListener(event -> modifyPopup.open());
+            return modifyButton;
         }
 
         /**
@@ -167,8 +171,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             title.setValue(section.getTitle());
             TextArea content = new TextArea("Content");
             content.setValue(section.getContent());
-            ComponentButton okButton = new ComponentButton("img/DDiscool", "img/DDiscool",
-                                                           "ok", "ok", null);
+            Button okButton = new Button("Valider");
             okButton.addClickListener(event -> {
                 getController().updateSection(section, title.getValue(), content.getValue());
                 modifyPopup.close();
