@@ -170,7 +170,6 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         textField.setWidthFull();
         textField.addFocusShortcut(Key.KEY_T, KeyModifier.ALT);
         textField.getStyle().set("margin", "0 2.5px");
-        System.out.println("test textInPuntFile");
         return textField;
     }
 
