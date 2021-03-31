@@ -2,10 +2,12 @@ package app.web.layout;
 
 import app.jpa_repo.CourseRepository;
 import app.model.courses.Course;
+import app.model.users.Person;
 import app.web.components.ComponentButton;
 import app.web.views.HomeView;
 import app.web.views.MoodleView;
 import app.web.views.ViewWithSidebars;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.KeyModifier;
 import com.vaadin.flow.component.Text;
@@ -16,11 +18,14 @@ import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Anchor;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.page.Push;
+import com.vaadin.flow.component.tabs.Tab;
+import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinServletRequest;
@@ -29,9 +34,13 @@ import com.vaadin.flow.theme.NoTheme;
 import com.vaadin.flow.theme.Theme;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 @Push(transport = Transport.LONG_POLLING)
 @CssImport("./styles/style.css")
@@ -137,54 +146,7 @@ public class Navbar extends AppLayout {
 
             if (imageInfo[0].equals("img/manageAccounts.svg")){
                 Dialog dialog  = new Dialog();
-
-                FlexLayout layout = new FlexLayout();
-                //layout.getStyle().set("background-color", ViewWithSidebars.ColorHTML.GREY.getColorHtml());
-                layout.setWidth("100%");
-                layout.setHeight("100%");
-                layout.getStyle().set("flex-direction","row");
-
-                FlexLayout layoutL = new FlexLayout();
-                FlexLayout layoutR = new FlexLayout();
-
-                layoutL.setHeight("100%");
-                layoutL.setWidth("25%");
-                layoutR.setHeight("100%");
-                layoutR.setWidth("75%");
-
-                layout.add(layoutL,layoutR);
-
-                Button buttonlogout = new Button("Déconnexion");
-                buttonlogout.getStyle()
-                        .set("background-color", ViewWithSidebars.ColorHTML.DANGER.getColorHtml())
-                        .set("color", ViewWithSidebars.ColorHTML.WHITE.getColorHtml());
-                Anchor logout=new Anchor("logout", "");
-
-
-                logout.getStyle()
-                        .set("position","absolute")
-                        .set("bottom","24px")
-                        .set("width","25%")
-                        .set("text-align","center");
-
-                Paragraph paramUser = new Paragraph("Paramètres utilisateur");
-                paramUser.getStyle()
-                        .set("width","25%")
-                        .set("text-align","center")
-                        .set("position","absolute")
-                        .set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml())
-                        .set("font-weight","700");
-
-                logout.add(buttonlogout);
-
-                layoutL.add(paramUser, logout);
-                layoutL.getStyle()
-                        .set("flex-direction","column")
-                        .set("border-right","solid .5px #EAEAEA")
-                        .set("padding-right","36px");
-                dialog.add(layout);
-                dialog.setWidth("50%");
-                dialog.setHeight("65%");
+                popupuser(dialog);
                 button.addClickListener(event -> dialog.open());
                 servCardDock.add(button);
             }else{
@@ -193,6 +155,86 @@ public class Navbar extends AppLayout {
             }
         }
         addToNavbar(servCardDock);
+    }
+
+    /**
+     * Set the dialog window for user parameters
+     * @param dialog navigation page for user settings
+     */
+    private void popupuser(Dialog dialog) {
+        /*Creation layout*/
+        FlexLayout layout = new FlexLayout();
+        FlexLayout layoutL = new FlexLayout();
+        FlexLayout layoutR = new FlexLayout();
+
+        /*Element Tab*/
+        Tab tab1 = new Tab("Mon compte");
+        tab1.getStyle().set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml());
+        Div page1 = new Div();
+        page1.setText("Page#1");
+
+        Tab tab2 = new Tab("Voix et Vidéo");
+        tab2.getStyle().set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml());
+        Div page2 = new Div();
+        page2.setText("Page#2");
+        page2.setVisible(false);
+
+        Map<Tab, Component> tabsToPages = new HashMap<>();
+        tabsToPages.put(tab1, page1);
+        tabsToPages.put(tab2, page2);
+        Tabs tabs = new Tabs(tab1, tab2);
+        Div pages = new Div(page1, page2);
+
+        tabs.addSelectedChangeListener(event -> {
+            tabsToPages.values().forEach(page -> page.setVisible(false));
+            Component selectedPage = tabsToPages.get(tabs.getSelectedTab());
+            selectedPage.setVisible(true);
+        });
+
+        /*Button logout*/
+        Button buttonlogout = new Button("Déconnexion");
+        buttonlogout.getStyle()
+                .set("background-color", ViewWithSidebars.ColorHTML.DANGER.getColorHtml())
+                .set("color", ViewWithSidebars.ColorHTML.WHITE.getColorHtml());
+        Anchor logout=new Anchor("logout", "");
+        logout.getStyle()
+                .set("position","absolute")
+                .set("bottom","24px")
+                .set("width","25%")
+                .set("text-align","center");
+        logout.add(buttonlogout);
+
+        /*Title Dialog*/
+        Paragraph paramUser = new Paragraph("Paramètres utilisateur");
+        paramUser.getStyle()
+                .set("width","25%")
+                .set("text-align","center")
+                .set("position","absolute")
+                .set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml())
+                .set("font-weight","700");
+
+        /*Style Layout*/
+        layout.setWidth("100%");
+        layout.setHeight("100%");
+        layoutL.setHeight("100%");
+        layoutR.setHeight("100%");
+        layout.getStyle().set("flex-direction","row");
+        layoutL.setWidth("25%");
+        layoutR.setWidth("75%");
+        layoutR.add(tabs, pages);
+        layoutR.getStyle().set("padding-left","24px");
+        layout.add(layoutL,layoutR);
+        layoutL.add(paramUser, logout);
+        layoutL.getStyle()
+                .set("flex-direction","column")
+                .set("border-right","solid .5px #EAEAEA")
+                .set("padding-right","36px");
+        layoutR.getStyle().set("flex-direction","column");
+
+        /*Set Dialog*/
+        dialog.add(layout);
+        dialog.setWidth("50%");
+        dialog.setHeight("65%");
     }
 
     /**
@@ -244,4 +286,5 @@ public class Navbar extends AppLayout {
         routerLink.getElement().appendChild(button.getElement());
         servCardDock.add(routerLink);
     }
+
 }
