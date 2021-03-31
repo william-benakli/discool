@@ -24,6 +24,7 @@ import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.page.Push;
+import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.router.RouterLink;
@@ -168,16 +169,39 @@ public class Navbar extends AppLayout {
         FlexLayout layoutR = new FlexLayout();
 
         /*Element Tab*/
+        /*Tab 1*/
         Tab tab1 = new Tab("Mon compte");
         tab1.getStyle().set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml());
         Div page1 = new Div();
-        page1.setText("Page#1");
+        FlexLayout centerElement1 = new FlexLayout();
+        centerElement1.getStyle()
+                .set("margin","auto")
+                .set("min-height","100px")
+                .set("width","75%")
+                .set("flex-direction","column");
+        centerElement1.add(createUserCard());
+        page1.add(centerElement1);
 
+        /*Tab 2*/
         Tab tab2 = new Tab("Voix et Vidéo");
         tab2.getStyle().set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml());
         Div page2 = new Div();
-        page2.setText("Page#2");
         page2.setVisible(false);
+        FlexLayout centerElement2 = new FlexLayout();
+        centerElement2.getStyle()
+                .set("margin","auto")
+                .set("min-height","100px")
+                .set("width","75%")
+                .set("flex-direction","column");
+        Select<String> intput = new Select<>();
+        intput.setItems("Option one", "Option two");
+        intput.setLabel("Périphérique d'entrée");
+        intput.getStyle().set("margin-top","25px");
+        Select<String> output = new Select<>();
+        output.setItems("Option one", "Option two");
+        output.setLabel("Périphérique de sortie");
+        centerElement2.add(createUserCard(), intput, output);
+        page2.add(centerElement2);
 
         Map<Tab, Component> tabsToPages = new HashMap<>();
         tabsToPages.put(tab1, page1);
@@ -235,6 +259,30 @@ public class Navbar extends AppLayout {
         dialog.add(layout);
         dialog.setWidth("50%");
         dialog.setHeight("65%");
+    }
+
+    /**
+     * Create file containing the icon and the user's nickname
+     * @return a user card
+     */
+    private FlexLayout createUserCard() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        FlexLayout card = new FlexLayout();
+        card.getStyle()
+                .set("padding-top","50px");
+        Image profilPicture = new Image("img/Chien 3.jpg","Photo de Profil");
+        profilPicture.getStyle()
+                .set("width","100px")
+                .set("height","100px")
+                .set("border-radius","50px");
+        Paragraph userName= new Paragraph(authentication.getName());
+        userName.getStyle()
+                .set("margin","auto auto auto 24px")
+                .set("font-size","18px")
+                .set("font-weight","700")
+                .set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml());
+        card.add(profilPicture, userName);
+        return card;
     }
 
     /**
