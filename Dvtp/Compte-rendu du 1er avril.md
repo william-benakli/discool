@@ -16,4 +16,4 @@ Présents:
 - Yani : faire des boutons pour modifier les données des users et des cours + en ajouter
 - David : pouvoir modifier les infos sur le panel des paramètres de l'utilisateur
 - William : finir le vocal (en tout cas avancer un peu)
-- Laure : la partie admin de l'upload
+- Laure : la partie admin de l'upload 
