@@ -44,6 +44,7 @@ public class AssignmentController {
                     .assignmentId(assignmentId)
                     .courseId(courseId)
                     .studentId(studentId)
+                    .grade(-1)
                     .dateUpload(date)
                     .build();
             studentAssignmentsUploadsRepository.save(submissionToSave);

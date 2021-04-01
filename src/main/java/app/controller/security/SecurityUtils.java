@@ -1,5 +1,7 @@
 package app.controller.security;
 
+import app.jpa_repo.PersonRepository;
+import app.model.users.Person;
 import com.vaadin.flow.server.ServletHelper.RequestType;
 import com.vaadin.flow.shared.ApplicationConstants;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -52,20 +54,5 @@ public final class SecurityUtils {
 	public static Person getCurrentUser(PersonRepository personRepository) {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		return personRepository.findByUsername(authentication.getName());
-	}
-
-	public static boolean isUserTeacher(PersonRepository personRepository) {
-		Person currentUser = getCurrentUser(personRepository);
-		return currentUser.getRole() == Person.Role.TEACHER;
-	}
-
-	public static boolean isUserAdmin(PersonRepository personRepository) {
-		Person currentUser = getCurrentUser(personRepository);
-		return currentUser.getRole() == Person.Role.ADMIN;
-	}
-
-	public static boolean isUserStudent(PersonRepository personRepository) {
-		Person currentUser = getCurrentUser(personRepository);
-		return currentUser.getRole() == Person.Role.STUDENT;
 	}
 }

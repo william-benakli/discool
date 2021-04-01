@@ -6,6 +6,7 @@ import app.controller.security.SecurityUtils;
 import app.jpa_repo.*;
 import app.model.courses.Assignment;
 import app.model.courses.Course;
+import app.model.courses.StudentAssignmentUpload;
 import app.model.users.Person;
 import app.web.components.UploadComponent;
 import app.web.layout.Navbar;
@@ -26,6 +27,7 @@ import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.parameters.P;
 
 import java.util.Optional;
 
@@ -109,26 +111,55 @@ public class StudentAssignmentView extends ViewWithSidebars implements HasDynami
             if (assignment.getAllowLate() == 1) {
                 this.add(new Paragraph("cut off date : " + assignment.getCutoffdate()));
             }
-            this.add(new Paragraph("max number of attempts : " + assignment.getMaxAttempts()));
+            //this.add(new Paragraph("max number of attempts : " + assignment.getMaxAttempts()));
             this.add(new Paragraph("max grade : " + assignment.getMaxGrade()));
+
+            writeGradeInfo();
+        }
+
+        private void writeGradeInfo() {
+            Long id = Long.parseLong(String.valueOf(assignment.getId()) + String.valueOf(SecurityUtils.getCurrentUser(personRepository).getId()));
+            Optional<StudentAssignmentUpload> s = studentAssignmentsUploadsRepository.findById(id);
+            Paragraph grade = new Paragraph();
+            this.add(grade);
+            if (s.isPresent()) {
+                StudentAssignmentUpload answer = s.get();
+                if (answer.getGrade() == -1) {
+                    grade.setText("Your assignment hasn't been graded yet");
+                } else {
+                    grade.setText("Your grade is : " + answer.getGrade());
+                    if (answer.getTeacherComments().equals("")) {
+                        this.add(new Paragraph("Your teacher didn't write any comments"));
+                    } else {
+                        this.add(new Paragraph("Teacher's comments : \n" + answer.getTeacherComments()));
+                    }
+                }
+            } else {
+                this.add(new Paragraph("You have not submitted an answer yet !"));
+            }
         }
 
         private void createUploadZone() {
-            MultiFileMemoryBuffer buffer = new MultiFileMemoryBuffer();
-//            Upload upload = new Upload(buffer);
-//            upload.setMaxFileSize(20971520);
-            UploadComponent upload = new UploadComponent("200px","200px", 3,
-                                                         30000000, null);
+            String newDirName = "uploads/assignments/" + String.valueOf(assignment.getId()) + "_" +
+                    String.valueOf(SecurityUtils.getCurrentUser(personRepository).getId());
+            UploadComponent upload = new UploadComponent("200px", "200px", 3, 30000000,
+                                                         newDirName);
+
             upload.addSucceededListener(event -> {
                 assignmentController.save(assignment.getId(), assignment.getCourseId(), 1);
                 Notification.show("You successfully uploaded your file !");
             });
-            upload.addFileRejectedListener(event -> Notification.show("Couldn't upload the file"));
+
+            upload.addFileRejectedListener(event -> {
+                Notification.show("Couldn't upload the file");
+                Notification.show(event.getErrorMessage());
+            });
+
             this.add(upload);
         }
     }
 
-    private class AdminAssignmentLayout extends VerticalLayout{
+    private class AdminAssignmentLayout extends VerticalLayout {
         public AdminAssignmentLayout(Assignment assignment) {
 
         }
