@@ -17,13 +17,14 @@ import com.vaadin.flow.component.page.Push;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinServletRequest;
+import com.vaadin.flow.shared.ui.Transport;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.net.URI;
 import java.util.ArrayList;
 
-@Push
+@Push(transport = Transport.LONG_POLLING)
 @CssImport("./styles/style.css")
 @StyleSheet("https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap")
 public class Navbar extends AppLayout {
