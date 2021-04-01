@@ -45,16 +45,18 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
     private TextChannel textChannel;
     private final TextField messageTextField;
     private final FlexLayout chatBar = new FlexLayout();
-    private ComponentButton muteMicrophone;
-    private ComponentButton muteHeadphone;
-    private Button exitButton;
-    private Button sendMessage;
+
+
     private long targetResponseMessage;
     private final FlexLayout messageContainer = new FlexLayout();
     private Registration broadcasterRegistration;
 
-    private Div chatResponse;
-    private Paragraph chatResponseMessage;
+    private MessageResponsePopComponent selectRep;
+    private Button exitButton;
+    private Button sendMessage;
+    private ComponentButton muteMicrophone;
+    private ComponentButton muteHeadphone;
+
 
     public TextChannelView(@Autowired TextChannelRepository textChannelRepository,
                            @Autowired PublicChatMessageRepository publicChatMessageRepository,
@@ -91,14 +93,16 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
 
                     if (targetResponseMessage == 0) {
                         newMessage = getController().saveMessage(messageTextField.getValue(), textChannel.getId(), 1, sender.getId());
-                        MessageLayout message = new MessageLayout(newMessage);
-                        PublicMessagesBroadcaster.broadcast("NEW_MESSAGE", message);
                     } else {
                         newMessage = getController().saveMessage(messageTextField.getValue(), textChannel.getId(), targetResponseMessage, sender.getId());
-                        MessageLayout message = new MessageLayout(newMessage);
-                        PublicMessagesBroadcaster.broadcast("NEW_MESSAGE", message);
-                        targetResponseMessage = 0;
+                        if (newMessage != null) {
+                            selectRep.changeStatus();
+                            targetResponseMessage = 0;
+                        }
                     }
+                    System.out.println(newMessage.getId() + " -------------------->");
+                    MessageLayout message = new MessageLayout(newMessage);
+                    PublicMessagesBroadcaster.broadcast("NEW_MESSAGE", message);
                     scrollDownChat();
 
                 } else {
@@ -157,6 +161,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         }
     }
 
+
     @Override
     public String getPageTitle() {
         return textChannel.getName();
@@ -212,13 +217,9 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         chatButtonContainer.getStyle().set("padding", "0 2.5px");
         chatButtonContainer.add(sendMessage, muteMicrophone, muteHeadphone, exitButton);
 
+        VerticalLayout layoutMaster = new VerticalLayout();
         FlexLayout messageInputBar = new FlexLayout();
-        chatResponse = new Div();
-        chatResponse.add(new Paragraph("Oui"));
-        chatResponse.setVisible(false);
-        chatResponseMessage = new Paragraph();
-        chatResponse.add(chatResponseMessage);
-        messageInputBar.add(messageTextField, chatResponse, chatButtonContainer);
+        messageInputBar.add(messageTextField, chatButtonContainer);
         setCardStyle(messageContainer, "99%", ColorHTML.GREY);
         messageContainer.setHeightFull();
         messageContainer.getStyle()
@@ -230,11 +231,52 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                 .set("background-color", ColorHTML.GREY.getColorHtml())
                 .set("flex-direction", "column");
 
-        for (PublicChatMessage message : getController().getChatMessagesForChannel(textChannel.getId())){
-            if(!message.isDeleted()) messageContainer.add(new MessageLayout(message));
+        selectRep = new MessageResponsePopComponent();
 
+        for (PublicChatMessage message : getController().getChatMessagesForChannel(textChannel.getId())) {
+            if (!message.isDeleted()) messageContainer.add(new MessageLayout(message));
         }
-        chatBar.add(messageContainer, messageInputBar);
+        layoutMaster.add(selectRep, messageInputBar);
+        chatBar.add(messageContainer, layoutMaster);
+    }
+
+    public class MessageResponsePopComponent extends Div {
+
+        FlexLayout layoutFlexLayout;
+
+        Paragraph message;
+        Button annuler;
+
+        public MessageResponsePopComponent() {
+            annuler = new Button("X");
+            message = new Paragraph();
+            layoutFlexLayout = new FlexLayout();
+            this.getStyle().set("background-color", ColorHTML.DARKGREY.getColorHtml());
+            this.setVisible(false);
+            eventClickMessage();
+            layoutFlexLayout.add(message, annuler);
+            add(layoutFlexLayout);
+        }
+
+        public void setMessage(String userTo) {
+            message.setText("Repondre à " + userTo);
+        }
+
+        public void eventClickMessage() {
+            annuler.addClickListener(ev -> {
+                targetResponseMessage = 0L;
+                changeStatus();
+            });
+        }
+
+        public void changeStatus() {
+            setVisible((!this.isVisible()));
+        }
+
+        public void show() {
+            setVisible(true);
+        }
+
     }
 
     /**
@@ -395,8 +437,8 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
             response = new ComponentButton("img/repondre.svg", "Repondre", SIZEWIDTH, SIZEHEIGHT);
             response.addClickListener(ev -> {
                 targetResponseMessage = publicMessage.getId();
-                chatResponseMessage.setText("Vous allez repondre à " + personRepository.findById(publicMessage.getSender()).getUsername() );
-                chatResponse.setVisible(true);
+                selectRep.setMessage(personRepository.findById(publicMessage.getSender()).getUsername());
+                if (!selectRep.isVisible()) selectRep.show();
                 scrollDownChat();
             });
         }
