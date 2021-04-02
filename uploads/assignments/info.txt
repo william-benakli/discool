@@ -1,0 +1,2 @@
+In this directory, the uploads from students for assignments are saved.
+The directories are named assignmentId_studentId.

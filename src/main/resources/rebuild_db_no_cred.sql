@@ -25,7 +25,6 @@ CREATE TABLE IF NOT EXISTS users (
     PRIMARY KEY(id)
 ) ENGINE=InnoDB;
 
-
 CREATE TABLE IF NOT EXISTS courses (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE,
     name VARCHAR(255) NOT NULL,
@@ -50,7 +49,6 @@ CREATE TABLE IF NOT EXISTS course_sections (
         FOREIGN KEY(courseid) REFERENCES courses(id),
     PRIMARY KEY(id)
 ) ENGINE=InnoDB;
-
 
 CREATE TABLE IF NOT EXISTS groups (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE,
@@ -118,8 +116,43 @@ CREATE TABLE IF NOT EXISTS posts (
     CONSTRAINT fk_userid_posts
         FOREIGN KEY(userid) REFERENCES users(id),
     CONSTRAINT fk_channelid
-	FOREIGN KEY (channelid) REFERENCES channels(id),
+	    FOREIGN KEY (channelid) REFERENCES channels(id),
     PRIMARY KEY (id)
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS assignments (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE,
+    courseid BIGINT UNSIGNED NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    duedate BIGINT NOT NULL,
+    cutoffdate BIGINT,
+    allowlate SMALLINT NOT NULL,
+    maxgrade SMALLINT,
+    maxattempts SMALLINT NOT NULL,
+
+    CONSTRAINT fk_courseid_assignments
+        FOREIGN KEY (courseid) REFERENCES courses(id),
+    PRIMARY KEY(id)
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS students_assignments_uploads (
+    id BIGINT UNSIGNED NOT NULL UNIQUE,
+    assignmentid BIGINT UNSIGNED NOT NULL,
+    courseid BIGINT UNSIGNED NOT NULL,
+    studentid BIGINT UNSIGNED NOT NULL,
+    grade INT,
+    teachercomments TEXT,
+    dateupload BIGINT NOT NULL,
+
+    CONSTRAINT fk_courseid_assignments2
+        FOREIGN KEY (courseid) REFERENCES courses(id),
+    CONSTRAINT fk_studentid_assigments
+        FOREIGN KEY (studentid) REFERENCES users(id),
+    CONSTRAINT fk_assignmentsid
+        FOREIGN KEY (assignmentid) REFERENCES assignments(id),
+
+    PRIMARY KEY(id)
 ) ENGINE=InnoDB;
 
 INSERT INTO users VALUES (1, "admin", 1, "admin_fn", "admin_ln", "adminemail", "description admin", "website admin", 0, 0, 0);
@@ -173,3 +206,6 @@ INSERT INTO group_members VALUES
     (NULL, 2, 6, 0),
     (NULL, 3, 6, 0),
     (NULL, 3, 7, 0);
+
+INSERT INTO assignments VALUES
+    (NULL, 1, "test assignment", "this is a test !", 0, 0, 1, 20, 3);

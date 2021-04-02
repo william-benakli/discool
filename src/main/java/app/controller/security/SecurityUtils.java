@@ -1,5 +1,7 @@
 package app.controller.security;
 
+import app.jpa_repo.PersonRepository;
+import app.model.users.Person;
 import com.vaadin.flow.server.ServletHelper.RequestType;
 import com.vaadin.flow.shared.ApplicationConstants;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -42,5 +44,15 @@ public final class SecurityUtils {
 		return authentication != null
 				&& !(authentication instanceof AnonymousAuthenticationToken)
 				&& authentication.isAuthenticated();
+	}
+
+	/**
+	 * Returns the current user
+	 * @param personRepository the JPA repo to search the user in
+	 * @return	the current user
+	 */
+	public static Person getCurrentUser(PersonRepository personRepository) {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		return personRepository.findByUsername(authentication.getName());
 	}
 }

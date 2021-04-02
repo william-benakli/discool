@@ -131,7 +131,7 @@ public abstract class ViewWithSidebars extends VerticalLayout {
     public void createSidebar(long courseId) {
         VaadinServletRequest req = (VaadinServletRequest) VaadinService.getCurrentRequest();
         StringBuffer uriString = req.getRequestURL();
-        URI uri = new URI(uriString.toString());//TODO: Del
+        URI uri = new URI(uriString.toString()); //TODO: Del
         String s=uri.toString();
         String t=s.substring(s.length()-1);//TODO: edit with the correct redirect values
         String[] s2=s.split("/");
