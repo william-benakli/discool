@@ -93,7 +93,6 @@ public class StudentAssignmentView extends ViewWithSidebars implements HasDynami
         assignmentBar.add(title);
         StudentAssignmentLayout layout = new StudentAssignmentLayout(assignment);
         assignmentBar.add(layout);
-
     }
 
     private class StudentAssignmentLayout extends VerticalLayout {
@@ -146,7 +145,7 @@ public class StudentAssignmentView extends ViewWithSidebars implements HasDynami
                                                          newDirName);
 
             upload.addSucceededListener(event -> {
-                assignmentController.save(assignment.getId(), assignment.getCourseId(), 1);
+                assignmentController.save(assignment.getId(), assignment.getCourseId(), SecurityUtils.getCurrentUser(personRepository).getId());
                 Notification.show("You successfully uploaded your file !");
             });
 
@@ -156,12 +155,6 @@ public class StudentAssignmentView extends ViewWithSidebars implements HasDynami
             });
 
             this.add(upload);
-        }
-    }
-
-    private class AdminAssignmentLayout extends VerticalLayout {
-        public AdminAssignmentLayout(Assignment assignment) {
-
         }
     }
 }
