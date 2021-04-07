@@ -11,13 +11,11 @@ import app.web.views.ViewWithSidebars;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.KeyModifier;
-import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.dialog.Dialog;
-import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
@@ -30,13 +28,10 @@ import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.PasswordField;
-import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinServletRequest;
 import com.vaadin.flow.shared.ui.Transport;
-import com.vaadin.flow.theme.NoTheme;
-import com.vaadin.flow.theme.Theme;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -52,8 +47,8 @@ import java.util.Map;
 @StyleSheet("https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap")
 public class Navbar extends AppLayout {
 
-    //TODO: adapt the display of the buttons according to the user
-    //TODO: the background of the selected button changes color when clicked
+    //TODO: adapt the display of the buttons according to the user #53
+    //TODO: the background of the selected button changes color when clicked #42
 
     private final CourseRepository courseRepository;
     private final PersonRepository personRepository;
@@ -97,10 +92,10 @@ public class Navbar extends AppLayout {
         StringBuffer uriString = req.getRequestURL();
         URI uri = new URI(uriString.toString());
         String s=uri.toString();
-        String t=s.substring(s.length()-1);//TODO: edit with the correct redirect values
+        String t=s.substring(s.length()-1);//TODO: edit with the correct redirect values #42
         String[] s2=s.split("/");
 
-        long tmp = 0;//TODO: edit with the correct redirect values
+        long tmp = 0;//TODO: edit with the correct redirect values #42
         HorizontalLayout servCardDock = HorizontalLayoutCustom();
         ArrayList<Course> courses = (ArrayList<Course>) courseRepository.findAll();
         for (Course c : courses) {
@@ -113,8 +108,7 @@ public class Navbar extends AppLayout {
                     .set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml());
             RouterLink routerLink = new RouterLink("", MoodleView.class, c.getId());
             linkRouteurImge(servCardDock, button, routerLink);
-/**/
-            if (s2.length>=4 && s2[3].equals("moodle") && t.equals(c.getId()+"")){//TODO: edit with the correct redirect values
+            if (s2.length>=4 && s2[3].equals("moodle") && t.equals(c.getId()+"")){//TODO: edit with the correct redirect values #42
                 routerLink.getStyle()
                         .set("border-radius","10px 10px 0 0")
                         .set("padding","0 10px")
@@ -126,15 +120,13 @@ public class Navbar extends AppLayout {
         button.getStyle()
                 .set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml());
         RouterLink routerLink = new RouterLink("", MoodleView.class, tmp);
-/**/
-        if (t.equals(0+"")){//TODO: edit with the correct redirect values
+        if (t.equals(0+"")){//TODO: edit with the correct redirect values #42
             routerLink.getStyle()
                     .set("border-radius","10px 10px 0 0")
                     .set("padding","0 10px")
                     .set("background-color", ViewWithSidebars.ColorHTML.GREY.getColorHtml());
         }
-        routerLink.addClassName("colored");//TODO: Supp
-
+        routerLink.addClassName("colored");
         linkRouteurImge(servCardDock, button, routerLink);
         addToNavbar(servCardDock);
     }
@@ -143,14 +135,13 @@ public class Navbar extends AppLayout {
      * Generates the submenu of the navigation bar which contains user, server and private message settings
      */
     private void subMenuRight(String[][] pathImage) {
-        long tmp = 0;//TODO: edit with the correct redirect values
+        long tmp = 0;//TODO: edit with the correct redirect values #42
         HorizontalLayout servCardDock = HorizontalLayoutCustom();
         servCardDock.getStyle().set("margin", "0");
         for (String[] imageInfo : pathImage) {
             ComponentButton button = createServDockImage(new Image(imageInfo[0], imageInfo[1]), Key.NAVIGATE_NEXT);
             button.getStyle()
                     .set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml());
-
             if (imageInfo[0].equals("img/manageAccounts.svg")){
                 Dialog dialog  = new Dialog();
                 popupuser(dialog);
@@ -167,6 +158,7 @@ public class Navbar extends AppLayout {
 
     /**
      * Set the dialog window for user parameters
+     *
      * @param dialog navigation page for user settings
      */
     private void popupuser(Dialog dialog) {
@@ -176,11 +168,10 @@ public class Navbar extends AppLayout {
         FlexLayout layoutR = new FlexLayout();
 
         /*Element Tab*/
-
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
         Person sender = personRepository.findByUsername(username);
-        
+
         EmailField emailField = new EmailField("Changer d'e-mail");
         emailField.setClearButtonVisible(true);
         emailField.setErrorMessage("Veuillez entrer une adresse email valide");
@@ -202,7 +193,7 @@ public class Navbar extends AppLayout {
         valide.addClickListener(buttonClickEvent -> {
             personRepository.updateEmailById(sender.getId(),emailField.getValue());
             dialog.close();
-            //TODO: add a password field in the database
+            //TODO: add a password field in the database #83
         });
 
         /*Tab 1*/
@@ -220,7 +211,7 @@ public class Navbar extends AppLayout {
         FlexLayout centerElement2 = new FlexLayout();
         styleTab(tab2, centerElement2);
 
-        /*Input TODO: set up audio output and input*/
+        /*Input TODO: set up audio output and input #25*/
         Select<String> intput = new Select<>();
         intput.setItems("Option one", "Option two");
         intput.setLabel("Périphérique d'entrée");
@@ -296,6 +287,7 @@ public class Navbar extends AppLayout {
 
     /**
      * Change the style of tabs
+     *
      * @param tab1 tab where we will apply css properties
      * @param div div where we will apply css properties
      */
@@ -310,6 +302,7 @@ public class Navbar extends AppLayout {
 
     /**
      * Create file containing the icon and the user's nickname
+     *
      * @return a user card
      */
     private FlexLayout createUserCard() {
@@ -366,8 +359,6 @@ public class Navbar extends AppLayout {
         imgButton.addFocusShortcut(shortCut, KeyModifier.ALT);
         return imgButton;
     }
-
-    /*formerly in Componenent Builder*/
 
     /**
      * Links an image a button and a link router to have a clickable button redirecting to a server
