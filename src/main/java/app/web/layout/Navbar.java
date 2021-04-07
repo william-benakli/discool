@@ -1,6 +1,7 @@
 package app.web.layout;
 
 import app.jpa_repo.CourseRepository;
+import app.jpa_repo.PersonRepository;
 import app.model.courses.Course;
 import app.model.users.Person;
 import app.web.components.ComponentButton;
@@ -27,6 +28,9 @@ import com.vaadin.flow.component.page.Push;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
+import com.vaadin.flow.component.textfield.EmailField;
+import com.vaadin.flow.component.textfield.PasswordField;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinServletRequest;
@@ -52,13 +56,15 @@ public class Navbar extends AppLayout {
     //TODO: the background of the selected button changes color when clicked
 
     private final CourseRepository courseRepository;
+    private final PersonRepository personRepository;
     private String[][] settingMenu = {
             {"img/chatBubble.svg", "Messages privés"},
             {"img/manageAccounts.svg", "Paramètres des utilisateurs"},
             {"img/settings.svg", "Paramètres de serveurs"}
     };
 
-    public Navbar(@Autowired CourseRepository courseRepository) {
+    public Navbar(@Autowired CourseRepository courseRepository, @Autowired PersonRepository personRepository) {
+        this.personRepository=personRepository;
         this.courseRepository = courseRepository;
         subMenuLeft();
         printCourseBar();
@@ -158,6 +164,7 @@ public class Navbar extends AppLayout {
         addToNavbar(servCardDock);
     }
 
+
     /**
      * Set the dialog window for user parameters
      * @param dialog navigation page for user settings
@@ -169,30 +176,51 @@ public class Navbar extends AppLayout {
         FlexLayout layoutR = new FlexLayout();
 
         /*Element Tab*/
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        Person sender = personRepository.findByUsername(username);
+        
+        EmailField emailField = new EmailField("Changer d'e-mail");
+        emailField.setClearButtonVisible(true);
+        emailField.setErrorMessage("Veuillez entrer une adresse email valide");
+        emailField.setPlaceholder(sender.getEmail());
+
+        PasswordField passwordField = new PasswordField();
+        passwordField.setLabel("Changer de mot de passe");
+
+        PasswordField passwordFieldConfirmation = new PasswordField();
+        passwordFieldConfirmation.setLabel("Mot de passe actuel");
+
+        Button valide = new Button("Valider");
+        valide.getStyle()
+                .set("background-color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml())
+                .set("color", ViewWithSidebars.ColorHTML.WHITE.getColorHtml())
+                .set("top","20px")
+                .set("text-align","center");
+
+        valide.addClickListener(buttonClickEvent -> {
+            personRepository.updateEmailById(sender.getId(),emailField.getValue());
+            dialog.close();
+            //TODO: add a password field in the database
+        });
+
         /*Tab 1*/
         Tab tab1 = new Tab("Mon compte");
-        tab1.getStyle().set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml());
         Div page1 = new Div();
         FlexLayout centerElement1 = new FlexLayout();
-        centerElement1.getStyle()
-                .set("margin","auto")
-                .set("min-height","100px")
-                .set("width","75%")
-                .set("flex-direction","column");
-        centerElement1.add(createUserCard());
+        styleTab(tab1, centerElement1);
+        centerElement1.add(createUserCard(), emailField, passwordField, passwordFieldConfirmation, valide);
         page1.add(centerElement1);
 
         /*Tab 2*/
         Tab tab2 = new Tab("Voix et Vidéo");
-        tab2.getStyle().set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml());
         Div page2 = new Div();
         page2.setVisible(false);
         FlexLayout centerElement2 = new FlexLayout();
-        centerElement2.getStyle()
-                .set("margin","auto")
-                .set("min-height","100px")
-                .set("width","75%")
-                .set("flex-direction","column");
+        styleTab(tab2, centerElement2);
+
+        /*Input TODO: set up audio output and input*/
         Select<String> intput = new Select<>();
         intput.setItems("Option one", "Option two");
         intput.setLabel("Périphérique d'entrée");
@@ -203,6 +231,7 @@ public class Navbar extends AppLayout {
         centerElement2.add(createUserCard(), intput, output);
         page2.add(centerElement2);
 
+        /*navigation between tabs*/
         Map<Tab, Component> tabsToPages = new HashMap<>();
         tabsToPages.put(tab1, page1);
         tabsToPages.put(tab2, page2);
@@ -238,27 +267,45 @@ public class Navbar extends AppLayout {
                 .set("font-weight","700");
 
         /*Style Layout*/
-        layout.setWidth("100%");
-        layout.setHeight("100%");
-        layoutL.setHeight("100%");
-        layoutR.setHeight("100%");
-        layout.getStyle().set("flex-direction","row");
-        layoutL.setWidth("25%");
-        layoutR.setWidth("75%");
-        layoutR.add(tabs, pages);
-        layoutR.getStyle().set("padding-left","24px");
         layout.add(layoutL,layoutR);
+        layout.getStyle()
+                .set("height","100%")
+                .set("width","100%")
+                .set("flex-direction","row");
+
+        layoutR.add(tabs, pages);
+        layoutR.getStyle()
+                .set("height","100%")
+                .set("width","75%")
+                .set("padding-left","24px")
+                .set("flex-direction","column");
+
         layoutL.add(paramUser, logout);
         layoutL.getStyle()
+                .set("height","100%")
+                .set("width","25%")
                 .set("flex-direction","column")
                 .set("border-right","solid .5px #EAEAEA")
                 .set("padding-right","36px");
-        layoutR.getStyle().set("flex-direction","column");
 
         /*Set Dialog*/
         dialog.add(layout);
         dialog.setWidth("50%");
         dialog.setHeight("65%");
+    }
+
+    /**
+     * Change the style of tabs
+     * @param tab1 tab where we will apply css properties
+     * @param div div where we will apply css properties
+     */
+    private void styleTab(Tab tab1, FlexLayout div) {
+        tab1.getStyle().set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml());
+        div.getStyle()
+                .set("margin","auto")
+                .set("min-height","100px")
+                .set("width","75%")
+                .set("flex-direction","column");
     }
 
     /**
