@@ -38,7 +38,6 @@ public class StudentAssignmentView extends ViewWithSidebars implements HasDynami
     private final StudentAssignmentsUploadsRepository studentAssignmentsUploadsRepository;
     private final CourseRepository courseRepository;
     private final PersonRepository personRepository;
-    private final AssignmentController assignmentController;
     private Course course;
     private Assignment assignment;
     private final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -55,10 +54,10 @@ public class StudentAssignmentView extends ViewWithSidebars implements HasDynami
         this.studentAssignmentsUploadsRepository = studentAssignmentsUploadsRepository;
         this.courseRepository = courseRepository;
         this.personRepository = personRepository;
-        this.assignmentController = new AssignmentController(personRepository, assignmentRepository,
-                                                             studentAssignmentsUploadsRepository, courseRepository);
         setController(new Controller(personRepository, textChannelRepository, null,
                                      courseRepository, null));
+        setAssignmentController(new AssignmentController(personRepository, assignmentRepository,
+                                                         studentAssignmentsUploadsRepository, courseRepository));
     }
 
     @SneakyThrows // so that javac doesn't complain about not catching the exception
@@ -119,7 +118,7 @@ public class StudentAssignmentView extends ViewWithSidebars implements HasDynami
         }
 
         private void writeGradeInfo() {
-            StudentAssignmentUpload s = assignmentController.findStudentAssignmentSubmission(assignment.getId(),
+            StudentAssignmentUpload s = getAssignmentController().findStudentAssignmentSubmission(assignment.getId(),
                                                  personRepository.findByUsername(authentication.getName()).getId());
             Paragraph grade = new Paragraph();
             this.add(grade);
@@ -146,7 +145,7 @@ public class StudentAssignmentView extends ViewWithSidebars implements HasDynami
                                                          newDirName);
 
             upload.addSucceededListener(event -> {
-                assignmentController.save(assignment.getId(), assignment.getCourseId(),
+                getAssignmentController().save(assignment.getId(), assignment.getCourseId(),
                                           personRepository.findByUsername(authentication.getName()).getId());
                 Notification.show("You successfully uploaded your file !");
             });

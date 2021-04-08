@@ -1,13 +1,13 @@
 package app.web.views;
 
+import app.controller.AssignmentController;
 import app.controller.Controller;
 import app.controller.PublicMessagesBroadcaster;
 import app.controller.commands.CommandsClearChat;
-import app.jpa_repo.PersonRepository;
-import app.jpa_repo.PublicChatMessageRepository;
-import app.jpa_repo.TextChannelRepository;
+import app.jpa_repo.*;
 import app.model.chat.PublicChatMessage;
 import app.model.chat.TextChannel;
+import app.model.courses.Course;
 import app.model.users.Person;
 import app.web.components.ComponentButton;
 import app.web.layout.Navbar;
@@ -55,12 +55,17 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
 
     public TextChannelView(@Autowired TextChannelRepository textChannelRepository,
                            @Autowired PublicChatMessageRepository publicChatMessageRepository,
-                           @Autowired PersonRepository personRepository) {
+                           @Autowired PersonRepository personRepository,
+                           @Autowired AssignmentRepository assignmentRepository,
+                           @Autowired StudentAssignmentsUploadsRepository studentAssignmentsUploadsRepository,
+                           @Autowired CourseRepository courseRepository) {
         this.textChannelRepository = textChannelRepository;
         this.personRepository = personRepository;
         this.targetResponseMessage = 0;
         setController(new Controller(personRepository, textChannelRepository, publicChatMessageRepository,
                                      null, null));
+        setAssignmentController(new AssignmentController(personRepository, assignmentRepository,
+                                                         studentAssignmentsUploadsRepository, courseRepository));
         this.messageTextField = createTextField();
         createVoiceChatButtons();
         createSendMessageButton();

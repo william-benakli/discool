@@ -4,8 +4,10 @@ import app.jpa_repo.AssignmentRepository;
 import app.jpa_repo.CourseRepository;
 import app.jpa_repo.PersonRepository;
 import app.jpa_repo.StudentAssignmentsUploadsRepository;
+import app.model.courses.Assignment;
 import app.model.courses.StudentAssignmentUpload;
 
+import java.util.ArrayList;
 import java.util.Optional;
 
 
@@ -54,5 +56,9 @@ public class AssignmentController {
 
     public StudentAssignmentUpload findStudentAssignmentSubmission(long assignmentId, long studentId) {
         return studentAssignmentsUploadsRepository.findByAssignmentIdAndStudentId(assignmentId, studentId);
+    }
+
+    public ArrayList<Assignment> getAssignmentsForCourse(long courseId) {
+        return assignmentRepository.findAllByCourseId(courseId);
     }
 }
