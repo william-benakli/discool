@@ -41,6 +41,8 @@ public class StudentAssignmentView extends ViewWithSidebars implements HasDynami
     private final AssignmentController assignmentController;
     private Course course;
     private Assignment assignment;
+    private final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
 
     private FlexLayout assignmentBar = new FlexLayout();
 
@@ -117,20 +119,19 @@ public class StudentAssignmentView extends ViewWithSidebars implements HasDynami
         }
 
         private void writeGradeInfo() {
-            Long id = Long.parseLong(String.valueOf(assignment.getId()) + String.valueOf(SecurityUtils.getCurrentUser(personRepository).getId()));
-            Optional<StudentAssignmentUpload> s = studentAssignmentsUploadsRepository.findById(id);
+            StudentAssignmentUpload s = assignmentController.findStudentAssignmentSubmission(assignment.getId(),
+                                                 personRepository.findByUsername(authentication.getName()).getId());
             Paragraph grade = new Paragraph();
             this.add(grade);
-            if (s.isPresent()) {
-                StudentAssignmentUpload answer = s.get();
-                if (answer.getGrade() == -1) {
+            if (s != null) {
+                if (s.getGrade() == -1) {
                     grade.setText("Your assignment hasn't been graded yet");
                 } else {
-                    grade.setText("Your grade is : " + answer.getGrade());
-                    if (answer.getTeacherComments().equals("")) {
+                    grade.setText("Your grade is : " + s.getGrade());
+                    if (s.getTeacherComments() == null) {
                         this.add(new Paragraph("Your teacher didn't write any comments"));
                     } else {
-                        this.add(new Paragraph("Teacher's comments : \n" + answer.getTeacherComments()));
+                        this.add(new Paragraph("Teacher's comments : \n" + s.getTeacherComments()));
                     }
                 }
             } else {
@@ -145,7 +146,8 @@ public class StudentAssignmentView extends ViewWithSidebars implements HasDynami
                                                          newDirName);
 
             upload.addSucceededListener(event -> {
-                assignmentController.save(assignment.getId(), assignment.getCourseId(), SecurityUtils.getCurrentUser(personRepository).getId());
+                assignmentController.save(assignment.getId(), assignment.getCourseId(),
+                                          personRepository.findByUsername(authentication.getName()).getId());
                 Notification.show("You successfully uploaded your file !");
             });
 

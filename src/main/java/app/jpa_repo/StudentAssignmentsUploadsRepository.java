@@ -5,5 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface StudentAssignmentsUploadsRepository extends JpaRepository<StudentAssignmentUpload, Long> {
 
+    StudentAssignmentUpload findByAssignmentIdAndStudentId(long assignmentId, long studentId);
 
 }

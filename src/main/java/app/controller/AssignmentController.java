@@ -51,4 +51,8 @@ public class AssignmentController {
         }
 
     }
+
+    public StudentAssignmentUpload findStudentAssignmentSubmission(long assignmentId, long studentId) {
+        return studentAssignmentsUploadsRepository.findByAssignmentIdAndStudentId(assignmentId, studentId);
+    }
 }
