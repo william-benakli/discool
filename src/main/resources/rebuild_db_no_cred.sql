@@ -208,4 +208,7 @@ INSERT INTO group_members VALUES
     (NULL, 3, 7, 0);
 
 INSERT INTO assignments VALUES
-    (NULL, 1, "test assignment", "this is a test !", 0, 0, 1, 20, 3);
+    (NULL, 1, "test assignment", "this is a test !", 0, 0, 1, 20, 3),
+    (NULL, 2, "test2 assignment", "this is a test2 !", 0, 0, 1, 20, 3),
+    (NULL, 3, "test3 assignment", "this is a test3 !", 0, 0, 1, 20, 3),
+    (NULL, 1, "test4 assignment", "this is a test4 !", 0, 0, 1, 20, 3);
