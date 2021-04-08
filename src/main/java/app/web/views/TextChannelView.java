@@ -100,7 +100,6 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                             targetResponseMessage = 0;
                         }
                     }
-                    System.out.println(newMessage.getId() + " -------------------->");
                     MessageLayout message = new MessageLayout(newMessage);
                     PublicMessagesBroadcaster.broadcast("NEW_MESSAGE", message);
                     scrollDownChat();
@@ -138,7 +137,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                 messageContainer.add(messageLayout);
                 break;
             case "DELETE_MESSAGE":
-                messageContainer.remove(messageLayout);
+                messageLayout.setVisible(false);
                 break;
             case "UPDATE_MESSAGE":
                 for (Object obj : messageContainer.getChildren().toArray()) {
@@ -218,7 +217,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         chatButtonContainer.add(sendMessage, muteMicrophone, muteHeadphone, exitButton);
 
         VerticalLayout layoutMaster = new VerticalLayout();
-        FlexLayout messageInputBar = new FlexLayout();
+        HorizontalLayout messageInputBar = new HorizontalLayout();
         messageInputBar.add(messageTextField, chatButtonContainer);
         setCardStyle(messageContainer, "99%", ColorHTML.GREY);
         messageContainer.setHeightFull();
@@ -236,13 +235,15 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         for (PublicChatMessage message : getController().getChatMessagesForChannel(textChannel.getId())) {
             if (!message.isDeleted()) messageContainer.add(new MessageLayout(message));
         }
+        layoutMaster.getStyle().set("display", "block");
         layoutMaster.add(selectRep, messageInputBar);
         chatBar.add(messageContainer, layoutMaster);
     }
 
+
     public class MessageResponsePopComponent extends Div {
 
-        FlexLayout layoutFlexLayout;
+        HorizontalLayout layoutHorizontalLayout;
 
         Paragraph message;
         Button annuler;
@@ -250,12 +251,26 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         public MessageResponsePopComponent() {
             annuler = new Button("X");
             message = new Paragraph();
-            layoutFlexLayout = new FlexLayout();
-            this.getStyle().set("background-color", ColorHTML.DARKGREY.getColorHtml());
-            this.setVisible(false);
+            message.getStyle().set("padding-right", "70%").set("padding", "10px");
+            layoutHorizontalLayout = new HorizontalLayout();
+            getStyle().set("background-color", ColorHTML.DARKGREY.getColorHtml());
+            setVisible(false);
+            setStyle();
             eventClickMessage();
-            layoutFlexLayout.add(message, annuler);
-            add(layoutFlexLayout);
+            layoutHorizontalLayout.add(message, annuler);
+            add(layoutHorizontalLayout);
+        }
+
+        public void setStyle() {
+            this.getStyle().set("-webkit-border-top-left-radius", "30px")
+                    .set("-webkit-border-top-right-radius", "30px")
+                    .set("-moz-border-radius-topleft", "30px")
+                    .set("-moz-border-radius-topright", "30px")
+                    .set("border-top-left-radius", "30px")
+                    .set("border-top-right-radius", "30px")
+                    .set("box-shadow", " -2px -24px 46px -27px rgba(0,0,0,0.43)")
+                    .set("-webkit-box-shadow", "-2px -24px 46px -27px rgba(0,0,0,0.43)")
+                    .set("-moz-box-shadow", "-2px -24px 46px -27px rgba(0,0,0,0.43)");
         }
 
         public void setMessage(String userTo) {
@@ -436,10 +451,12 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         public void createResponseButton(PublicChatMessage publicMessage) {
             response = new ComponentButton("img/repondre.svg", "Repondre", SIZEWIDTH, SIZEHEIGHT);
             response.addClickListener(ev -> {
-                targetResponseMessage = publicMessage.getId();
-                selectRep.setMessage(personRepository.findById(publicMessage.getSender()).getUsername());
-                if (!selectRep.isVisible()) selectRep.show();
-                scrollDownChat();
+                if (publicMessage != null) {
+                    targetResponseMessage = publicMessage.getId();
+                    selectRep.setMessage(personRepository.findById(publicMessage.getSender()).getUsername());
+                    if (!selectRep.isVisible()) selectRep.show();
+                    scrollDownChat();
+                }
             });
         }
 
