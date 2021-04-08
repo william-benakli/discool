@@ -86,6 +86,12 @@ public class Person {
         return role.toString();
     }
 
+    public boolean isUserStudent(){return Role.STUDENT.equals(getRole());}
+
+    public boolean isUserTeacher(){return Role.TEACHER.equals(getRole());}
+
+    public boolean isUserAdmin(){return Role.ADMIN.equals(getRole());}
+
     //TODO: use lastlogin and first login to see if the user is logged in
     public boolean isConected(){ return true; }
 }
