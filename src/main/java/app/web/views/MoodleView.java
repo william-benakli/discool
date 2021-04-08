@@ -9,6 +9,7 @@ import app.jpa_repo.PersonRepository;
 import app.jpa_repo.TextChannelRepository;
 import app.model.courses.Course;
 import app.model.courses.CourseSection;
+import app.model.users.Person;
 import app.web.components.ComponentButton;
 import app.web.layout.Navbar;
 import com.vaadin.flow.component.AttachEvent;
@@ -30,6 +31,8 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.shared.Registration;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.LinkedList;
 import java.util.Optional;
@@ -37,6 +40,7 @@ import java.util.Optional;
 @Route(value = "moodle", layout = Navbar.class)
 public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, HasUrlParameter<Long> {
 
+    private final PersonRepository personRepository;
     private final CourseSectionRepository courseSectionRepository;
     private final CourseRepository courseRepository;
     private Course course;
@@ -49,6 +53,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
                       @Autowired CourseRepository courseRepository,
                       @Autowired TextChannelRepository textChannelRepository,
                       @Autowired PersonRepository personRepository) {
+        this.personRepository=personRepository;
         this.courseSectionRepository = courseSectionRepository;
         this.courseRepository = courseRepository;
         setController(new Controller(personRepository, textChannelRepository, null,
@@ -123,9 +128,16 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             this.section = section;
             if (section == null) return;
             initContent();
-            FlexLayout f=new FlexLayout();
-            f.add(createDeleteButton(), createModifyButton());
-            this.add(f);
+
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String username = authentication.getName();
+            Person sender = personRepository.findByUsername(username);
+            if(!sender.isUserStudent()){
+                FlexLayout f=new FlexLayout();
+                f.add(createDeleteButton(), createModifyButton());
+                this.add(f);
+            }
+
             createModifyPopup();
         }
 
