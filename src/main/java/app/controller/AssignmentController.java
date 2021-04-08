@@ -61,4 +61,8 @@ public class AssignmentController {
     public ArrayList<Assignment> getAssignmentsForCourse(long courseId) {
         return assignmentRepository.findAllByCourseId(courseId);
     }
+
+    public ArrayList<StudentAssignmentUpload> getUploadsForAssignment(long assignmentId) {
+        return studentAssignmentsUploadsRepository.findAllByAssignmentId(assignmentId);
+    }
 }
