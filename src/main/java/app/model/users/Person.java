@@ -1,8 +1,10 @@
 package app.model.users;
 
+import com.vaadin.flow.component.combobox.ComboBox;
 import lombok.*;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Builder
 @AllArgsConstructor
@@ -87,7 +89,12 @@ public class Person {
     private long timeCreated;
 
     // TODO : make sure it converts to an int when saving to the database
-    public enum Role {ADMIN, TEACHER, STUDENT}
+    public enum Role {
+        ADMIN, TEACHER, STUDENT;
+        public static Role[] getRole(){
+            return Role.class.getEnumConstants();
+        }
+    }
 
     public String getRoleAsString() {
         return role.toString();

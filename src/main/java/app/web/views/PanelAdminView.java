@@ -4,10 +4,13 @@ import app.jpa_repo.CourseRepository;
 import app.jpa_repo.PersonRepository;
 import app.model.courses.Course;
 import app.model.users.Person;
+import app.model.users.UserForm;
 import app.web.layout.Navbar;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
@@ -20,12 +23,13 @@ import java.util.Map;
 
 @Route(value = "admin", layout = Navbar.class)
 @PageTitle("Discool : Admin Panel")
+@CssImport("./styles/formStyle.css")
 
 public class PanelAdminView extends VerticalLayout {
 
     private final PersonRepository personRepository;
     private final CourseRepository courseRepository;
-
+    private UserForm form;
     private final Tab usersTab = new Tab("Users");
     private final Tab coursesTab = new Tab("Courses");
     private final Tabs tabs = new Tabs(usersTab, coursesTab);
@@ -35,13 +39,14 @@ public class PanelAdminView extends VerticalLayout {
     public PanelAdminView(@Autowired PersonRepository personRepository, @Autowired CourseRepository courseRepository) {
         this.personRepository = personRepository;
         this.courseRepository = courseRepository;
-
-        createUserGird();
+        addClassName("list-view");
+        createUserGrid();
         createCoursesGrid();
         createTabs();
     }
 
-    private void createUserGird() {
+    private void createUserGrid() {
+
         usersGrid.setItems(personRepository.findAll());
         usersGrid.addColumn(Person::getUsername).setHeader("Pseudo");
         usersGrid.addColumn(Person::getLastName).setHeader("Last Name");
@@ -52,7 +57,9 @@ public class PanelAdminView extends VerticalLayout {
         usersGrid.addColumn(Person::getWebsite).setHeader("Website");
         usersGrid.addThemeVariants(GridVariant.LUMO_NO_BORDER,
                               GridVariant.LUMO_NO_ROW_BORDERS, GridVariant.LUMO_ROW_STRIPES);
+        usersGrid.getStyle().set("flex","2");
         usersTab.add(usersGrid);
+
     }
 
     private void createCoursesGrid() {
@@ -65,11 +72,21 @@ public class PanelAdminView extends VerticalLayout {
     }
 
     private void createTabs() {
-        tabs.add(usersTab,coursesTab);
 
-        Map<Tab, Grid> tabsToPages = new HashMap<>();
-        tabsToPages.put(usersTab, usersGrid);
-        tabsToPages.put(coursesTab, coursesGrid);
+        form = new UserForm();
+        form.getStyle().set("flex","1");
+        form.getStyle().set("display","list-item");
+        Div content = new Div(usersGrid, form);
+        Div content2 = new Div(coursesGrid);
+        content.setSizeFull();
+        content2.setSizeFull();
+        content2.setVisible(true);
+        content.addClassName("content");
+        usersTab.getStyle().set("flex-direction","column");
+        tabs.add(usersTab,coursesTab);
+        Map<Tab, Div > tabsToPages = new HashMap<>();
+        tabsToPages.put(usersTab, content);
+        tabsToPages.put(coursesTab, content2);
         tabsToPages.values().forEach(page -> page.setVisible(false));
         Component selectedPage = tabsToPages.get(tabs.getSelectedTab());
         selectedPage.setVisible(true);
@@ -78,7 +95,8 @@ public class PanelAdminView extends VerticalLayout {
             Component insideSelectedPage = tabsToPages.get(tabs.getSelectedTab());
             insideSelectedPage.setVisible(true);
         });
-        add(tabs, usersGrid, coursesGrid);
+
+        add(tabs, content, content2);
     }
 }
 
