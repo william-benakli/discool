@@ -252,10 +252,10 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
 
 
     public class MessageLayout extends HorizontalLayout {
-        private final int SIZEWIDTH = 40;
-        private final int SIZEHEIGHT = 40;
+        private final int SIZEWIDTH = 25;
+        private final int SIZEHEIGHT = 15;
 
-        private final VerticalLayout messageFullWithResponseLayout;
+        private final Div messageFullWithResponseLayout;
         private final HorizontalLayout messageFullLayout;
         private final VerticalLayout chatUserInformation;
         private final HorizontalLayout optionsUser;
@@ -278,7 +278,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
             this.optionMenu = new FlexLayout();
             this.optionsUser = new HorizontalLayout();
             this.messageFullLayout = new HorizontalLayout();
-            this.messageFullWithResponseLayout = new VerticalLayout();
+            this.messageFullWithResponseLayout = new Div();
 
             optionsUser.setSpacing(false);
             optionsUser.setPadding(false);
@@ -294,6 +294,9 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
             messageFullLayout.add(chatUserInformation);
 
             messageFullWithResponseLayout.add(messageFullLayout);
+
+            messageFullWithResponseLayout.getStyle().set("padding","5px");
+
             add(messageFullWithResponseLayout);
             add(layoutPop);
         }
@@ -329,9 +332,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                     Notification.show("Vous avez supprimé votre message");
                 });
 
-                non.addClickListener(ev -> {
-                    dialog.close();
-                });
+                non.addClickListener(ev -> dialog.close());
             });
         }
 
@@ -363,9 +364,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                     dialog.close();
                 });
 
-                non.addClickListener(ev -> {
-                    dialog.close();
-                });
+                non.addClickListener(ev -> dialog.close());
             });
         }
 
@@ -394,9 +393,11 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
             messageFullLayout.add(optionMenu);
         }
 
-
         private void createChatBlock(PublicChatMessage publicMessage) {
             this.metaData = createParagrapheAmelioration(getController().getUsernameOfSender(publicMessage) + " | " + convertLongToDate(publicMessage.getTimeCreated()));
+            metaData.getStyle()
+                    .set("color",ColorHTML.PURPLE.getColorHtml())
+                    .set("font-weight","700");
             chatUserInformation.add(metaData);
             this.message = createParagrapheAmelioration(publicMessage.getMessage());
             chatUserInformation.add(message);
@@ -406,17 +407,20 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
             this.profilPicture = new Image("img/Chien 3.jpg", "profilPicture");
             this.profilPicture.setWidth("60px");
             this.profilPicture.setHeight("60px");
-            this.profilPicture.getStyle().set("border-radius", "40px");
-            this.profilPicture.getStyle().set("margin", "0px 0px 0px 0px");
-            this.profilPicture.getStyle().set("padding", "10px");
+            this.profilPicture.getStyle()
+                    .set("border-radius", "40px")
+                    .set("margin", "0px 0px 0px 0px");
         }
 
         private Paragraph createParagrapheAmelioration(String text) {
             Paragraph Data = new Paragraph();
             Data.setText(text);
-            Data.getStyle().set("border", "none");
-            Data.getStyle().set("border-width", "0px");
-            Data.getStyle().set("outline", "none");
+            Data.getStyle()
+                    .set("border", "none")
+                    .set("border-width", "0px")
+                    .set("outline", "none")
+                    .set("margin","0")
+                    .set("padding","0");
             return Data;
         }
 
