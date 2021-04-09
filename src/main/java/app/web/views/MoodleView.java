@@ -1,12 +1,10 @@
 package app.web.views;
 
+import app.controller.AssignmentController;
 import app.controller.Controller;
 import app.controller.Markdown;
 import app.controller.MoodleBroadcaster;
-import app.jpa_repo.CourseRepository;
-import app.jpa_repo.CourseSectionRepository;
-import app.jpa_repo.PersonRepository;
-import app.jpa_repo.TextChannelRepository;
+import app.jpa_repo.*;
 import app.model.courses.Course;
 import app.model.courses.CourseSection;
 import app.web.components.ComponentButton;
@@ -48,11 +46,15 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
     public MoodleView(@Autowired CourseSectionRepository courseSectionRepository,
                       @Autowired CourseRepository courseRepository,
                       @Autowired TextChannelRepository textChannelRepository,
-                      @Autowired PersonRepository personRepository) {
+                      @Autowired PersonRepository personRepository,
+                      @Autowired AssignmentRepository assignmentRepository,
+                      @Autowired StudentAssignmentsUploadsRepository studentAssignmentsUploadsRepository) {
         this.courseSectionRepository = courseSectionRepository;
         this.courseRepository = courseRepository;
         setController(new Controller(personRepository, textChannelRepository, null,
                                      courseRepository, courseSectionRepository));
+        setAssignmentController(new AssignmentController(personRepository, assignmentRepository,
+                                                         studentAssignmentsUploadsRepository, courseRepository));
     }
 
     @Override
