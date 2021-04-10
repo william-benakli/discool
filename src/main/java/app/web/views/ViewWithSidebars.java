@@ -16,13 +16,9 @@ import com.vaadin.flow.router.RouterLayout;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinServletRequest;
-import com.vaadin.flow.server.VaadinSession;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
-import org.atmosphere.interceptor.AtmosphereResourceStateRecovery;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -233,6 +229,7 @@ public abstract class ViewWithSidebars extends VerticalLayout {
         GREY("#EAEAEA"),
         DARKGREY("#DEDEDE"),
         TEXTGREY("#707070"),
+        DARK("#808080"),
         DANGER("#F04747");
 
         @Getter
