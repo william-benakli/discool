@@ -46,14 +46,12 @@ public class UploadComponent extends Upload {
                 // make sure the directory exists, and create it if it doesn't
                 File dir = new File(dirName);
                 dir.mkdirs();
-                Notification.show(dirName);
 
                 // save the file
                 file = new File(dirName + "/" + fileName);
                 fos = new FileOutputStream(file);
-                Notification.show("YEAH !!");
             } catch (FileNotFoundException e) {
-                Notification.show("CAN'T UPLOAD");
+                e.printStackTrace();
             }
             return fos;
         }
