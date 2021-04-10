@@ -6,9 +6,9 @@ import app.jpa_repo.PersonRepository;
 import app.jpa_repo.StudentAssignmentsUploadsRepository;
 import app.model.courses.Assignment;
 import app.model.courses.StudentAssignmentUpload;
+import app.web.views.TeacherAssignmentView;
 
 import java.util.ArrayList;
-import java.util.Optional;
 
 
 public class AssignmentController {
@@ -29,20 +29,16 @@ public class AssignmentController {
 
     /**
      * Adds the record to the database if needed
-     *
-     * @param assignmentId The id of the assignment the file belongs in
+     *  @param assignmentId The id of the assignment the file belongs in
      * @param courseId     The id of the course that the assignment belongs in
      * @param studentId    The id of the student who submitted the file
      */
-    public void save(long assignmentId, long courseId, long studentId) {
+    public void saveStudentUploadIfNeeded(long assignmentId, long courseId, long studentId) {
         long date = System.currentTimeMillis();
-        String uploadId = String.valueOf(assignmentId) + String.valueOf(studentId);
-
-        Optional<StudentAssignmentUpload> upload = studentAssignmentsUploadsRepository.findById(Long.parseLong(uploadId));
-
-        if (upload.isEmpty()) {
+        StudentAssignmentUpload upload = studentAssignmentsUploadsRepository.
+                findByAssignmentIdAndStudentId(assignmentId, studentId);
+        if (upload == null) {
             StudentAssignmentUpload submissionToSave = StudentAssignmentUpload.builder()
-                    .id(Long.parseLong(uploadId))
                     .assignmentId(assignmentId)
                     .courseId(courseId)
                     .studentId(studentId)
@@ -64,5 +60,20 @@ public class AssignmentController {
 
     public ArrayList<StudentAssignmentUpload> getUploadsForAssignment(long assignmentId) {
         return studentAssignmentsUploadsRepository.findAllByAssignmentId(assignmentId);
+    }
+
+    public void saveGrading(TeacherAssignmentView.RowModel model) {
+        studentAssignmentsUploadsRepository.save(model.getUpload());
+    }
+
+    public void saveGrading(long studentId, long assignmentId, long courseId, int grade, String teacherComments) {
+        StudentAssignmentUpload toSave = StudentAssignmentUpload.builder()
+                .assignmentId(assignmentId)
+                .courseId(courseId)
+                .grade(grade)
+                .teacherComments(teacherComments)
+                .studentId(studentId)
+                .build();
+        studentAssignmentsUploadsRepository.save(toSave);
     }
 }
