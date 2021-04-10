@@ -156,13 +156,21 @@ CREATE TABLE IF NOT EXISTS students_assignments_uploads (
     PRIMARY KEY(id)
 ) ENGINE=InnoDB;
 
-INSERT INTO users VALUES (1, "admin", "password", 1, "admin_fn", "admin_ln", "adminemail", "description admin", "website admin", 0, 0, 0);
-INSERT INTO users VALUES (2, "teacher1", "t1", 1, "teacher1_fn", "teacher1_ln", "teacher1email", "description teacher 1", "website teacher1", 0, 0, 0);
-INSERT INTO users VALUES (3, "teacher2", "t2",1, "teacher2_fn", "teacher2_ln", "teacher2email", "description teacher 2", "website teacher2", 0, 0, 0);
-INSERT INTO users VALUES (4, "teacher3", "t3",1, "teacher3_fn", "teacher3_ln", "teacher3email", "description teacher 3", "website teacher3", 0, 0, 0);
-INSERT INTO users VALUES (5, "student1", "s1",1, "student1_fn", "student1_ln", "student1email", "description student 1", "", 0, 0, 0);
-INSERT INTO users VALUES (6, "student2", "s2",1, "student2_fn", "student2_ln", "student2email", "description student 2", "", 0, 0, 0);
-INSERT INTO users VALUES (7, "student3", "s3",1, "student3_fn", "student3_ln", "student3email", "description student 3", "", 0, 0, 0);
+-- the passwords are as follows :
+-- admin : password
+-- teacher1 : t1
+-- teacher2 : t2
+-- teacher3 : t3
+-- student1 : s1
+-- student2 : s2
+-- student3 : s3
+INSERT INTO users VALUES (1, "admin", "$2a$10$xEJmnRr.0TdrUJANERV73eii9hgKzS7mkaECxbHiZ6JPIt5lVN1NG", 1, "admin_fn", "admin_ln", "adminemail", "description admin", "website admin", 0, 0, 0);
+INSERT INTO users VALUES (2, "teacher1", "$2a$10$cyHZi9oHM50SGG.P00hT5utYa0CGAVj0boZ5vdOfsk7r2kPN6aQwa", 1, "teacher1_fn", "teacher1_ln", "teacher1email", "description teacher 1", "website teacher1", 0, 0, 0);
+INSERT INTO users VALUES (3, "teacher2", "$2a$10$OVpL9EEtJt8Ity1ebpcVoOM7wRWzCCQDL8x/9ulVsYpCURPYbUM5K",1, "teacher2_fn", "teacher2_ln", "teacher2email", "description teacher 2", "website teacher2", 0, 0, 0);
+INSERT INTO users VALUES (4, "teacher3", "$2a$10$jFBAvugjpUAyQ0nOsaMBqOkp7KLM525gW6QLIUsN2tccSGqrIu33G",1, "teacher3_fn", "teacher3_ln", "teacher3email", "description teacher 3", "website teacher3", 0, 0, 0);
+INSERT INTO users VALUES (5, "student1", "$2a$10$fSSMggiuJz/g1rQBUtAO0OXwMmGSAIUUIdplyjY7hr7iFXtQsVNiC",1, "student1_fn", "student1_ln", "student1email", "description student 1", "", 0, 0, 0);
+INSERT INTO users VALUES (6, "student2", "$2a$10$o3NawTTPYqS3ZSaaMryK5eaYbq8spNfNeHtxh6oSZZdGbfRLtmYSy",1, "student2_fn", "student2_ln", "student2email", "description student 2", "", 0, 0, 0);
+INSERT INTO users VALUES (7, "student3", "$2a$10$EaQJlro9r.ATqKjcNyh3ZefSTGsaHs8p/L5YM8.rHCzHHNaE1iume",1, "student3_fn", "student3_ln", "student3email", "description student 3", "", 0, 0, 0);
 
 INSERT INTO courses VALUES
     (NULL, "course1", 1, "course_pic/course1.png"),
