@@ -290,6 +290,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
 
         public void show() {
             setVisible(true);
+            messageTextField.focus();
         }
 
     }
