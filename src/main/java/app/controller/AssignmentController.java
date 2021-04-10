@@ -67,13 +67,20 @@ public class AssignmentController {
     }
 
     public void saveGrading(long studentId, long assignmentId, long courseId, int grade, String teacherComments) {
-        StudentAssignmentUpload toSave = StudentAssignmentUpload.builder()
-                .assignmentId(assignmentId)
-                .courseId(courseId)
-                .grade(grade)
-                .teacherComments(teacherComments)
-                .studentId(studentId)
-                .build();
-        studentAssignmentsUploadsRepository.save(toSave);
+        StudentAssignmentUpload upload = studentAssignmentsUploadsRepository.findByAssignmentIdAndStudentId(assignmentId, studentId);
+        if (upload == null) {
+            StudentAssignmentUpload toSave = StudentAssignmentUpload.builder()
+                    .assignmentId(assignmentId)
+                    .courseId(courseId)
+                    .grade(grade)
+                    .teacherComments(teacherComments)
+                    .studentId(studentId)
+                    .build();
+            studentAssignmentsUploadsRepository.save(toSave);
+        } else {
+            upload.setTeacherComments(teacherComments);
+            upload.setGrade(grade);
+            studentAssignmentsUploadsRepository.save(upload);
+        }
     }
 }
