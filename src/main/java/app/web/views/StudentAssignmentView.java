@@ -7,18 +7,13 @@ import app.jpa_repo.*;
 import app.model.courses.Assignment;
 import app.model.courses.Course;
 import app.model.courses.StudentAssignmentUpload;
-import app.model.users.Person;
 import app.web.components.UploadComponent;
 import app.web.layout.Navbar;
 import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.upload.FailedEvent;
-import com.vaadin.flow.component.upload.Upload;
-import com.vaadin.flow.component.upload.receivers.MultiFileMemoryBuffer;
 import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.HasDynamicTitle;
 import com.vaadin.flow.router.HasUrlParameter;
@@ -27,7 +22,6 @@ import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.parameters.P;
 
 import java.util.Optional;
 
@@ -49,13 +43,15 @@ public class StudentAssignmentView extends ViewWithSidebars implements HasDynami
                                  @Autowired TextChannelRepository textChannelRepository,
                                  @Autowired AssignmentRepository assignmentRepository,
                                  @Autowired PersonRepository personRepository,
-                                 @Autowired StudentAssignmentsUploadsRepository studentAssignmentsUploadsRepository) {
+                                 @Autowired StudentAssignmentsUploadsRepository studentAssignmentsUploadsRepository,
+                                 @Autowired GroupRepository groupRepository,
+                                 @Autowired GroupMembersRepository groupMembersRepository) {
         this.assignmentRepository = assignmentRepository;
         this.studentAssignmentsUploadsRepository = studentAssignmentsUploadsRepository;
         this.courseRepository = courseRepository;
         this.personRepository = personRepository;
         setController(new Controller(personRepository, textChannelRepository, null,
-                                     courseRepository, null));
+                                     courseRepository, null, groupRepository, groupMembersRepository));
         setAssignmentController(new AssignmentController(personRepository, assignmentRepository,
                                                          studentAssignmentsUploadsRepository, courseRepository));
     }
@@ -145,8 +141,8 @@ public class StudentAssignmentView extends ViewWithSidebars implements HasDynami
                                                          newDirName);
 
             upload.addSucceededListener(event -> {
-                getAssignmentController().save(assignment.getId(), assignment.getCourseId(),
-                                          personRepository.findByUsername(authentication.getName()).getId());
+                getAssignmentController().saveStudentUploadIfNeeded(assignment.getId(), assignment.getCourseId(),
+                                                                    personRepository.findByUsername(authentication.getName()).getId());
                 Notification.show("You successfully uploaded your file !");
             });
 

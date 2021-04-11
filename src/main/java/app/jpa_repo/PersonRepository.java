@@ -20,5 +20,4 @@ public interface PersonRepository extends JpaRepository<Person, Long> {
 
     Person findByUsername(String username);
     ArrayList<Person> findAll();
-
 }

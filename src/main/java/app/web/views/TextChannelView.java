@@ -62,13 +62,15 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                            @Autowired PublicChatMessageRepository publicChatMessageRepository,
                            @Autowired PersonRepository personRepository,
                            @Autowired AssignmentRepository assignmentRepository,
+                           @Autowired CourseRepository courseRepository,
                            @Autowired StudentAssignmentsUploadsRepository studentAssignmentsUploadsRepository,
-                           @Autowired CourseRepository courseRepository) {
+                           @Autowired GroupRepository groupRepository,
+                           @Autowired GroupMembersRepository groupMembersRepository) {
         this.textChannelRepository = textChannelRepository;
         this.personRepository = personRepository;
         this.targetResponseMessage = 0;
         setController(new Controller(personRepository, textChannelRepository, publicChatMessageRepository,
-                                     null, null));
+                                     null, null, groupRepository, groupMembersRepository));
         setAssignmentController(new AssignmentController(personRepository, assignmentRepository,
                                                          studentAssignmentsUploadsRepository, courseRepository));
         this.messageTextField = createTextField();
@@ -290,6 +292,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
 
         public void show() {
             setVisible(true);
+            messageTextField.focus();
         }
 
     }
