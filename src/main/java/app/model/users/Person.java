@@ -22,6 +22,13 @@ public class Person {
     private long id;
 
     @Column(
+            nullable = false,
+            name = "password",
+            columnDefinition = "TEXT"
+    )
+    private String password;
+
+    @Column(
             name = "username",
             nullable = false
     )

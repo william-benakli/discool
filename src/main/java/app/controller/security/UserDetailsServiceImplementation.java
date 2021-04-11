@@ -32,12 +32,8 @@ public class UserDetailsServiceImplementation implements UserDetailsService {
         Set<GrantedAuthority> grantedAuthorities = new HashSet<>();
         grantedAuthorities.add(new SimpleGrantedAuthority(person.getRoleAsString()));
 
-        // TODO : implement passwords
-        // the weird string is the encoded version of "password"
-        // (aka to log in, put a valid username and "password" as the password)
-        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
         UserDetails user = User.withUsername(person.getUsername())
-                .password(encoder.encode("password"))
+                .password(person.getPassword())
                 .authorities(grantedAuthorities).build();
         return user;
     }
