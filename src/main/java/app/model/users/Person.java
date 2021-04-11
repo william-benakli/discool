@@ -88,4 +88,9 @@ public class Person {
 
     //TODO: use lastlogin and first login to see if the user is logged in
     public boolean isConected(){ return true; }
+
+    @Override
+    public boolean equals(Object o) {
+        return (o instanceof Person) && ((Person)o).getId() == this.id;
+    }
 }

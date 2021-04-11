@@ -171,16 +171,22 @@ public abstract class ViewWithSidebars extends VerticalLayout {
     private void addAssignments(long courseId, String s2[], String t) {
         ArrayList<Assignment> assignments = assignmentController.getAssignmentsForCourse(courseId);
         assignments.forEach(assignment -> {
-            RouterLink link = new RouterLink("", StudentAssignmentView.class, assignment.getId());
-            Button button = new Button(assignment.getName());
-            button.addClassName(assignment.getId() + "");
-            styleButton(link, button);
-            button.addClassName("color" + assignment.getId());
-            if (s2.length>=4 && s2[3].equals("channels") && t.equals(assignment.getId()+"")){
-                button.getStyle().set("color",ColorHTML.PURPLE.getColorHtml());
-            }else button.getStyle().set("color",ColorHTML.TEXTGREY.getColorHtml());
-            sideBar.add(link);
+            RouterLink studentLink = new RouterLink("", StudentAssignmentView.class, assignment.getId());
+            styleNavButtonsForAssignments(assignment, s2, t, studentLink);
+            RouterLink teacherLink = new RouterLink("", TeacherAssignmentView.class, assignment.getId());
+            styleNavButtonsForAssignments(assignment, s2, t, teacherLink);
         });
+    }
+
+    private void styleNavButtonsForAssignments(Assignment assignment, String[] s2, String t, RouterLink link) {
+        Button button = new Button(assignment.getName());
+        button.addClassName(assignment.getId() + "");
+        styleButton(link, button);
+        button.addClassName("color" + assignment.getId());
+        if (s2.length>=4 && s2[3].equals("channels") && t.equals(assignment.getId()+"")){
+            button.getStyle().set("color",ColorHTML.PURPLE.getColorHtml());
+        }else button.getStyle().set("color",ColorHTML.TEXTGREY.getColorHtml());
+        sideBar.add(link);
     }
 
     /**

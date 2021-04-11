@@ -8,4 +8,5 @@ import java.util.ArrayList;
 public interface GroupMembersRepository extends JpaRepository<GroupMembers, Long> {
 
     ArrayList<GroupMembers> findByUserId(long id);
+    ArrayList<GroupMembers> findByGroupId(long id);
 }

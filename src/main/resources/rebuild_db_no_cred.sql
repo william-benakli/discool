@@ -137,7 +137,7 @@ CREATE TABLE IF NOT EXISTS assignments (
 ) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS students_assignments_uploads (
-    id BIGINT UNSIGNED NOT NULL UNIQUE,
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE,
     assignmentid BIGINT UNSIGNED NOT NULL,
     courseid BIGINT UNSIGNED NOT NULL,
     studentid BIGINT UNSIGNED NOT NULL,
@@ -155,13 +155,13 @@ CREATE TABLE IF NOT EXISTS students_assignments_uploads (
     PRIMARY KEY(id)
 ) ENGINE=InnoDB;
 
-INSERT INTO users VALUES (1, "admin", 1, "admin_fn", "admin_ln", "adminemail", "description admin", "website admin", 0, 0, 0);
+INSERT INTO users VALUES (1, "admin", 0, "admin_fn", "admin_ln", "adminemail", "description admin", "website admin", 0, 0, 0);
 INSERT INTO users VALUES (2, "teacher1", 1, "teacher1_fn", "teacher1_ln", "teacher1email", "description teacher 1", "website teacher1", 0, 0, 0);
 INSERT INTO users VALUES (3, "teacher2", 1, "teacher2_fn", "teacher2_ln", "teacher2email", "description teacher 2", "website teacher2", 0, 0, 0);
 INSERT INTO users VALUES (4, "teacher3", 1, "teacher3_fn", "teacher3_ln", "teacher3email", "description teacher 3", "website teacher3", 0, 0, 0);
-INSERT INTO users VALUES (5, "student1", 1, "student1_fn", "student1_ln", "student1email", "description student 1", "", 0, 0, 0);
-INSERT INTO users VALUES (6, "student2", 1, "student2_fn", "student2_ln", "student2email", "description student 2", "", 0, 0, 0);
-INSERT INTO users VALUES (7, "student3", 1, "student3_fn", "student3_ln", "student3email", "description student 3", "", 0, 0, 0);
+INSERT INTO users VALUES (5, "student1", 2, "student1_fn", "student1_ln", "student1email", "description student 1", "", 0, 0, 0);
+INSERT INTO users VALUES (6, "student2", 2, "student2_fn", "student2_ln", "student2email", "description student 2", "", 0, 0, 0);
+INSERT INTO users VALUES (7, "student3", 2, "student3_fn", "student3_ln", "student3email", "description student 3", "", 0, 0, 0);
 
 INSERT INTO courses VALUES
     (NULL, "course1", 1, "course_pic/course1.png"),
@@ -208,4 +208,7 @@ INSERT INTO group_members VALUES
     (NULL, 3, 7, 0);
 
 INSERT INTO assignments VALUES
-    (NULL, 1, "test assignment", "this is a test !", 0, 0, 1, 20, 3);
+    (NULL, 1, "test assignment", "this is a test !", 0, 0, 1, 20, 3),
+    (NULL, 2, "test2 assignment", "this is a test2 !", 0, 0, 1, 20, 3),
+    (NULL, 3, "test3 assignment", "this is a test3 !", 0, 0, 1, 20, 3),
+    (NULL, 1, "test4 assignment", "this is a test4 !", 0, 0, 1, 20, 3);
