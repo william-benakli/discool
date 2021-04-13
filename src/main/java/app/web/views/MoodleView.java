@@ -3,6 +3,7 @@ package app.web.views;
 import app.controller.Controller;
 import app.controller.Markdown;
 import app.controller.MoodleBroadcaster;
+import app.controller.security.SecurityUtils;
 import app.jpa_repo.CourseRepository;
 import app.jpa_repo.CourseSectionRepository;
 import app.jpa_repo.PersonRepository;
@@ -31,8 +32,6 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.shared.Registration;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.LinkedList;
 import java.util.Optional;
@@ -129,9 +128,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             if (section == null) return;
             initContent();
 
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String username = authentication.getName();
-            Person sender = personRepository.findByUsername(username);
+            Person sender = SecurityUtils.getCurrentUser(personRepository);
             if(!sender.isUserStudent()){
                 FlexLayout f=new FlexLayout();
                 f.add(createDeleteButton(), createModifyButton());

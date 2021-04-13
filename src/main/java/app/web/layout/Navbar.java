@@ -1,5 +1,6 @@
 package app.web.layout;
 
+import app.controller.security.SecurityUtils;
 import app.jpa_repo.CourseRepository;
 import app.jpa_repo.PersonRepository;
 import app.model.courses.Course;
@@ -125,9 +126,8 @@ public class Navbar extends AppLayout {
         }
         routerLink.addClassName("colored");
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
-        Person sender = personRepository.findByUsername(username);
+
+        Person sender = SecurityUtils.getCurrentUser(personRepository);
 
         if (!sender.isUserStudent()) {
             ComponentButton button = createServDockImage(new Image("img/add.svg", "Create serveur"), Key.NAVIGATE_NEXT);
@@ -146,9 +146,7 @@ public class Navbar extends AppLayout {
         HorizontalLayout servCardDock = HorizontalLayoutCustom();
         servCardDock.getStyle().set("margin", "0");
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
-        Person sender = personRepository.findByUsername(username);
+        Person sender = SecurityUtils.getCurrentUser(personRepository);
 
         for (String[] imageInfo : pathImage) {
             if (!imageInfo[0].equals("img/settings.svg") || !sender.isUserStudent()) {
@@ -182,9 +180,7 @@ public class Navbar extends AppLayout {
         FlexLayout layoutR = new FlexLayout();
 
         /*Element Tab*/
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
-        Person sender = personRepository.findByUsername(username);
+        Person sender = SecurityUtils.getCurrentUser(personRepository);
 
         EmailField emailField = new EmailField("Changer d'e-mail");
         emailField.setClearButtonVisible(true);
