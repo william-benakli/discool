@@ -2,6 +2,7 @@ package app.web.views;
 
 import app.controller.AssignmentController;
 import app.controller.Controller;
+import app.controller.DownloadController;
 import app.jpa_repo.*;
 import app.model.courses.Assignment;
 import app.model.courses.Course;
@@ -12,8 +13,11 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.grid.editor.Editor;
+import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
@@ -23,11 +27,16 @@ import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.HasDynamicTitle;
 import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.Route;
-import lombok.AllArgsConstructor;
+import com.vaadin.flow.server.StreamResource;
+import com.vaadin.flow.server.frontend.installer.DefaultFileDownloader;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.vaadin.viritin.button.DownloadButton;
+
+import java.io.File;
+import java.io.FileInputStream;
 
 import java.util.*;
 
@@ -93,6 +102,7 @@ public class TeacherAssignmentView extends ViewWithSidebars implements HasDynami
         assignmentBar.add(layout);
     }
 
+
     private class TeacherLayout extends VerticalLayout {
         private Grid<RowModel> grid;
 
@@ -101,7 +111,7 @@ public class TeacherAssignmentView extends ViewWithSidebars implements HasDynami
             assignValues();
             createColumnsAndEditor();
             grid.addThemeVariants(GridVariant.LUMO_NO_BORDER,
-                                       GridVariant.LUMO_NO_ROW_BORDERS, GridVariant.LUMO_ROW_STRIPES);
+                                  GridVariant.LUMO_NO_ROW_BORDERS, GridVariant.LUMO_ROW_STRIPES);
             this.add(grid);
         }
 
@@ -123,6 +133,7 @@ public class TeacherAssignmentView extends ViewWithSidebars implements HasDynami
             grid.addColumn(RowModel::getName).setHeader("Name");
             Grid.Column<RowModel> gradeColumn = grid.addColumn(RowModel::getGrade).setHeader("Grade");
             Grid.Column<RowModel> commentsColumn = grid.addColumn(RowModel::getComments).setHeader("Comments").setAutoWidth(true);
+            grid.addComponentColumn(RowModel::getDownloadButton).setHeader(".tar.gz");
             TextField gradeField = new TextField();
             TextField commentsField = new TextField();
             Editor<RowModel> editor = grid.getEditor();
@@ -189,21 +200,23 @@ public class TeacherAssignmentView extends ViewWithSidebars implements HasDynami
                 if (model.getUpload() != null) {
                     getAssignmentController().saveGrading(model);
                 } else {
-                    getAssignmentController().saveGrading(model.getStudentId() ,assignment.getId(), assignment.getCourseId(),
+                    getAssignmentController().saveGrading(model.getStudentId(), assignment.getId(), assignment.getCourseId(),
                                                           model.getGrade(), model.getComments());
                 }
             });
         }
     }
-    
+
+
     @Getter
     @Setter
-    public static class RowModel {
+    public class RowModel {
         private String name;
         private StudentAssignmentUpload upload;
         private String comments;
         private int grade;
         private long studentId;
+        private Anchor downloadButton;
 
         public RowModel(long studentId, String name, StudentAssignmentUpload upload) {
             this.name = name;
@@ -212,11 +225,37 @@ public class TeacherAssignmentView extends ViewWithSidebars implements HasDynami
             if (upload != null) {
                 this.comments = upload.getTeacherComments();
                 this.grade = upload.getGrade();
+                createDownloadButton();
             } else {
-                this.comments = "No submission yet";
+                this.comments = "";
                 this.grade = 0;
                 this.studentId = studentId;
+                downloadButton = new Anchor("", "Nothing to Download");
             }
+        }
+
+        private void createDownloadButton() {
+            String outputName = "downloads/" + name + "_" + studentId + ".tar.gz";
+            String sourceDir = "uploads/assignments/" + assignment.getId() + "_" + studentId;
+            DownloadController.createTarFile(outputName, sourceDir);
+
+            //DownloadButton button = new DownloadButton(new Content)
+//            try {
+//                File file = new File(outputName);
+//                if (file.exists()) {
+//                    FileInputStream fos = new FileInputStream(file.getAbsolutePath());
+//                    // the ()->fos is a lambda that return an InputStream (here a FileInputStream)
+//                    StreamResource res = new StreamResource(name, () -> fos);
+//                    res.setContentType("application/gzip");
+//                    downloadButton = new Anchor(res, "");
+//                    downloadButton.add(new Button("Download", new Icon(VaadinIcon.DOWNLOAD)));
+//                    downloadButton.getElement().setAttribute("download", true);
+//                } else {
+//                    downloadButton = new Anchor("", "Nothing to download");
+//                }
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
         }
     }
 }

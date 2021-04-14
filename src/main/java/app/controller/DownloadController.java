@@ -5,6 +5,7 @@ import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.compress.utils.IOUtils;
 
 import java.io.*;
+import java.nio.file.FileSystems;
 import java.util.zip.GZIPOutputStream;
 
 public class DownloadController {
@@ -14,20 +15,14 @@ public class DownloadController {
      * The archive will be in : downloads/studentName_studentId
      * @param sourceDir The source directory to archive
      */
-    public static void createTarFile(String sourceDir, String studentName, long studentId){
+    public static void createTarFile(String outputName, String sourceDir){
         TarArchiveOutputStream tarOs;
         try {
-            File source = new File(sourceDir);
-            String outputName = "downloads/" + studentName + "_" + studentId + ".tar.gz";
-            FileOutputStream fos = new FileOutputStream(source.getAbsolutePath().concat(".tar.gz"));
+            File outputFile = new File(outputName);
+            FileOutputStream fos = new FileOutputStream(outputFile);
             GZIPOutputStream gos = new GZIPOutputStream(new BufferedOutputStream(fos));
             tarOs = new TarArchiveOutputStream(gos);
             addFilesToTarGZ(sourceDir, "", tarOs);
-            try {
-                tarOs.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -48,7 +43,7 @@ public class DownloadController {
             bis.close();
         }else if(file.isDirectory()){
             // no need to copy any content since it is
-            // a directory, just close the outputstream
+            // a directory, just close the outputStream
             tarArchive.closeArchiveEntry();
             // for files in the directories
             for(File f : file.listFiles()){
