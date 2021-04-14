@@ -4,6 +4,7 @@ import app.controller.AssignmentController;
 import app.controller.Controller;
 import app.controller.Markdown;
 import app.controller.MoodleBroadcaster;
+import app.controller.security.SecurityUtils;
 import app.jpa_repo.*;
 import app.model.courses.Course;
 import app.model.courses.CourseSection;
