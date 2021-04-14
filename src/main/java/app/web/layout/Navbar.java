@@ -12,6 +12,7 @@ import app.web.views.ViewWithSidebars;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.KeyModifier;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
@@ -253,6 +254,22 @@ public class Navbar extends AppLayout {
                 .set("text-align","center");
         logout.add(buttonlogout);
 
+        /*Panel Admin*/
+        Div divAdmin = new Div();
+        Button panelAdmin = new Button("Panel Admin", event -> {
+            UI.getCurrent().navigate("admin");
+            dialog.close();
+        });
+        panelAdmin.getStyle()
+                .set("background-color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml())
+                .set("color", ViewWithSidebars.ColorHTML.WHITE.getColorHtml());
+        divAdmin.add(panelAdmin);
+        divAdmin.getStyle()
+                .set("position","absolute")
+                .set("bottom","64px")
+                .set("width","25%")
+                .set("text-align","center");
+
         /*Title Dialog*/
         Paragraph paramUser = new Paragraph("Paramètres utilisateur");
         paramUser.getStyle()
@@ -276,7 +293,9 @@ public class Navbar extends AppLayout {
                 .set("padding-left","24px")
                 .set("flex-direction","column");
 
-        layoutL.add(paramUser, logout);
+        if (sender.isUserAdmin()) layoutL.add(paramUser, logout, divAdmin);
+        else layoutL.add(paramUser, logout);
+
         layoutL.getStyle()
                 .set("height","100%")
                 .set("width","25%")
