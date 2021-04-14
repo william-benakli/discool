@@ -4,9 +4,11 @@ import app.controller.AssignmentController;
 import app.controller.Controller;
 import app.controller.Markdown;
 import app.controller.MoodleBroadcaster;
+import app.controller.security.SecurityUtils;
 import app.jpa_repo.*;
 import app.model.courses.Course;
 import app.model.courses.CourseSection;
+import app.model.users.Person;
 import app.web.components.ComponentButton;
 import app.web.layout.Navbar;
 import com.vaadin.flow.component.AttachEvent;
@@ -35,6 +37,7 @@ import java.util.Optional;
 @Route(value = "moodle", layout = Navbar.class)
 public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, HasUrlParameter<Long> {
 
+    private final PersonRepository personRepository;
     private final CourseSectionRepository courseSectionRepository;
     private final CourseRepository courseRepository;
     private Course course;
@@ -51,6 +54,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
                       @Autowired StudentAssignmentsUploadsRepository studentAssignmentsUploadsRepository,
                       @Autowired GroupRepository groupRepository,
                       @Autowired GroupMembersRepository groupMembersRepository) {
+        this.personRepository=personRepository;
         this.courseSectionRepository = courseSectionRepository;
         this.courseRepository = courseRepository;
         setController(new Controller(personRepository, textChannelRepository, null,
@@ -127,9 +131,14 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             this.section = section;
             if (section == null) return;
             initContent();
-            FlexLayout f=new FlexLayout();
-            f.add(createDeleteButton(), createModifyButton());
-            this.add(f);
+
+            Person sender = SecurityUtils.getCurrentUser(personRepository);
+            if(!sender.isUserStudent()){
+                FlexLayout f=new FlexLayout();
+                f.add(createDeleteButton(), createModifyButton());
+                this.add(f);
+            }
+
             createModifyPopup();
         }
 

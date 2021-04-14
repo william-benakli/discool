@@ -1,5 +1,6 @@
 package app.web.layout;
 
+import app.controller.security.SecurityUtils;
 import app.jpa_repo.CourseRepository;
 import app.jpa_repo.PersonRepository;
 import app.model.courses.Course;
@@ -116,9 +117,6 @@ public class Navbar extends AppLayout {
             }
 
         }
-        ComponentButton button = createServDockImage(new Image("img/add.svg", "Create serveur"), Key.NAVIGATE_NEXT);
-        button.getStyle()
-                .set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml());
         RouterLink routerLink = new RouterLink("", MoodleView.class, tmp);
         if (t.equals(0+"")){//TODO: edit with the correct redirect values #42
             routerLink.getStyle()
@@ -127,7 +125,16 @@ public class Navbar extends AppLayout {
                     .set("background-color", ViewWithSidebars.ColorHTML.GREY.getColorHtml());
         }
         routerLink.addClassName("colored");
-        linkRouteurImge(servCardDock, button, routerLink);
+
+
+        Person sender = SecurityUtils.getCurrentUser(personRepository);
+
+        if (!sender.isUserStudent()) {
+            ComponentButton button = createServDockImage(new Image("img/add.svg", "Create serveur"), Key.NAVIGATE_NEXT);
+            button.getStyle()
+                    .set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml());
+            linkRouteurImge(servCardDock, button, routerLink);
+        }
         addToNavbar(servCardDock);
     }
 
@@ -138,18 +145,23 @@ public class Navbar extends AppLayout {
         long tmp = 0;//TODO: edit with the correct redirect values #42
         HorizontalLayout servCardDock = HorizontalLayoutCustom();
         servCardDock.getStyle().set("margin", "0");
+
+        Person sender = SecurityUtils.getCurrentUser(personRepository);
+
         for (String[] imageInfo : pathImage) {
-            ComponentButton button = createServDockImage(new Image(imageInfo[0], imageInfo[1]), Key.NAVIGATE_NEXT);
-            button.getStyle()
-                    .set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml());
-            if (imageInfo[0].equals("img/manageAccounts.svg")){
-                Dialog dialog  = new Dialog();
-                popupuser(dialog);
-                button.addClickListener(event -> dialog.open());
-                servCardDock.add(button);
-            }else{
-                RouterLink routerLink = new RouterLink("", MoodleView.class, tmp);
-                linkRouteurImge(servCardDock, button, routerLink);
+            if (!imageInfo[0].equals("img/settings.svg") || !sender.isUserStudent()) {
+                ComponentButton button = createServDockImage(new Image(imageInfo[0], imageInfo[1]), Key.NAVIGATE_NEXT);
+                button.getStyle()
+                        .set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml());
+                if (imageInfo[0].equals("img/manageAccounts.svg")) {
+                    Dialog dialog = new Dialog();
+                    popupuser(dialog);
+                    button.addClickListener(event -> dialog.open());
+                    servCardDock.add(button);
+                } else {
+                    RouterLink routerLink = new RouterLink("", MoodleView.class, tmp);
+                    linkRouteurImge(servCardDock, button, routerLink);
+                }
             }
         }
         addToNavbar(servCardDock);
@@ -168,9 +180,7 @@ public class Navbar extends AppLayout {
         FlexLayout layoutR = new FlexLayout();
 
         /*Element Tab*/
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
-        Person sender = personRepository.findByUsername(username);
+        Person sender = SecurityUtils.getCurrentUser(personRepository);
 
         EmailField emailField = new EmailField("Changer d'e-mail");
         emailField.setClearButtonVisible(true);
