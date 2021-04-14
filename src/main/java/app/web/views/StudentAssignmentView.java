@@ -7,18 +7,13 @@ import app.jpa_repo.*;
 import app.model.courses.Assignment;
 import app.model.courses.Course;
 import app.model.courses.StudentAssignmentUpload;
-import app.model.users.Person;
 import app.web.components.UploadComponent;
 import app.web.layout.Navbar;
 import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.upload.FailedEvent;
-import com.vaadin.flow.component.upload.Upload;
-import com.vaadin.flow.component.upload.receivers.MultiFileMemoryBuffer;
 import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.HasDynamicTitle;
 import com.vaadin.flow.router.HasUrlParameter;
@@ -27,7 +22,6 @@ import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.parameters.P;
 
 import java.util.Optional;
 
@@ -38,9 +32,10 @@ public class StudentAssignmentView extends ViewWithSidebars implements HasDynami
     private final StudentAssignmentsUploadsRepository studentAssignmentsUploadsRepository;
     private final CourseRepository courseRepository;
     private final PersonRepository personRepository;
-    private final AssignmentController assignmentController;
     private Course course;
     private Assignment assignment;
+    private final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
 
     private FlexLayout assignmentBar = new FlexLayout();
 
@@ -48,15 +43,17 @@ public class StudentAssignmentView extends ViewWithSidebars implements HasDynami
                                  @Autowired TextChannelRepository textChannelRepository,
                                  @Autowired AssignmentRepository assignmentRepository,
                                  @Autowired PersonRepository personRepository,
-                                 @Autowired StudentAssignmentsUploadsRepository studentAssignmentsUploadsRepository) {
+                                 @Autowired StudentAssignmentsUploadsRepository studentAssignmentsUploadsRepository,
+                                 @Autowired GroupRepository groupRepository,
+                                 @Autowired GroupMembersRepository groupMembersRepository) {
         this.assignmentRepository = assignmentRepository;
         this.studentAssignmentsUploadsRepository = studentAssignmentsUploadsRepository;
         this.courseRepository = courseRepository;
         this.personRepository = personRepository;
-        this.assignmentController = new AssignmentController(personRepository, assignmentRepository,
-                                                             studentAssignmentsUploadsRepository, courseRepository);
         setController(new Controller(personRepository, textChannelRepository, null,
-                                     courseRepository, null));
+                                     courseRepository, null, groupRepository, groupMembersRepository));
+        setAssignmentController(new AssignmentController(personRepository, assignmentRepository,
+                                                         studentAssignmentsUploadsRepository, courseRepository));
     }
 
     @SneakyThrows // so that javac doesn't complain about not catching the exception
@@ -93,7 +90,6 @@ public class StudentAssignmentView extends ViewWithSidebars implements HasDynami
         assignmentBar.add(title);
         StudentAssignmentLayout layout = new StudentAssignmentLayout(assignment);
         assignmentBar.add(layout);
-
     }
 
     private class StudentAssignmentLayout extends VerticalLayout {
@@ -118,20 +114,19 @@ public class StudentAssignmentView extends ViewWithSidebars implements HasDynami
         }
 
         private void writeGradeInfo() {
-            Long id = Long.parseLong(String.valueOf(assignment.getId()) + String.valueOf(SecurityUtils.getCurrentUser(personRepository).getId()));
-            Optional<StudentAssignmentUpload> s = studentAssignmentsUploadsRepository.findById(id);
+            StudentAssignmentUpload s = getAssignmentController().findStudentAssignmentSubmission(assignment.getId(),
+                                                 personRepository.findByUsername(authentication.getName()).getId());
             Paragraph grade = new Paragraph();
             this.add(grade);
-            if (s.isPresent()) {
-                StudentAssignmentUpload answer = s.get();
-                if (answer.getGrade() == -1) {
+            if (s != null) {
+                if (s.getGrade() == -1) {
                     grade.setText("Your assignment hasn't been graded yet");
                 } else {
-                    grade.setText("Your grade is : " + answer.getGrade());
-                    if (answer.getTeacherComments().equals("")) {
+                    grade.setText("Your grade is : " + s.getGrade());
+                    if (s.getTeacherComments() == null) {
                         this.add(new Paragraph("Your teacher didn't write any comments"));
                     } else {
-                        this.add(new Paragraph("Teacher's comments : \n" + answer.getTeacherComments()));
+                        this.add(new Paragraph("Teacher's comments : \n" + s.getTeacherComments()));
                     }
                 }
             } else {
@@ -146,7 +141,8 @@ public class StudentAssignmentView extends ViewWithSidebars implements HasDynami
                                                          newDirName);
 
             upload.addSucceededListener(event -> {
-                assignmentController.save(assignment.getId(), assignment.getCourseId(), 1);
+                getAssignmentController().saveStudentUploadIfNeeded(assignment.getId(), assignment.getCourseId(),
+                                                                    personRepository.findByUsername(authentication.getName()).getId());
                 Notification.show("You successfully uploaded your file !");
             });
 
@@ -156,12 +152,6 @@ public class StudentAssignmentView extends ViewWithSidebars implements HasDynami
             });
 
             this.add(upload);
-        }
-    }
-
-    private class AdminAssignmentLayout extends VerticalLayout {
-        public AdminAssignmentLayout(Assignment assignment) {
-
         }
     }
 }

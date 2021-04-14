@@ -1,11 +1,10 @@
 package app.model.courses;
 
+import app.jpa_repo.PersonRepository;
+import app.model.users.Person;
 import lombok.*;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Builder
 @AllArgsConstructor
@@ -17,12 +16,12 @@ import javax.persistence.Table;
 public class StudentAssignmentUpload {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // to generate the id
     @Column(
             name = "id",
             updatable = false
     )
     private long id;
-    // the id is the concatenation of 3 Strings : assignmentid + studentid + dateupload
 
     @Column(
             name = "assignmentid",
@@ -58,4 +57,5 @@ public class StudentAssignmentUpload {
             updatable = false
     )
     private long dateUpload;
+
 }

@@ -22,6 +22,13 @@ public class Person {
     private long id;
 
     @Column(
+            nullable = false,
+            name = "password",
+            columnDefinition = "TEXT"
+    )
+    private String password;
+
+    @Column(
             name = "username",
             nullable = false
     )
@@ -94,4 +101,9 @@ public class Person {
 
     //TODO: use lastlogin and first login to see if the user is logged in
     public boolean isConected(){ return true; }
+
+    @Override
+    public boolean equals(Object o) {
+        return (o instanceof Person) && ((Person)o).getId() == this.id;
+    }
 }

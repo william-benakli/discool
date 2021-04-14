@@ -6,11 +6,11 @@ import app.model.chat.PublicChatMessage;
 import app.model.chat.TextChannel;
 import app.model.courses.Course;
 import app.model.courses.CourseSection;
+import app.model.users.Group;
+import app.model.users.GroupMembers;
 import app.model.users.Person;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.Optional;
+import java.util.*;
 
 public class Controller {
 
@@ -19,17 +19,23 @@ public class Controller {
     private final PersonRepository personRepository;
     private final CourseRepository courseRepository;
     private final CourseSectionRepository courseSectionRepository;
+    private final GroupRepository groupRepository;
+    private final GroupMembersRepository groupMembersRepository;
 
     public Controller(PersonRepository personRepository,
                       TextChannelRepository textChannelRepository,
                       PublicChatMessageRepository publicChatMessageRepository,
                       CourseRepository courseRepository,
-                      CourseSectionRepository courseSectionRepository) {
+                      CourseSectionRepository courseSectionRepository,
+                      GroupRepository groupRepository,
+                      GroupMembersRepository groupMembersRepository) {
         this.publicChatMessageRepository = publicChatMessageRepository;
         this.textChannelRepository = textChannelRepository;
         this.personRepository = personRepository;
         this.courseRepository = courseRepository;
         this.courseSectionRepository = courseSectionRepository;
+        this.groupRepository = groupRepository;
+        this.groupMembersRepository = groupMembersRepository;
     }
 
     public String getTitleCourse(long id) {
@@ -115,4 +121,12 @@ public class Controller {
         return publicChatMessageRepository.findById(id);
     }
 
+    public ArrayList<Person> getAllStudentsForCourse(long courseId) {
+        ArrayList<Group> groups = groupRepository.findAllByCourseId(courseId);
+        ArrayList<GroupMembers> members = new ArrayList<>();
+        groups.forEach(group -> members.addAll(groupMembersRepository.findByGroupId(group.getId())));
+        Set<Person> students = new LinkedHashSet<>(); // Set doesn't allow duplicates
+        members.forEach(m -> students.add(personRepository.findById(m.getUserId())));
+        return new ArrayList<>(students);
+    }
 }

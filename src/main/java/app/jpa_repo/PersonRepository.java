@@ -19,7 +19,5 @@ public interface PersonRepository extends JpaRepository<Person, Long> {
     void updateEmailById(@Param("idparam") long id, @Param("emailparam") String email);
 
     Person findByUsername(String username);
-//    long findIdByUsername(String username);
     ArrayList<Person> findAll();
-
 }
