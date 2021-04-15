@@ -43,6 +43,14 @@ public class PanelAdminView extends VerticalLayout {
         createUserGrid();
         createCoursesGrid();
         createTabs();
+        closeEditor();
+
+    }
+
+    private void closeEditor() {
+        form.setPerson(null);
+        form.setVisible(false);
+        removeClassName("editing");
     }
 
     private void createUserGrid() {
@@ -53,13 +61,26 @@ public class PanelAdminView extends VerticalLayout {
         usersGrid.addColumn(Person::getFirstName).setHeader("First Name");
         usersGrid.addColumn(Person::getEmail).setHeader("Email");
         usersGrid.addColumn(Person::getDescription).setHeader("Description");
-        //usersGrid.addColumn(Person::getRole).setHeader("Role");
+        usersGrid.addColumn(Person::getRole).setHeader("Role");
         usersGrid.addColumn(Person::getWebsite).setHeader("Website");
         usersGrid.addThemeVariants(GridVariant.LUMO_NO_BORDER,
                               GridVariant.LUMO_NO_ROW_BORDERS, GridVariant.LUMO_ROW_STRIPES);
         usersGrid.getStyle().set("flex","2");
+        usersGrid.getColumns().forEach(col ->col.setAutoWidth(true));
+        usersGrid.asSingleSelect().addValueChangeListener(event -> editPerson(event.getValue()));
         usersTab.add(usersGrid);
 
+    }
+
+    private void editPerson(Person person) {
+        if(person==null){
+            closeEditor();
+        }
+        else{
+            form.setPerson(person);
+            form.setVisible(true);
+            addClassName("editing");
+        }
     }
 
     private void createCoursesGrid() {

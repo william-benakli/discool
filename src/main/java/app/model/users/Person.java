@@ -2,8 +2,10 @@ package app.model.users;
 
 import com.vaadin.flow.component.combobox.ComboBox;
 import lombok.*;
+import org.jetbrains.annotations.NotNull;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotEmpty;
 import java.util.List;
 
 @Builder
@@ -21,6 +23,7 @@ public class Person {
             name = "id", // the name of the column in the database
             updatable = false // so that the value can't be updated
     )
+
     private long id;
 
     @Column(
@@ -40,18 +43,23 @@ public class Person {
             name = "role",
             nullable = false
     )
+    @NotNull
     private Role role;
 
     @Column(
             name = "firstname",
             nullable = false
     )
+    @NotNull
+    @NotEmpty
     private String firstName;
 
     @Column(
             name = "lastname",
             nullable = false
     )
+    @NotNull
+    @NotEmpty
     private String lastName;
 
     @Column(
