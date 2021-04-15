@@ -22,6 +22,7 @@ import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.page.Page;
 import com.vaadin.flow.component.page.Push;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.tabs.Tab;
@@ -133,9 +134,18 @@ public class Navbar extends AppLayout {
 
         if (! SecurityUtils.isUserStudent()) {
             ComponentButton button = createServDockImage(new Image("img/add.svg", "Create serveur"), Key.NAVIGATE_NEXT);
+            Dialog dialog = new Dialog();
+            TextField field = new TextField();
+            Button valider = new Button("Valider", buttonClickEvent1 -> {
+                courseRepository.createServer(sender.getId(), field.getValue(), "img/DDiscool.svg");
+                dialog.close();
+                UI.getCurrent().getPage().reload();
+            });
             button.getStyle()
                     .set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml());
-            linkRouteurImge(servCardDock, button, routerLink);
+            dialog.add(field, valider);
+            button.addClickListener(buttonClickEvent -> dialog.open());
+            servCardDock.add(button);
         }
         addToNavbar(servCardDock);
     }
