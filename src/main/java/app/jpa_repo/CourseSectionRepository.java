@@ -20,4 +20,9 @@ public interface CourseSectionRepository extends JpaRepository<CourseSection, Lo
     @Query(value = "UPDATE course_sections SET parentId = :new_id WHERE parentId = :old_id")
     void updateParentId(@Param(value = "old_id") Long old_id, @Param(value = "new_id") Long new_id);
 
+    @Modifying
+    @Transactional
+    @Query(value = "INSERT INTO channels (courseid, name) VALUES (:course ,:name)", nativeQuery = true)
+    void createChat(@Param(value = "course") Long course, @Param(value = "name") String name);
+
 }

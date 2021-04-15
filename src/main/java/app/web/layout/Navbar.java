@@ -2,6 +2,7 @@ package app.web.layout;
 
 import app.controller.security.SecurityUtils;
 import app.jpa_repo.CourseRepository;
+import app.jpa_repo.CourseSectionRepository;
 import app.jpa_repo.PersonRepository;
 import app.model.courses.Course;
 import app.model.users.Person;
@@ -9,10 +10,7 @@ import app.web.components.ComponentButton;
 import app.web.views.HomeView;
 import app.web.views.MoodleView;
 import app.web.views.ViewWithSidebars;
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.Key;
-import com.vaadin.flow.component.KeyModifier;
-import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
@@ -30,6 +28,7 @@ import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.PasswordField;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinServletRequest;
@@ -41,6 +40,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -54,13 +54,16 @@ public class Navbar extends AppLayout {
 
     private final CourseRepository courseRepository;
     private final PersonRepository personRepository;
+    private final CourseSectionRepository courseSectionRepository;
     private String[][] settingMenu = {
             {"img/chatBubble.svg", "Messages privés"},
             {"img/manageAccounts.svg", "Paramètres des utilisateurs"},
             {"img/settings.svg", "Paramètres de serveurs"}
     };
 
-    public Navbar(@Autowired CourseRepository courseRepository, @Autowired PersonRepository personRepository) {
+    public Navbar(@Autowired CourseRepository courseRepository, @Autowired PersonRepository personRepository,
+                  @Autowired CourseSectionRepository courseSectionRepository) {
+        this.courseSectionRepository = courseSectionRepository;
         this.personRepository=personRepository;
         this.courseRepository = courseRepository;
         subMenuLeft();
@@ -71,6 +74,7 @@ public class Navbar extends AppLayout {
     /**
      * Generates the navigation bar submenu that contains the logo
      */
+    @SneakyThrows
     private void subMenuLeft() {
         HorizontalLayout servCardDock = HorizontalLayoutCustom();
         servCardDock.getStyle().set("margin", "0");
@@ -139,6 +143,7 @@ public class Navbar extends AppLayout {
     /**
      * Generates the submenu of the navigation bar which contains user, server and private message settings
      */
+    @SneakyThrows
     private void subMenuRight(String[][] pathImage) {
         long tmp = 0;//TODO: edit with the correct redirect values #42
         HorizontalLayout servCardDock = HorizontalLayoutCustom();
@@ -154,7 +159,30 @@ public class Navbar extends AppLayout {
                     popupuser(dialog);
                     button.addClickListener(event -> dialog.open());
                     servCardDock.add(button);
-                } else {
+                }else if(imageInfo[0].equals("img/settings.svg")){
+                    VaadinServletRequest req = (VaadinServletRequest) VaadinService.getCurrentRequest();
+                    StringBuffer uriString = req.getRequestURL();
+                    URI uri = new URI(uriString.toString());
+                    String s=uri.toString();
+                    String t=s.substring(s.length()-1);//TODO: edit with the correct redirect values #42
+                    String[] s2=s.split("/");
+                    System.out.println(Arrays.toString(s2));
+
+                    Dialog dialog = new Dialog();
+                    TextField labelField = new TextField();
+                    labelField.getStyle()
+                            .set("margin","auto");
+                    labelField.setLabel("Créer un chanel textuel");
+                    Button newChan= new Button("Créer", event -> {
+                        courseSectionRepository.createChat( 1L, labelField.getValue());
+                        dialog.close();
+                    });
+                    dialog.add(labelField, newChan);
+                    dialog.setWidth("325px");
+                    dialog.setHeight("150px");
+                    button.addClickListener(event -> dialog.open());
+                    servCardDock.add(button);
+                }else {
                     RouterLink routerLink = new RouterLink("", MoodleView.class, tmp);
                     linkRouteurImge(servCardDock, button, routerLink);
                 }
