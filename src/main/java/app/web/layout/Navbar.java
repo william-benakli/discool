@@ -1,6 +1,7 @@
 package app.web.layout;
 
 import app.controller.security.SecurityUtils;
+import app.jpa_repo.AssignmentRepository;
 import app.jpa_repo.CourseRepository;
 import app.jpa_repo.CourseSectionRepository;
 import app.jpa_repo.PersonRepository;
@@ -27,9 +28,7 @@ import com.vaadin.flow.component.page.Push;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
-import com.vaadin.flow.component.textfield.EmailField;
-import com.vaadin.flow.component.textfield.PasswordField;
-import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.textfield.*;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinServletRequest;
@@ -56,6 +55,7 @@ public class Navbar extends AppLayout {
     private final CourseRepository courseRepository;
     private final PersonRepository personRepository;
     private final CourseSectionRepository courseSectionRepository;
+    private final AssignmentRepository assignmentRepository;
     private String[][] settingMenu = {
             {"img/chatBubble.svg", "Messages privés"},
             {"img/manageAccounts.svg", "Paramètres des utilisateurs"},
@@ -63,7 +63,8 @@ public class Navbar extends AppLayout {
     };
 
     public Navbar(@Autowired CourseRepository courseRepository, @Autowired PersonRepository personRepository,
-                  @Autowired CourseSectionRepository courseSectionRepository) {
+                  @Autowired CourseSectionRepository courseSectionRepository, @Autowired AssignmentRepository assignmentRepository) {
+        this.assignmentRepository=assignmentRepository;
         this.courseSectionRepository = courseSectionRepository;
         this.personRepository=personRepository;
         this.courseRepository = courseRepository;
@@ -187,9 +188,35 @@ public class Navbar extends AppLayout {
                         courseSectionRepository.createChat( 1L, labelField.getValue());
                         dialog.close();
                     });
-                    dialog.add(labelField, newChan);
-                    dialog.setWidth("325px");
-                    dialog.setHeight("150px");
+                    Div sectionAssignement = new Div();
+                    Text assignement = new Text("Ajouter un nouveau travail à rendre");
+                    sectionAssignement.getStyle()
+                            .set("margin-top","50px");
+                    TextField nameAssignement = new TextField("Nom du devoirs");
+                    TextArea descriptionAssignement = new TextArea("Description du devoirs");
+
+
+                    IntegerField noteMax = new IntegerField("Note Maximale");
+                    Button validerAssignement = new Button("Ajouter un devoirs", buttonClickEvent -> {
+                        assignmentRepository.createAssignement(
+                                1L,
+                                nameAssignement.getValue(),
+                                descriptionAssignement.getValue(),
+                                0,
+                                0,
+                                0,
+                                noteMax.getValue(),
+                                0);
+                        dialog.close();
+                        UI.getCurrent().getPage().reload();
+                    });
+
+
+                    sectionAssignement.add(assignement, nameAssignement, descriptionAssignement, noteMax, validerAssignement);
+
+                    dialog.add(labelField, newChan, sectionAssignement);
+                    dialog.setWidth("350px");
+                    dialog.setHeight("450px");
                     button.addClickListener(event -> dialog.open());
                     servCardDock.add(button);
                 }else {
