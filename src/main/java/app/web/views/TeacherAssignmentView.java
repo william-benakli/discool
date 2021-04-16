@@ -246,7 +246,7 @@ public class TeacherAssignmentView extends ViewWithSidebars implements HasDynami
 
             downloadButton = new DynamicFileDownloader("Download", outputName,
             outputStream -> {
-                DownloadController.createTarFile(outputName, sourceDir);
+                DownloadController.createTarGZ(sourceDir, outputName);
                 try {
                     File file = new File(outputName);
                     byte[] toWrite = FileUtils.readFileToByteArray(file);
