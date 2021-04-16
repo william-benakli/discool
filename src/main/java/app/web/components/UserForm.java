@@ -1,8 +1,8 @@
 
-    package app.model.users;
+    package app.web.components;
 
 import app.jpa_repo.PersonRepository;
-import app.web.views.PanelAdminView;
+import app.model.users.Person;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.Key;
@@ -15,16 +15,12 @@ import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.Binder;
-import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.shared.Registration;
-import org.hibernate.event.spi.DeleteEvent;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 
     public class UserForm extends FormLayout {
 
-        private PersonRepository personRepository;
+        private final PersonRepository personRepository;
         private Person person ;
         Binder<Person> binder = new BeanValidationBinder<>(Person.class) ;
 

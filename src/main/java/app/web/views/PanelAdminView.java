@@ -4,7 +4,7 @@ import app.jpa_repo.CourseRepository;
 import app.jpa_repo.PersonRepository;
 import app.model.courses.Course;
 import app.model.users.Person;
-import app.model.users.UserForm;
+import app.web.components.UserForm;
 import app.web.layout.Navbar;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.dependency.CssImport;
@@ -20,9 +20,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Route(value = "admin", layout = Navbar.class)
 @PageTitle("Discool : Admin Panel")
