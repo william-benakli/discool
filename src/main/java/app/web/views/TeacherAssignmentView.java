@@ -65,6 +65,7 @@ public class TeacherAssignmentView extends ViewWithSidebars implements HasDynami
                                  @Autowired GroupMembersRepository groupMembersRepository) {
         this.assignmentRepository = assignmentRepository;
         this.courseRepository = courseRepository;
+        setPersonRepository(personRepository);
         setController(new Controller(personRepository, textChannelRepository, null,
                                      courseRepository, null, groupRepository, groupMembersRepository));
         setAssignmentController(new AssignmentController(personRepository, assignmentRepository,

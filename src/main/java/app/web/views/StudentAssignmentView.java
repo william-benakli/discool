@@ -50,6 +50,7 @@ public class StudentAssignmentView extends ViewWithSidebars implements HasDynami
         this.studentAssignmentsUploadsRepository = studentAssignmentsUploadsRepository;
         this.courseRepository = courseRepository;
         this.personRepository = personRepository;
+        setPersonRepository(personRepository);
         setController(new Controller(personRepository, textChannelRepository, null,
                                      courseRepository, null, groupRepository, groupMembersRepository));
         setAssignmentController(new AssignmentController(personRepository, assignmentRepository,

@@ -2,6 +2,8 @@ package app.web.views;
 
 import app.controller.AssignmentController;
 import app.controller.Controller;
+import app.controller.security.SecurityUtils;
+import app.jpa_repo.PersonRepository;
 import app.model.chat.TextChannel;
 import app.model.courses.Assignment;
 import app.model.courses.StudentAssignmentUpload;
@@ -33,6 +35,9 @@ public abstract class ViewWithSidebars extends VerticalLayout {
     @Getter
     @Setter
     private AssignmentController assignmentController;
+    @Getter
+    @Setter
+    private PersonRepository personRepository;
 
     public void createLayout(FlexLayout centerElement) {
         HorizontalLayout layout = new HorizontalLayout();
@@ -173,8 +178,11 @@ public abstract class ViewWithSidebars extends VerticalLayout {
         assignments.forEach(assignment -> {
             RouterLink studentLink = new RouterLink("", StudentAssignmentView.class, assignment.getId());
             styleNavButtonsForAssignments(assignment, s2, t, studentLink);
-            RouterLink teacherLink = new RouterLink("", TeacherAssignmentView.class, assignment.getId());
-            styleNavButtonsForAssignments(assignment, s2, t, teacherLink);
+            Person p = SecurityUtils.getCurrentUser(personRepository);
+            if (! p.isUserStudent()) {
+                RouterLink teacherLink = new RouterLink("", TeacherAssignmentView.class, assignment.getId());
+                styleNavButtonsForAssignments(assignment, s2, t, teacherLink);
+            }
         });
     }
 
