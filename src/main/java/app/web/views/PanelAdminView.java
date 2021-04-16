@@ -14,11 +14,14 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Route(value = "admin", layout = Navbar.class)
@@ -30,6 +33,7 @@ public class PanelAdminView extends VerticalLayout {
     private final PersonRepository personRepository;
     private final CourseRepository courseRepository;
     private UserForm form;
+    TextField filterText = new TextField() ;
     private final Tab usersTab = new Tab("Users");
     private final Tab coursesTab = new Tab("Courses");
     private final Tabs tabs = new Tabs(usersTab, coursesTab);
@@ -40,11 +44,18 @@ public class PanelAdminView extends VerticalLayout {
         this.personRepository = personRepository;
         this.courseRepository = courseRepository;
         addClassName("list-view");
+        add(filterText);
         createUserGrid();
         createCoursesGrid();
         createTabs();
+        configureFilter();
         closeEditor();
+    }
 
+    public void configureFilter(){
+        filterText.setPlaceholder("filtrer par nom...");
+        filterText.setClearButtonVisible(true);
+        filterText.setValueChangeMode(ValueChangeMode.LAZY);
     }
 
     private void closeEditor() {
@@ -94,7 +105,7 @@ public class PanelAdminView extends VerticalLayout {
 
     private void createTabs() {
 
-        form = new UserForm();
+        form = new UserForm(personRepository);
         form.getStyle().set("flex","1");
         form.getStyle().set("display","list-item");
         Div content = new Div(usersGrid, form);

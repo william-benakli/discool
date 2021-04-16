@@ -1,6 +1,7 @@
 
     package app.model.users;
 
+import app.jpa_repo.PersonRepository;
 import app.web.views.PanelAdminView;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -16,31 +17,41 @@ import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.shared.Registration;
+import org.hibernate.event.spi.DeleteEvent;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
     public class UserForm extends FormLayout {
 
+        private PersonRepository personRepository;
         private Person person ;
         Binder<Person> binder = new BeanValidationBinder<>(Person.class) ;
 
-        TextField pseudo = new TextField("pseudo");
+        TextField username = new TextField("Pseudo");
         TextField firstName = new TextField("First name");
         TextField lastName = new TextField("Last name");
         EmailField email = new EmailField("Email");
         TextField description = new TextField("Description");
         ComboBox<Person.Role> role = new ComboBox<>("Role");
-        TextField website = new TextField("website");
+        TextField website = new TextField("Website");
         Person.Role[] departmentList = Person.Role.getRole();
 
         Button save = new Button("Save");
         Button delete = new Button("Delete");
         Button close = new Button("Cancel");
 
-        public UserForm() {
+
+        public UserForm(@Autowired PersonRepository personRepository) {
+
+            description.setClearButtonVisible(true);//pour avoir le boutton croix qui permet de supprimer toute la saisie d'un coup
+            email.setClearButtonVisible(true);
+            this.personRepository = personRepository ;
             binder.bindInstanceFields(this);
             role.setItems(departmentList);
             addClassName("user-form");
             getStyle().set("display","block");
-            add(pseudo,
+            add(username,
                     firstName,
                     lastName,
                     email,
@@ -61,21 +72,17 @@ import com.vaadin.flow.shared.Registration;
             close.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
             save.addClickShortcut(Key.ENTER);
             close.addClickShortcut(Key.ESCAPE);
-            save.addClickListener(click ->validateAndSave());
+            save.addClickListener(click ->{
+                if(this.username == null){
+                    System.out.println("c'est null");
+                }else{
+                    personRepository.updateUserById(person.getId(),email.getValue(),username.getValue(),firstName.getValue(),lastName.getValue(),description.getValue(),role.getValue(),website.getValue());
+                }
+            });
             delete.addClickListener(click ->fireEvent(new DeleteEvent(this,binder.getBean())));
             close.addClickListener(click ->fireEvent(new CloseEvent(this)));
             binder.addStatusChangeListener(evt -> save.setEnabled(binder.isValid()));
-
             return new HorizontalLayout(save, delete, close);
-        }
-
-        private void validateAndSave() {
-            try {
-                binder.writeBean(person);
-                fireEvent(new SaveEvent(this, person));
-            } catch (ValidationException e) {
-                e.printStackTrace();
-            }
         }
 
         public static abstract class UserFormEvent extends ComponentEvent<UserForm> {
@@ -101,7 +108,6 @@ import com.vaadin.flow.shared.Registration;
             DeleteEvent(UserForm source, Person person) {
                 super(source, person);
             }
-
         }
 
         public static class CloseEvent extends UserFormEvent {
