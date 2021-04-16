@@ -93,8 +93,8 @@
         </dependency>
         <dependency>
             <groupId>org.vaadin</groupId>
-            <artifactId>viritin</artifactId>
-            <version>2.12</version>
+            <artifactId>flow-viritin</artifactId>
+            <version>0.5.0</version>
         </dependency>
 <dependencies>
     <dependency>

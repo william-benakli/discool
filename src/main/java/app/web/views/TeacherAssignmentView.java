@@ -23,21 +23,27 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.converter.StringToIntegerConverter;
+import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.HasDynamicTitle;
 import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.StreamResource;
+import com.vaadin.flow.server.VaadinRequest;
+import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.frontend.installer.DefaultFileDownloader;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
+import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.vaadin.viritin.button.DownloadButton;
+import org.vaadin.firitin.components.DynamicFileDownloader;
 
-import java.io.File;
-import java.io.FileInputStream;
+import java.io.*;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Route(value = "teacher_assignment", layout = Navbar.class)
@@ -216,7 +222,7 @@ public class TeacherAssignmentView extends ViewWithSidebars implements HasDynami
         private String comments;
         private int grade;
         private long studentId;
-        private Anchor downloadButton;
+        private DynamicFileDownloader downloadButton;
 
         public RowModel(long studentId, String name, StudentAssignmentUpload upload) {
             this.name = name;
@@ -230,32 +236,26 @@ public class TeacherAssignmentView extends ViewWithSidebars implements HasDynami
                 this.comments = "";
                 this.grade = 0;
                 this.studentId = studentId;
-                downloadButton = new Anchor("", "Nothing to Download");
+                downloadButton = new DynamicFileDownloader("Nothing to download", "", null);
             }
         }
 
         private void createDownloadButton() {
             String outputName = "downloads/" + name + "_" + studentId + ".tar.gz";
             String sourceDir = "uploads/assignments/" + assignment.getId() + "_" + studentId;
-            DownloadController.createTarFile(outputName, sourceDir);
 
-            //DownloadButton button = new DownloadButton(new Content)
-//            try {
-//                File file = new File(outputName);
-//                if (file.exists()) {
-//                    FileInputStream fos = new FileInputStream(file.getAbsolutePath());
-//                    // the ()->fos is a lambda that return an InputStream (here a FileInputStream)
-//                    StreamResource res = new StreamResource(name, () -> fos);
-//                    res.setContentType("application/gzip");
-//                    downloadButton = new Anchor(res, "");
-//                    downloadButton.add(new Button("Download", new Icon(VaadinIcon.DOWNLOAD)));
-//                    downloadButton.getElement().setAttribute("download", true);
-//                } else {
-//                    downloadButton = new Anchor("", "Nothing to download");
-//                }
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
+            downloadButton = new DynamicFileDownloader("Download", outputName,
+            outputStream -> {
+                DownloadController.createTarFile(outputName, sourceDir);
+                try {
+                    File file = new File(outputName);
+                    byte[] toWrite = FileUtils.readFileToByteArray(file);
+                    outputStream.write(toWrite);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
         }
     }
+
 }
