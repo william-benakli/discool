@@ -212,6 +212,7 @@ public class TeacherAssignmentView extends ViewWithSidebars implements HasDynami
         private int grade;
         private long studentId;
         private DownloadController downloadButton;
+        private boolean isLate;
 
         public RowModel(long studentId, String name, StudentAssignmentUpload upload) {
             this.name = name;
@@ -222,11 +223,13 @@ public class TeacherAssignmentView extends ViewWithSidebars implements HasDynami
                 this.grade = upload.getGrade();
                 this.studentId = upload.getStudentId();
                 createDownloadButton();
+                isLate = true;
             } else {
                 this.comments = "";
                 this.grade = 0;
                 this.studentId = studentId;
                 downloadButton = new DownloadController();
+                //if (upload.getDateUpload() < upload.getAssignmentId().)
             }
         }
 
