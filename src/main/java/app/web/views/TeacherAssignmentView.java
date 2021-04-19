@@ -10,8 +10,10 @@ import app.model.courses.StudentAssignmentUpload;
 import app.model.users.Person;
 import app.web.layout.Navbar;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
+import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.grid.editor.Editor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
@@ -22,6 +24,8 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.converter.StringToIntegerConverter;
+import com.vaadin.flow.data.provider.ListDataProvider;
+import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.HasDynamicTitle;
 import com.vaadin.flow.router.HasUrlParameter;
@@ -30,6 +34,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.File;
@@ -101,11 +106,25 @@ public class TeacherAssignmentView extends ViewWithSidebars implements HasDynami
 
     private class TeacherLayout extends VerticalLayout {
         private Grid<RowModel> grid;
+        private ListDataProvider<RowModel> dataProvider;
+        private Grid.Column<RowModel> lateColumn;
+        private Grid.Column<RowModel> nameColumn;
+        private Grid.Column<RowModel> gradeColumn;
+        private Grid.Column<RowModel> commentsColumn;
+        private Grid.Column<RowModel> tarColumn;
+        private Grid.Column<RowModel> editorColumn;
+        private Editor<RowModel> editor;
+        private HeaderRow filterRow;
+        private Button deleteFilters;
+        private ComboBox<String> lateStatus;
+        private TextField nameFilterField;
 
         private void createGrid() {
             grid = new Grid<>();
+            filterRow = grid.appendHeaderRow();
             assignValues();
             createColumnsAndEditor();
+            createFilters();
             grid.addThemeVariants(GridVariant.LUMO_NO_BORDER,
                                   GridVariant.LUMO_NO_ROW_BORDERS, GridVariant.LUMO_ROW_STRIPES);
             this.add(grid);
@@ -119,32 +138,32 @@ public class TeacherAssignmentView extends ViewWithSidebars implements HasDynami
                                           getAssignmentController().findStudentAssignmentSubmission(assignment.getId(), student.getId()));
                 values.add(u);
             });
-            grid.setItems(values);
+            //grid.setItems(values);
+            this.dataProvider = new ListDataProvider<>(values);
+            grid.setDataProvider(dataProvider);
         }
 
         /**
          * Creates the columns and a way to edit the values inside
          */
         private void createColumnsAndEditor() {
-            grid.addComponentColumn(RowModel::getLateButton).setHeader("Late");
-            grid.addColumn(RowModel::getName).setHeader("Name");
-            Grid.Column<RowModel> gradeColumn = grid.addColumn(RowModel::getGrade).setHeader("Grade");
-            Grid.Column<RowModel> commentsColumn = grid.addColumn(RowModel::getComments).setHeader("Comments").setAutoWidth(true);
-            grid.addComponentColumn(RowModel::getDownloadButton).setHeader(".tar.gz");
+            lateColumn = grid.addComponentColumn(RowModel::getLateButton).setHeader("Late");
+            nameColumn = grid.addColumn(RowModel::getName).setHeader("Name");
+            gradeColumn = grid.addColumn(RowModel::getGrade).setHeader("Grade");
+            commentsColumn = grid.addColumn(RowModel::getComments).setHeader("Comments").setAutoWidth(true);
+            tarColumn = grid.addComponentColumn(RowModel::getDownloadButton).setHeader(".tar.gz");
             TextField gradeField = new TextField();
             TextField commentsField = new TextField();
-            Editor<RowModel> editor = grid.getEditor();
+            editor = grid.getEditor();
             Div validationStatus = new Div();
             validationStatus.setId("validation");
 
-            createBinder(editor, gradeColumn, commentsColumn, gradeField, commentsField, validationStatus);
-            createEditor(editor, gradeField);
+            createBinder(gradeField, commentsField, validationStatus);
+            createEditor(gradeField);
             add(validationStatus, grid);
         }
 
-        private void createBinder(Editor<RowModel> editor, Grid.Column<RowModel> gradeColumn,
-                                  Grid.Column<RowModel> commentsColumn, TextField gradeField,
-                                  TextField commentsField, Div validationStatus) {
+        private void createBinder(TextField gradeField, TextField commentsField, Div validationStatus) {
             Binder<RowModel> binder = new Binder<>(RowModel.class);
             editor.setBinder(binder);
             editor.setBuffered(true);
@@ -160,9 +179,9 @@ public class TeacherAssignmentView extends ViewWithSidebars implements HasDynami
             commentsColumn.setEditorComponent(commentsField);
         }
 
-        private void createEditor(Editor<RowModel> editor, TextField gradeField) {
+        private void createEditor(TextField gradeField) {
             Collection<Button> editButtons = Collections.newSetFromMap(new WeakHashMap<>());
-            Grid.Column<RowModel> editorColumn = grid.addComponentColumn(row -> {
+            editorColumn = grid.addComponentColumn(row -> {
                 Button edit = new Button("Grade");
                 edit.addClassName("edit");
                 edit.addClickListener(e -> {
@@ -197,11 +216,53 @@ public class TeacherAssignmentView extends ViewWithSidebars implements HasDynami
                 if (model.getUpload() != null) {
                     getAssignmentController().saveGrading(model);
                 } else {
-                    System.out.println("ok");
                     getAssignmentController().saveGrading(model.getStudentId(), assignment.getId(), assignment.getCourseId(),
                                                           model.getGrade(), model.getComments());
                 }
             });
+        }
+
+        private void createFilters() {
+            createLateFilter();
+            createNameFilter();
+            createDeleteAllFilters();
+        }
+
+        private void createLateFilter() {
+            String[] lateLabels = {"All", "Late", "Not turned in", "Turned in"};
+            lateStatus = new ComboBox<>("");
+            lateStatus.setItems(lateLabels);
+            lateStatus.addValueChangeListener(event -> {
+                dataProvider.clearFilters();
+                if (! event.getValue().equals("all")) {
+                    dataProvider.addFilter(row -> event.getValue().equals(row.getLateStatus()));
+                    deleteFilters.setEnabled(true);
+                }
+            });
+            filterRow.getCell(lateColumn).setComponent(lateStatus);
+        }
+
+        private void createNameFilter() {
+            nameFilterField = new TextField();
+            nameFilterField.addValueChangeListener(event -> {
+                dataProvider.setFilter(rowModel -> event.getValue().length() <= 0
+                        || StringUtils.containsIgnoreCase(String.valueOf(rowModel.name), event.getValue()));
+                deleteFilters.setEnabled(true);
+            });
+            nameFilterField.setValueChangeMode(ValueChangeMode.EAGER);
+            filterRow.getCell(nameColumn).setComponent(nameFilterField);
+            nameFilterField.setPlaceholder("Filter");
+        }
+
+        private void createDeleteAllFilters() {
+            deleteFilters = new Button("Remove filters", new Icon(VaadinIcon.CLOSE_SMALL));
+            deleteFilters.setEnabled(false);
+            deleteFilters.addClickListener(event -> {
+                nameFilterField.setValue("");
+                lateStatus.setValue("All");
+                dataProvider.clearFilters();
+            });
+            filterRow.getCell(editorColumn).setComponent(deleteFilters);
         }
     }
 
@@ -216,6 +277,7 @@ public class TeacherAssignmentView extends ViewWithSidebars implements HasDynami
         private long studentId;
         private DownloadController downloadButton;
         private Icon lateButton;
+        private String lateStatus;
 
         public RowModel(long studentId, String name, StudentAssignmentUpload upload) {
             this.name = name;
@@ -228,8 +290,10 @@ public class TeacherAssignmentView extends ViewWithSidebars implements HasDynami
                 createDownloadButton();
                 if (upload.getDateUpload() > assignment.getDuedate()) {
                     lateButton = new Icon(VaadinIcon.EXCLAMATION);
+                    lateStatus = "late";
                 } else {
                     lateButton = new Icon(VaadinIcon.CHECK);
+                    lateStatus = "turned in";
                 }
             } else {
                 this.comments = "";
@@ -237,6 +301,7 @@ public class TeacherAssignmentView extends ViewWithSidebars implements HasDynami
                 this.studentId = studentId;
                 downloadButton = new DownloadController();
                 lateButton = new Icon(VaadinIcon.ASTERISK);
+                lateStatus = "not turned in";
             }
         }
 
