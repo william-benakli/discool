@@ -63,7 +63,10 @@ public class AssignmentController {
     }
 
     public void saveGrading(TeacherAssignmentView.RowModel model) {
-        studentAssignmentsUploadsRepository.save(model.getUpload());
+        StudentAssignmentUpload toSave = model.getUpload();
+        toSave.setGrade(model.getGrade());
+        toSave.setTeacherComments(model.getComments());
+        studentAssignmentsUploadsRepository.save(toSave);
     }
 
     public void saveGrading(long studentId, long assignmentId, long courseId, int grade, String teacherComments) {

@@ -97,7 +97,6 @@ public class TeacherAssignmentView extends ViewWithSidebars implements HasDynami
         assignmentBar.add(layout);
     }
 
-
     private class TeacherLayout extends VerticalLayout {
         private Grid<RowModel> grid;
 
@@ -195,6 +194,7 @@ public class TeacherAssignmentView extends ViewWithSidebars implements HasDynami
                 if (model.getUpload() != null) {
                     getAssignmentController().saveGrading(model);
                 } else {
+                    System.out.println("ok");
                     getAssignmentController().saveGrading(model.getStudentId(), assignment.getId(), assignment.getCourseId(),
                                                           model.getGrade(), model.getComments());
                 }

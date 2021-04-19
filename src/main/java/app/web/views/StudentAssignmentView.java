@@ -7,6 +7,7 @@ import app.jpa_repo.*;
 import app.model.courses.Assignment;
 import app.model.courses.Course;
 import app.model.courses.StudentAssignmentUpload;
+import app.model.users.Person;
 import app.web.components.UploadComponent;
 import app.web.layout.Navbar;
 import com.vaadin.flow.component.html.H1;
@@ -20,8 +21,6 @@ import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.Route;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.Optional;
 
@@ -29,15 +28,14 @@ import java.util.Optional;
 public class StudentAssignmentView extends ViewWithSidebars implements HasDynamicTitle, HasUrlParameter<Long> {
 
     private final AssignmentRepository assignmentRepository;
-    private final StudentAssignmentsUploadsRepository studentAssignmentsUploadsRepository;
     private final CourseRepository courseRepository;
     private final PersonRepository personRepository;
     private Course course;
     private Assignment assignment;
-    private final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-
-    private FlexLayout assignmentBar = new FlexLayout();
+    private Person currentUser;
+    private StudentAssignmentUpload studentAssignmentUpload;
+    private final FlexLayout assignmentBar = new FlexLayout();
 
     public StudentAssignmentView(@Autowired CourseRepository courseRepository,
                                  @Autowired TextChannelRepository textChannelRepository,
@@ -47,7 +45,6 @@ public class StudentAssignmentView extends ViewWithSidebars implements HasDynami
                                  @Autowired GroupRepository groupRepository,
                                  @Autowired GroupMembersRepository groupMembersRepository) {
         this.assignmentRepository = assignmentRepository;
-        this.studentAssignmentsUploadsRepository = studentAssignmentsUploadsRepository;
         this.courseRepository = courseRepository;
         this.personRepository = personRepository;
         setPersonRepository(personRepository);
@@ -72,6 +69,9 @@ public class StudentAssignmentView extends ViewWithSidebars implements HasDynami
             throw new Exception("There is no course with this ID.");
             // TODO : take care of the exception (issue 28)
         }
+        currentUser = SecurityUtils.getCurrentUser(personRepository);
+        studentAssignmentUpload = getAssignmentController()
+                .findStudentAssignmentSubmission(assignment.getId(), currentUser.getId());
         createSidebar(course.getId());
         createMembersBar(course.getId());
         createAssignmentBar();
@@ -82,7 +82,6 @@ public class StudentAssignmentView extends ViewWithSidebars implements HasDynami
     public String getPageTitle() {
         return course.getName();
     }
-
 
     private void createAssignmentBar() {
         assignmentBar.removeAll();
@@ -99,7 +98,11 @@ public class StudentAssignmentView extends ViewWithSidebars implements HasDynami
         public StudentAssignmentLayout(Assignment assignment) {
             this.assignment = assignment;
             writeInfo();
-            createUploadZone();
+
+            if (studentAssignmentUpload == null) {
+                // only allow uploads if the student hasn't already submitted a file
+                createUploadZone();
+            }
         }
 
         private void writeInfo() {
@@ -115,19 +118,17 @@ public class StudentAssignmentView extends ViewWithSidebars implements HasDynami
         }
 
         private void writeGradeInfo() {
-            StudentAssignmentUpload s = getAssignmentController().findStudentAssignmentSubmission(assignment.getId(),
-                                                 personRepository.findByUsername(authentication.getName()).getId());
             Paragraph grade = new Paragraph();
             this.add(grade);
-            if (s != null) {
-                if (s.getGrade() == -1) {
+            if (studentAssignmentUpload != null) {
+                if (studentAssignmentUpload.getGrade() == -1) {
                     grade.setText("Your assignment hasn't been graded yet");
                 } else {
-                    grade.setText("Your grade is : " + s.getGrade());
-                    if (s.getTeacherComments() == null) {
+                    grade.setText("Your grade is : " + studentAssignmentUpload.getGrade());
+                    if (studentAssignmentUpload.getTeacherComments() == null) {
                         this.add(new Paragraph("Your teacher didn't write any comments"));
                     } else {
-                        this.add(new Paragraph("Teacher's comments : \n" + s.getTeacherComments()));
+                        this.add(new Paragraph("Teacher's comments : \n" + studentAssignmentUpload.getTeacherComments()));
                     }
                 }
             } else {
@@ -138,21 +139,21 @@ public class StudentAssignmentView extends ViewWithSidebars implements HasDynami
         private void createUploadZone() {
             String newDirName = "uploads/assignments/" + String.valueOf(assignment.getId()) + "_" +
                     String.valueOf(SecurityUtils.getCurrentUser(personRepository).getId());
-            UploadComponent upload = new UploadComponent("200px", "200px", 3, 30000000,
+            UploadComponent uploadComponent = new UploadComponent("200px", "200px", 1, 30000000,
                                                          newDirName);
 
-            upload.addSucceededListener(event -> {
+            uploadComponent.addSucceededListener(event -> {
                 getAssignmentController().saveStudentUploadIfNeeded(assignment.getId(), assignment.getCourseId(),
-                                                                    personRepository.findByUsername(authentication.getName()).getId());
+                                                                    currentUser.getId());
                 Notification.show("You successfully uploaded your file !");
             });
 
-            upload.addFileRejectedListener(event -> {
+            uploadComponent.addFileRejectedListener(event -> {
                 Notification.show("Couldn't upload the file");
                 Notification.show(event.getErrorMessage());
             });
 
-            this.add(upload);
+            this.add(uploadComponent);
         }
     }
 }
