@@ -15,6 +15,8 @@ import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.grid.editor.Editor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
@@ -124,6 +126,7 @@ public class TeacherAssignmentView extends ViewWithSidebars implements HasDynami
          * Creates the columns and a way to edit the values inside
          */
         private void createColumnsAndEditor() {
+            grid.addComponentColumn(RowModel::getLateButton).setHeader("Late");
             grid.addColumn(RowModel::getName).setHeader("Name");
             Grid.Column<RowModel> gradeColumn = grid.addColumn(RowModel::getGrade).setHeader("Grade");
             Grid.Column<RowModel> commentsColumn = grid.addColumn(RowModel::getComments).setHeader("Comments").setAutoWidth(true);
@@ -160,7 +163,7 @@ public class TeacherAssignmentView extends ViewWithSidebars implements HasDynami
         private void createEditor(Editor<RowModel> editor, TextField gradeField) {
             Collection<Button> editButtons = Collections.newSetFromMap(new WeakHashMap<>());
             Grid.Column<RowModel> editorColumn = grid.addComponentColumn(row -> {
-                Button edit = new Button("Edit");
+                Button edit = new Button("Grade");
                 edit.addClassName("edit");
                 edit.addClickListener(e -> {
                     editor.editItem(row);
@@ -212,7 +215,7 @@ public class TeacherAssignmentView extends ViewWithSidebars implements HasDynami
         private int grade;
         private long studentId;
         private DownloadController downloadButton;
-        private boolean isLate;
+        private Icon lateButton;
 
         public RowModel(long studentId, String name, StudentAssignmentUpload upload) {
             this.name = name;
@@ -223,13 +226,17 @@ public class TeacherAssignmentView extends ViewWithSidebars implements HasDynami
                 this.grade = upload.getGrade();
                 this.studentId = upload.getStudentId();
                 createDownloadButton();
-                isLate = true;
+                if (upload.getDateUpload() > assignment.getDuedate()) {
+                    lateButton = new Icon(VaadinIcon.EXCLAMATION);
+                } else {
+                    lateButton = new Icon(VaadinIcon.CHECK);
+                }
             } else {
                 this.comments = "";
                 this.grade = 0;
                 this.studentId = studentId;
                 downloadButton = new DownloadController();
-                //if (upload.getDateUpload() < upload.getAssignmentId().)
+                lateButton = new Icon(VaadinIcon.ASTERISK);
             }
         }
 
