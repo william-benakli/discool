@@ -13,34 +13,25 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.grid.editor.Editor;
-import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.icon.Icon;
-import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.converter.StringToIntegerConverter;
-import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.HasDynamicTitle;
 import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.server.StreamResource;
-import com.vaadin.flow.server.VaadinRequest;
-import com.vaadin.flow.server.VaadinSession;
-import com.vaadin.flow.server.frontend.installer.DefaultFileDownloader;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.vaadin.firitin.components.DynamicFileDownloader;
 
-import java.io.*;
-
+import java.io.File;
+import java.io.IOException;
 import java.util.*;
 
 @Route(value = "teacher_assignment", layout = Navbar.class)
@@ -229,6 +220,7 @@ public class TeacherAssignmentView extends ViewWithSidebars implements HasDynami
             if (upload != null) {
                 this.comments = upload.getTeacherComments();
                 this.grade = upload.getGrade();
+                this.studentId = upload.getStudentId();
                 createDownloadButton();
             } else {
                 this.comments = "";
@@ -250,6 +242,7 @@ public class TeacherAssignmentView extends ViewWithSidebars implements HasDynami
                     byte[] toWrite = FileUtils.readFileToByteArray(file);
                     outputStream.write(toWrite);
                 } catch (IOException e) {
+                    System.out.println("Problem while writing the file");
                     e.printStackTrace();
                 }
             });

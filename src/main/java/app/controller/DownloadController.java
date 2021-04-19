@@ -51,8 +51,6 @@ public class DownloadController extends DynamicFileDownloader {
 
     private void addFileToTarGz(TarArchiveOutputStream tOut, String path, String base) throws IOException  {
         File f = new File(path);
-        System.out.println(path);
-        System.out.println(f.exists());
         String entryName = base + f.getName();
         TarArchiveEntry tarEntry = new TarArchiveEntry(f, entryName);
         tOut.putArchiveEntry(tarEntry);
@@ -64,7 +62,6 @@ public class DownloadController extends DynamicFileDownloader {
             File[] children = f.listFiles();
             if (children != null) {
                 for (File child : children) {
-                    System.out.println(child.getName());
                     addFileToTarGz(tOut, child.getAbsolutePath(), entryName + "/");
                 }
             }
