@@ -41,9 +41,6 @@ import org.vaadin.firitin.components.DynamicFileDownloader;
 
 import java.io.*;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.time.LocalDateTime;
 import java.util.*;
 
 @Route(value = "teacher_assignment", layout = Navbar.class)
@@ -223,7 +220,7 @@ public class TeacherAssignmentView extends ViewWithSidebars implements HasDynami
         private String comments;
         private int grade;
         private long studentId;
-        private DynamicFileDownloader downloadButton;
+        private DownloadController downloadButton;
 
         public RowModel(long studentId, String name, StudentAssignmentUpload upload) {
             this.name = name;
@@ -237,7 +234,7 @@ public class TeacherAssignmentView extends ViewWithSidebars implements HasDynami
                 this.comments = "";
                 this.grade = 0;
                 this.studentId = studentId;
-                downloadButton = new DynamicFileDownloader("Nothing to download", "", null);
+                downloadButton = new DownloadController();
             }
         }
 
@@ -245,9 +242,9 @@ public class TeacherAssignmentView extends ViewWithSidebars implements HasDynami
             String outputName = "downloads/" + name + "_" + studentId + ".tar.gz";
             String sourceDir = "uploads/assignments/" + assignment.getId() + "_" + studentId;
 
-            downloadButton = new DynamicFileDownloader("Download", outputName,
+            downloadButton = new DownloadController("Download", outputName,
             outputStream -> {
-                DownloadController.createTarGZ(sourceDir, outputName);
+                downloadButton.createTarGZ(sourceDir, outputName);
                 try {
                     File file = new File(outputName);
                     byte[] toWrite = FileUtils.readFileToByteArray(file);
