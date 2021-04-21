@@ -126,7 +126,19 @@ public class Controller {
         ArrayList<GroupMembers> members = new ArrayList<>();
         groups.forEach(group -> members.addAll(groupMembersRepository.findByGroupId(group.getId())));
         Set<Person> students = new LinkedHashSet<>(); // Set doesn't allow duplicates
-        members.forEach(m -> students.add(personRepository.findById(m.getUserId())));
+        members.forEach(m -> {
+            Person p = personRepository.findById(m.getUserId());
+            if (p.isUserStudent()) students.add(p);
+        });
         return new ArrayList<>(students);
+    }
+
+    public ArrayList<Person> getAllUsersForCourse(long courseId) {
+        ArrayList<Group> groups = groupRepository.findAllByCourseId(courseId);
+        ArrayList<GroupMembers> members = new ArrayList<>();
+        groups.forEach(group -> members.addAll(groupMembersRepository.findByGroupId(group.getId())));
+        Set<Person> users = new LinkedHashSet<>(); // Set doesn't allow duplicates
+        members.forEach(m -> users.add(personRepository.findById(m.getUserId())));
+        return new ArrayList<>(users);
     }
 }

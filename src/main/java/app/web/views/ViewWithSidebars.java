@@ -7,12 +7,21 @@ import app.jpa_repo.PersonRepository;
 import app.model.chat.TextChannel;
 import app.model.courses.Assignment;
 import app.model.users.Person;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.tabs.Tab;
+import com.vaadin.flow.component.tabs.Tabs;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinServletRequest;
@@ -22,19 +31,18 @@ import lombok.SneakyThrows;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public abstract class ViewWithSidebars extends VerticalLayout {
 
     private FlexLayout sideBar;
     private FlexLayout membersBar;
-    @Getter
-    @Setter
+    @Getter @Setter
     private Controller controller;
-    @Getter
-    @Setter
+    @Getter @Setter
     private AssignmentController assignmentController;
-    @Getter
-    @Setter
+    @Getter @Setter
     private PersonRepository personRepository;
 
     public void createLayout(FlexLayout centerElement) {
@@ -102,13 +110,12 @@ public abstract class ViewWithSidebars extends VerticalLayout {
      */
     public void createMembersBar(long courseId) {
         membersBar = new FlexLayout();
-        ArrayList<Person> usersList = controller.getAllUser();
+        ArrayList<Person> usersList = controller.getAllUsersForCourse(courseId);
         for (Person p : usersList) if (p.isConected()) membersBar.add(styleStatusUsers(p));
         for (Person p : usersList) if (!p.isConected()) membersBar.add(styleStatusUsers(p));
         membersBar.addClassName("card");
         membersBar.addClassName("cardRight");
         setCardStyle(membersBar, "20%", ColorHTML.DARKGREY);
-        // TODO add the members for the chat/course
     }
 
     /**
@@ -147,8 +154,32 @@ public abstract class ViewWithSidebars extends VerticalLayout {
         //  comment the doc of addChannels() and addAssignments()
 
         sideBar = new FlexLayout();
-        // add the RouterLinks
-        RouterLink linkHome=new RouterLink("Page d'accueil", MoodleView.class, courseId);
+        createAddButton();
+        addMoodleLinksToSidebar(courseId);
+        addAssignmentsLinksToSidebar(courseId, s2, t);
+        addChannelsLinksToSidebar(courseId, s2, t);
+        // add the style
+        sideBar.addClassName("card");
+        sideBar.addClassName("cardLeft");
+        setCardStyle(sideBar, "20%", TextChannelView.ColorHTML.DARKGREY);
+    }
+
+    /**
+     * Creates the button & dialog to add a new text channel/assignment/moodle page
+     */
+    private void createAddButton() {
+        Button button = new Button("Add", new Icon(VaadinIcon.PLUS_CIRCLE));
+        button.addClickListener(event -> {
+            CustomAddDialog dialog = new CustomAddDialog();
+            dialog.open();
+        });
+        sideBar.add(button);
+    }
+
+    // TODO : allow the teacher to have several Moodle pages #96
+    // this will require changing the model, currently the database only supports 1 page per course.
+    private void addMoodleLinksToSidebar(long courseId) {
+        RouterLink linkHome = new RouterLink("Page d'accueil", MoodleView.class, courseId);
         linkHome.getStyle()
                 .set("border-bottom","1px solid rgba(112, 112, 122, .75)")
                 .set("color",ColorHTML.TEXTGREY.getColorHtml())
@@ -157,12 +188,6 @@ public abstract class ViewWithSidebars extends VerticalLayout {
                 .set("font-weight","700")
                 .set("pointer-event","none");
         sideBar.add(linkHome);
-        addAssignments(courseId, s2, t);
-        addChannels(courseId, s2, t);
-        // add the style
-        sideBar.addClassName("card");
-        sideBar.addClassName("cardLeft");
-        setCardStyle(sideBar, "20%", TextChannelView.ColorHTML.DARKGREY);
     }
 
     /**
@@ -171,12 +196,13 @@ public abstract class ViewWithSidebars extends VerticalLayout {
      * @param s2
      * @param t
      */
-    private void addAssignments(long courseId, String s2[], String t) {
+    private void addAssignmentsLinksToSidebar(long courseId, String s2[], String t) {
         ArrayList<Assignment> assignments = assignmentController.getAssignmentsForCourse(courseId);
         assignments.forEach(assignment -> {
             RouterLink studentLink = new RouterLink("", StudentAssignmentView.class, assignment.getId());
             styleNavButtonsForAssignments(assignment, s2, t, studentLink);
-            if (! SecurityUtils.isUserStudent()) {
+            Person p = SecurityUtils.getCurrentUser(personRepository);
+            if (! p.isUserStudent()) {
                 RouterLink teacherLink = new RouterLink("", TeacherAssignmentView.class, assignment.getId());
                 styleNavButtonsForAssignments(assignment, s2, t, teacherLink);
             }
@@ -200,7 +226,7 @@ public abstract class ViewWithSidebars extends VerticalLayout {
      * @param s2
      * @param t
      */
-    private void addChannels(long courseId, String s2[], String t) {
+    private void addChannelsLinksToSidebar(long courseId, String s2[], String t) {
         ArrayList<TextChannel> textChannels = controller.getAllChannelsForCourse(courseId);
         textChannels.forEach(channel -> {
             RouterLink link=new RouterLink("", TextChannelView.class, channel.getId());
@@ -251,29 +277,110 @@ public abstract class ViewWithSidebars extends VerticalLayout {
         }
     }
 
+    private class CustomAddDialog extends Dialog {
 
-    //unused
-    /*public ComponentButton createButtonImage(String pathImage, String alt, Key shortCut){
-        Image img =new Image(pathImage, alt);
-        img.getStyle()
-                .set("width","25px")
-                .set("vertical-align","middle")
-                .set("horizontal-align","middle");
-        ComponentButton imgButton = new ComponentButton(img);
-        imgButton.getStyle()
-                .set("padding", "2.5px")
-                .set("margin","0 2.5px");
-        imgButton.addFocusShortcut(shortCut, KeyModifier.ALT);
-        return imgButton;
+        private final Div bottomLayout = new Div();
+        private FlexLayout moodleLayout;
+        private FlexLayout assignmentLayout;
+        private FlexLayout chanelLayout;
+        private FlexLayout layout = new FlexLayout();
+
+        public CustomAddDialog() {
+            addCloseListeners();
+            addTabs();
+            createChannelPage();
+            createAssignmentPage();
+            createMoodlePage();
+        }
+
+        /**
+         * The dialog closes when the "Close" button is clicked, on Esc, or on any outside clicks
+         */
+        private void addCloseListeners() {
+            setCloseOnEsc(true);
+            setCloseOnOutsideClick(true);
+            Button closeButton = new Button("Close");
+            closeButton.addClickListener(event -> close());
+            bottomLayout.add(closeButton);
+        }
+
+        private void addTabs() {
+            Tab channelTab = new Tab("Add a text channel");
+            Div channelDiv = new Div();
+            chanelLayout = new FlexLayout();
+            styleTab(channelTab, chanelLayout);
+            channelDiv.add(chanelLayout);
+
+            Tab assignmentTab = new Tab("Add an assignment");
+            Div assignmentDiv = new Div();
+            assignmentDiv.setVisible(false);
+            assignmentLayout = new FlexLayout();
+            styleTab(assignmentTab, assignmentLayout);
+            assignmentDiv.add(assignmentLayout);
+
+            Tab moodleTab = new Tab("Add a Moodle page");
+            Div moodleDiv = new Div();
+            moodleDiv.setVisible(false);
+            moodleLayout = new FlexLayout();
+            styleTab(moodleTab, moodleLayout);
+            moodleDiv.add(moodleLayout);
+
+            /*navigation between tabs*/
+            Map<Tab, Component> tabsToPages = new HashMap<>();
+            tabsToPages.put(channelTab, channelDiv);
+            tabsToPages.put(assignmentTab, assignmentDiv);
+            tabsToPages.put(moodleTab, moodleDiv);
+            Tabs tabs = new Tabs(channelTab, assignmentTab, moodleTab);
+            Div pages = new Div(channelDiv, assignmentDiv, moodleDiv);
+
+            tabs.addSelectedChangeListener(event -> {
+                tabsToPages.values().forEach(page -> page.setVisible(false));
+                Component selectedPage = tabsToPages.get(tabs.getSelectedTab());
+                selectedPage.setVisible(true);
+            });
+            layout.add(tabs, pages);
+        }
+
+        /**
+         * Change the style of tabs
+         *
+         * @param tab1 Tab to apply the CSS properties to
+         * @param div  Div to apply the CSS properties to
+         */
+        private void styleTab(Tab tab1, FlexLayout div) {
+            tab1.getStyle().set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml());
+            div.getStyle()
+                    .set("margin","auto")
+                    .set("min-height","100px")
+                    .set("width","75%")
+                    .set("flex-direction","column");
+        }
+
+        private void createChannelPage() {
+            H2 title = new H2("Create a new text channel");
+            TextField name = new TextField();
+            name.setPlaceholder("Channel name");
+            name.focus();
+
+            Button valider = new Button("Valider");
+            valider.addClickListener(event -> {
+            // TODO save into database
+            });
+
+            chanelLayout.add(title, name, valider);
+        }
+
+        private void createAssignmentPage() {
+
+        }
+
+        private void createMoodlePage() {
+
+        }
+
     }
 
-    public  Dialog createDialog(Button button){
-        Dialog dialog = new Dialog();
-        dialog.add(new Text("Close me with the esc-key or an outside click"));
 
-        dialog.setWidth("400px");
-        dialog.setHeight("150px");
-        button.addClickListener(event -> dialog.open());
-        return dialog;
-    }*/
+
+
 }
