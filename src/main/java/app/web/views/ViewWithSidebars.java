@@ -6,7 +6,6 @@ import app.controller.security.SecurityUtils;
 import app.jpa_repo.PersonRepository;
 import app.model.chat.TextChannel;
 import app.model.courses.Assignment;
-import app.model.courses.StudentAssignmentUpload;
 import app.model.users.Person;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Image;
@@ -14,7 +13,6 @@ import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.router.RouterLayout;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinServletRequest;
@@ -178,8 +176,7 @@ public abstract class ViewWithSidebars extends VerticalLayout {
         assignments.forEach(assignment -> {
             RouterLink studentLink = new RouterLink("", StudentAssignmentView.class, assignment.getId());
             styleNavButtonsForAssignments(assignment, s2, t, studentLink);
-            Person p = SecurityUtils.getCurrentUser(personRepository);
-            if (! p.isUserStudent()) {
+            if (! SecurityUtils.isUserStudent()) {
                 RouterLink teacherLink = new RouterLink("", TeacherAssignmentView.class, assignment.getId());
                 styleNavButtonsForAssignments(assignment, s2, t, teacherLink);
             }

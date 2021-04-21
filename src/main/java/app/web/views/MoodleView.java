@@ -8,8 +8,6 @@ import app.controller.security.SecurityUtils;
 import app.jpa_repo.*;
 import app.model.courses.Course;
 import app.model.courses.CourseSection;
-import app.model.users.Person;
-import app.web.components.ComponentButton;
 import app.web.layout.Navbar;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
@@ -133,8 +131,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             if (section == null) return;
             initContent();
 
-            Person sender = SecurityUtils.getCurrentUser(personRepository);
-            if(!sender.isUserStudent()){
+            if(! SecurityUtils.isUserStudent()){
                 FlexLayout f=new FlexLayout();
                 f.add(createDeleteButton(), createModifyButton());
                 this.add(f);

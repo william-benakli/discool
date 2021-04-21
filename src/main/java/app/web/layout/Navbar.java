@@ -126,10 +126,7 @@ public class Navbar extends AppLayout {
         }
         routerLink.addClassName("colored");
 
-
-        Person sender = SecurityUtils.getCurrentUser(personRepository);
-
-        if (!sender.isUserStudent()) {
+        if (! SecurityUtils.isUserStudent()) {
             ComponentButton button = createServDockImage(new Image("img/add.svg", "Create serveur"), Key.NAVIGATE_NEXT);
             button.getStyle()
                     .set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml());
@@ -146,10 +143,8 @@ public class Navbar extends AppLayout {
         HorizontalLayout servCardDock = HorizontalLayoutCustom();
         servCardDock.getStyle().set("margin", "0");
 
-        Person sender = SecurityUtils.getCurrentUser(personRepository);
-
         for (String[] imageInfo : pathImage) {
-            if (!imageInfo[0].equals("img/settings.svg") || !sender.isUserStudent()) {
+            if (!imageInfo[0].equals("img/settings.svg") || ! SecurityUtils.isUserStudent()) {
                 ComponentButton button = createServDockImage(new Image(imageInfo[0], imageInfo[1]), Key.NAVIGATE_NEXT);
                 button.getStyle()
                         .set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml());

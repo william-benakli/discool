@@ -47,7 +47,7 @@ public final class SecurityUtils {
 				&& authentication.isAuthenticated();
 	}
 
-	static boolean isUserAdmin() {
+	public static boolean isUserAdmin() {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		SimpleGrantedAuthority adminRole = new SimpleGrantedAuthority(Person.Role.ADMIN.toString());
 		return authentication != null
@@ -56,7 +56,7 @@ public final class SecurityUtils {
 				&& authentication.getAuthorities().contains(adminRole);
 	}
 
-	static boolean isUserStudent() {
+	public static boolean isUserStudent() {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		SimpleGrantedAuthority studentRole = new SimpleGrantedAuthority(Person.Role.STUDENT.toString());
 		return authentication != null
@@ -65,7 +65,7 @@ public final class SecurityUtils {
 				&& authentication.getAuthorities().contains(studentRole);
 	}
 
-	static boolean isUserTeacher() {
+	public static boolean isUserTeacher() {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		SimpleGrantedAuthority teacherRole = new SimpleGrantedAuthority(Person.Role.TEACHER.toString());
 		return authentication != null
