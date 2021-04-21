@@ -21,6 +21,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
+import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.server.VaadinService;
@@ -170,6 +171,8 @@ public abstract class ViewWithSidebars extends VerticalLayout {
         Button button = new Button("Add", new Icon(VaadinIcon.PLUS_CIRCLE));
         button.addClickListener(event -> {
             CustomAddDialog dialog = new CustomAddDialog();
+            dialog.setHeight("50%");
+            dialog.setWidth("60%");
             dialog.open();
         });
         sideBar.add(button);
@@ -288,7 +291,6 @@ public abstract class ViewWithSidebars extends VerticalLayout {
         private FlexLayout moodleLayout;
         private FlexLayout assignmentLayout;
         private FlexLayout chanelLayout;
-        private FlexLayout layout = new FlexLayout();
 
         public CustomAddDialog() {
             addCloseListeners();
@@ -343,7 +345,7 @@ public abstract class ViewWithSidebars extends VerticalLayout {
                 Component selectedPage = tabsToPages.get(tabs.getSelectedTab());
                 selectedPage.setVisible(true);
             });
-            layout.add(tabs, pages);
+            this.add(tabs, pages);
         }
 
         /**
@@ -362,25 +364,55 @@ public abstract class ViewWithSidebars extends VerticalLayout {
         }
 
         private void createChannelPage() {
-            H2 title = new H2("Create a new text channel");
             TextField name = new TextField();
+            name.setLabel("Create a new text channel");
             name.setPlaceholder("Channel name");
             name.focus();
 
             Button valider = new Button("Valider");
             valider.addClickListener(event -> {
-            // TODO save into database
+                // TODO save into database
             });
 
-            chanelLayout.add(title, name, valider);
+            chanelLayout.add(name, valider);
         }
 
         private void createAssignmentPage() {
+            TextField title = new TextField();
+            title.setPlaceholder("Assignment name");
+            title.setLabel("Create a new assignment");
 
+            TextField description = new TextField();
+            description.setPlaceholder("Assignment name");
+            description.setLabel("Description");
+
+            IntegerField grade = new IntegerField("Max grade");
+
+            Button valider = new Button("Valider");
+            valider.addClickListener(event -> {
+                // TODO save into database
+            });
+
+            assignmentLayout.add(title, description, grade, valider);
         }
 
         private void createMoodlePage() {
+            TextField title = new TextField();
+            title.setPlaceholder("Title");
+            title.setLabel("Title");
 
+            TextField description = new TextField();
+            description.setPlaceholder("Content");
+            description.setLabel("Content");
+
+            IntegerField parent = new IntegerField("Parent");
+
+            Button valider = new Button("Valider");
+            valider.addClickListener(event -> {
+                // TODO save into database
+            });
+
+            moodleLayout.add(title, description, parent, valider);
         }
 
     }
