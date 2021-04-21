@@ -201,8 +201,7 @@ public abstract class ViewWithSidebars extends VerticalLayout {
         assignments.forEach(assignment -> {
             RouterLink studentLink = new RouterLink("", StudentAssignmentView.class, assignment.getId());
             styleNavButtonsForAssignments(assignment, s2, t, studentLink);
-            Person p = SecurityUtils.getCurrentUser(personRepository);
-            if (! p.isUserStudent()) {
+            if (! SecurityUtils.isUserStudent()) {
                 RouterLink teacherLink = new RouterLink("", TeacherAssignmentView.class, assignment.getId());
                 styleNavButtonsForAssignments(assignment, s2, t, teacherLink);
             }

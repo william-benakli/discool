@@ -130,7 +130,7 @@ public class Navbar extends AppLayout {
 //        }
 //        routerLink.addClassName("colored");
 
-        if (!currentUser.isUserStudent()) {
+        if (! SecurityUtils.isUserStudent()) {
             createAddACourseButton();
         }
         addToNavbar(courseNavigationDock);
@@ -189,7 +189,7 @@ public class Navbar extends AppLayout {
         createUserParamButton();
 
         currentUser = SecurityUtils.getCurrentUser(personRepository);
-        if (currentUser.isUserAdmin()) {
+        if (SecurityUtils.isUserAdmin()) {
             createAdminSettingsButton();
         }
 
@@ -234,7 +234,7 @@ public class Navbar extends AppLayout {
         createAdminButtonForUserParamDialog();
         styleUserParamLayout();
 
-        if (currentUser.isUserAdmin()) layoutL.add(paramUser, logoutAnchor, divAdmin);
+        if (SecurityUtils.isUserAdmin()) layoutL.add(paramUser, logoutAnchor, divAdmin);
         else layoutL.add(paramUser, logoutAnchor);
 
         /*Set Dialog*/
