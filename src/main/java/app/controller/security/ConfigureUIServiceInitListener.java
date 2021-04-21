@@ -2,6 +2,8 @@ package app.controller.security;
 
 import app.web.views.HomeView;
 import app.web.views.LoginView;
+import app.web.views.PanelAdminView;
+import app.web.views.TeacherAssignmentView;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.server.ServiceInitEvent;
@@ -30,6 +32,10 @@ public class ConfigureUIServiceInitListener implements VaadinServiceInitListener
                 || !HomeView.class.equals(event.getNavigationTarget()))
                 && !SecurityUtils.isUserLoggedIn()) {
             event.rerouteTo(LoginView.class);
+        } else if (PanelAdminView.class.equals(event.getNavigationTarget()) && !SecurityUtils.isUserAdmin()) {
+            event.rerouteTo(HomeView.class);
+        } else if (TeacherAssignmentView.class.equals(event.getNavigationTarget()) && SecurityUtils.isUserStudent()) {
+            event.rerouteTo(HomeView.class);
         }
     }
 }

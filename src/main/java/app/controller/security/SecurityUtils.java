@@ -6,6 +6,7 @@ import com.vaadin.flow.server.ServletHelper.RequestType;
 import com.vaadin.flow.shared.ApplicationConstants;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import javax.servlet.http.HttpServletRequest;
@@ -45,6 +46,35 @@ public final class SecurityUtils {
 				&& !(authentication instanceof AnonymousAuthenticationToken)
 				&& authentication.isAuthenticated();
 	}
+
+	static boolean isUserAdmin() {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		SimpleGrantedAuthority adminRole = new SimpleGrantedAuthority(Person.Role.ADMIN.toString());
+		return authentication != null
+				&& !(authentication instanceof AnonymousAuthenticationToken)
+				&& authentication.isAuthenticated()
+				&& authentication.getAuthorities().contains(adminRole);
+	}
+
+	static boolean isUserStudent() {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		SimpleGrantedAuthority studentRole = new SimpleGrantedAuthority(Person.Role.STUDENT.toString());
+		return authentication != null
+				&& !(authentication instanceof AnonymousAuthenticationToken)
+				&& authentication.isAuthenticated()
+				&& authentication.getAuthorities().contains(studentRole);
+	}
+
+	static boolean isUserTeacher() {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		SimpleGrantedAuthority teacherRole = new SimpleGrantedAuthority(Person.Role.TEACHER.toString());
+		return authentication != null
+				&& !(authentication instanceof AnonymousAuthenticationToken)
+				&& authentication.isAuthenticated()
+				&& authentication.getAuthorities().contains(teacherRole);
+	}
+
+
 
 	/**
 	 * Returns the current user
