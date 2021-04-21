@@ -128,7 +128,7 @@ public class Controller {
         Set<Person> students = new LinkedHashSet<>(); // Set doesn't allow duplicates
         members.forEach(m -> {
             Person p = personRepository.findById(m.getUserId());
-            if (p.isUserStudent()) students.add(p);
+            if (Person.Role.STUDENT.equals(p.getRole())) students.add(p);
         });
         return new ArrayList<>(students);
     }

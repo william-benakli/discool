@@ -200,22 +200,28 @@ public abstract class ViewWithSidebars extends VerticalLayout {
         ArrayList<Assignment> assignments = assignmentController.getAssignmentsForCourse(courseId);
         assignments.forEach(assignment -> {
             RouterLink studentLink = new RouterLink("", StudentAssignmentView.class, assignment.getId());
-            styleNavButtonsForAssignments(assignment, s2, t, studentLink);
+            styleNavButtonsForAssignments(assignment, s2, t, studentLink, false);
             if (! SecurityUtils.isUserStudent()) {
                 RouterLink teacherLink = new RouterLink("", TeacherAssignmentView.class, assignment.getId());
-                styleNavButtonsForAssignments(assignment, s2, t, teacherLink);
+                styleNavButtonsForAssignments(assignment, s2, t, teacherLink, true);
             }
         });
     }
 
-    private void styleNavButtonsForAssignments(Assignment assignment, String[] s2, String t, RouterLink link) {
+    private void styleNavButtonsForAssignments(Assignment assignment, String[] s2, String t,
+                                               RouterLink link, boolean isTeacherPage) {
         Button button = new Button(assignment.getName());
         button.addClassName(assignment.getId() + "");
+        if (isTeacherPage) {
+            button.setIcon(new Icon(VaadinIcon.ACADEMY_CAP));
+        }
         styleButton(link, button);
         button.addClassName("color" + assignment.getId());
-        if (s2.length>=4 && s2[3].equals("channels") && t.equals(assignment.getId()+"")){
+        if (s2.length>=4 && s2[3].equals("assignment") && t.equals(assignment.getId()+"")) {
             button.getStyle().set("color",ColorHTML.PURPLE.getColorHtml());
-        }else button.getStyle().set("color",ColorHTML.TEXTGREY.getColorHtml());
+        } else {
+            button.getStyle().set("color",ColorHTML.TEXTGREY.getColorHtml());
+        }
         sideBar.add(link);
     }
 
