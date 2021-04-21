@@ -55,19 +55,6 @@ public class Navbar extends AppLayout {
     private final CourseRepository courseRepository;
     private final PersonRepository personRepository;
     private Person currentUser;
-
-    private final FlexLayout layout = new FlexLayout();
-    private final FlexLayout layoutL = new FlexLayout();
-    private final FlexLayout layoutR = new FlexLayout();
-    private final Dialog userParametersDialog = new Dialog();
-    private final Div divAdmin = new Div();
-    private EmailField emailField;
-    private PasswordField passwordField;
-    private PasswordField passwordFieldConfirmation;
-    private Button valider;
-    private FlexLayout audioControlsLayout;
-    private Anchor logoutAnchor;
-    private Paragraph paramUser;
     private HorizontalLayout courseNavigationDock;
     private HorizontalLayout rightMenuLayout;
 
@@ -119,16 +106,6 @@ public class Navbar extends AppLayout {
         for (Course c : courses) {
             createCourseButton(c, splitURI, cleanURI);
         }
-
-//        long tmpRedirect = 0;
-//        RouterLink routerLink = new RouterLink("", MoodleView.class, tmpRedirect);
-//        if (cleanURI.equals(0+"")){ //TODO: edit with the correct redirect values #42
-//            routerLink.getStyle()
-//                    .set("border-radius","10px 10px 0 0")
-//                    .set("padding","0 10px")
-//                    .set("background-color", ViewWithSidebars.ColorHTML.GREY.getColorHtml());
-//        }
-//        routerLink.addClassName("colored");
 
         if (! SecurityUtils.isUserStudent()) {
             createAddACourseButton();
@@ -203,7 +180,7 @@ public class Navbar extends AppLayout {
 
     private void createUserParamButton() {
         ComponentButton button = createAndStyleButton("img/manageAccounts.svg", "Paramètres des utilisateurs");
-        createUserParametersDialog();
+        UserParametersDialog userParametersDialog = new UserParametersDialog();
         button.addClickListener(event -> userParametersDialog.open());
         rightMenuLayout.add(button);
     }
@@ -223,182 +200,6 @@ public class Navbar extends AppLayout {
     }
 
 
-    /**
-     * Set the dialog window for user parameters
-     */
-    private void createUserParametersDialog() {
-        createUserParametersForm();
-        createUserTabs();
-        createAudioControls();
-        createLogoutButton();
-        createAdminButtonForUserParamDialog();
-        styleUserParamLayout();
-
-        if (SecurityUtils.isUserAdmin()) layoutL.add(paramUser, logoutAnchor, divAdmin);
-        else layoutL.add(paramUser, logoutAnchor);
-
-        /*Set Dialog*/
-        userParametersDialog.add(layout);
-        userParametersDialog.setWidth("50%");
-        userParametersDialog.setHeight("65%");
-    }
-
-    private void createAdminButtonForUserParamDialog() {
-        Button panelAdmin = new Button("Panel Admin", event -> {
-            UI.getCurrent().navigate("admin");
-            userParametersDialog.close();
-        });
-        panelAdmin.getStyle()
-                .set("background-color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml())
-                .set("color", ViewWithSidebars.ColorHTML.WHITE.getColorHtml());
-        divAdmin.add(panelAdmin);
-        divAdmin.getStyle()
-                .set("position","absolute")
-                .set("bottom","64px")
-                .set("width","25%")
-                .set("text-align","center");
-    }
-
-
-    private void createUserParametersForm() {
-        emailField = new EmailField("Changer d'e-mail");
-        emailField.setClearButtonVisible(true);
-        emailField.setErrorMessage("Veuillez entrer une adresse email valide");
-        emailField.setPlaceholder(currentUser.getEmail());
-
-        passwordField = new PasswordField();
-        passwordField.setLabel("Changer de mot de passe");
-
-        passwordFieldConfirmation = new PasswordField();
-        passwordFieldConfirmation.setLabel("Mot de passe actuel");
-
-        valider = new Button("Valider");
-        valider.getStyle()
-                .set("background-color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml())
-                .set("color", ViewWithSidebars.ColorHTML.WHITE.getColorHtml())
-                .set("top","20px")
-                .set("text-align","center");
-
-        valider.addClickListener(buttonClickEvent -> {
-            personRepository.updateEmailById(currentUser.getId(), emailField.getValue());
-            userParametersDialog.close();
-        });
-    }
-
-    /**
-     * Creates the tabs for the user parameters dialog
-     */
-    private void createUserTabs() {
-        /*Tab 1*/
-        Tab tab1 = new Tab("Mon compte");
-        Div page1 = new Div();
-        FlexLayout userInfosLayout = new FlexLayout();
-        styleTab(tab1, userInfosLayout);
-        userInfosLayout.add(createUserCard(), emailField, passwordField, passwordFieldConfirmation, valider);
-        page1.add(userInfosLayout);
-
-        /*Tab 2*/
-        Tab tab2 = new Tab("Voix et Vidéo");
-        Div page2 = new Div();
-        page2.setVisible(false);
-        audioControlsLayout = new FlexLayout();
-        styleTab(tab2, audioControlsLayout);
-        page2.add(audioControlsLayout);
-
-        /*navigation between tabs*/
-        Map<Tab, Component> tabsToPages = new HashMap<>();
-        tabsToPages.put(tab1, page1);
-        tabsToPages.put(tab2, page2);
-        Tabs tabs = new Tabs(tab1, tab2);
-        Div pages = new Div(page1, page2);
-
-        tabs.addSelectedChangeListener(event -> {
-            tabsToPages.values().forEach(page -> page.setVisible(false));
-            Component selectedPage = tabsToPages.get(tabs.getSelectedTab());
-            selectedPage.setVisible(true);
-        });
-
-        layoutR.add(tabs, pages);
-    }
-
-    /**
-     * Creates the audio input/output options for the user parameters dialog
-     */
-    private void createAudioControls() {
-        // TODO: set up audio output and input #25
-        Select<String> intput = new Select<>();
-        intput.setItems("Option one", "Option two");
-        intput.setLabel("Périphérique d'entrée");
-        intput.getStyle().set("margin-top","25px");
-        Select<String> output = new Select<>();
-        output.setItems("Option one", "Option two");
-        output.setLabel("Périphérique de sortie");
-        audioControlsLayout.add(createUserCard(), intput, output);
-    }
-
-    /**
-     * Creates the logout button to go in the user parameters dialog
-     */
-    private void createLogoutButton() {
-        Button logoutButton = new Button("Déconnexion");
-        logoutButton.getStyle()
-                .set("background-color", ViewWithSidebars.ColorHTML.DANGER.getColorHtml())
-                .set("color", ViewWithSidebars.ColorHTML.WHITE.getColorHtml());
-        logoutAnchor = new Anchor("logout", "");
-        logoutAnchor.getStyle()
-                .set("position","absolute")
-                .set("bottom","24px")
-                .set("width","25%")
-                .set("text-align","center");
-        logoutAnchor.add(logoutButton);
-    }
-
-    /**
-     * Adds style to the user parameters dialog and add a title
-     */
-    private void styleUserParamLayout() {
-        paramUser = new Paragraph("Paramètres utilisateur");
-        paramUser.getStyle()
-                .set("width","25%")
-                .set("text-align","center")
-                .set("position","absolute")
-                .set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml())
-                .set("font-weight","700");
-
-        layout.add(layoutL,layoutR);
-        layout.getStyle()
-                .set("height","100%")
-                .set("width","100%")
-                .set("flex-direction","row");
-
-        layoutR.getStyle()
-                .set("height","100%")
-                .set("width","75%")
-                .set("padding-left","24px")
-                .set("flex-direction","column");
-
-        layoutL.getStyle()
-                .set("height","100%")
-                .set("width","25%")
-                .set("flex-direction","column")
-                .set("border-right","solid .5px #EAEAEA")
-                .set("padding-right","36px");
-    }
-
-    /**
-     * Change the style of tabs
-     *
-     * @param tab1 Tab to apply the CSS properties to
-     * @param div  Div to apply the CSS properties to
-     */
-    private void styleTab(Tab tab1, FlexLayout div) {
-        tab1.getStyle().set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml());
-        div.getStyle()
-                .set("margin","auto")
-                .set("min-height","100px")
-                .set("width","75%")
-                .set("flex-direction","column");
-    }
 
     /**
      * Create file containing the icon and the user's nickname
@@ -472,6 +273,196 @@ public class Navbar extends AppLayout {
         button.getStyle().set("overflow", "hidden");
         routerLink.getElement().appendChild(button.getElement());
         servCardDock.add(routerLink);
+    }
+
+    /**
+     * The pop-up that allows the user to access their parameters and change their info
+     */
+    private class UserParametersDialog extends Dialog {
+        private final FlexLayout layout = new FlexLayout();
+        private final FlexLayout layoutL = new FlexLayout();
+        private final FlexLayout layoutR = new FlexLayout();
+        private final Div divAdmin = new Div();
+        private EmailField emailField;
+        private PasswordField passwordField;
+        private PasswordField passwordFieldConfirmation;
+        private Button valider;
+        private FlexLayout audioControlsLayout;
+        private Anchor logoutAnchor;
+        private Paragraph paramUser;
+
+        public UserParametersDialog() {
+            createUserParametersForm();
+            createUserTabs();
+            createAudioControls();
+            createLogoutButton();
+            createAdminButtonForUserParamDialog();
+            styleUserParamLayout();
+
+            if (SecurityUtils.isUserAdmin()) layoutL.add(paramUser, logoutAnchor, divAdmin);
+            else layoutL.add(paramUser, logoutAnchor);
+
+            /*Set Dialog*/
+            add(layout);
+            setWidth("50%");
+            setHeight("65%");
+        }
+
+        private void createAdminButtonForUserParamDialog() {
+            Button panelAdmin = new Button("Panel Admin", event -> {
+                UI.getCurrent().navigate("admin");
+                this.close();
+            });
+            panelAdmin.getStyle()
+                    .set("background-color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml())
+                    .set("color", ViewWithSidebars.ColorHTML.WHITE.getColorHtml());
+            divAdmin.add(panelAdmin);
+            divAdmin.getStyle()
+                    .set("position","absolute")
+                    .set("bottom","64px")
+                    .set("width","25%")
+                    .set("text-align","center");
+        }
+
+        private void createUserParametersForm() {
+            emailField = new EmailField("Changer d'e-mail");
+            emailField.setClearButtonVisible(true);
+            emailField.setErrorMessage("Veuillez entrer une adresse email valide");
+            emailField.setPlaceholder(currentUser.getEmail());
+
+            passwordField = new PasswordField();
+            passwordField.setLabel("Changer de mot de passe");
+
+            passwordFieldConfirmation = new PasswordField();
+            passwordFieldConfirmation.setLabel("Mot de passe actuel");
+
+            valider = new Button("Valider");
+            valider.getStyle()
+                    .set("background-color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml())
+                    .set("color", ViewWithSidebars.ColorHTML.WHITE.getColorHtml())
+                    .set("top","20px")
+                    .set("text-align","center");
+
+            valider.addClickListener(buttonClickEvent -> {
+                personRepository.updateEmailById(currentUser.getId(), emailField.getValue());
+                this.close();
+            });
+        }
+
+        /**
+         * Creates the tabs for the user parameters dialog
+         */
+        private void createUserTabs() {
+            /*Tab 1*/
+            Tab tab1 = new Tab("Mon compte");
+            Div page1 = new Div();
+            FlexLayout userInfosLayout = new FlexLayout();
+            styleTab(tab1, userInfosLayout);
+            userInfosLayout.add(createUserCard(), emailField, passwordField, passwordFieldConfirmation, valider);
+            page1.add(userInfosLayout);
+
+            /*Tab 2*/
+            Tab tab2 = new Tab("Voix et Vidéo");
+            Div page2 = new Div();
+            page2.setVisible(false);
+            audioControlsLayout = new FlexLayout();
+            styleTab(tab2, audioControlsLayout);
+            page2.add(audioControlsLayout);
+
+            /*navigation between tabs*/
+            Map<Tab, Component> tabsToPages = new HashMap<>();
+            tabsToPages.put(tab1, page1);
+            tabsToPages.put(tab2, page2);
+            Tabs tabs = new Tabs(tab1, tab2);
+            Div pages = new Div(page1, page2);
+
+            tabs.addSelectedChangeListener(event -> {
+                tabsToPages.values().forEach(page -> page.setVisible(false));
+                Component selectedPage = tabsToPages.get(tabs.getSelectedTab());
+                selectedPage.setVisible(true);
+            });
+
+            layoutR.add(tabs, pages);
+        }
+
+        /**
+         * Creates the audio input/output options for the user parameters dialog
+         */
+        private void createAudioControls() {
+            // TODO: set up audio output and input #25
+            Select<String> intput = new Select<>();
+            intput.setItems("Option one", "Option two");
+            intput.setLabel("Périphérique d'entrée");
+            intput.getStyle().set("margin-top","25px");
+            Select<String> output = new Select<>();
+            output.setItems("Option one", "Option two");
+            output.setLabel("Périphérique de sortie");
+            audioControlsLayout.add(createUserCard(), intput, output);
+        }
+
+        /**
+         * Creates the logout button to go in the user parameters dialog
+         */
+        private void createLogoutButton() {
+            Button logoutButton = new Button("Déconnexion");
+            logoutButton.getStyle()
+                    .set("background-color", ViewWithSidebars.ColorHTML.DANGER.getColorHtml())
+                    .set("color", ViewWithSidebars.ColorHTML.WHITE.getColorHtml());
+            logoutAnchor = new Anchor("logout", "");
+            logoutAnchor.getStyle()
+                    .set("position","absolute")
+                    .set("bottom","24px")
+                    .set("width","25%")
+                    .set("text-align","center");
+            logoutAnchor.add(logoutButton);
+        }
+
+        /**
+         * Adds style to the user parameters dialog and add a title
+         */
+        private void styleUserParamLayout() {
+            paramUser = new Paragraph("Paramètres utilisateur");
+            paramUser.getStyle()
+                    .set("width","25%")
+                    .set("text-align","center")
+                    .set("position","absolute")
+                    .set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml())
+                    .set("font-weight","700");
+
+            layout.add(layoutL,layoutR);
+            layout.getStyle()
+                    .set("height","100%")
+                    .set("width","100%")
+                    .set("flex-direction","row");
+
+            layoutR.getStyle()
+                    .set("height","100%")
+                    .set("width","75%")
+                    .set("padding-left","24px")
+                    .set("flex-direction","column");
+
+            layoutL.getStyle()
+                    .set("height","100%")
+                    .set("width","25%")
+                    .set("flex-direction","column")
+                    .set("border-right","solid .5px #EAEAEA")
+                    .set("padding-right","36px");
+        }
+
+        /**
+         * Change the style of tabs
+         *
+         * @param tab1 Tab to apply the CSS properties to
+         * @param div  Div to apply the CSS properties to
+         */
+        private void styleTab(Tab tab1, FlexLayout div) {
+            tab1.getStyle().set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml());
+            div.getStyle()
+                    .set("margin","auto")
+                    .set("min-height","100px")
+                    .set("width","75%")
+                    .set("flex-direction","column");
+        }
     }
 
 }
