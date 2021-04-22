@@ -82,7 +82,7 @@ public abstract class ViewWithSidebars extends VerticalLayout {
         status.getStyle()
                 .set("color", ColorHTML.TEXTGREY.getColorHtml())
                 .set("margin","0");
-        Image img=new Image((p.isConnected())?"img/dotgreen.svg":"img/dotred.svg", "Status");
+        Image img = new Image((p.isConnected())?"img/dotgreen.svg":"img/dotred.svg", "Status");
         img.getStyle()
                 .set("margin-right","5px")
                 .set("margin-top","-2.5px");
@@ -90,8 +90,7 @@ public abstract class ViewWithSidebars extends VerticalLayout {
         divstatus.add(status);
         div.add(pseudo);
         div.add(divstatus);
-        //TODO: support the management of the icon in the database
-        Image iconUser = new Image("img/books.jpg","Status");
+        Image iconUser = p.getProfilePicture();
         iconUser.getStyle()
                 .set("width","50px")
                 .set("height","50px")
