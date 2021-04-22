@@ -38,8 +38,6 @@ import com.vaadin.flow.server.VaadinServletRequest;
 import com.vaadin.flow.shared.ui.Transport;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -180,8 +178,10 @@ public class Navbar extends AppLayout {
 
     private void createUserParamButton() {
         ComponentButton button = createAndStyleButton("img/manageAccounts.svg", "Paramètres des utilisateurs");
-        UserParametersDialog userParametersDialog = new UserParametersDialog();
-        button.addClickListener(event -> userParametersDialog.open());
+        button.addClickListener(event -> {
+            UserParametersDialog userParametersDialog = new UserParametersDialog();
+            userParametersDialog.open();
+        });
         rightMenuLayout.add(button);
     }
 
@@ -201,30 +201,7 @@ public class Navbar extends AppLayout {
 
 
 
-    /**
-     * Create file containing the icon and the user's nickname
-     *
-     * @return a user card
-     */
-    private FlexLayout createUserCard() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        FlexLayout card = new FlexLayout();
-        card.getStyle()
-                .set("padding-top","50px");
-        Image profilPicture = new Image("img/Chien 3.jpg","Photo de Profil");
-        profilPicture.getStyle()
-                .set("width","100px")
-                .set("height","100px")
-                .set("border-radius","50px");
-        Paragraph userName= new Paragraph(authentication.getName());
-        userName.getStyle()
-                .set("margin","auto auto auto 24px")
-                .set("font-size","18px")
-                .set("font-weight","700")
-                .set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml());
-        card.add(profilPicture, userName);
-        return card;
-    }
+
 
     /**
      * Create an empty dock and style it.
@@ -390,14 +367,14 @@ public class Navbar extends AppLayout {
          */
         private void createAudioControls() {
             // TODO: set up audio output and input #25
-            Select<String> intput = new Select<>();
-            intput.setItems("Option one", "Option two");
-            intput.setLabel("Périphérique d'entrée");
-            intput.getStyle().set("margin-top","25px");
+            Select<String> input = new Select<>();
+            input.setItems("Option one", "Option two");
+            input.setLabel("Périphérique d'entrée");
+            input.getStyle().set("margin-top","25px");
             Select<String> output = new Select<>();
             output.setItems("Option one", "Option two");
             output.setLabel("Périphérique de sortie");
-            audioControlsLayout.add(createUserCard(), intput, output);
+            audioControlsLayout.add(createUserCard(), input, output);
         }
 
         /**
@@ -463,6 +440,32 @@ public class Navbar extends AppLayout {
                     .set("width","75%")
                     .set("flex-direction","column");
         }
+
+        /**
+         * Create a FlexLayout containing the icon and the user's nickname
+         *
+         * @return a user card
+         */
+        private FlexLayout createUserCard() {
+            Person currentUser = SecurityUtils.getCurrentUser(personRepository);
+            FlexLayout card = new FlexLayout();
+            card.getStyle()
+                    .set("padding-top","50px");
+            Image profilPicture = currentUser.getProfilePicture();
+            profilPicture.getStyle()
+                    .set("width","100px")
+                    .set("height","100px")
+                    .set("border-radius","50px");
+            Paragraph userName= new Paragraph(currentUser.getUsername());
+            userName.getStyle()
+                    .set("margin","auto auto auto 24px")
+                    .set("font-size","18px")
+                    .set("font-weight","700")
+                    .set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml());
+            card.add(profilPicture, userName);
+            return card;
+        }
+
     }
 
 }

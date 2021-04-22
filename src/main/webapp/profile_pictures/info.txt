@@ -1,0 +1,2 @@
+This directory contains the profile pictures of the users.
+The name of the picture is the id of the person in the database.

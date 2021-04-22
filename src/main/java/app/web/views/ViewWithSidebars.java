@@ -78,11 +78,11 @@ public abstract class ViewWithSidebars extends VerticalLayout {
                 .set("margin","0")
                 .set("margin-top","5px");
         FlexLayout divstatus = new FlexLayout();
-        Paragraph status = new Paragraph((p.isConected())?"En ligne":"Hors-ligne");
+        Paragraph status = new Paragraph((p.isConnected())?"En ligne":"Hors-ligne");
         status.getStyle()
                 .set("color", ColorHTML.TEXTGREY.getColorHtml())
                 .set("margin","0");
-        Image img=new Image((p.isConected())?"img/dotgreen.svg":"img/dotred.svg","Status");
+        Image img=new Image((p.isConnected())?"img/dotgreen.svg":"img/dotred.svg", "Status");
         img.getStyle()
                 .set("margin-right","5px")
                 .set("margin-top","-2.5px");
@@ -111,8 +111,8 @@ public abstract class ViewWithSidebars extends VerticalLayout {
     public void createMembersBar(long courseId) {
         membersBar = new FlexLayout();
         ArrayList<Person> usersList = controller.getAllUsersForCourse(courseId);
-        for (Person p : usersList) if (p.isConected()) membersBar.add(styleStatusUsers(p));
-        for (Person p : usersList) if (!p.isConected()) membersBar.add(styleStatusUsers(p));
+        for (Person p : usersList) if (p.isConnected()) membersBar.add(styleStatusUsers(p));
+        for (Person p : usersList) if (!p.isConnected()) membersBar.add(styleStatusUsers(p));
         membersBar.addClassName("card");
         membersBar.addClassName("cardRight");
         setCardStyle(membersBar, "20%", ColorHTML.DARKGREY);

@@ -1,10 +1,12 @@
 package app.model.users;
 
+import com.vaadin.flow.component.html.Image;
 import lombok.*;
 import org.jetbrains.annotations.NotNull;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
+import java.io.File;
 
 @Builder
 @AllArgsConstructor
@@ -94,7 +96,6 @@ public class Person {
     )
     private long timeCreated;
 
-    // TODO : make sure it converts to an int when saving to the database
     public enum Role {
         ADMIN, TEACHER, STUDENT;
         public static Role[] getRole(){
@@ -106,11 +107,28 @@ public class Person {
         return role.toString();
     }
 
-    //TODO: use lastlogin and first login to see if the user is logged in
-    public boolean isConected(){ return true; }
+    //TODO: find a way to see if the user is logged in
+    public boolean isConnected(){ return true; }
 
     @Override
     public boolean equals(Object o) {
         return (o instanceof Person) && ((Person)o).getId() == this.id;
     }
+
+    /**
+     * Gets the user's profile picture, or the default one.
+     * The pictures are stored in webapp/profile_pictures/id_of_the_user
+     * @return an Image
+     */
+    public Image getProfilePicture() {
+        String fileName = "profile_pictures/" + id + ".jpg";
+        System.out.println(fileName);
+        File file = new File("src/main/webapp/" + fileName);
+        if (! file.exists()) {
+            fileName = "profile_pictures/default.jpg";
+        }
+        System.out.println("final " + fileName);
+        return new Image(fileName, "profile picture");
+    }
+
 }
