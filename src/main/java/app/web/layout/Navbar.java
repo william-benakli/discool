@@ -6,6 +6,7 @@ import app.jpa_repo.PersonRepository;
 import app.model.courses.Course;
 import app.model.users.Person;
 import app.web.components.ComponentButton;
+import app.web.components.UploadComponent;
 import app.web.views.HomeView;
 import app.web.views.MoodleView;
 import app.web.views.PanelAdminView;
@@ -19,10 +20,8 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.dialog.Dialog;
-import com.vaadin.flow.component.html.Anchor;
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Image;
-import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.html.*;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.page.Push;
@@ -39,6 +38,7 @@ import com.vaadin.flow.shared.ui.Transport;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -451,8 +451,8 @@ public class Navbar extends AppLayout {
             FlexLayout card = new FlexLayout();
             card.getStyle()
                     .set("padding-top","50px");
-            Image profilPicture = currentUser.getProfilePicture();
-            profilPicture.getStyle()
+            FlexLayout profilePictureLayout = createProfilePicture();
+            profilePictureLayout.getStyle()
                     .set("width","100px")
                     .set("height","100px")
                     .set("border-radius","50px");
@@ -462,10 +462,67 @@ public class Navbar extends AppLayout {
                     .set("font-size","18px")
                     .set("font-weight","700")
                     .set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml());
-            card.add(profilPicture, userName);
+            card.add(profilePictureLayout, userName);
             return card;
+        }
+
+        /**
+         * Create a layout with the profile picture and a button to change the picture
+         * @return the layout
+         */
+        private FlexLayout createProfilePicture() {
+            FlexLayout ppLayout = new FlexLayout();
+            Image profilPicture = currentUser.getProfilePicture();
+            Button button = new Button("Change profile picture");
+            button.addClickListener(event -> {
+                ChangeProfilePictureDialog changeProfilePicture = new ChangeProfilePictureDialog();
+            });
+            ppLayout.add(profilPicture, button);
+            return ppLayout;
         }
 
     }
 
+    private class ChangeProfilePictureDialog extends Dialog {
+
+        public ChangeProfilePictureDialog() {
+            createDialog();
+            open();
+        }
+
+        private void createDialog() {
+            H2 title = new H2("Upload a new profile picture");
+            Paragraph instructions = new Paragraph("Choose a new picture from your browser (or drag-and-drop). " +
+                                                        "Only .jpg and .jpeg files are accepted.");
+            UploadComponent uploadComponent = new UploadComponent("200px", "200px", 1, 30000000,
+                                                                  "src/main/webapp/profile_pictures",
+                                                                  "image/jpeg");
+            uploadComponent.addSucceededListener(event -> {
+                String oldName = uploadComponent.getFileName();
+                try {
+                    renameProfilePicture(oldName);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                Notification.show("Your profile picture was updated successfully");
+                Notification.show("Close the parameters window to see the change ");
+            });
+
+            this.add(title, instructions, uploadComponent);
+        }
+
+        private void renameProfilePicture(String oldName) throws Exception {
+            String extension;
+            if (oldName.endsWith("jpeg")) {
+                extension = ".jpeg";
+            } else {
+                extension = ".jpg";
+            }
+            File old = new File(oldName);
+            File newFile = new File("src/main/webapp/profile_pictures/" + currentUser.getId() + extension);
+            if (! old.renameTo(newFile)) {
+                throw new Exception("File can't be renamed");
+            }
+        }
+    }
 }

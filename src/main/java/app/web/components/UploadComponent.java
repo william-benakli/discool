@@ -1,14 +1,22 @@
 package app.web.components;
 
-import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.upload.Receiver;
 import com.vaadin.flow.component.upload.Upload;
+import lombok.Getter;
+import lombok.Setter;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 
 public class UploadComponent extends Upload {
-    /** The name of the directory to save the files to**/
-    private String dirName;
+    /** The name of the directory to save the files to */
+    private final String dirName;
+
+    /** The full path to the file that was uploaded */
+    @Getter @Setter
+    private String fileName;
 
     /**
      *
@@ -49,6 +57,7 @@ public class UploadComponent extends Upload {
 
                 // save the file
                 file = new File(dirName + "/" + fileName);
+                setFileName(dirName + "/" + fileName);
                 fos = new FileOutputStream(file);
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
