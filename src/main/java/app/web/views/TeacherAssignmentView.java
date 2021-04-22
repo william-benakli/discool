@@ -232,12 +232,14 @@ public class TeacherAssignmentView extends ViewWithSidebars implements HasDynami
             String[] lateLabels = {"All", "Late", "Not turned in", "Turned in"};
             lateStatus = new ComboBox<>("");
             lateStatus.setItems(lateLabels);
+            lateStatus.setValue("All");
             lateStatus.addValueChangeListener(event -> {
                 dataProvider.clearFilters();
-                if (! event.getValue().equals("all")) {
+                if (! event.getValue().equals("All")) {
                     dataProvider.addFilter(row -> event.getValue().equals(row.getLateStatus()));
                     deleteFilters.setEnabled(true);
                 }
+                dataProvider.refreshAll();
             });
             filterRow.getCell(lateColumn).setComponent(lateStatus);
         }
@@ -251,7 +253,7 @@ public class TeacherAssignmentView extends ViewWithSidebars implements HasDynami
             });
             nameFilterField.setValueChangeMode(ValueChangeMode.EAGER);
             filterRow.getCell(nameColumn).setComponent(nameFilterField);
-            nameFilterField.setPlaceholder("Filter");
+            nameFilterField.setPlaceholder("Name");
         }
 
         private void createDeleteAllFilters() {
@@ -261,6 +263,7 @@ public class TeacherAssignmentView extends ViewWithSidebars implements HasDynami
                 nameFilterField.setValue("");
                 lateStatus.setValue("All");
                 dataProvider.clearFilters();
+                dataProvider.refreshAll();
             });
             filterRow.getCell(editorColumn).setComponent(deleteFilters);
         }
@@ -290,10 +293,10 @@ public class TeacherAssignmentView extends ViewWithSidebars implements HasDynami
                 createDownloadButton();
                 if (upload.getDateUpload() > assignment.getDuedate()) {
                     lateButton = new Icon(VaadinIcon.EXCLAMATION);
-                    lateStatus = "late";
+                    lateStatus = "Late";
                 } else {
                     lateButton = new Icon(VaadinIcon.CHECK);
-                    lateStatus = "turned in";
+                    lateStatus = "Turned in";
                 }
             } else {
                 this.comments = "";
@@ -301,7 +304,7 @@ public class TeacherAssignmentView extends ViewWithSidebars implements HasDynami
                 this.studentId = studentId;
                 downloadButton = new DownloadController();
                 lateButton = new Icon(VaadinIcon.ASTERISK);
-                lateStatus = "not turned in";
+                lateStatus = "Not turned in";
             }
         }
 
