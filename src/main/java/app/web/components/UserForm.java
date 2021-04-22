@@ -3,9 +3,11 @@
 
 import app.jpa_repo.PersonRepository;
 import app.model.users.Person;
+import app.web.views.PanelAdminView;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.Key;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -15,15 +17,20 @@ import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.shared.Registration;
+import org.hibernate.event.spi.DeleteEvent;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.ArrayList;
+import java.util.List;
 
     public class UserForm extends FormLayout {
 
         private final PersonRepository personRepository;
         private Person person ;
         Binder<Person> binder = new BeanValidationBinder<>(Person.class) ;
-
+        PanelAdminView panel ;
         TextField username = new TextField("Pseudo");
         TextField firstName = new TextField("First name");
         TextField lastName = new TextField("Last name");
@@ -73,12 +80,23 @@ import org.springframework.beans.factory.annotation.Autowired;
                     System.out.println("c'est null");
                 }else{
                     personRepository.updateUserById(person.getId(),email.getValue(),username.getValue(),firstName.getValue(),lastName.getValue(),description.getValue(),role.getValue(),website.getValue());
+                    //UI.getCurrent().getPage().reload();
+                    validateAndSave();
                 }
             });
             delete.addClickListener(click ->fireEvent(new DeleteEvent(this,binder.getBean())));
             close.addClickListener(click ->fireEvent(new CloseEvent(this)));
             binder.addStatusChangeListener(evt -> save.setEnabled(binder.isValid()));
             return new HorizontalLayout(save, delete, close);
+        }
+
+        private void validateAndSave() {
+            try {
+                binder.writeBean(person);
+                fireEvent(new SaveEvent(this, person));
+            } catch (ValidationException e) {
+                e.printStackTrace();
+            }
         }
 
         public static abstract class UserFormEvent extends ComponentEvent<UserForm> {

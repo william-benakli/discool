@@ -10,11 +10,14 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
+import com.vaadin.flow.component.grid.editor.Editor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.converter.StringToIntegerConverter;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -47,9 +50,22 @@ public class PanelAdminView extends VerticalLayout {
         createCoursesGrid();
         createTabs();
         configureFilter();
+        form.addListener(UserForm.SaveEvent.class,this::savePerson);
+        updateList();
+        updateList();
+        closeEditor();
+
+    }
+
+    public void savePerson(UserForm.SaveEvent evt){
+        personRepository.save(evt.getPerson());
+        updateList();
         closeEditor();
     }
 
+    public void updateList(){
+        usersGrid.setItems(personRepository.findAll());
+    }
     public void configureFilter(){
         filterText.setPlaceholder("filtrer par nom...");
         filterText.setClearButtonVisible(true);
@@ -78,7 +94,6 @@ public class PanelAdminView extends VerticalLayout {
         usersGrid.getColumns().forEach(col ->col.setAutoWidth(true));
         usersGrid.asSingleSelect().addValueChangeListener(event -> editPerson(event.getValue()));
         usersTab.add(usersGrid);
-
     }
 
     private void editPerson(Person person) {
