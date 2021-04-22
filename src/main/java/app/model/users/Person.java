@@ -121,14 +121,19 @@ public class Person {
      * @return an Image
      */
     public Image getProfilePicture() {
-        String fileName = "profile_pictures/" + id + ".jpg";
-        System.out.println(fileName);
-        File file = new File("src/main/webapp/" + fileName);
+        String fileName = "profile_pictures/" + id;
+        String sourceDir = "src/main/webapp/";
+        String extension = ".jpg";
+        File file = new File( sourceDir + fileName + extension);
         if (! file.exists()) {
-            fileName = "profile_pictures/default.jpg";
+            extension = ".jpeg";
+            file = new File(sourceDir + fileName + extension);
+            if (! file.exists()) {
+                extension = ".jpg";
+                fileName = "profile_pictures/default";
+            }
         }
-        System.out.println("final " + fileName);
-        return new Image(fileName, "profile picture");
+        return new Image(fileName + extension, "profile picture");
     }
 
 }
