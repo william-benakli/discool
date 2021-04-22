@@ -10,6 +10,7 @@ import app.model.courses.StudentAssignmentUpload;
 import app.model.users.Person;
 import app.web.components.UploadComponent;
 import app.web.layout.Navbar;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.notification.Notification;
@@ -105,15 +106,59 @@ public class StudentAssignmentView extends ViewWithSidebars implements HasDynami
             }
         }
 
+        private void constTab(Div div, String text){
+            div.getStyle()
+                    .set("width","100px")
+                    .set("height","50px")
+                    .set("background-color",ColorHTML.WHITE.getColorHtml())
+                    .set("display","flex")
+                    .set("padding-left","40px")
+                    .set("padding-right","30px");
+            div.add(new Paragraph(text));
+        }
+
+        private Div tabHorizontal(){
+            Div div=new Div();
+            Div divLeft=new Div();
+            Div divRight=new Div();
+            div.getStyle()
+                    .set("display","flex")
+                    .set("flex-direction","row");
+
+            Div dueDate=new Div();
+            Div dueDateR=new Div();
+            constTab(dueDate, "date");
+            constTab(dueDateR, Long.toString(assignment.getDuedate()));
+
+            if (assignment.getAllowLate() == 1) {
+                Div cutOffDate = new Div();
+                Div cutOffDateR = new Div();
+                constTab(cutOffDate, "cut off date");
+                constTab(cutOffDateR, Long.toString(assignment.getCutoffdate()));
+                divLeft.add(cutOffDate);
+                divRight.add(cutOffDateR);
+            }
+
+            Div maxGrade=new Div();
+            Div maxGradeR=new Div();
+            constTab(maxGrade, "max grade");
+            constTab(maxGradeR, Long.toString(assignment.getMaxGrade()));
+
+            /*Div status=new Div();
+            constTab(status, "status");
+            constTab(statusR, Long.toString(assignment.getMaxGrade()));*/
+
+            divLeft.add(dueDate, maxGrade);
+            divRight.add(dueDateR, maxGradeR);
+
+            div.add(divLeft, divRight);
+            return div;
+        }
+
         private void writeInfo() {
             this.add(new Paragraph(assignment.getDescription()));
-            this.add(new Paragraph("due date : " + assignment.getDuedate()));
-            if (assignment.getAllowLate() == 1) {
-                this.add(new Paragraph("cut off date : " + assignment.getCutoffdate()));
-            }
+            add(tabHorizontal());
             //this.add(new Paragraph("max number of attempts : " + assignment.getMaxAttempts()));
-            this.add(new Paragraph("max grade : " + assignment.getMaxGrade()));
-
             writeGradeInfo();
         }
 
