@@ -88,6 +88,7 @@ public class StudentAssignmentView extends ViewWithSidebars implements HasDynami
         assignmentBar.removeAll();
         setCardStyle(assignmentBar, "60%", ColorHTML.GREY);
         H1 title = new H1(assignment.getName());
+        title.getStyle().set("color",ColorHTML.PURPLE.getColorHtml());
         assignmentBar.add(title);
         StudentAssignmentLayout layout = new StudentAssignmentLayout(assignment);
         assignmentBar.add(layout);
@@ -106,11 +107,11 @@ public class StudentAssignmentView extends ViewWithSidebars implements HasDynami
             }
         }
 
-        private void constTab(Div div, String text){
+        private void constTab(Div div, String text, ColorHTML color){
             div.getStyle()
-                    .set("width","100px")
+                    .set("width","100%")
                     .set("height","50px")
-                    .set("background-color",ColorHTML.WHITE.getColorHtml())
+                    .set("background-color", String.valueOf(color))
                     .set("display","flex")
                     .set("padding-left","40px")
                     .set("padding-right","30px");
@@ -120,36 +121,45 @@ public class StudentAssignmentView extends ViewWithSidebars implements HasDynami
         private Div tabHorizontal(){
             Div div=new Div();
             Div divLeft=new Div();
+            divLeft.getStyle().set("width","25%");
+
             Div divRight=new Div();
             div.getStyle()
                     .set("display","flex")
-                    .set("flex-direction","row");
+                    .set("flex-direction","row")
+                    .set("overflow","hidden");
+            div.setWidth("100%");
+
+            divRight.setWidth("74%");
 
             Div dueDate=new Div();
             Div dueDateR=new Div();
-            constTab(dueDate, "date");
-            constTab(dueDateR, Long.toString(assignment.getDuedate()));
+            constTab(dueDate, "date", ColorHTML.WHITE);
+            constTab(dueDateR, Long.toString(assignment.getDuedate()), ColorHTML.WHITE);
 
             if (assignment.getAllowLate() == 1) {
                 Div cutOffDate = new Div();
                 Div cutOffDateR = new Div();
-                constTab(cutOffDate, "cut off date");
-                constTab(cutOffDateR, Long.toString(assignment.getCutoffdate()));
+                constTab(cutOffDate, "cut off date", ColorHTML.DARKGREY);
+                constTab(cutOffDateR, Long.toString(assignment.getCutoffdate()), ColorHTML.DARKGREY);
                 divLeft.add(cutOffDate);
                 divRight.add(cutOffDateR);
             }
 
             Div maxGrade=new Div();
             Div maxGradeR=new Div();
-            constTab(maxGrade, "max grade");
-            constTab(maxGradeR, Long.toString(assignment.getMaxGrade()));
+            constTab(maxGrade, "max grade", ColorHTML.DARKGREY);
+            constTab(maxGradeR, Long.toString(assignment.getMaxGrade()), ColorHTML.DARKGREY);
 
-            /*Div status=new Div();
-            constTab(status, "status");
-            constTab(statusR, Long.toString(assignment.getMaxGrade()));*/
+            Div status=new Div();
+            Div statusR=new Div();
+            constTab(status, "status", ColorHTML.WHITE);
+            constTab(statusR, writeGradeInfo(), ColorHTML.WHITE);
+            status.setHeight("100px");
+            statusR.setHeight("100px");
 
-            divLeft.add(dueDate, maxGrade);
-            divRight.add(dueDateR, maxGradeR);
+            divLeft.add(dueDate, maxGrade, status);
+            divRight.add(dueDateR, maxGradeR, statusR);
 
             div.add(divLeft, divRight);
             return div;
@@ -159,32 +169,37 @@ public class StudentAssignmentView extends ViewWithSidebars implements HasDynami
             this.add(new Paragraph(assignment.getDescription()));
             add(tabHorizontal());
             //this.add(new Paragraph("max number of attempts : " + assignment.getMaxAttempts()));
-            writeGradeInfo();
         }
 
-        private void writeGradeInfo() {
-            Paragraph grade = new Paragraph();
-            this.add(grade);
+        private String writeGradeInfo() {
+            //Paragraph grade = new Paragraph();
+            String res="";
             if (studentAssignmentUpload != null) {
                 if (studentAssignmentUpload.getGrade() == -1) {
-                    grade.setText("Your assignment hasn't been graded yet");
+                    //grade.setText("Your assignment hasn't been graded yet");
+                    res+="Your assignment hasn't been graded yet";
                 } else {
-                    grade.setText("Your grade is : " + studentAssignmentUpload.getGrade());
+                    //grade.setText("Your grade is : " + studentAssignmentUpload.getGrade());
+                    res+="Your grade is : " + studentAssignmentUpload.getGrade();
                     if (studentAssignmentUpload.getTeacherComments() == null) {
-                        this.add(new Paragraph("Your teacher didn't write any comments"));
+                        //grade.add(new Paragraph("Your teacher didn't write any comments"));
+                        res+="Your teacher didn't write any comments";
                     } else {
-                        this.add(new Paragraph("Teacher's comments : \n" + studentAssignmentUpload.getTeacherComments()));
+                        //grade.add(new Paragraph("Teacher's comments : \n" + studentAssignmentUpload.getTeacherComments()));
+                        res+="Teacher's comments : \n" + studentAssignmentUpload.getTeacherComments();
                     }
                 }
             } else {
-                this.add(new Paragraph("You have not submitted an answer yet !"));
+                //grade.add(new Paragraph("You have not submitted an answer yet !"));
+                res+="You have not submitted an answer yet !";
             }
+            return res;
         }
 
         private void createUploadZone() {
             String newDirName = "uploads/assignments/" + String.valueOf(assignment.getId()) + "_" +
                     String.valueOf(SecurityUtils.getCurrentUser(personRepository).getId());
-            UploadComponent uploadComponent = new UploadComponent("200px", "200px", 1, 30000000,
+            UploadComponent uploadComponent = new UploadComponent("50px", "96%", 1, 30000000,
                                                          newDirName);
 
             uploadComponent.addSucceededListener(event -> {
@@ -197,6 +212,9 @@ public class StudentAssignmentView extends ViewWithSidebars implements HasDynami
                 Notification.show("Couldn't upload the file");
                 Notification.show(event.getErrorMessage());
             });
+
+            uploadComponent.getStyle()
+                    .set("margin","auto");
 
             this.add(uploadComponent);
         }
