@@ -7,7 +7,6 @@ import app.controller.commands.CommandsClearChat;
 import app.jpa_repo.*;
 import app.model.chat.PublicChatMessage;
 import app.model.chat.TextChannel;
-import app.model.courses.Course;
 import app.model.users.Person;
 import app.web.components.ComponentButton;
 import app.web.layout.Navbar;
@@ -363,7 +362,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
             optionsUser.setPadding(false);
             onHover();
             createResponseMessage(publicMessage);
-            createPictureSetting();
+            createPictureSetting(publicMessage.getSender());
             createDeleteButton(publicMessage);
             createModifyButton(publicMessage);
             createResponseButton(publicMessage);
@@ -490,8 +489,9 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
             chatUserInformation.add(message);
         }
 
-        private void createPictureSetting() {
-            this.profilPicture = new Image("img/Chien 3.jpg", "profilPicture");
+        private void createPictureSetting(long senderId) {
+            Person sender = personRepository.findById(senderId);
+            this.profilPicture = sender.getProfilePicture();
             this.profilPicture.setWidth("60px");
             this.profilPicture.setHeight("60px");
             this.profilPicture.getStyle()
