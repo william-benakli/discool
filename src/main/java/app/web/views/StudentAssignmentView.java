@@ -102,7 +102,11 @@ public class StudentAssignmentView extends ViewWithSidebars implements HasDynami
 
             if (studentAssignmentUpload == null) {
                 // only allow uploads if the student hasn't already submitted a file
-                createUploadZone();
+                // and if they are not late
+                if ((assignment.getAllowLate() == 1 && assignment.getCutoffdate() >= System.currentTimeMillis())
+                    || (assignment.getDuedate() >= System.currentTimeMillis())) {
+                    createUploadZone();
+                }
             }
         }
 

@@ -10,10 +10,11 @@ import app.model.courses.Course;
 import app.model.users.Person;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.datetimepicker.DateTimePicker;
 import com.vaadin.flow.component.dialog.Dialog;
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Image;
-import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
@@ -21,19 +22,28 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
-import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.binder.BinderValidationStatus;
+import com.vaadin.flow.data.binder.BindingValidationStatus;
+import com.vaadin.flow.data.converter.StringToIntegerConverter;
+import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinServletRequest;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
+import org.vaadin.firitin.fields.LocalDateTimeField;
 
 import java.net.URI;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 public abstract class ViewWithSidebars extends VerticalLayout {
 
@@ -372,31 +382,17 @@ public abstract class ViewWithSidebars extends VerticalLayout {
             name.focus();
 
             Button valider = new Button("Valider");
-            valider.addClickListener(event -> {
-                controller.createChannel(name.getValue(), getCourse().getId());
-            });
+            valider.addClickListener(event -> controller.createChannel(name.getValue(), getCourse().getId()));
 
             chanelLayout.add(name, valider);
         }
 
         private void createAssignmentPage() {
-            TextField title = new TextField();
-            title.setPlaceholder("Assignment name");
-            title.setLabel("Create a new assignment");
-
-            TextField description = new TextField();
-            description.setPlaceholder("Assignment name");
-            description.setLabel("Description");
-
-            IntegerField grade = new IntegerField("Max grade");
-
-            Button valider = new Button("Valider");
-            valider.addClickListener(event -> {
-                assignmentController.createAssignment(description.getValue(), title.getValue());
-            });
-
-            assignmentLayout.add(title, description, grade, valider);
+            AddAssignmentForm assignmentForm = new AddAssignmentForm();
+            assignmentLayout.add(assignmentForm);
         }
+
+
 
         private void createMoodlePage() {
             TextField title = new TextField();
@@ -404,15 +400,137 @@ public abstract class ViewWithSidebars extends VerticalLayout {
             title.setLabel("Title");
 
             Button valider = new Button("Valider");
-            valider.addClickListener(event -> {
-                controller.createMoodlePage(title.getValue(), getCourse().getId());
-            });
+            valider.addClickListener(event -> controller.createMoodlePage(title.getValue(), getCourse().getId()));
 
             moodleLayout.add(title, valider);
         }
 
     }
 
+    private class AddAssignmentForm extends FormLayout {
+        Binder<AssignmentModel> binder = new Binder<>();
+        TextField title;
+        TextField description;
+        TextField maxGrade;
+        DateTimePicker dueDate;
+        DateTimePicker cutoffDate;
+        Checkbox allowLate;
+
+        public AddAssignmentForm() {
+            createTextFields();
+            createDatePickers();
+        }
+
+        private void createTextFields() {
+            title = new TextField();
+            title.setLabel("Title");
+            title.setRequired(true);
+            title.setValueChangeMode(ValueChangeMode.EAGER);
+            binder.forField(title)
+                    .bind(AssignmentModel::getDescription, AssignmentModel::setDescription);
+
+            description = new TextField();
+            description.setLabel("Description");
+            description.setRequired(true);
+            description.setValueChangeMode(ValueChangeMode.EAGER);
+            binder.forField(description)
+                    .bind(AssignmentModel::getDescription, AssignmentModel::setDescription);
+
+            maxGrade = new TextField("Max grade");
+            maxGrade.setRequired(true);
+            binder.forField(maxGrade)
+                    .withConverter(new StringToIntegerConverter("Must be a number"))
+                    .bind(AssignmentModel::getMaxGrade, AssignmentModel::setMaxGrade);
+
+            VerticalLayout layout = new VerticalLayout();
+            layout.add(title, description, maxGrade, createButtons());
+            this.add(layout);
+        }
+
+        private void createDatePickers() {
+            dueDate = new DateTimePicker("Due date");
+            dueDate.addValueChangeListener(event -> cutoffDate.setValue(dueDate.getValue()));
+            cutoffDate = new DateTimePicker("Cut-off date");
+            cutoffDate.setVisible(false);
+            setDatePickers(dueDate, cutoffDate);
+
+            allowLate = new Checkbox("Allow late ?", false);
+            allowLate.setRequiredIndicatorVisible(true);
+            allowLate.addClickListener(event -> {
+                // date picker only visible if late work is accepted
+                cutoffDate.setVisible(allowLate.getValue());
+            });
+
+            VerticalLayout datePickers = new VerticalLayout();
+            datePickers.add(dueDate);
+            datePickers.add(allowLate);
+            datePickers.add(cutoffDate);
+
+            LocalDateTimeField now = new LocalDateTimeField();
+            now.setValue(LocalDateTime.now());
+            binder.forField(dueDate)
+                    .withValidator(date -> !date.isBefore(LocalDateTime.now()), "Due date can't be in the past")
+                    .bind(AssignmentModel::getDueDate, AssignmentModel::setDueDate);
+            binder.forField(cutoffDate)
+                    .withValidator(date -> !date.isBefore(dueDate.getValue()), "Can't be before the due date")
+                    .bind(AssignmentModel::getCutoffDate, AssignmentModel::setCutoffDate);
+            binder.forField(allowLate).bind(AssignmentModel::isAllowLate, AssignmentModel::setAllowLate);
+
+            this.add(datePickers);
+        }
+
+        private void setDatePickers(DateTimePicker... datePickers) {
+            for (DateTimePicker datePicker : datePickers) {
+                LocalDateTime now = LocalDateTime.now();
+                datePicker.setStep(Duration.ofMinutes(15));
+                datePicker.setMin(now);
+            }
+        }
+
+        private HorizontalLayout createButtons() {
+            Label infoLabel = new Label();
+            NativeButton save = new NativeButton("Save");
+            NativeButton reset = new NativeButton("Reset");
+
+            reset.addClickListener(event -> {
+                binder.readBean(null);
+                infoLabel.setText("");
+            });
+
+            save.addClickListener(event -> {
+                if (binder.isValid()) {
+                    getAssignmentController().createAssignment(title.getValue(), description.getValue(),
+                                                               getCourse().getId(), maxGrade.getValue(),
+                                                               allowLate.getValue(),
+                                                               dueDate.getValue(), cutoffDate.getValue());
+                    infoLabel.setText("Saved");
+                } else {
+                    BinderValidationStatus<AssignmentModel> validate = binder.validate();
+                    String errorText = validate.getFieldValidationStatuses()
+                            .stream().filter(BindingValidationStatus::isError)
+                            .map(BindingValidationStatus::getMessage)
+                            .map(Optional::get).distinct()
+                            .collect(Collectors.joining(", "));
+                    infoLabel.setText("Errors : " + errorText);
+                }
+            });
+
+            HorizontalLayout actions = new HorizontalLayout();
+            actions.add(save, reset, infoLabel);
+            return actions;
+        }
+
+    }
+
+    @Getter @Setter
+    public static class AssignmentModel {
+        private String title;
+        private String description;
+        private boolean allowLate;
+        private LocalDateTime dueDate;
+        private LocalDateTime cutoffDate;
+        private int maxGrade;
+    }
 
 
 

@@ -245,7 +245,6 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
 
 
     public class MessageResponsePopComponent extends Div {
-
         HorizontalLayout layoutHorizontalLayout;
 
         Paragraph message;

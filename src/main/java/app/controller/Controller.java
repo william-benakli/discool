@@ -5,12 +5,15 @@ import app.jpa_repo.*;
 import app.model.chat.PublicChatMessage;
 import app.model.chat.TextChannel;
 import app.model.courses.Course;
-import app.model.courses.CourseSection;
+import app.model.courses.MoodlePage;
 import app.model.users.Group;
 import app.model.users.GroupMembers;
 import app.model.users.Person;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.Optional;
+import java.util.Set;
 
 public class Controller {
 
@@ -18,7 +21,7 @@ public class Controller {
     private final PublicChatMessageRepository publicChatMessageRepository;
     private final PersonRepository personRepository;
     private final CourseRepository courseRepository;
-    private final CourseSectionRepository courseSectionRepository;
+    private final MoodlePageRepository moodlePageRepository;
     private final GroupRepository groupRepository;
     private final GroupMembersRepository groupMembersRepository;
 
@@ -26,14 +29,14 @@ public class Controller {
                       TextChannelRepository textChannelRepository,
                       PublicChatMessageRepository publicChatMessageRepository,
                       CourseRepository courseRepository,
-                      CourseSectionRepository courseSectionRepository,
+                      MoodlePageRepository moodlePageRepository,
                       GroupRepository groupRepository,
                       GroupMembersRepository groupMembersRepository) {
         this.publicChatMessageRepository = publicChatMessageRepository;
         this.textChannelRepository = textChannelRepository;
         this.personRepository = personRepository;
         this.courseRepository = courseRepository;
-        this.courseSectionRepository = courseSectionRepository;
+        this.moodlePageRepository = moodlePageRepository;
         this.groupRepository = groupRepository;
         this.groupMembersRepository = groupMembersRepository;
     }
@@ -72,13 +75,8 @@ public class Controller {
         publicChatMessageRepository.updateDeletedById(message.getId());
     }
 
-    public void deleteSection(CourseSection section) {
-        if (section.getParentId() == null) { // the section to delete is the first section
-            courseSectionRepository.updateParentId(section.getId(), null);
-        } else { // else just update the parentId
-            courseSectionRepository.updateParentId(section.getId(), section.getParentId());
-        }
-        courseSectionRepository.delete(section);
+    public void deletePage(MoodlePage section) {
+        moodlePageRepository.delete(section);
     }
 
     public String getUsernameOfSender(PublicChatMessage publicChatMessage) {
@@ -93,20 +91,11 @@ public class Controller {
         return personRepository.findAll();
     }
 
-    /**
-     * @return all the course sections in the right order
-     */
-    public LinkedList<CourseSection> getAllSectionsInOrder(long courseId) {
-        ArrayList<CourseSection> list = courseSectionRepository.findAllSectionsByCourseId(courseId); // get all the sections from the table
-        list.forEach(courseSection -> courseSection.addParent(courseSectionRepository)); // add the parent for each element
-        LinkedList<CourseSection> sortedList = CourseSection.sort(list); // sort the sections in the right order
-        return sortedList;
-    }
 
-    public void updateSection(CourseSection section, String title, String content) {
+    public void updateSection(MoodlePage section, String title, String content) {
         section.setTitle(title);
         section.setContent(content);
-        courseSectionRepository.save(section);
+        moodlePageRepository.save(section);
     }
 
     public void clearMessageChat() {
@@ -148,8 +137,8 @@ public class Controller {
     }
 
     public void createMoodlePage(String title, long courseId) {
-        CourseSection toSave = CourseSection.builder().courseId(courseId).title(title).content("").build();
-        courseSectionRepository.save(toSave);
+        MoodlePage toSave = MoodlePage.builder().courseId(courseId).title(title).content("").build();
+        moodlePageRepository.save(toSave);
     }
 
 }

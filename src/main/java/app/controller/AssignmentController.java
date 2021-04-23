@@ -8,6 +8,8 @@ import app.model.courses.Assignment;
 import app.model.courses.StudentAssignmentUpload;
 import app.web.views.TeacherAssignmentView;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 
 
@@ -88,8 +90,15 @@ public class AssignmentController {
     }
 
 
-    public void createAssignment(String description, String title) {
-        Assignment toSave = Assignment.builder().description(description).name(title).build();
-        assignmentRepository.save(toSave);
+    public void createAssignment(String title, String description, long courseId, String maxGrade,
+                                 boolean allowLate, LocalDateTime dueDate, LocalDateTime cutoffDate) {
+        Assignment assignment = Assignment.builder()
+                .name(title).description(description).courseId(courseId)
+                .allowLate((short) (allowLate ? 1 : 0))
+                .duedate(dueDate.toEpochSecond(ZoneOffset.of("+1"))) // offset +1 pour l'heure de Paris
+                .cutoffdate(allowLate ? cutoffDate.toEpochSecond(ZoneOffset.of("+1")) : 0)
+                .maxGrade((short) Integer.parseInt(maxGrade))
+                .maxAttempts((short) 1).build();
+        assignmentRepository.save(assignment);
     }
 }
