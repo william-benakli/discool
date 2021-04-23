@@ -98,6 +98,7 @@ public class TeacherAssignmentView extends ViewWithSidebars implements HasDynami
         assignmentBar.removeAll();
         setCardStyle(assignmentBar, "60%", ColorHTML.GREY);
         H1 title = new H1(assignment.getName());
+        title.getStyle().set("color",ColorHTML.PURPLE.getColorHtml());
         assignmentBar.add(title);
         TeacherLayout layout = new TeacherLayout();
         layout.createGrid();
@@ -121,6 +122,8 @@ public class TeacherAssignmentView extends ViewWithSidebars implements HasDynami
 
         private void createGrid() {
             grid = new Grid<>();
+            grid.getStyle()
+                    .set("background-color",ColorHTML.GREY.getColorHtml());
             filterRow = grid.appendHeaderRow();
             assignValues();
             createColumnsAndEditor();
