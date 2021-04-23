@@ -38,7 +38,6 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
     private final PersonRepository personRepository;
     private final CourseSectionRepository courseSectionRepository;
     private final CourseRepository courseRepository;
-    private Course course;
 
     private final FlexLayout moodleBar = new FlexLayout();
 
@@ -80,9 +79,9 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
     public void createMoodleBar() {
         moodleBar.removeAll();
         setCardStyle(moodleBar, "60%", ColorHTML.GREY);
-        H1 title = new H1(getController().getTitleCourse(course.getId()));
+        H1 title = new H1(getController().getTitleCourse(getCourse().getId()));
         moodleBar.add(title);
-        LinkedList<CourseSection> listOfSections = getController().getAllSectionsInOrder(course.getId());
+        LinkedList<CourseSection> listOfSections = getController().getAllSectionsInOrder(getCourse().getId());
         for (CourseSection section : listOfSections) {
             SectionLayout sectionLayout = new SectionLayout(section);
             moodleBar.add(sectionLayout);
@@ -94,20 +93,20 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
     public void setParameter(BeforeEvent event, Long parameter) {
         Optional<Course> c = courseRepository.findById(parameter);
         if (c.isPresent()) {
-            course = c.get();
+            setCourse(c.get());
         } else {
             throw new Exception("There is no course with this ID.");
             // TODO : take care of the exception
         }
-        createSidebar(course.getId());
-        createMembersBar(course.getId());
+        createSidebar(getCourse().getId());
+        createMembersBar(getCourse().getId());
         createMoodleBar();
         createLayout(moodleBar);
     }
 
     @Override
     public String getPageTitle() {
-        return course.getName();
+        return getCourse().getName();
     }
 
     /**
@@ -119,8 +118,6 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
      */
     public class SectionLayout extends VerticalLayout implements HasText {
         private final CourseSection section;
-
-        // TODO : add icons for the buttons
 
         private final H2 title = new H2();
         private final Paragraph content = new Paragraph();

@@ -141,4 +141,15 @@ public class Controller {
         members.forEach(m -> users.add(personRepository.findById(m.getUserId())));
         return new ArrayList<>(users);
     }
+
+    public void createChannel(String name, long courseId) {
+        TextChannel toSave = TextChannel.builder().name(name).courseId(courseId).build();
+        textChannelRepository.save(toSave);
+    }
+
+    public void createMoodlePage(String title, long courseId) {
+        CourseSection toSave = CourseSection.builder().courseId(courseId).title(title).content("").build();
+        courseSectionRepository.save(toSave);
+    }
+
 }

@@ -41,10 +41,10 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
 
     private final TextChannelRepository textChannelRepository;
     private final PersonRepository personRepository;
+    private final CourseRepository courseRepository;
     private TextChannel textChannel;
     private final TextField messageTextField;
     private final FlexLayout chatBar = new FlexLayout();
-
 
     private long targetResponseMessage;
     private final FlexLayout messageContainer = new FlexLayout();
@@ -67,6 +67,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                            @Autowired GroupMembersRepository groupMembersRepository) {
         this.textChannelRepository = textChannelRepository;
         this.personRepository = personRepository;
+        this.courseRepository = courseRepository;
         this.targetResponseMessage = 0;
         setPersonRepository(personRepository);
         setController(new Controller(personRepository, textChannelRepository, publicChatMessageRepository,
@@ -322,6 +323,8 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
             throw new Exception("There is no channel with this ID.");
             // TODO : take care of the exception
         }
+        Optional<Course> c = courseRepository.findById(textChannel.getCourseId());
+        setCourse(c.orElse(null));
         createSidebar(textChannel.getCourseId());
         createMembersBar(textChannel.getCourseId());
         createLayout(chatBar);

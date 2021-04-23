@@ -31,7 +31,6 @@ public class StudentAssignmentView extends ViewWithSidebars implements HasDynami
     private final AssignmentRepository assignmentRepository;
     private final CourseRepository courseRepository;
     private final PersonRepository personRepository;
-    private Course course;
     private Assignment assignment;
 
     private Person currentUser;
@@ -65,23 +64,23 @@ public class StudentAssignmentView extends ViewWithSidebars implements HasDynami
             // TODO : take care of the exception (issue 28)
         }
         Optional<Course> c = courseRepository.findById(assignment.getCourseId());
-        course = c.orElse(null);
-        if (course == null) {
+        setCourse(c.orElse(null));
+        if (getCourse() == null) {
             throw new Exception("There is no course with this ID.");
             // TODO : take care of the exception (issue 28)
         }
         currentUser = SecurityUtils.getCurrentUser(personRepository);
         studentAssignmentUpload = getAssignmentController()
                 .findStudentAssignmentSubmission(assignment.getId(), currentUser.getId());
-        createSidebar(course.getId());
-        createMembersBar(course.getId());
+        createSidebar(getCourse().getId());
+        createMembersBar(getCourse().getId());
         createAssignmentBar();
         createLayout(assignmentBar);
     }
 
     @Override
     public String getPageTitle() {
-        return course.getName();
+        return getCourse().getName();
     }
 
     private void createAssignmentBar() {

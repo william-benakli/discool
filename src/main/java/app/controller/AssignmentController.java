@@ -86,4 +86,10 @@ public class AssignmentController {
             studentAssignmentsUploadsRepository.save(upload);
         }
     }
+
+
+    public void createAssignment(String description, String title) {
+        Assignment toSave = Assignment.builder().description(description).name(title).build();
+        assignmentRepository.save(toSave);
+    }
 }

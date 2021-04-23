@@ -46,7 +46,6 @@ public class TeacherAssignmentView extends ViewWithSidebars implements HasDynami
 
     private final AssignmentRepository assignmentRepository;
     private final CourseRepository courseRepository;
-    private Course course;
     private Assignment assignment;
 
     private final FlexLayout assignmentBar = new FlexLayout();
@@ -78,20 +77,20 @@ public class TeacherAssignmentView extends ViewWithSidebars implements HasDynami
             // TODO : take care of the exception (issue 28)
         }
         Optional<Course> c = courseRepository.findById(assignment.getCourseId());
-        course = c.orElse(null);
-        if (course == null) {
+        setCourse(c.orElse(null));
+        if (getCourse() == null) {
             throw new Exception("There is no course with this ID.");
             // TODO : take care of the exception (issue 28)
         }
-        createSidebar(course.getId());
-        createMembersBar(course.getId());
+        createSidebar(getCourse().getId());
+        createMembersBar(getCourse().getId());
         createAdminPanelBar();
         createLayout(assignmentBar);
     }
 
     @Override
     public String getPageTitle() {
-        return course.getName();
+        return getCourse().getName();
     }
 
     private void createAdminPanelBar() {
@@ -134,7 +133,7 @@ public class TeacherAssignmentView extends ViewWithSidebars implements HasDynami
         }
 
         private void assignValues() {
-            ArrayList<Person> students = getController().getAllStudentsForCourse(course.getId());
+            ArrayList<Person> students = getController().getAllStudentsForCourse(getCourse().getId());
             ArrayList<RowModel> values = new ArrayList<>();
             students.forEach(student -> {
                 RowModel u = new RowModel(student.getId(), student.getLastName() + " " + student.getFirstName(),

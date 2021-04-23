@@ -6,12 +6,12 @@ import app.controller.security.SecurityUtils;
 import app.jpa_repo.PersonRepository;
 import app.model.chat.TextChannel;
 import app.model.courses.Assignment;
+import app.model.courses.Course;
 import app.model.users.Person;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.icon.Icon;
@@ -45,6 +45,8 @@ public abstract class ViewWithSidebars extends VerticalLayout {
     private AssignmentController assignmentController;
     @Getter @Setter
     private PersonRepository personRepository;
+    @Getter @Setter
+    private Course course;
 
     public void createLayout(FlexLayout centerElement) {
         HorizontalLayout layout = new HorizontalLayout();
@@ -371,7 +373,7 @@ public abstract class ViewWithSidebars extends VerticalLayout {
 
             Button valider = new Button("Valider");
             valider.addClickListener(event -> {
-                // TODO save into database
+                controller.createChannel(name.getValue(), getCourse().getId());
             });
 
             chanelLayout.add(name, valider);
@@ -390,7 +392,7 @@ public abstract class ViewWithSidebars extends VerticalLayout {
 
             Button valider = new Button("Valider");
             valider.addClickListener(event -> {
-                // TODO save into database
+                assignmentController.createAssignment(description.getValue(), title.getValue());
             });
 
             assignmentLayout.add(title, description, grade, valider);
@@ -401,18 +403,12 @@ public abstract class ViewWithSidebars extends VerticalLayout {
             title.setPlaceholder("Title");
             title.setLabel("Title");
 
-            TextField description = new TextField();
-            description.setPlaceholder("Content");
-            description.setLabel("Content");
-
-            IntegerField parent = new IntegerField("Parent");
-
             Button valider = new Button("Valider");
             valider.addClickListener(event -> {
-                // TODO save into database
+                controller.createMoodlePage(title.getValue(), getCourse().getId());
             });
 
-            moodleLayout.add(title, description, parent, valider);
+            moodleLayout.add(title, valider);
         }
 
     }
