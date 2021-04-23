@@ -7,7 +7,7 @@ import app.controller.MoodleBroadcaster;
 import app.controller.security.SecurityUtils;
 import app.jpa_repo.*;
 import app.model.courses.Course;
-import app.model.courses.CourseSection;
+import app.model.courses.MoodlePage;
 import app.web.layout.Navbar;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
@@ -16,7 +16,10 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
-import com.vaadin.flow.component.html.*;
+import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
@@ -29,21 +32,20 @@ import com.vaadin.flow.shared.Registration;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.LinkedList;
 import java.util.Optional;
 
 @Route(value = "moodle", layout = Navbar.class)
 public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, HasUrlParameter<Long> {
 
-    private final PersonRepository personRepository;
-    private final CourseSectionRepository courseSectionRepository;
     private final CourseRepository courseRepository;
+    private final MoodlePageRepository moodlePageRepository;
 
     private final FlexLayout moodleBar = new FlexLayout();
 
     private Registration broadcasterRegistration;
+    private MoodlePage page;
 
-    public MoodleView(@Autowired CourseSectionRepository courseSectionRepository,
+    public MoodleView(@Autowired MoodlePageRepository moodlePageRepository,
                       @Autowired CourseRepository courseRepository,
                       @Autowired TextChannelRepository textChannelRepository,
                       @Autowired PersonRepository personRepository,
@@ -51,12 +53,11 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
                       @Autowired StudentAssignmentsUploadsRepository studentAssignmentsUploadsRepository,
                       @Autowired GroupRepository groupRepository,
                       @Autowired GroupMembersRepository groupMembersRepository) {
-        this.personRepository=personRepository;
-        this.courseSectionRepository = courseSectionRepository;
         this.courseRepository = courseRepository;
+        this.moodlePageRepository = moodlePageRepository;
         setPersonRepository(personRepository);
         setController(new Controller(personRepository, textChannelRepository, null,
-                                     courseRepository, courseSectionRepository, groupRepository, groupMembersRepository));
+                                     courseRepository, moodlePageRepository, groupRepository, groupMembersRepository));
         setAssignmentController(new AssignmentController(personRepository, assignmentRepository,
                                                          studentAssignmentsUploadsRepository, courseRepository));
     }
@@ -79,19 +80,21 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
     public void createMoodleBar() {
         moodleBar.removeAll();
         setCardStyle(moodleBar, "60%", ColorHTML.GREY);
-        H1 title = new H1(getController().getTitleCourse(getCourse().getId()));
-        moodleBar.add(title);
-        LinkedList<CourseSection> listOfSections = getController().getAllSectionsInOrder(getCourse().getId());
-        for (CourseSection section : listOfSections) {
-            SectionLayout sectionLayout = new SectionLayout(section);
-            moodleBar.add(sectionLayout);
-        }
+        SectionLayout content = new SectionLayout(page);
+        moodleBar.add(content);
     }
 
     @SneakyThrows // so that javac doesn't complain about not catching the exception
     @Override
     public void setParameter(BeforeEvent event, Long parameter) {
-        Optional<Course> c = courseRepository.findById(parameter);
+        Optional<MoodlePage> m = moodlePageRepository.findById(parameter);
+        if (m.isPresent()) {
+            page = m.get();
+        } else {
+            throw new Exception("There is no course with this ID.");
+            // TODO : take care of the exception
+        }
+        Optional<Course> c = courseRepository.findById(page.getCourseId());
         if (c.isPresent()) {
             setCourse(c.get());
         } else {
@@ -117,16 +120,14 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
      * - the modify button
      */
     public class SectionLayout extends VerticalLayout implements HasText {
-        private final CourseSection section;
+        private final MoodlePage section;
 
         private final H2 title = new H2();
         private final Paragraph content = new Paragraph();
-        private final Dialog modifyPopup = new Dialog();
 
-        public SectionLayout(CourseSection section) {
+        public SectionLayout(MoodlePage section) {
             this.section = section;
             if (section == null) return;
-            initContent();
 
             if(! SecurityUtils.isUserStudent()){
                 FlexLayout f=new FlexLayout();
@@ -134,7 +135,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
                 this.add(f);
             }
 
-            createModifyPopup();
+            initContent();
         }
 
         private void initContent() {
@@ -152,8 +153,8 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
                     .set("margin","auto");
             deleteButton.setIcon(img);
             deleteButton.addClickListener(event -> {
-                getController().deleteSection(section);
-                MoodleBroadcaster.broadcast("UPDATE_SECTION_DELETED");
+                getController().deletePage(section);
+                UI.getCurrent().navigate("home");
             });
             return deleteButton;
         }
@@ -165,7 +166,9 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
                     .set("width","25px")
                     .set("margin","auto");
             modifyButton.setIcon(img);
-            modifyButton.addClickListener(event -> modifyPopup.open());
+            modifyButton.addClickListener(event -> {
+                createModifyPopup();
+            });
             return modifyButton;
         }
 
@@ -173,6 +176,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
          * The created pop-up is invisible until the open() method is called.
          */
         private void createModifyPopup() {
+            Dialog modifyPopup = new Dialog();
             FormLayout popupContent = new FormLayout();
             Label label = new Label("Modify the section here");
             TextField title = new TextField("Title");
@@ -183,11 +187,12 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             okButton.addClickListener(event -> {
                 getController().updateSection(section, title.getValue(), content.getValue());
                 modifyPopup.close();
-                MoodleBroadcaster.broadcast("UPDATE_SECTION_UPDATED");
+                MoodleBroadcaster.broadcast(this);
             });
 
             popupContent.add(label, title, content, okButton);
             modifyPopup.add(popupContent);
+            modifyPopup.open();
         }
 
     }
