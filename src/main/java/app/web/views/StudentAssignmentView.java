@@ -169,6 +169,10 @@ public class StudentAssignmentView extends ViewWithSidebars implements HasDynami
 
         private void writeInfo() {
             this.add(new Paragraph(assignment.getDescription()));
+            this.add(new Paragraph("due date : " + getController().convertLongToDate(assignment.getDuedate())));
+            if (assignment.getAllowLate() == 1) {
+                this.add(new Paragraph("cut off date : " + getController().convertLongToDate(assignment.getCutoffdate())));
+            }
             add(tabHorizontal());
             //this.add(new Paragraph("max number of attempts : " + assignment.getMaxAttempts()));
         }

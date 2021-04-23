@@ -31,8 +31,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Optional;
 
 
@@ -465,7 +463,6 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         }
 
         public void createPopMessage(PublicChatMessage publicMessage) {
-
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             Person id = personRepository.findByUsername(authentication.getName());
             optionsUser.add(response);
@@ -482,7 +479,8 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         }
 
         private void createChatBlock(PublicChatMessage publicMessage) {
-            this.metaData = createParagrapheAmelioration(getController().getUsernameOfSender(publicMessage) + " | " + convertLongToDate(publicMessage.getTimeCreated()));
+            this.metaData = createParagrapheAmelioration(getController().getUsernameOfSender(publicMessage) + " | "
+                                                                 + getController().convertLongToDate(publicMessage.getTimeCreated()));
             metaData.getStyle()
                     .set("color",ColorHTML.PURPLE.getColorHtml())
                     .set("font-weight","700");
@@ -514,14 +512,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         }
 
 
-        private String convertLongToDate(long dateLong) {
-            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-            SimpleDateFormat heure = new SimpleDateFormat("HH:mm");
-            Date date = new Date(dateLong);
-            if (formatter.format(date).equals(formatter.format(new Date(System.currentTimeMillis()))))
-                return "Aujourd'hui à " + heure.format(date);
-            return formatter.format(date) + " à " + heure.format(date);
-        }
+
 
         private void onHover() {
             getElement().addEventListener("mouseover", e -> {

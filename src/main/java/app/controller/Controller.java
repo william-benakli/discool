@@ -10,10 +10,8 @@ import app.model.users.Group;
 import app.model.users.GroupMembers;
 import app.model.users.Person;
 
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 public class Controller {
 
@@ -139,6 +137,15 @@ public class Controller {
     public void createMoodlePage(String title, long courseId) {
         MoodlePage toSave = MoodlePage.builder().courseId(courseId).title(title).content("").build();
         moodlePageRepository.save(toSave);
+    }
+
+    public String convertLongToDate(long dateLong) {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat heure = new SimpleDateFormat("HH:mm");
+        Date date = new Date(dateLong);
+        if (formatter.format(date).equals(formatter.format(new Date(System.currentTimeMillis()))))
+            return "Aujourd'hui à " + heure.format(date);
+        return formatter.format(date) + " à " + heure.format(date);
     }
 
 }
