@@ -65,13 +65,21 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         UI ui = attachEvent.getUI();
-        broadcasterRegistration = MoodleBroadcaster.register(newMessage -> ui.access(this::createMoodleBar));
+        broadcasterRegistration = MoodleBroadcaster.register((sectionLayout) -> {
+            if (ui.isEnabled() && ui.getUI().isPresent()) {
+                ui.access(() -> receiveBroadcast(sectionLayout));
+            }
+        });
     }
 
     @Override
     protected void onDetach(DetachEvent detachEvent) {
         broadcasterRegistration.remove();
         broadcasterRegistration = null;
+    }
+
+    private void receiveBroadcast(SectionLayout sectionLayout) {
+        createMoodleBar();
     }
 
     /**
