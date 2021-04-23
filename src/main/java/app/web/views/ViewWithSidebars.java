@@ -166,7 +166,9 @@ public abstract class ViewWithSidebars extends VerticalLayout {
         //  comment the doc of addChannels() and addAssignments()
 
         sideBar = new FlexLayout();
-        createAddButton();
+        if (! SecurityUtils.isUserStudent()) {
+            createAddButton();
+        }
         addMoodleLinksToSidebar(courseId);
         addAssignmentsLinksToSidebar(courseId, s2, t);
         addChannelsLinksToSidebar(courseId, s2, t);
@@ -519,7 +521,6 @@ public abstract class ViewWithSidebars extends VerticalLayout {
             actions.add(save, reset, infoLabel);
             return actions;
         }
-
     }
 
     @Getter @Setter
@@ -531,7 +532,5 @@ public abstract class ViewWithSidebars extends VerticalLayout {
         private LocalDateTime cutoffDate;
         private int maxGrade;
     }
-
-
 
 }
