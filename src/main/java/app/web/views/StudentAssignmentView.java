@@ -107,59 +107,58 @@ public class StudentAssignmentView extends ViewWithSidebars implements HasDynami
             }
         }
 
-        private void constTab(Div div, String text, ColorHTML color){
+        private Div constTab(Div div, String text, ColorHTML color, boolean bold){
             div.getStyle()
                     .set("width","100%")
                     .set("height","50px")
-                    .set("background-color", String.valueOf(color))
+                    .set("background-color", color.getColorHtml())
                     .set("display","flex")
                     .set("padding-left","40px")
                     .set("padding-right","30px");
-            div.add(new Paragraph(text));
+            Paragraph p = new Paragraph(text);
+            if(bold) p.getStyle().set("font-weight","700");
+            div.add(p);
+            return div;
         }
 
         private Div tabHorizontal(){
             Div div=new Div();
             Div divLeft=new Div();
-            divLeft.getStyle().set("width","25%");
-
             Div divRight=new Div();
+            Div statusL=new Div();
+            Div statusR=new Div();
+
             div.getStyle()
                     .set("display","flex")
                     .set("flex-direction","row")
                     .set("overflow","hidden");
             div.setWidth("100%");
 
-            divRight.setWidth("74%");
+            divLeft.getStyle()
+                    .set("width","25%");
 
-            Div dueDate=new Div();
-            Div dueDateR=new Div();
-            constTab(dueDate, "date", ColorHTML.WHITE);
-            constTab(dueDateR, Long.toString(assignment.getDuedate()), ColorHTML.WHITE);
+            divRight.setWidth("74%");
+            divRight.getStyle()
+                    .set("border-left","solid 1px "+ColorHTML.GREY.getColorHtml());
+
+            statusL.getStyle()
+                    .set("min-height","150px");
+            statusR.getStyle()
+                    .set("min-height","150px");
 
             if (assignment.getAllowLate() == 1) {
-                Div cutOffDate = new Div();
-                Div cutOffDateR = new Div();
-                constTab(cutOffDate, "cut off date", ColorHTML.DARKGREY);
-                constTab(cutOffDateR, Long.toString(assignment.getCutoffdate()), ColorHTML.DARKGREY);
-                divLeft.add(cutOffDate);
-                divRight.add(cutOffDateR);
+                divLeft.add(constTab(new Div(), "cut off date", ColorHTML.GREYTAB, true));
+                divRight.add(constTab(new Div(), Long.toString(assignment.getCutoffdate()), ColorHTML.GREYTAB, false));
             }
 
-            Div maxGrade=new Div();
-            Div maxGradeR=new Div();
-            constTab(maxGrade, "max grade", ColorHTML.DARKGREY);
-            constTab(maxGradeR, Long.toString(assignment.getMaxGrade()), ColorHTML.DARKGREY);
-
-            Div status=new Div();
-            Div statusR=new Div();
-            constTab(status, "status", ColorHTML.WHITE);
-            constTab(statusR, writeGradeInfo(), ColorHTML.WHITE);
-            status.setHeight("100px");
-            statusR.setHeight("100px");
-
-            divLeft.add(dueDate, maxGrade, status);
-            divRight.add(dueDateR, maxGradeR, statusR);
+            divLeft.add(
+                    constTab(new Div(), "due date", ColorHTML.WHITE, true),
+                    constTab(new Div(), "max grade", ColorHTML.GREYTAB, true),
+                    constTab(statusL, "status", ColorHTML.WHITE, true));
+            divRight.add(
+                    constTab(new Div(), Long.toString(assignment.getDuedate()), ColorHTML.WHITE, false),
+                    constTab(new Div(), Long.toString(assignment.getMaxGrade()), ColorHTML.GREYTAB, false),
+                    constTab(statusR, writeGradeInfo(), ColorHTML.WHITE, false));
 
             div.add(divLeft, divRight);
             return div;
@@ -172,25 +171,19 @@ public class StudentAssignmentView extends ViewWithSidebars implements HasDynami
         }
 
         private String writeGradeInfo() {
-            //Paragraph grade = new Paragraph();
             String res="";
             if (studentAssignmentUpload != null) {
                 if (studentAssignmentUpload.getGrade() == -1) {
-                    //grade.setText("Your assignment hasn't been graded yet");
                     res+="Your assignment hasn't been graded yet";
                 } else {
-                    //grade.setText("Your grade is : " + studentAssignmentUpload.getGrade());
                     res+="Your grade is : " + studentAssignmentUpload.getGrade();
                     if (studentAssignmentUpload.getTeacherComments() == null) {
-                        //grade.add(new Paragraph("Your teacher didn't write any comments"));
                         res+="Your teacher didn't write any comments";
                     } else {
-                        //grade.add(new Paragraph("Teacher's comments : \n" + studentAssignmentUpload.getTeacherComments()));
                         res+="Teacher's comments : \n" + studentAssignmentUpload.getTeacherComments();
                     }
                 }
             } else {
-                //grade.add(new Paragraph("You have not submitted an answer yet !"));
                 res+="You have not submitted an answer yet !";
             }
             return res;

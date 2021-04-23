@@ -271,7 +271,8 @@ public abstract class ViewWithSidebars extends VerticalLayout {
         DARKGREY("#DEDEDE"),
         TEXTGREY("#707070"),
         DARK("#808080"),
-        DANGER("#F04747");
+        DANGER("#F04747"),
+        GREYTAB("#f4f5f8");
 
         @Getter
         private final String colorHtml;
