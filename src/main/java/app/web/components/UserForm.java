@@ -7,13 +7,13 @@ import app.web.views.PanelAdminView;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.Key;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.EmailField;
+import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.Binder;
@@ -22,19 +22,16 @@ import com.vaadin.flow.shared.Registration;
 import org.hibernate.event.spi.DeleteEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.ArrayList;
-import java.util.List;
-
     public class UserForm extends FormLayout {
 
         private final PersonRepository personRepository;
         private Person person ;
         Binder<Person> binder = new BeanValidationBinder<>(Person.class) ;
-        PanelAdminView panel ;
         TextField username = new TextField("Pseudo");
         TextField firstName = new TextField("First name");
         TextField lastName = new TextField("Last name");
         EmailField email = new EmailField("Email");
+        PasswordField password = new PasswordField("Password");
         TextField description = new TextField("Description");
         ComboBox<Person.Role> role = new ComboBox<>("Role");
         TextField website = new TextField("Website");
@@ -58,6 +55,7 @@ import java.util.List;
                     firstName,
                     lastName,
                     email,
+                    password,
                     description,
                     role,
                     website,
@@ -69,6 +67,13 @@ import java.util.List;
             binder.readBean(person);
         }
 
+        public boolean userExist(String username){
+            if(personRepository.findByUsername(username)!=null){
+                return true ;
+            }
+            return false;
+        }
+
         private HorizontalLayout createButtonsLayout() {
             save.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
             delete.addThemeVariants(ButtonVariant.LUMO_ERROR);
@@ -76,15 +81,27 @@ import java.util.List;
             save.addClickShortcut(Key.ENTER);
             close.addClickShortcut(Key.ESCAPE);
             save.addClickListener(click ->{
-                if(this.username == null){
+                if(this.username == null) {
+
                     System.out.println("c'est null");
-                }else{
-                    personRepository.updateUserById(person.getId(),email.getValue(),username.getValue(),firstName.getValue(),lastName.getValue(),description.getValue(),role.getValue(),website.getValue());
-                    //UI.getCurrent().getPage().reload();
+                }
+                else {
+                    if (!userExist(this.username.getValue())) {
+                        personRepository.addUser(this.username.getValue(), this.password.getValue(), this.role.getValue(), this.firstName.getValue(), this.lastName.getValue(), this.email.getValue(), this.description.getValue(), this.website.getValue(), 0, 0, 0);
+                    } else {
+                        personRepository.updateUserById(person.getId(), email.getValue(), username.getValue(), firstName.getValue(), lastName.getValue(), description.getValue(), role.getValue(), website.getValue());
+                    }
+                    personRepository.deleteNullUsers();
                     validateAndSave();
                 }
+                });
+            delete.addClickListener(click ->{
+                personRepository.deleteUserByIdGroup_members(person.getId());
+                personRepository.deleteUserByIdIndirect_messages(person.getId());
+                personRepository.updateUserByIdPosts(person.getId());
+                personRepository.deleteUserById(person.getId());
+                fireEvent(new DeleteEvent(this, person));
             });
-            delete.addClickListener(click ->fireEvent(new DeleteEvent(this,binder.getBean())));
             close.addClickListener(click ->fireEvent(new CloseEvent(this)));
             binder.addStatusChangeListener(evt -> save.setEnabled(binder.isValid()));
             return new HorizontalLayout(save, delete, close);

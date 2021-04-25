@@ -7,6 +7,7 @@ import app.model.users.Person;
 import app.web.components.UserForm;
 import app.web.layout.Navbar;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
@@ -35,6 +36,7 @@ public class PanelAdminView extends VerticalLayout {
     private final CourseRepository courseRepository;
     private UserForm form;
     TextField filterText = new TextField() ;
+    private Button addUser = new Button("add User");
     private final Tab usersTab = new Tab("Users");
     private final Tab coursesTab = new Tab("Courses");
     private final Tabs tabs = new Tabs(usersTab, coursesTab);
@@ -45,22 +47,36 @@ public class PanelAdminView extends VerticalLayout {
         this.personRepository = personRepository;
         this.courseRepository = courseRepository;
         addClassName("list-view");
-        add(filterText);
+        addUser.addClickListener(buttonClickEvent -> {
+            addPerson();
+        });
+        add(filterText,addUser);
         createUserGrid();
         createCoursesGrid();
         createTabs();
         configureFilter();
         form.addListener(UserForm.SaveEvent.class,this::savePerson);
-        updateList();
+        form.addListener(UserForm.DeleteEvent.class,this::deletePerson);
+        form.addListener(UserForm.CloseEvent.class,e ->closeEditor());
         updateList();
         closeEditor();
 
+    }
+    public void deletePerson(UserForm.DeleteEvent evt){
+        personRepository.delete(evt.getPerson());
+        updateList();
+        closeEditor();
     }
 
     public void savePerson(UserForm.SaveEvent evt){
         personRepository.save(evt.getPerson());
         updateList();
         closeEditor();
+    }
+
+    public void addPerson(){
+        usersGrid.asSingleSelect().clear();
+        editPerson(new Person());
     }
 
     public void updateList(){
