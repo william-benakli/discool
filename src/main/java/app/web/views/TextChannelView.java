@@ -2,14 +2,12 @@ package app.web.views;
 
 import app.controller.AssignmentController;
 import app.controller.Controller;
-import app.controller.MoodleBroadcaster;
+import app.controller.Markdown;
 import app.controller.PublicMessagesBroadcaster;
 import app.controller.commands.CommandsClearChat;
 import app.jpa_repo.*;
-import app.model.courses.Course;
 import app.model.chat.PublicChatMessage;
 import app.model.chat.TextChannel;
-import app.model.courses.MoodlePage;
 import app.model.users.Person;
 import app.web.components.ComponentButton;
 import app.web.layout.Navbar;
@@ -29,10 +27,9 @@ import com.vaadin.flow.router.HasDynamicTitle;
 import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.shared.Registration;
+import lombok.Getter;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.Optional;
 
@@ -47,7 +44,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
     private final TextField messageTextField;
     private final FlexLayout chatBar = new FlexLayout();
 
-    Person currentUser;
+    private final Person currentUser;
 
     private long targetResponseMessage;
     private final FlexLayout messageContainer = new FlexLayout();
@@ -103,8 +100,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                             targetResponseMessage = 0;
                         }
                     }
-                    MessageLayout message = new MessageLayout(newMessage);
-                    PublicMessagesBroadcaster.broadcast("NEW_MESSAGE", message);
+                    PublicMessagesBroadcaster.broadcast("NEW_MESSAGE", newMessage);
                     scrollDownChat();
 
                 } else {
@@ -134,29 +130,43 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         });
     }
 
-    private void receiveBroadcast(String type, MessageLayout messageLayout) {
+    private void receiveBroadcast(String type, PublicChatMessage message) {
         switch (type) {
             case "NEW_MESSAGE":
-                messageContainer.add(messageLayout);
+                UI.getCurrent().access(() -> {
+                    messageContainer.add(new MessageLayout(message));
+                });
                 break;
             case "DELETE_MESSAGE":
-                messageLayout.setVisible(false);
-                break;
-            case "UPDATE_MESSAGE":
-                for (Object obj : messageContainer.getChildren().toArray()) {
-                    if (obj instanceof MessageLayout) {
-                        if (((MessageLayout) obj) == messageLayout) {
-                            messageContainer.replace((MessageLayout) obj, messageLayout);
+                UI.getCurrent().access(() -> {
+                    for (Object obj : messageContainer.getChildren().toArray()) {
+                        if (obj instanceof MessageLayout
+                                && ((MessageLayout) obj).getPublicChatMessage().getId() == message.getId()) {
+                            // we found the layout to update
+                            ((MessageLayout) obj).setVisible(false);
                         }
                     }
-                }
+                });
+                break;
+            case "UPDATE_MESSAGE":
+                UI.getCurrent().access(() -> {
+                    for (Object obj : messageContainer.getChildren().toArray()) {
+                        if (obj instanceof MessageLayout
+                                && ((MessageLayout) obj).getPublicChatMessage().getId() == message.getId()) {
+                            // we found the layout to update
+                            ((MessageLayout) obj).updateMessage();
+                        }
+                    }
+                });
                 break;
             case "UPDATE_ALL":
-                messageContainer.removeAll();
-                for (PublicChatMessage message : getController().getChatMessagesForChannel(textChannel.getId())) {
-                    System.out.println("Message" + message.getMessage());
-                    messageContainer.add(new MessageLayout(message));
-                }
+                UI.getCurrent().access(() -> {
+                    messageContainer.removeAll();
+                    for (PublicChatMessage publicChatMessage : getController().getChatMessagesForChannel(textChannel.getId())) {
+                        System.out.println("Message" + publicChatMessage.getMessage());
+                        messageContainer.add(new MessageLayout(publicChatMessage));
+                    }
+                });
                 break;
             default:
                 break;
@@ -333,6 +343,9 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         private final int SIZEWIDTH = 25;
         private final int SIZEHEIGHT = 15;
 
+        @Getter
+        private final PublicChatMessage publicChatMessage;
+
         private final Div messageFullWithResponseLayout;
         private final HorizontalLayout messageFullLayout;
         private final VerticalLayout chatUserInformation;
@@ -350,6 +363,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         private Button modify;
 
         public MessageLayout(PublicChatMessage publicMessage) {
+            this.publicChatMessage = publicMessage;
             this.chatUserInformation = new VerticalLayout();
             setPadding(false);
             setSpacing(false);
@@ -363,7 +377,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
             optionsUser.setPadding(false);
             onHover();
             createResponseMessage(publicMessage);
-            createPictureSetting(publicMessage.getSender());
+            createPictureSetting();
             createDeleteButton(publicMessage);
             createModifyButton(publicMessage);
             createResponseButton(publicMessage);
@@ -384,10 +398,10 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
             if (publicMessage.getParentId() != 1) {
                 PublicChatMessage messageParent = getController().getMessageById(publicMessage.getParentId());
                 if (messageParent != null) {
-                    if(!messageParent.isDeleted()){
+                    if (!messageParent.isDeleted()) {
                         messageReponse = new Paragraph("Reponse à " + personRepository.findById(messageParent.getSender()).getUsername() + " | "
-                                + ((messageParent.getMessage().length() > 50) ? messageParent.getMessage().substring(0, 50) + "..." : messageParent.getMessage()));
-                    }else{
+                                                               + ((messageParent.getMessage().length() > 50) ? messageParent.getMessage().substring(0, 50) + "..." : messageParent.getMessage()));
+                    } else {
                         messageReponse = new Paragraph("Message suprimée par l'utilisateur");
                     }
                     messageFullWithResponseLayout.add(messageReponse);
@@ -464,8 +478,6 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         }
 
         public void createPopMessage(PublicChatMessage publicMessage) {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            Person id = personRepository.findByUsername(authentication.getName());
             optionsUser.add(response);
 
             //Protection si l'utilisateur est bien le createur du message
