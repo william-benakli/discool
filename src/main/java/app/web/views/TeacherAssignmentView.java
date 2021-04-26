@@ -56,12 +56,13 @@ public class TeacherAssignmentView extends ViewWithSidebars implements HasDynami
                                  @Autowired PersonRepository personRepository,
                                  @Autowired StudentAssignmentsUploadsRepository studentAssignmentsUploadsRepository,
                                  @Autowired GroupRepository groupRepository,
-                                 @Autowired GroupMembersRepository groupMembersRepository) {
+                                 @Autowired GroupMembersRepository groupMembersRepository,
+                                 @Autowired MoodlePageRepository moodlePageRepository) {
         this.assignmentRepository = assignmentRepository;
         this.courseRepository = courseRepository;
         setPersonRepository(personRepository);
         setController(new Controller(personRepository, textChannelRepository, null,
-                                     courseRepository, null, groupRepository, groupMembersRepository));
+                                     courseRepository, moodlePageRepository, groupRepository, groupMembersRepository));
         setAssignmentController(new AssignmentController(personRepository, assignmentRepository,
                                                          studentAssignmentsUploadsRepository, courseRepository));
     }

@@ -2,11 +2,14 @@ package app.web.views;
 
 import app.controller.AssignmentController;
 import app.controller.Controller;
+import app.controller.MoodleBroadcaster;
 import app.controller.PublicMessagesBroadcaster;
 import app.controller.commands.CommandsClearChat;
 import app.jpa_repo.*;
+import app.model.courses.Course;
 import app.model.chat.PublicChatMessage;
 import app.model.chat.TextChannel;
+import app.model.courses.MoodlePage;
 import app.model.users.Person;
 import app.web.components.ComponentButton;
 import app.web.layout.Navbar;
@@ -62,14 +65,15 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                            @Autowired CourseRepository courseRepository,
                            @Autowired StudentAssignmentsUploadsRepository studentAssignmentsUploadsRepository,
                            @Autowired GroupRepository groupRepository,
-                           @Autowired GroupMembersRepository groupMembersRepository) {
+                           @Autowired GroupMembersRepository groupMembersRepository,
+                           @Autowired MoodlePageRepository moodlePageRepository) {
         this.textChannelRepository = textChannelRepository;
         this.personRepository = personRepository;
         this.courseRepository = courseRepository;
         this.targetResponseMessage = 0;
         setPersonRepository(personRepository);
         setController(new Controller(personRepository, textChannelRepository, publicChatMessageRepository,
-                                     null, null, groupRepository, groupMembersRepository));
+                                     courseRepository, moodlePageRepository, groupRepository, groupMembersRepository));
         setAssignmentController(new AssignmentController(personRepository, assignmentRepository,
                                                          studentAssignmentsUploadsRepository, courseRepository));
         this.messageTextField = createTextField();

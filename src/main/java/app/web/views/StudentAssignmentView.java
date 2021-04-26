@@ -43,13 +43,14 @@ public class StudentAssignmentView extends ViewWithSidebars implements HasDynami
                                  @Autowired PersonRepository personRepository,
                                  @Autowired StudentAssignmentsUploadsRepository studentAssignmentsUploadsRepository,
                                  @Autowired GroupRepository groupRepository,
-                                 @Autowired GroupMembersRepository groupMembersRepository) {
+                                 @Autowired GroupMembersRepository groupMembersRepository,
+                                 @Autowired MoodlePageRepository moodlePageRepository) {
         this.assignmentRepository = assignmentRepository;
         this.courseRepository = courseRepository;
         this.personRepository = personRepository;
         setPersonRepository(personRepository);
         setController(new Controller(personRepository, textChannelRepository, null,
-                                     courseRepository, null, groupRepository, groupMembersRepository));
+                                     courseRepository, moodlePageRepository, groupRepository, groupMembersRepository));
         setAssignmentController(new AssignmentController(personRepository, assignmentRepository,
                                                          studentAssignmentsUploadsRepository, courseRepository));
     }
@@ -124,13 +125,7 @@ public class StudentAssignmentView extends ViewWithSidebars implements HasDynami
             return div;
         }
 
-        private Div tabHorizontal(){
-            Div div=new Div();
-            Div divLeft=new Div();
-            Div divRight=new Div();
-            Div statusL=new Div();
-            Div statusR=new Div();
-
+        private void styleDivAssignment(Div div, Div divLeft, Div divRight, Div statusL, Div statusR){
             div.getStyle()
                     .set("display","flex")
                     .set("flex-direction","row")
@@ -142,39 +137,38 @@ public class StudentAssignmentView extends ViewWithSidebars implements HasDynami
 
             divRight.setWidth("74%");
             divRight.getStyle()
-                    .set("border-left","solid 1px "+ColorHTML.GREY.getColorHtml());
+                    .set("border-left","solid 1px " + ColorHTML.GREY.getColorHtml());
 
             statusL.getStyle()
                     .set("min-height","150px");
             statusR.getStyle()
                     .set("min-height","150px");
+        }
 
+        private void writeInfo() {
+            Div div=new Div();
+            Div divLeft=new Div();
+            Div divRight=new Div();
+            Div statusL=new Div();
+            Div statusR=new Div();
+
+            styleDivAssignment(div, divLeft, divRight, statusL, statusR);
             if (assignment.getAllowLate() == 1) {
-                divLeft.add(constTab(new Div(), "cut off date", ColorHTML.GREYTAB, true));
-                divRight.add(constTab(new Div(), Long.toString(assignment.getCutoffdate()), ColorHTML.GREYTAB, false));
+                divLeft.add(constTab(new Div(), "Cut-off date", ColorHTML.GREYTAB, true));
+                divRight.add(constTab(new Div(), getController().convertLongToDate(assignment.getCutoffdate()), ColorHTML.GREYTAB, false));
             }
 
             divLeft.add(
-                    constTab(new Div(), "due date", ColorHTML.WHITE, true),
-                    constTab(new Div(), "max grade", ColorHTML.GREYTAB, true),
-                    constTab(statusL, "status", ColorHTML.WHITE, true));
+                    constTab(new Div(), "Due date", ColorHTML.WHITE, true),
+                    constTab(new Div(), "Max grade", ColorHTML.GREYTAB, true),
+                    constTab(statusL, "Status", ColorHTML.WHITE, true));
             divRight.add(
-                    constTab(new Div(), Long.toString(assignment.getDuedate()), ColorHTML.WHITE, false),
+                    constTab(new Div(), getController().convertLongToDate(assignment.getDuedate()), ColorHTML.WHITE, false),
                     constTab(new Div(), Long.toString(assignment.getMaxGrade()), ColorHTML.GREYTAB, false),
                     constTab(statusR, writeGradeInfo(), ColorHTML.WHITE, false));
 
             div.add(divLeft, divRight);
-            return div;
-        }
-
-        private void writeInfo() {
-            this.add(new Paragraph(assignment.getDescription()));
-            this.add(new Paragraph("due date : " + getController().convertLongToDate(assignment.getDuedate())));
-            if (assignment.getAllowLate() == 1) {
-                this.add(new Paragraph("cut off date : " + getController().convertLongToDate(assignment.getCutoffdate())));
-            }
-            add(tabHorizontal());
-            //this.add(new Paragraph("max number of attempts : " + assignment.getMaxAttempts()));
+            add(div);
         }
 
         private String writeGradeInfo() {
