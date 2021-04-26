@@ -501,15 +501,20 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         }
 
         private Paragraph createParagrapheAmelioration(String text) {
-            Paragraph Data = new Paragraph();
-            Data.setText(text);
-            Data.getStyle()
+            Paragraph data = new Paragraph();
+            data.add(Markdown.getHtmlFromMarkdown(text));
+            data.getStyle()
                     .set("border", "none")
                     .set("border-width", "0px")
                     .set("outline", "none")
-                    .set("margin","0")
-                    .set("padding","0");
-            return Data;
+                    .set("margin", "0")
+                    .set("padding", "0");
+            return data;
+        }
+
+        public void updateMessage() {
+            message.removeAll();
+            message.add(Markdown.getHtmlFromMarkdown(publicChatMessage.getMessage()));
         }
 
         private void onHover() {
