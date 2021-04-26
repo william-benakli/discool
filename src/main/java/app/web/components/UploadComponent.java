@@ -32,7 +32,7 @@ public class UploadComponent extends Upload {
      */
     public UploadComponent(String height, String width, int maxFiles, int maxFileSize, String dirName,
                            String ... acceptedFileTypes) {
-        this.setHeight(height);
+        this.getStyle().set("min-height",height);
         this.setWidth(width);
         this.setDropAllowed(true);
         this.setMaxFiles(maxFiles);
