@@ -447,18 +447,8 @@ public class Navbar extends AppLayout {
             FlexLayout card = new FlexLayout();
             card.getStyle()
                     .set("padding-top","50px");
-            FlexLayout profilePictureLayout = createProfilePicture();
-            profilePictureLayout.getStyle()
-                    .set("width","100px")
-                    .set("height","100px")
-                    .set("border-radius","50px");
-            Paragraph userName= new Paragraph(currentUser.getUsername());
-            userName.getStyle()
-                    .set("margin","auto auto auto 24px")
-                    .set("font-size","18px")
-                    .set("font-weight","700")
-                    .set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml());
-            card.add(profilePictureLayout, userName);
+            FlexLayout profilePictureLayout = createProfilePicture(new Paragraph(currentUser.getUsername()));
+            card.add(profilePictureLayout);
             return card;
         }
 
@@ -466,14 +456,34 @@ public class Navbar extends AppLayout {
          * Create a layout with the profile picture and a button to change the picture
          * @return the layout
          */
-        private FlexLayout createProfilePicture() {
+        private FlexLayout createProfilePicture(Paragraph userName) {
             FlexLayout ppLayout = new FlexLayout();
             Image profilPicture = currentUser.getProfilePicture();
             Button button = new Button("Change profile picture");
+            Div nameButton = new Div();
+
+            nameButton.getStyle()
+                    .set("display","flex")
+                    .set("flex-direction","column");
+            userName.getStyle()
+                    .set("margin","auto auto auto 24px")
+                    .set("font-size","18px")
+                    .set("font-weight","700")
+                    .set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml());
+            profilPicture.getStyle()
+                    .set("width","100px")
+                    .set("height","100px")
+                    .set("border-radius","50px");
+            button.getStyle()
+                    .set("background-color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml())
+                    .set("color", ViewWithSidebars.ColorHTML.WHITE.getColorHtml())
+                    .set("margin","24px 0 12px 24px");
+
             button.addClickListener(event -> {
                 ChangeProfilePictureDialog changeProfilePicture = new ChangeProfilePictureDialog();
             });
-            ppLayout.add(profilPicture, button);
+            nameButton.add(userName, button);
+            ppLayout.add(profilPicture, nameButton);
             return ppLayout;
         }
 
