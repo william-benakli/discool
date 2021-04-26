@@ -498,9 +498,13 @@ public class Navbar extends AppLayout {
 
         private void createDialog() {
             H2 title = new H2("Upload a new profile picture");
-            Paragraph instructions = new Paragraph("Choose a new picture from your browser (or drag-and-drop). " +
+            title.getStyle()
+                    .set("text-align","center")
+                    .set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml());
+            Paragraph instructions = new Paragraph("Choose a new picture from your browser (or drag-and-drop).\n " +
                                                         "Only .jpg and .jpeg files are accepted.");
-            UploadComponent uploadComponent = new UploadComponent("200px", "200px", 1, 30000000,
+
+            UploadComponent uploadComponent = new UploadComponent("50px", "96%", 1, 30000000,
                                                                   "src/main/webapp/profile_pictures",
                                                                   "image/jpeg");
             uploadComponent.addSucceededListener(event -> {
