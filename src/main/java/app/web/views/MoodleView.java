@@ -16,6 +16,7 @@ import com.vaadin.component.VaadinClipboard;
 import com.vaadin.component.VaadinClipboardImpl;
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
@@ -256,7 +257,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
          */
         public void createTab() {
             Tab externe = new Tab("Lien externe");
-            div_externe = externeLinkDiv();
+            Div div_externe = externeLinkDiv();
             tabsToPages.put(externe, div_externe);
 
             Tab interne = new Tab("Lien interne");
@@ -270,6 +271,10 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
                 tabsToPages.values().forEach(e -> e.setVisible(false));
                 tabsToPages.get(tabs.getSelectedTab()).setVisible(true);
             });
+
+            add(tabs, div_externe);
+
+
             this.addDialogCloseActionListener(event -> {
                 parent.open();
                 this.close();
