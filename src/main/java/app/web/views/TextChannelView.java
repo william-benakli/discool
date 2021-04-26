@@ -5,10 +5,12 @@ import app.controller.Controller;
 import app.controller.Markdown;
 import app.controller.PublicMessagesBroadcaster;
 import app.controller.commands.CommandsClearChat;
+import app.controller.security.SecurityUtils;
 import app.jpa_repo.*;
 import app.model.chat.PublicChatMessage;
 import app.model.chat.TextChannel;
 import app.model.users.Person;
+import app.model.courses.Course;
 import app.web.components.ComponentButton;
 import app.web.layout.Navbar;
 import com.vaadin.flow.component.*;
@@ -40,6 +42,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
     private final TextChannelRepository textChannelRepository;
     private final PersonRepository personRepository;
     private final CourseRepository courseRepository;
+    private final PublicChatMessageRepository publicChatMessageRepository;
     private TextChannel textChannel;
     private final TextField messageTextField;
     private final FlexLayout chatBar = new FlexLayout();
@@ -69,7 +72,9 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         this.textChannelRepository = textChannelRepository;
         this.personRepository = personRepository;
         this.courseRepository = courseRepository;
+        this.publicChatMessageRepository = publicChatMessageRepository;
         this.targetResponseMessage = 0;
+        currentUser = SecurityUtils.getCurrentUser(personRepository);
         setPersonRepository(personRepository);
         setController(new Controller(personRepository, textChannelRepository, publicChatMessageRepository,
                                      courseRepository, moodlePageRepository, groupRepository, groupMembersRepository));
@@ -154,7 +159,11 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                         if (obj instanceof MessageLayout
                                 && ((MessageLayout) obj).getPublicChatMessage().getId() == message.getId()) {
                             // we found the layout to update
-                            ((MessageLayout) obj).updateMessage();
+                            Notification.show("TEST");
+                            MessageLayout toChange = (MessageLayout) obj;
+                            toChange.publicChatMessage = publicChatMessageRepository.findById(message.getId());
+                            toChange.messageParagraph.removeAll();
+                            toChange.messageParagraph.add(Markdown.getHtmlFromMarkdown(toChange.publicChatMessage.getMessage()));
                         }
                     }
                 });
@@ -344,7 +353,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         private final int SIZEHEIGHT = 15;
 
         @Getter
-        private final PublicChatMessage publicChatMessage;
+        private PublicChatMessage publicChatMessage;
 
         private final Div messageFullWithResponseLayout;
         private final HorizontalLayout messageFullLayout;
@@ -353,9 +362,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         private final FlexLayout optionMenu;
         private final PopAbsoluteLayout layoutPop;
 
-        private Paragraph metaData;
-        private Paragraph message;
-        private Paragraph messageReponse;
+        private Paragraph messageParagraph;
         private Image profilPicture;
 
         private Button response;
@@ -377,7 +384,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
             optionsUser.setPadding(false);
             onHover();
             createResponseMessage(publicMessage);
-            createPictureSetting();
+            createPictureSetting(publicMessage.getId());
             createDeleteButton(publicMessage);
             createModifyButton(publicMessage);
             createResponseButton(publicMessage);
@@ -398,13 +405,14 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
             if (publicMessage.getParentId() != 1) {
                 PublicChatMessage messageParent = getController().getMessageById(publicMessage.getParentId());
                 if (messageParent != null) {
+                    Paragraph answerInfo;
                     if (!messageParent.isDeleted()) {
-                        messageReponse = new Paragraph("Reponse à " + personRepository.findById(messageParent.getSender()).getUsername() + " | "
-                                                               + ((messageParent.getMessage().length() > 50) ? messageParent.getMessage().substring(0, 50) + "..." : messageParent.getMessage()));
+                        answerInfo = new Paragraph("Reponse à " + personRepository.findById(messageParent.getSender()).getUsername() + " | "
+                                                           + ((messageParent.getMessage().length() > 50) ? messageParent.getMessage().substring(0, 50) + "..." : messageParent.getMessage()));
                     } else {
-                        messageReponse = new Paragraph("Message suprimée par l'utilisateur");
+                        answerInfo = new Paragraph("Message suprimée par l'utilisateur");
                     }
-                    messageFullWithResponseLayout.add(messageReponse);
+                    messageFullWithResponseLayout.add(answerInfo);
                 }
             }
         }
@@ -443,7 +451,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                 Button non = new Button("Annuler");
 
                 TextField messageUpdate = new TextField();
-                messageUpdate.setValue(message.getText());
+                messageUpdate.setValue(publicMessage.getMessage());
                 dialog.add(new Paragraph("Modifiez votre message ?"));
                 dialog.add(messageUpdate);
 
@@ -454,7 +462,6 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                 oui.addClickListener(ev -> {
                     if (!messageUpdate.getValue().equals(publicMessage.getMessage()) && !messageUpdate.isEmpty()) {
                         getController().changeMessage(publicMessage, messageUpdate.getValue());
-                        this.message.setText(messageUpdate.getValue());
                         PublicMessagesBroadcaster.broadcast("UPDATE_MESSAGE", publicMessage);
                         Notification.show("Vous avez modifié votre message");
                     }
@@ -492,14 +499,13 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         }
 
         private void createChatBlock(PublicChatMessage publicMessage) {
-            this.metaData = createParagrapheAmelioration(getController().getUsernameOfSender(publicMessage) + " | "
-                                                                 + getController().convertLongToDate(publicMessage.getTimeCreated()));
+            Paragraph metaData = createParagrapheAmelioration(getController().getUsernameOfSender(publicMessage) + " | " + getController().convertLongToDate(publicMessage.getTimeCreated()));
             metaData.getStyle()
                     .set("color", ColorHTML.PURPLE.getColorHtml())
                     .set("font-weight", "700");
             chatUserInformation.add(metaData);
-            this.message = createParagrapheAmelioration(publicMessage.getMessage());
-            chatUserInformation.add(message);
+            this.messageParagraph = createParagrapheAmelioration(publicMessage.getMessage());
+            chatUserInformation.add(messageParagraph);
         }
 
         private void createPictureSetting(long senderId) {
@@ -522,11 +528,6 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                     .set("margin", "0")
                     .set("padding", "0");
             return data;
-        }
-
-        public void updateMessage() {
-            message.removeAll();
-            message.add(Markdown.getHtmlFromMarkdown(publicChatMessage.getMessage()));
         }
 
         private void onHover() {

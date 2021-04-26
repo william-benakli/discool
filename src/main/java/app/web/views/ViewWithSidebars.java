@@ -208,7 +208,8 @@ public abstract class ViewWithSidebars extends VerticalLayout {
 
     /**
      * Add links to all the assignments for this course
-     * @param courseId  The id of the course
+     *
+     * @param courseId The id of the course
      * @param s2
      * @param t
      */
@@ -243,21 +244,22 @@ public abstract class ViewWithSidebars extends VerticalLayout {
 
     /**
      * Add links to all the text channels of the course
-     * @param courseId  The id of the course
+     *
+     * @param courseId The id of the course
      * @param s2
      * @param t
      */
     private void addChannelsLinksToSidebar(long courseId, String s2[], String t) {
         ArrayList<TextChannel> textChannels = controller.getAllChannelsForCourse(courseId);
         textChannels.forEach(channel -> {
-            RouterLink link=new RouterLink("", TextChannelView.class, channel.getId());
+            RouterLink link = new RouterLink("", TextChannelView.class, channel.getId());
             Button button = new Button(channel.getName());
-            button.addClassName(channel.getId()+"");
+            button.addClassName(channel.getId() + "");
             styleButton(link, button);
-            button.addClassName("color"+channel.getId());
-            if (s2.length>=4 && s2[3].equals("channels") && t.equals(channel.getId()+"")){
-                button.getStyle().set("color",ColorHTML.PURPLE.getColorHtml());
-            }else button.getStyle().set("color",ColorHTML.TEXTGREY.getColorHtml());
+            button.addClassName("color" + channel.getId());
+            if (s2.length >= 4 && s2[3].equals("channels") && t.equals(channel.getId() + "")) {
+                button.getStyle().set("color", ColorHTML.PURPLE.getColorHtml());
+            } else button.getStyle().set("color", ColorHTML.TEXTGREY.getColorHtml());
             sideBar.add(link);
         });
     }
