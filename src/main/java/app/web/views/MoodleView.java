@@ -272,7 +272,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
                 tabsToPages.get(tabs.getSelectedTab()).setVisible(true);
             });
 
-            add(tabs, div_externe);
+            add(tabs, div_externe, div_interne);
 
 
             this.addDialogCloseActionListener(event -> {
@@ -389,6 +389,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             Button valide = new Button("Generer");
             Button copie = new Button("Copier");
             Button close = new Button("Fermer");
+
             valide.addClickListener(event -> {
                 if (msg.isEmpty()) {
                     text.setValue("Erreur champs invalide");
