@@ -344,6 +344,11 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
 
             TextField msg = createTextField("Texte à l'affichage: ", "Entre le nom du lien ici...");
             TextArea text = createTextArea("Texte généré:", "");
+            HorizontalLayout insertLayout = new HorizontalLayout();
+            HorizontalLayout buttonLayout = new HorizontalLayout();
+
+            VerticalLayout mainLayout = new VerticalLayout();
+
 
             Select<Assignment> select_assignment = new Select<>();
             select_assignment.setLabel("Sélectionnez une redirection : ");
@@ -386,8 +391,19 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
                 }
             });
 
+            TextField msg = new TextField();
+            msg.setPlaceholder("Entre le nom du lien ici...");
+
+            ComboBox<String> comboBox = new ComboBox<>();
+            comboBox.setItems("Assigment 1", "Assigment 2");
+            insertLayout.add(msg, comboBox);
+
+            TextArea text = new TextArea();
+            text.setPlaceholder("Votre text apparaitra ici");
+
             Button valide = new Button("Generer");
             Button copie = new Button("Copier");
+            buttonLayout.add(valide, copie, close);
             Button close = new Button("Fermer");
 
             valide.addClickListener(event -> {
@@ -434,6 +450,8 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
                 copyInClipBoard(text.getValue());
             });
 
+            mainLayout.add(insertLayout, text, buttonLayout);
+            interne.add(mainLayout);
             insertLayout.add(msg, radio, select_assignment, select_channel, select_moodle);
             buttonLayout.add(valide, copie, close);
             mainLayout.setDefaultHorizontalComponentAlignment(Alignment.CENTER);
