@@ -233,7 +233,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             Tab interne = new Tab("Lien interne");
             Div div_interne = interneLinkDiv();
             tabsToPages.put(interne, div_interne);
-
+            div_interne.setVisible(false);
 
             Tabs tabs = new Tabs(externe, interne);
 
@@ -242,7 +242,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
                 tabsToPages.get(tabs.getSelectedTab()).setVisible(true);
             });
 
-            add(tabs, div_externe);
+            add(tabs, div_externe, div_interne);
 
 
         }
@@ -301,7 +301,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             Button copie = new Button("Copier");
             Button close = new Button("fermer");
 
-            add(valide, copie, close);
+            interne.add(valide, copie, close);
             valide.addClickListener(event -> {
                 text.setValue("[" + msg.getValue() + "](assignment/" + comboBox.getValue() + ")");
             });
