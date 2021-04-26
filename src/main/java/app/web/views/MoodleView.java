@@ -291,17 +291,26 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
 
         public Div interneLinkDiv() {
             Div interne = new Div();
+            HorizontalLayout insertLayout = new HorizontalLayout();
+            HorizontalLayout buttonLayout = new HorizontalLayout();
+
+            VerticalLayout mainLayout = new VerticalLayout();
+
 
             TextField msg = new TextField();
+            msg.setPlaceholder("Entre le nom du lien ici...");
+
             ComboBox<String> comboBox = new ComboBox<>();
             comboBox.setItems("Assigment 1", "Assigment 2");
+            insertLayout.add(msg, comboBox);
+
             TextArea text = new TextArea();
             text.setPlaceholder("Votre text apparaitra ici");
+
             Button valide = new Button("Generer");
             Button copie = new Button("Copier");
             Button close = new Button("fermer");
-
-            interne.add(valide, copie, close);
+            buttonLayout.add(valide, copie, close);
             valide.addClickListener(event -> {
                 text.setValue("[" + msg.getValue() + "](assignment/" + comboBox.getValue() + ")");
             });
@@ -313,7 +322,8 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
                 UI.getCurrent().getPage().executeJs("window.copyToClipboard($0)", text.getValue());
             });
 
-            interne.add(msg, comboBox);
+            mainLayout.add(insertLayout, text, buttonLayout);
+            interne.add(mainLayout);
             return interne;
         }
 
