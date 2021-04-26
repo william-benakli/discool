@@ -14,6 +14,7 @@ import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.HasText;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.*;
@@ -226,17 +227,23 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
 
         DialogLink(){
             Tab externe = new Tab("Lien externe");
+            Div div_externe = externeLinkDiv();
+            tabsToPages.put(externe, div_externe);
 
             Tab interne = new Tab("Lien interne");
+            Div div_interne = interneLinkDiv();
+            tabsToPages.put(interne, div_interne);
 
 
             Tabs tabs = new Tabs(externe, interne);
-
 
             tabs.addSelectedChangeListener(event -> {
                 tabsToPages.values().forEach(e -> e.setVisible(false));
                 tabsToPages.get(tabs.getSelectedTab()).setVisible(true);
             });
+
+            add(tabs, div_externe);
+
 
         }
 
@@ -256,7 +263,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             TextArea text = new TextArea();
             text.setPlaceholder("Votre text apparaitra ici");
 
-            Button valide = new Button("ddddd");
+            Button valide = new Button("Generer");
             Button copie = new Button("Copier");
             Button close = new Button("fermer");
             buttonLayout.add(valide, copie, close);
@@ -273,14 +280,46 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             close.addClickListener(event -> {
                 this.close();
             });
+            copie.addClickListener(event -> {
+                UI.getCurrent().getPage().executeJs("window.copyToClipboard($0)", text.getValue());
+            });
+
             mainLayout.add(insertLayout, text, buttonLayout);
             d.add(mainLayout);
             return d;
         }
 
+        public Div interneLinkDiv() {
+            Div interne = new Div();
 
-        public boolean isLinks(String s){
-            if(s.startsWith("http") && s.contains("www") && s.contains(".")) return true;
+            TextField msg = new TextField();
+            ComboBox<String> comboBox = new ComboBox<>();
+            comboBox.setItems("Assigment 1", "Assigment 2");
+            TextArea text = new TextArea();
+            text.setPlaceholder("Votre text apparaitra ici");
+            Button valide = new Button("Generer");
+            Button copie = new Button("Copier");
+            Button close = new Button("fermer");
+
+            add(valide, copie, close);
+            valide.addClickListener(event -> {
+                text.setValue("[" + msg.getValue() + "](assignment/" + comboBox.getValue() + ")");
+            });
+
+            close.addClickListener(event -> {
+                this.close();
+            });
+            copie.addClickListener(event -> {
+                UI.getCurrent().getPage().executeJs("window.copyToClipboard($0)", text.getValue());
+            });
+
+            interne.add(msg, comboBox);
+            return interne;
+        }
+
+
+        public boolean isLinks(String s) {
+            if (s.startsWith("http") && s.contains("www") && s.contains(".")) return true;
             return false;
         }
 
