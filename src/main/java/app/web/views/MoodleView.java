@@ -7,7 +7,7 @@ import app.controller.MoodleBroadcaster;
 import app.controller.security.SecurityUtils;
 import app.jpa_repo.*;
 import app.model.courses.Course;
-import app.model.courses.MoodlePage;
+import app.model.courses.CourseSection;
 import app.web.layout.Navbar;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
@@ -16,12 +16,12 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
-import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.Image;
-import com.vaadin.flow.component.html.Label;
-import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.tabs.Tab;
+import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.BeforeEvent;
@@ -32,20 +32,25 @@ import com.vaadin.flow.shared.Registration;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
 import java.util.Optional;
 
 @Route(value = "moodle", layout = Navbar.class)
 public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, HasUrlParameter<Long> {
 
+    private final PersonRepository personRepository;
+    private final CourseSectionRepository courseSectionRepository;
     private final CourseRepository courseRepository;
-    private final MoodlePageRepository moodlePageRepository;
+    private Course course;
 
     private final FlexLayout moodleBar = new FlexLayout();
 
     private Registration broadcasterRegistration;
     private MoodlePage page;
 
-    public MoodleView(@Autowired MoodlePageRepository moodlePageRepository,
+    public MoodleView(@Autowired CourseSectionRepository courseSectionRepository,
                       @Autowired CourseRepository courseRepository,
                       @Autowired TextChannelRepository textChannelRepository,
                       @Autowired PersonRepository personRepository,
@@ -53,6 +58,8 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
                       @Autowired StudentAssignmentsUploadsRepository studentAssignmentsUploadsRepository,
                       @Autowired GroupRepository groupRepository,
                       @Autowired GroupMembersRepository groupMembersRepository) {
+        this.personRepository=personRepository;
+        this.courseSectionRepository = courseSectionRepository;
         this.courseRepository = courseRepository;
         this.moodlePageRepository = moodlePageRepository;
         setPersonRepository(personRepository);
@@ -132,6 +139,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
 
         private final H2 title = new H2();
         private final Paragraph content = new Paragraph();
+        private final Dialog modifyPopup = new Dialog();
 
         public SectionLayout(MoodlePage section) {
             this.section = section;
@@ -144,6 +152,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             }
 
             initContent();
+            createModifyPopup();
         }
 
         private void initContent() {
@@ -174,9 +183,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
                     .set("width","25px")
                     .set("margin","auto");
             modifyButton.setIcon(img);
-            modifyButton.addClickListener(event -> {
-                createModifyPopup();
-            });
+            modifyButton.addClickListener(event -> modifyPopup.open());
             return modifyButton;
         }
 
@@ -186,6 +193,9 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
         private void createModifyPopup() {
             Dialog modifyPopup = new Dialog();
             FormLayout popupContent = new FormLayout();
+            DialogLink Dialoglink = new DialogLink();
+            Button link = new Button("Generer des liens");
+
             Label label = new Label("Modify the section here");
             TextField title = new TextField("Title");
             title.setValue(section.getTitle());
@@ -198,11 +208,81 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
                 MoodleBroadcaster.broadcast(this);
             });
 
-            popupContent.add(label, title, content, okButton);
+            link.addClickListener(event -> {
+                Dialoglink.open();
+            });
+
+            popupContent.add(label, link, title, content, okButton);
             modifyPopup.add(popupContent);
             modifyPopup.open();
         }
 
     }
 
+
+    public class DialogLink extends Dialog{
+
+        Map<Tab, Component> tabsToPages = new HashMap<>();
+
+        DialogLink(){
+            Tab externe = new Tab("Lien externe");
+
+            Tab interne = new Tab("Lien interne");
+
+
+            Tabs tabs = new Tabs(externe, interne);
+
+
+            tabs.addSelectedChangeListener(event -> {
+                tabsToPages.values().forEach(e -> e.setVisible(false));
+                tabsToPages.get(tabs.getSelectedTab()).setVisible(true);
+            });
+
+        }
+
+
+        public Div externeLinkDiv(){
+            Div d = new Div();
+            HorizontalLayout insertLayout = new HorizontalLayout();
+            HorizontalLayout buttonLayout = new HorizontalLayout();
+
+            VerticalLayout mainLayout = new VerticalLayout();
+
+            TextField msg = new TextField();
+            TextField lien = new TextField();
+            insertLayout.add(msg, lien);
+            msg.setPlaceholder("Entre le nom du lien ici...");
+            lien.setPlaceholder("Entre votre lien ici....");
+            TextArea text = new TextArea();
+            text.setPlaceholder("Votre text apparaitra ici");
+
+            Button valide = new Button("ddddd");
+            Button copie = new Button("Copier");
+            Button close = new Button("fermer");
+            buttonLayout.add(valide, copie, close);
+            valide.addClickListener(event -> {
+                if (msg.isEmpty() || lien.isEmpty()) {
+                    text.setValue("Erreur champs invalide");
+                } else if (!isLinks(lien.getValue())) {
+                    text.setValue("Erreur lien non valide");
+                } else {
+                    text.setValue("[" + msg.getValue() + "](" + lien.getValue() + ")");
+                }
+            });
+
+            close.addClickListener(event -> {
+                this.close();
+            });
+            mainLayout.add(insertLayout, text, buttonLayout);
+            d.add(mainLayout);
+            return d;
+        }
+
+
+        public boolean isLinks(String s){
+            if(s.startsWith("http") && s.contains("www") && s.contains(".")) return true;
+            return false;
+        }
+
+    }
 }
