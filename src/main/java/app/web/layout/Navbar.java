@@ -199,10 +199,6 @@ public class Navbar extends AppLayout {
         return button;
     }
 
-
-
-
-
     /**
      * Create an empty dock and style it.
      * We will add buttons later to allow the user to navigate in the application
@@ -505,7 +501,8 @@ public class Navbar extends AppLayout {
                     e.printStackTrace();
                 }
                 Notification.show("Your profile picture was updated successfully");
-                Notification.show("Close the parameters window to see the change ");
+                Notification.show("Reload the page to see the changes!");
+                this.close();
             });
 
             this.add(title, instructions, uploadComponent);
@@ -515,11 +512,18 @@ public class Navbar extends AppLayout {
             String extension;
             if (oldName.endsWith("jpeg")) {
                 extension = ".jpeg";
-            } else {
+            } else if (oldName.endsWith("jpg")){
                 extension = ".jpg";
+            } else if (oldName.endsWith("JPG")) {
+                extension = ".JPG";
+            } else if (oldName.endsWith("JPEG")) {
+                extension = ".JPEG";
+            } else {
+                System.out.println("Problem while tying to figure out the file's name while renaming the profile picture");
+                extension = "";
             }
             File old = new File(oldName);
-            File newFile = new File("src/main/webapp/profile_pictures/" + currentUser.getId() + extension);
+            File newFile = new File("src/main/webapp/profile_pictures/" + currentUser.getId() + extension.toLowerCase());
             if (! old.renameTo(newFile)) {
                 throw new Exception("File can't be renamed");
             }
