@@ -19,8 +19,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
  * <li>Restrict access to the application, allowing only logged in users,</li>
  * <li>Set up the login form</li>
  */
-@EnableWebSecurity
 @Configuration
+@EnableWebSecurity
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 	private static final String LOGIN_PROCESSING_URL = "/login";
