@@ -6,6 +6,8 @@ import app.controller.Markdown;
 import app.controller.MoodleBroadcaster;
 import app.controller.security.SecurityUtils;
 import app.jpa_repo.*;
+import app.model.chat.TextChannel;
+import app.model.courses.Assignment;
 import app.model.courses.Course;
 import app.model.courses.CourseSection;
 import app.web.layout.Navbar;
@@ -33,10 +35,7 @@ import com.vaadin.flow.shared.Registration;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Route(value = "moodle", layout = Navbar.class)
 public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, HasUrlParameter<Long> {
@@ -194,7 +193,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
         private void createModifyPopup() {
             Dialog modifyPopup = new Dialog();
             FormLayout popupContent = new FormLayout();
-            DialogLink Dialoglink = new DialogLink();
+            DialogLink Dialoglink = new DialogLink(modifyPopup);
             Button link = new Button("Generer des liens");
 
             Label label = new Label("Modify the section here");
@@ -211,6 +210,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
 
             link.addClickListener(event -> {
                 Dialoglink.open();
+                modifyPopup.close();
             });
 
             popupContent.add(label, link, title, content, okButton);
@@ -221,11 +221,14 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
     }
 
 
-    public class DialogLink extends Dialog{
+    public class DialogLink extends Dialog {
 
+        Dialog parent;
         Map<Tab, Component> tabsToPages = new HashMap<>();
 
-        DialogLink(){
+        DialogLink(Dialog last) {
+            this.parent = last;
+
             Tab externe = new Tab("Lien externe");
             Div div_externe = externeLinkDiv();
             tabsToPages.put(externe, div_externe);
@@ -241,10 +244,11 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
                 tabsToPages.values().forEach(e -> e.setVisible(false));
                 tabsToPages.get(tabs.getSelectedTab()).setVisible(true);
             });
-
+            this.addDialogCloseActionListener(event -> {
+                last.open();
+                this.close();
+            });
             add(tabs, div_externe, div_interne);
-
-
         }
 
 
@@ -279,6 +283,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
 
             close.addClickListener(event -> {
                 this.close();
+                this.parent.open();
             });
             copie.addClickListener(event -> {
                 UI.getCurrent().getPage().executeJs("window.copyToClipboard($0)", text.getValue());
@@ -301,7 +306,17 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             msg.setPlaceholder("Entre le nom du lien ici...");
 
             ComboBox<String> comboBox = new ComboBox<>();
-            comboBox.setItems("Assigment 1", "Assigment 2");
+            ArrayList<Assignment> assigment = getAssignmentController().getAssignmentsForCourse(course.getId());
+            ArrayList<TextChannel> channels = getController().getAllChannelsForCourse(course.getId());
+            // ArrayList<Moo> channels = getController().getAllChannelsForCourse(course.getId());
+
+            for (Assignment a : assigment) {
+                comboBox.setItems(a.getName());
+            }
+            for (TextChannel channel : channels) {
+                // comboBox.add
+                comboBox.setItems(channel.getName());
+            }
             insertLayout.add(msg, comboBox);
 
             TextArea text = new TextArea();
@@ -317,6 +332,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
 
             close.addClickListener(event -> {
                 this.close();
+                this.parent.open();
             });
             copie.addClickListener(event -> {
                 UI.getCurrent().getPage().executeJs("window.copyToClipboard($0)", text.getValue());
@@ -329,7 +345,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
 
 
         public boolean isLinks(String s) {
-            if (s.startsWith("http") && s.contains("www") && s.contains(".")) return true;
+            if ((s.startsWith("http") || s.startsWith("https")) && s.contains("www") && s.contains(".")) return true;
             return false;
         }
 
