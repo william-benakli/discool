@@ -101,8 +101,8 @@ public class StudentAssignmentView extends ViewWithSidebars implements HasDynami
             if (studentAssignmentUpload == null) {
                 // only allow uploads if the student hasn't already submitted a file
                 // and if they are not late
-                if ((assignment.getAllowLate() == 1 && assignment.getCutoffdate() >= System.currentTimeMillis())
-                    || (assignment.getDuedate() >= System.currentTimeMillis())) {
+                if ((assignment.getAllowLate() == 1 && assignment.getCutoffdate()*1000-3600000*2 >= System.currentTimeMillis())
+                    || (assignment.getDuedate()*1000-3600000*2 >= System.currentTimeMillis())) {
                     createUploadZone();
                 }
             }
@@ -152,7 +152,7 @@ public class StudentAssignmentView extends ViewWithSidebars implements HasDynami
             styleDivAssignment(div, divLeft, divRight, statusL, statusR);
             if (assignment.getAllowLate() == 1) {
                 divLeft.add(constTab(new Div(), "Cut-off date", ColorHTML.GREYTAB, true));
-                divRight.add(constTab(new Div(), getController().convertLongToDate(assignment.getCutoffdate()), ColorHTML.GREYTAB, false));
+                divRight.add(constTab(new Div(), getController().convertLongToDate(assignment.getCutoffdate()*1000-3600000*2), ColorHTML.GREYTAB, false));
             }
 
             divLeft.add(
@@ -160,12 +160,26 @@ public class StudentAssignmentView extends ViewWithSidebars implements HasDynami
                     constTab(new Div(), "Max grade", ColorHTML.GREYTAB, true),
                     constTab(statusL, "Status", ColorHTML.WHITE, true));
             divRight.add(
-                    constTab(new Div(), getController().convertLongToDate(assignment.getDuedate()), ColorHTML.WHITE, false),
+                    constTab(new Div(), getController().convertLongToDate(assignment.getDuedate()*1000-3600000*2), ColorHTML.WHITE, false),
                     constTab(new Div(), Long.toString(assignment.getMaxGrade()), ColorHTML.GREYTAB, false),
-                    constTab(statusR, writeGradeInfo(), ColorHTML.WHITE, false));
+                    constTab(statusR, writeGradeInfo(), changeColor(), false));
 
             div.add(divLeft, divRight);
             add(div);
+        }
+
+        private ColorHTML changeColor(){
+            ColorHTML res=ColorHTML.WHITE;
+            if (studentAssignmentUpload != null && assignment.getDuedate()*1000-3600000*2 > System.currentTimeMillis()){
+                res= ColorHTML.GREEN;
+            }else{
+                if (assignment.getAllowLate() == 1 && assignment.getDuedate()*1000-3600000*2 < System.currentTimeMillis() && assignment.getCutoffdate()*1000-3600000*2 > System.currentTimeMillis()){
+                    res=ColorHTML.ORANGE;
+                }else if((assignment.getCutoffdate()*1000-3600000*2 < System.currentTimeMillis() && assignment.getAllowLate() == 1) || (assignment.getAllowLate() == 0 && assignment.getDuedate()*1000-3600000*2<System.currentTimeMillis())){
+                    res=ColorHTML.DANGER;
+                }
+            }
+            return res;
         }
 
         private String writeGradeInfo() {

@@ -40,10 +40,7 @@ import org.vaadin.firitin.fields.LocalDateTimeField;
 import java.net.URI;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public abstract class ViewWithSidebars extends VerticalLayout {

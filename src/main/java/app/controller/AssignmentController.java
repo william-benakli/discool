@@ -95,8 +95,8 @@ public class AssignmentController {
         Assignment assignment = Assignment.builder()
                 .name(title).description(description).courseId(courseId)
                 .allowLate((short) (allowLate ? 1 : 0))
-                .duedate(dueDate.toEpochSecond(ZoneOffset.of("+1"))) // offset +1 pour l'heure de Paris
-                .cutoffdate(allowLate ? cutoffDate.toEpochSecond(ZoneOffset.of("+1")) : 0)
+                .duedate(dueDate.toEpochSecond(ZoneOffset.of("+0"))) // offset +0 pour l'heure de Paris
+                .cutoffdate(allowLate ? cutoffDate.toEpochSecond(ZoneOffset.of("+0")) : 0)
                 .maxGrade((short) Integer.parseInt(maxGrade))
                 .maxAttempts((short) 1).build();
         assignmentRepository.save(assignment);
