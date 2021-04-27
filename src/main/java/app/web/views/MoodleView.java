@@ -368,7 +368,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             Button copie = new Button("Copier");
             Button close = new Button("fermer");
             valide.addClickListener(event -> {
-                if (msg.isEmpty() || url.get().isEmpty()) {
+                if (msg.isEmpty()) {
                     text.setValue("Erreur champs invalide");
                 } else {
                     //TODO: à changer pour le serveur ne plus mettre https://localhost:8080/
@@ -376,16 +376,28 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
 
                     switch (url.get()) {
                         case "channels":
-                            targetId = select_channel.getValue().getId();
-                            text.setValue("[" + msg.getValue() + "](" + urlRadicale + url + "/" + targetId + " )");
+                            if (select_channel.getValue() == null) {
+                                text.setValue("Erreur aucune séléction");
+                            } else {
+                                targetId = select_channel.getValue().getId();
+                                text.setValue("[" + msg.getValue() + "](" + urlRadicale + url + "/" + targetId + " )");
+                            }
                             break;
                         case "assignment":
-                            targetId = select_assignment.getValue().getId();
-                            text.setValue("[" + msg.getValue() + "](" + urlRadicale + url + "/" + targetId + " )");
+                            if (select_assignment.getValue() == null) {
+                                text.setValue("Erreur aucune séléction");
+                            } else {
+                                targetId = select_assignment.getValue().getId();
+                                text.setValue("[" + msg.getValue() + "](" + urlRadicale + url + "/" + targetId + " )");
+                            }
                             break;
                         case "moodle":
-                            targetId = select_moodle.getValue().getId();
-                            text.setValue("[" + msg.getValue() + "](" + urlRadicale + url + "/" + targetId + " )");
+                            if (select_assignment.getValue() == null) {
+                                text.setValue("Erreur aucune séléction");
+                            } else {
+                                targetId = select_moodle.getValue().getId();
+                                text.setValue("[" + msg.getValue() + "](" + urlRadicale + url + "/" + targetId + " )");
+                            }
                             break;
                     }
                 }
