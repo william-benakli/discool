@@ -7,10 +7,12 @@ import app.web.views.PanelAdminView;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.Key;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.PasswordField;
@@ -18,13 +20,19 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
+import com.vaadin.flow.server.StreamRegistration;
+import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.shared.Registration;
 import org.hibernate.event.spi.DeleteEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
+
     public class UserForm extends FormLayout {
 
         private final PersonRepository personRepository;
+        private Notification notification ;
         private Person person ;
         Binder<Person> binder = new BeanValidationBinder<>(Person.class) ;
         TextField username = new TextField("Pseudo");
@@ -81,9 +89,22 @@ import org.springframework.beans.factory.annotation.Autowired;
             save.addClickShortcut(Key.ENTER);
             close.addClickShortcut(Key.ESCAPE);
             save.addClickListener(click ->{
-                if(this.username == null) {
 
-                    System.out.println("c'est null");
+                if(this.username.isEmpty()) {
+                    notification = new Notification("pseudo is empty !",3000,Notification.Position.MIDDLE);
+                    notification.open();
+                }
+                if(this.password.isEmpty()) {
+                    notification = new Notification("password is empty !",3000,Notification.Position.MIDDLE);
+                    notification.open();
+                }
+                if(this.email.isEmpty()) {
+                    notification = new Notification("email is empty !",3000,Notification.Position.MIDDLE);
+                    notification.open();
+                }
+                if(this.role.isEmpty()){
+                    notification = new Notification("you have to select a role !",3000,Notification.Position.MIDDLE);
+                    notification.open();
                 }
                 else {
                     if (!userExist(this.username.getValue())) {

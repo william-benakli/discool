@@ -80,12 +80,23 @@ public class PanelAdminView extends VerticalLayout {
     }
 
     public void updateList(){
-        usersGrid.setItems(personRepository.findAll());
+        usersGrid.setItems(findAll(filterText.getValue()));
     }
+
+    public List<Person>findAll(String stringFilter){
+        if (stringFilter == null || stringFilter.isEmpty()) {
+            return personRepository.findAll();
+        }
+        else{
+            return personRepository.search(stringFilter);
+        }
+    }
+
     public void configureFilter(){
         filterText.setPlaceholder("filtrer par nom...");
         filterText.setClearButtonVisible(true);
         filterText.setValueChangeMode(ValueChangeMode.LAZY);
+        filterText.addValueChangeListener(e ->updateList());
     }
 
     private void closeEditor() {
