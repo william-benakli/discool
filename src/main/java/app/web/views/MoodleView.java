@@ -262,21 +262,17 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             Div d = new Div();
             HorizontalLayout insertLayout = new HorizontalLayout();
             HorizontalLayout buttonLayout = new HorizontalLayout();
+            FlexLayout flexLayout = new FlexLayout();
 
             VerticalLayout mainLayout = new VerticalLayout();
 
-            TextField msg = new TextField();
-            TextField lien = new TextField();
-            insertLayout.add(msg, lien);
-            msg.setPlaceholder("Entre le nom du lien ici...");
-            lien.setPlaceholder("Entre votre lien ici....");
-            TextArea text = new TextArea();
-            text.setPlaceholder("Votre text apparaitra ici");
+            TextField msg = createTextField("Text à l'affichage: ", "Entre le nom du lien ici...");
+            TextField lien = createTextField("Votre lien: ", "Entre votre lien ici....");
+            TextArea text = createTextArea("Texte généré:", "Votre text apparaitra ici");
 
             Button valide = new Button("Generer");
             Button copie = new Button("Copier");
             Button close = new Button("fermer");
-            buttonLayout.add(valide, copie, close);
             valide.addClickListener(event -> {
                 if (msg.isEmpty() || lien.isEmpty()) {
                     text.setValue("Erreur champs invalide");
@@ -291,53 +287,54 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
                 this.close();
                 this.parent.open();
             });
+
             copie.addClickListener(event -> {
                 copyInClipBoard(text.getValue());
             });
 
-            mainLayout.add(insertLayout, text, buttonLayout);
+            buttonLayout.add(valide, copie, close);
+            insertLayout.add(msg, lien);
+            flexLayout.add(text);
+            mainLayout.add(insertLayout, flexLayout, buttonLayout);
             d.add(mainLayout);
             return d;
         }
 
         public Div interneLinkDiv() {
             Div interne = new Div();
-            HorizontalLayout insertLayout = new HorizontalLayout();
-            HorizontalLayout buttonLayout = new HorizontalLayout();
-
-            VerticalLayout mainLayout = new VerticalLayout();
-
-
-            TextField msg = new TextField();
             AtomicReference<String> url = new AtomicReference<>("/channels/");
             List<Assignment> assigment = getAssignmentController().getAssignmentsForCourse(course.getId());
             List<TextChannel> channels = getController().getAllChannelsForCourse(course.getId());
             Map<Integer, Component> selectMap = new HashMap<>();
 
+
+            HorizontalLayout insertLayout = new HorizontalLayout();
+            HorizontalLayout buttonLayout = new HorizontalLayout();
+            VerticalLayout mainLayout = new VerticalLayout();
+
+            TextField msg = createTextField("Text à l'affichage: ", "Entre le nom du lien ici...");
+            TextArea text = createTextArea("Texte généré:", "Votre text apparaitra ici");
+
             Select<Assignment> select_assignment = new Select<>();
             select_assignment.setTextRenderer(Assignment::getName);
             select_assignment.setItems(assigment);
 
-
             Select<TextChannel> select_channel = new Select<>();
-
             select_channel.setTextRenderer(TextChannel::getName);
             select_channel.setItems(channels);
 
 
-            Select<Course> select_cours = new Select<>();
+            Select<Course> select_moodle = new Select<>();
 
             //Map
             selectMap.put(0, select_assignment);
             selectMap.put(1, select_channel);
-            selectMap.put(2, select_cours);
+            selectMap.put(2, select_moodle);
 
             selectMap.values().forEach(e -> e.setVisible(false));
             select_channel.setVisible(true);
 
-            RadioButtonGroup<String> radio = new RadioButtonGroup<>();
-            radio.setLabel("Label");
-            radio.setItems("Salon de discussion", "Devoir à rendre", "Moodle présentation");
+            RadioButtonGroup<String> radio = createRadioDefault();
 
             radio.addValueChangeListener(event -> {
 
@@ -354,22 +351,14 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
                 }
             });
 
-            msg.setPlaceholder("Entre le nom du lien ici...");
-
-
-            insertLayout.add(msg, select_assignment, select_channel, radio);
-
-            TextArea text = new TextArea();
-            text.setPlaceholder("Votre text apparaitra ici");
-
             Button valide = new Button("Generer");
             Button copie = new Button("Copier");
             Button close = new Button("fermer");
-            buttonLayout.add(valide, copie, close);
             valide.addClickListener(event -> {
                 if (msg.isEmpty() || url.get().isEmpty()) {
                     text.setValue("Erreur champs invalide");
                 } else {
+                    //TODO: à changer pour le serveur ne plus mettre https://localhost:8080/
                     text.setValue("[" + msg.getValue() + "](http://localhost:8080/" + url + "/" + course.getId() + " )");
                 }
             });
@@ -382,6 +371,8 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
                 copyInClipBoard(text.getValue());
             });
 
+            insertLayout.add(msg, select_assignment, select_channel, radio);
+            buttonLayout.add(valide, copie, close);
             mainLayout.add(insertLayout, text, buttonLayout);
             interne.add(mainLayout);
             return interne;
@@ -404,6 +395,29 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
         public boolean isLinks(String s) {
             if ((s.startsWith("http") || s.startsWith("https")) && s.contains("www") && s.contains(".")) return true;
             return false;
+        }
+
+
+        public TextField createTextField(String label, String placeHolder) {
+            TextField textField = new TextField();
+            textField.setLabel(label);
+            textField.setPlaceholder(placeHolder);
+            return textField;
+        }
+
+        public TextArea createTextArea(String label, String placeHolder) {
+            TextArea textArea = new TextArea();
+            textArea.setLabel(label);
+            textArea.setPlaceholder(placeHolder);
+            textArea.getStyle().set("margin", "auto").set("width", "100%");
+            return textArea;
+        }
+
+        public RadioButtonGroup createRadioDefault() {
+            RadioButtonGroup radio = new RadioButtonGroup<>();
+            radio.setLabel("Label");
+            radio.setItems("Salon de discussion", "Devoir à rendre", "Moodle présentation");
+            return radio;
         }
 
     }
