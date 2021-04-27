@@ -19,13 +19,14 @@ import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.HasText;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
+import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.textfield.TextArea;
@@ -307,21 +308,52 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
 
 
             TextField msg = new TextField();
+            List<Assignment> assigment = getAssignmentController().getAssignmentsForCourse(course.getId());
+            List<TextChannel> channels = getController().getAllChannelsForCourse(course.getId());
+            Map<Integer, Component> selectMap = new HashMap<>();
+
+            Select<Assignment> select_assignment = new Select<>();
+            select_assignment.setTextRenderer(Assignment::getName);
+            select_assignment.setItems(assigment);
+
+
+            Select<TextChannel> select_channel = new Select<>();
+
+            select_channel.setTextRenderer(TextChannel::getName);
+            select_channel.setItems(channels);
+
+
+            Select<Course> select_cours = new Select<>();
+
+            //Map
+            selectMap.put(0, select_assignment);
+            selectMap.put(1, select_channel);
+            selectMap.put(2, select_cours);
+
+            selectMap.values().forEach(e -> e.setVisible(false));
+            select_channel.setVisible(true);
+
+            RadioButtonGroup<String> radio = new RadioButtonGroup<>();
+            radio.setLabel("Label");
+            radio.setItems("Salon de discusion", "Devoir à rendre", "Moodle présentation");
+
+            radio.addValueChangeListener(event -> {
+
+                if (event.getValue().equals("Salon de discusion")) {
+                    selectMap.values().forEach(e -> e.setVisible(false));
+                    select_channel.setVisible(true);
+                } else if (event.getValue().equals("Devoir à rendre")) {
+                    selectMap.values().forEach(e -> e.setVisible(false));
+                    select_assignment.setVisible(true);
+                } else {
+
+                }
+            });
+
             msg.setPlaceholder("Entre le nom du lien ici...");
 
-            ComboBox<String> comboBox = new ComboBox<>();
-            ArrayList<Assignment> assigment = getAssignmentController().getAssignmentsForCourse(course.getId());
-            ArrayList<TextChannel> channels = getController().getAllChannelsForCourse(course.getId());
-            // ArrayList<Moo> channels = getController().getAllChannelsForCourse(course.getId());
 
-            for (Assignment a : assigment) {
-                comboBox.setItems(a.getName());
-            }
-            for (TextChannel channel : channels) {
-                // comboBox.add
-                comboBox.setItems(channel.getName());
-            }
-            insertLayout.add(msg, comboBox);
+            insertLayout.add(msg, select_assignment, select_channel, radio);
 
             TextArea text = new TextArea();
             text.setPlaceholder("Votre text apparaitra ici");
@@ -331,7 +363,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             Button close = new Button("fermer");
             buttonLayout.add(valide, copie, close);
             valide.addClickListener(event -> {
-                text.setValue("[" + msg.getValue() + "](assignment/" + comboBox.getValue() + ")");
+                text.setValue("[" + msg.getValue() + "](assignment/" + radio.getValue() + ")");
             });
 
             close.addClickListener(event -> {
