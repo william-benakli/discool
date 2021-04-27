@@ -21,6 +21,7 @@ import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
+import com.vaadin.flow.component.radiobutton.RadioGroupVariant;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
@@ -196,7 +197,6 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
         private void createModifyPopup() {
             VerticalLayout layout = new VerticalLayout();
             HorizontalLayout layout_horizontal = new HorizontalLayout();
-            Dialog modifyPopup = new Dialog();
 
             AtomicReference<DialogLink> dialoglink = new AtomicReference<>(new DialogLink(modifyPopup));
 
@@ -224,27 +224,37 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             layout.add(label, title, content, layout_horizontal);
             layout.setDefaultHorizontalComponentAlignment(Alignment.CENTER);
             modifyPopup.add(layout);
-            modifyPopup.open();
         }
 
     }
 
+    /*
+        Cette classe permet de générer un dialog avec des Tabs
+     */
 
     public class DialogLink extends Dialog {
 
-        Dialog parent;
-        Map<Tab, Component> tabsToPages = new HashMap<>();
-        long targetId;
+        private Dialog parent;
+        private Map<Tab, Component> tabsToPages = new HashMap<>();
+        private long targetId;
+        private Div div_externe;
+        private Div div_interne;
 
         DialogLink(Dialog parent) {
             this.parent = parent;
+            createTab();
+        }
 
+        /*
+            Cette fonction crée les Tabs
+         */
+        public void createTab() {
             Tab externe = new Tab("Lien externe");
-            Div div_externe = externeLinkDiv();
+            div_externe = externeLinkDiv();
             tabsToPages.put(externe, div_externe);
 
             Tab interne = new Tab("Lien interne");
-            Div div_interne = interneLinkDiv();
+            div_interne = interneLinkDiv();
             tabsToPages.put(interne, div_interne);
             div_interne.setVisible(false);
 
@@ -261,8 +271,10 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             add(tabs, div_externe, div_interne);
         }
 
-
-        public Div externeLinkDiv(){
+        /*
+            Cette fonction créer la partie du tab qui s'occupe des liens externes
+         */
+        public Div externeLinkDiv() {
             Div d = new Div();
 
             HorizontalLayout insertLayout = new HorizontalLayout();
@@ -302,6 +314,9 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             return d;
         }
 
+        /*
+             Cette fonction créer la partie du tab qui s'occupe des liens internes
+        */
         public Div interneLinkDiv() {
             Div interne = new Div();
             AtomicReference<String> url = new AtomicReference<>("channels");
@@ -415,7 +430,9 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             return interne;
         }
 
-
+        /*
+           Fonction de copy (dependance Maven)
+         */
         public void copyInClipBoard(String text) {
             //il faut que ce soit en https
             System.out.println(text);
@@ -429,12 +446,16 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             });
         }
 
+        /*
+            Cette fonction verifie qu'il s'agit d'un lien et non d'une entree interdite
+         */
         public boolean isLinks(String s) {
-            if ((s.startsWith("http") || s.startsWith("https")) && s.contains("www") && s.contains(".")) return true;
+            if ((s.startsWith("http") || s.startsWith("https")) && s.contains(".")) return true;
             return false;
         }
 
 
+        /* *** Fonction auxiliaire pour alleger le code  *** */
         public TextField createTextField(String label, String placeHolder) {
             TextField textField = new TextField();
             textField.setLabel(label);
@@ -456,8 +477,10 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             radio.setItems("Salon de discussion", "Devoir à rendre", "Moodle présentation");
             radio.setLabel("Sélectionnez le type de redirection: ");
             radio.setValue("Salon de discussion");
+            radio.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
             return radio;
         }
+        /* *** Fonction auxiliaire pour alleger le code  *** */
 
     }
 }
