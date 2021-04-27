@@ -220,6 +220,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
 
         Dialog parent;
         Map<Tab, Component> tabsToPages = new HashMap<>();
+        long targetId;
 
         DialogLink(Dialog parent) {
             this.parent = parent;
@@ -245,6 +246,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             });
             add(tabs, div_externe, div_interne);
         }
+
 
         public Div externeLinkDiv(){
             Div d = new Div();
@@ -331,14 +333,17 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
                     selectMap.values().forEach(e -> e.setVisible(false));
                     select_channel.setVisible(true);
                     url.set("channels");
+                    targetId = select_channel.getValue().getId();
                 } else if (event.getValue().equals("Devoir à rendre")) {
                     selectMap.values().forEach(e -> e.setVisible(false));
                     select_assignment.setVisible(true);
                     url.set("assignment");
+                    targetId = select_assignment.getValue().getId();
                 } else {
                     selectMap.values().forEach(e -> e.setVisible(false));
                     select_moodle.setVisible(true);
                     url.set("moodle");
+                    targetId = select_moodle.getValue().getId();
                 }
             });
 
@@ -350,7 +355,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
                     text.setValue("Erreur champs invalide");
                 } else {
                     //TODO: à changer pour le serveur ne plus mettre https://localhost:8080/
-                    text.setValue("[" + msg.getValue() + "](http://localhost:8080/" + url + "/" + course.getId() + " )");
+                    text.setValue("[" + msg.getValue() + "](http://localhost:8080/" + url + "/" + targetId + " )");
                 }
             });
 
