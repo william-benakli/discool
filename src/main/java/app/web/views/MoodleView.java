@@ -356,7 +356,9 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
                     select_assignment.setVisible(true);
                     url.set("assignment");
                 } else {
-
+                    selectMap.values().forEach(e -> e.setVisible(false));
+                    select_moodle.setVisible(true);
+                    url.set("moodle");
                 }
             });
 
