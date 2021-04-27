@@ -11,6 +11,9 @@ import app.model.courses.Assignment;
 import app.model.courses.Course;
 import app.model.courses.CourseSection;
 import app.web.layout.Navbar;
+import com.vaadin.component.VaadinClipboard;
+import com.vaadin.component.VaadinClipboardImpl;
+import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.HasText;
@@ -32,6 +35,7 @@ import com.vaadin.flow.router.HasDynamicTitle;
 import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.shared.Registration;
+import com.vaadin.ui.Notification;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -286,7 +290,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
                 this.parent.open();
             });
             copie.addClickListener(event -> {
-                UI.getCurrent().getPage().executeJs("window.copyToClipboard($0)", text.getValue());
+                copyInClipBoard(text.getValue());
             });
 
             mainLayout.add(insertLayout, text, buttonLayout);
@@ -335,7 +339,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
                 this.parent.open();
             });
             copie.addClickListener(event -> {
-                UI.getCurrent().getPage().executeJs("window.copyToClipboard($0)", text.getValue());
+                copyInClipBoard(text.getValue());
             });
 
             mainLayout.add(insertLayout, text, buttonLayout);
@@ -343,6 +347,19 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             return interne;
         }
 
+
+        public void copyInClipBoard(String text) {
+            //il faut que ce soit en https
+            System.out.println(text);
+            VaadinClipboard vaadinClipboard = VaadinClipboardImpl.GetInstance();
+            vaadinClipboard.copyToClipboard(text, copySuccess -> {
+                if (copySuccess) {
+                    Notification.show("\'" + text + "\'" + " a bien été copié");
+                } else {
+                    Notification.show("Erreur la copie n'a pas été effectué", Notification.Type.ERROR_MESSAGE);
+                }
+            });
+        }
 
         public boolean isLinks(String s) {
             if ((s.startsWith("http") || s.startsWith("https")) && s.contains("www") && s.contains(".")) return true;

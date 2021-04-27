@@ -99,6 +99,11 @@
             <artifactId>flow-viritin</artifactId>
             <version>0.5.0</version>
         </dependency>
+        <dependency>
+            <groupId>com.vaadin.component</groupId>
+            <artifactId>vaadinClipboard</artifactId>
+            <version>1.0.0</version>
+        </dependency>
     </dependencies>
     <dependencyManagement>
         <dependencies>
