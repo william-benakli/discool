@@ -16,7 +16,6 @@ import com.vaadin.component.VaadinClipboardImpl;
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
-import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -182,10 +181,13 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
          * The created pop-up is invisible until the open() method is called.
          */
         private void createModifyPopup() {
-            FormLayout popupContent = new FormLayout();
-            DialogLink Dialoglink = new DialogLink(modifyPopup);
-            Button link = new Button("Generer des liens");
+            //   FormLayout popupContent = new FormLayout();
+            VerticalLayout layout = new VerticalLayout();
+            HorizontalLayout layout_horizontal = new HorizontalLayout();
 
+            AtomicReference<DialogLink> dialoglink = new AtomicReference<>(new DialogLink(modifyPopup));
+
+            Button link = new Button("Liens");
             Label label = new Label("Modify the section here");
             TextField title = new TextField("Title");
             title.setValue(section.getTitle());
@@ -199,12 +201,16 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             });
 
             link.addClickListener(event -> {
-                Dialoglink.open();
+                dialoglink.set(new DialogLink(modifyPopup));
+                dialoglink.get().open();
                 modifyPopup.close();
             });
-
-            popupContent.add(label, link, title, content, okButton);
-            modifyPopup.add(popupContent);
+            layout_horizontal.add(okButton, link);
+            layout_horizontal.setPadding(true);
+            layout_horizontal.setSpacing(true);
+            layout.add(label, title, content, layout_horizontal);
+            layout.setDefaultHorizontalComponentAlignment(Alignment.CENTER);
+            modifyPopup.add(layout);
         }
 
     }
@@ -215,8 +221,8 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
         Dialog parent;
         Map<Tab, Component> tabsToPages = new HashMap<>();
 
-        DialogLink(Dialog last) {
-            this.parent = last;
+        DialogLink(Dialog parent) {
+            this.parent = parent;
 
             Tab externe = new Tab("Lien externe");
             Div div_externe = externeLinkDiv();
@@ -234,19 +240,17 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
                 tabsToPages.get(tabs.getSelectedTab()).setVisible(true);
             });
             this.addDialogCloseActionListener(event -> {
-                last.open();
+                parent.open();
                 this.close();
             });
             add(tabs, div_externe, div_interne);
         }
 
-
         public Div externeLinkDiv(){
             Div d = new Div();
+
             HorizontalLayout insertLayout = new HorizontalLayout();
             HorizontalLayout buttonLayout = new HorizontalLayout();
-            FlexLayout flexLayout = new FlexLayout();
-
             VerticalLayout mainLayout = new VerticalLayout();
 
             TextField msg = createTextField("Text à l'affichage: ", "Entre le nom du lien ici...");
@@ -274,11 +278,10 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             copie.addClickListener(event -> {
                 copyInClipBoard(text.getValue());
             });
-
             buttonLayout.add(valide, copie, close);
             insertLayout.add(msg, lien);
-            flexLayout.add(text);
-            mainLayout.add(insertLayout, flexLayout, buttonLayout);
+            mainLayout.setDefaultHorizontalComponentAlignment(Alignment.CENTER);
+            mainLayout.add(insertLayout, text, buttonLayout);
             d.add(mainLayout);
             return d;
         }
@@ -299,15 +302,18 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             TextArea text = createTextArea("Texte généré:", "Votre text apparaitra ici");
 
             Select<Assignment> select_assignment = new Select<>();
+            select_assignment.setLabel("Séléctionnez une redirection : ");
             select_assignment.setTextRenderer(Assignment::getName);
             select_assignment.setItems(assigment);
 
             Select<TextChannel> select_channel = new Select<>();
+            select_channel.setLabel("Séléctionnez une redirection : ");
             select_channel.setTextRenderer(TextChannel::getName);
             select_channel.setItems(channels);
 
 
             Select<Course> select_moodle = new Select<>();
+            select_moodle.setLabel("Séléctionnez une redirection : ");
 
             //Map
             selectMap.put(0, select_assignment);
@@ -356,6 +362,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
 
             insertLayout.add(msg, select_assignment, select_channel, radio);
             buttonLayout.add(valide, copie, close);
+            mainLayout.setDefaultHorizontalComponentAlignment(Alignment.CENTER);
             mainLayout.add(insertLayout, text, buttonLayout);
             interne.add(mainLayout);
             return interne;
@@ -392,14 +399,16 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             TextArea textArea = new TextArea();
             textArea.setLabel(label);
             textArea.setPlaceholder(placeHolder);
+            textArea.setReadOnly(true);
             textArea.getStyle().set("margin", "auto").set("width", "100%");
             return textArea;
         }
 
         public RadioButtonGroup createRadioDefault() {
             RadioButtonGroup radio = new RadioButtonGroup<>();
-            radio.setLabel("Label");
             radio.setItems("Salon de discussion", "Devoir à rendre", "Moodle présentation");
+            radio.setLabel("Séléctionnez type de rédirection: ");
+            radio.setValue("Salon de discussion");
             return radio;
         }
 
