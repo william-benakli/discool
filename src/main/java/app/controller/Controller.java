@@ -148,4 +148,7 @@ public class Controller {
         return formatter.format(date) + " à " + heure.format(date);
     }
 
+    public List<MoodlePage> getAllMoodlePageForCourse(long courseID) {
+        return moodlePageRepository.findAllSectionsByCourseId(courseID);
+    }
 }

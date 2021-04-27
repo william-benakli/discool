@@ -9,18 +9,13 @@ import app.jpa_repo.*;
 import app.model.chat.TextChannel;
 import app.model.courses.Assignment;
 import app.model.courses.Course;
-import app.model.courses.CourseSection;
+import app.model.courses.MoodlePage;
 import app.web.layout.Navbar;
 import com.vaadin.component.VaadinClipboard;
 import com.vaadin.component.VaadinClipboardImpl;
 import com.vaadin.flow.component.*;
-import com.vaadin.flow.component.AttachEvent;
-import com.vaadin.flow.component.DetachEvent;
-import com.vaadin.flow.component.HasText;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
-import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -40,14 +35,17 @@ import com.vaadin.ui.Notification;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Route(value = "moodle", layout = Navbar.class)
 public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, HasUrlParameter<Long> {
 
     private final PersonRepository personRepository;
-    private final CourseSectionRepository courseSectionRepository;
+    private final MoodlePageRepository moodlePageRepository;
     private final CourseRepository courseRepository;
     private Course course;
 
@@ -56,7 +54,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
     private Registration broadcasterRegistration;
     private MoodlePage page;
 
-    public MoodleView(@Autowired CourseSectionRepository courseSectionRepository,
+    public MoodleView(@Autowired MoodlePageRepository moodlePageRepository,
                       @Autowired CourseRepository courseRepository,
                       @Autowired TextChannelRepository textChannelRepository,
                       @Autowired PersonRepository personRepository,
@@ -64,8 +62,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
                       @Autowired StudentAssignmentsUploadsRepository studentAssignmentsUploadsRepository,
                       @Autowired GroupRepository groupRepository,
                       @Autowired GroupMembersRepository groupMembersRepository) {
-        this.personRepository=personRepository;
-        this.courseSectionRepository = courseSectionRepository;
+        this.personRepository = personRepository;
         this.courseRepository = courseRepository;
         this.moodlePageRepository = moodlePageRepository;
         setPersonRepository(personRepository);
@@ -197,13 +194,9 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
          * The created pop-up is invisible until the open() method is called.
          */
         private void createModifyPopup() {
-            //   FormLayout popupContent = new FormLayout();
             VerticalLayout layout = new VerticalLayout();
             HorizontalLayout layout_horizontal = new HorizontalLayout();
             Dialog modifyPopup = new Dialog();
-            FormLayout popupContent = new FormLayout();
-            DialogLink Dialoglink = new DialogLink(modifyPopup);
-            Button link = new Button("Generer des liens");
 
             AtomicReference<DialogLink> dialoglink = new AtomicReference<>(new DialogLink(modifyPopup));
 
@@ -231,6 +224,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             layout.add(label, title, content, layout_horizontal);
             layout.setDefaultHorizontalComponentAlignment(Alignment.CENTER);
             modifyPopup.add(layout);
+            modifyPopup.open();
         }
 
     }
@@ -275,13 +269,13 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             HorizontalLayout buttonLayout = new HorizontalLayout();
             VerticalLayout mainLayout = new VerticalLayout();
 
-            TextField msg = createTextField("Text à l'affichage: ", "Entre le nom du lien ici...");
+            TextField msg = createTextField("Texte à l'affichage: ", "Entre le nom du lien ici...");
             TextField lien = createTextField("Votre lien: ", "Entre votre lien ici....");
-            TextArea text = createTextArea("Texte généré:", "Votre text apparaitra ici");
+            TextArea text = createTextArea("Texte généré:", "");
 
             Button valide = new Button("Generer");
             Button copie = new Button("Copier");
-            Button close = new Button("fermer");
+            Button close = new Button("Fermer");
             valide.addClickListener(event -> {
                 if (msg.isEmpty() || lien.isEmpty()) {
                     text.setValue("Erreur champs invalide");
@@ -311,8 +305,10 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
         public Div interneLinkDiv() {
             Div interne = new Div();
             AtomicReference<String> url = new AtomicReference<>("channels");
-            List<Assignment> assigment = getAssignmentController().getAssignmentsForCourse(course.getId());
-            List<TextChannel> channels = getController().getAllChannelsForCourse(course.getId());
+            List<Assignment> assigment = getAssignmentController().getAssignmentsForCourse(getCourse().getId());
+            List<TextChannel> channels = getController().getAllChannelsForCourse(getCourse().getId());
+            List<MoodlePage> moodle = getController().getAllMoodlePageForCourse(getCourse().getId());
+
             Map<Integer, Component> selectMap = new HashMap<>();
 
 
@@ -320,23 +316,23 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             HorizontalLayout buttonLayout = new HorizontalLayout();
             VerticalLayout mainLayout = new VerticalLayout();
 
-            TextField msg = createTextField("Text à l'affichage: ", "Entre le nom du lien ici...");
-            TextArea text = createTextArea("Texte généré:", "Votre text apparaitra ici");
+            TextField msg = createTextField("Texte à l'affichage: ", "Entre le nom du lien ici...");
+            TextArea text = createTextArea("Texte généré:", "");
 
             Select<Assignment> select_assignment = new Select<>();
-            select_assignment.setLabel("Séléctionnez une redirection : ");
+            select_assignment.setLabel("Sélectionnez une redirection : ");
             select_assignment.setTextRenderer(Assignment::getName);
             select_assignment.setItems(assigment);
 
             Select<TextChannel> select_channel = new Select<>();
-            select_channel.setLabel("Séléctionnez une redirection : ");
+            select_channel.setLabel("Sélectionnez une redirection : ");
             select_channel.setTextRenderer(TextChannel::getName);
             select_channel.setItems(channels);
 
-
-            Select<Course> select_moodle = new Select<>();
-            select_moodle.setLabel("Séléctionnez une redirection : ");
-
+            Select<MoodlePage> select_moodle = new Select<>();
+            select_moodle.setLabel("Sélectionnez une redirection : ");
+            select_moodle.setTextRenderer(MoodlePage::getTitle);
+            select_moodle.setItems(moodle);
             //Map
             selectMap.put(0, select_assignment);
             selectMap.put(1, select_channel);
@@ -366,7 +362,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
 
             Button valide = new Button("Generer");
             Button copie = new Button("Copier");
-            Button close = new Button("fermer");
+            Button close = new Button("Fermer");
             valide.addClickListener(event -> {
                 if (msg.isEmpty()) {
                     text.setValue("Erreur champs invalide");
@@ -411,7 +407,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
                 copyInClipBoard(text.getValue());
             });
 
-            insertLayout.add(msg, select_assignment, select_channel, radio);
+            insertLayout.add(msg, radio, select_assignment, select_channel, select_moodle);
             buttonLayout.add(valide, copie, close);
             mainLayout.setDefaultHorizontalComponentAlignment(Alignment.CENTER);
             mainLayout.add(insertLayout, text, buttonLayout);
@@ -458,7 +454,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
         public RadioButtonGroup createRadioDefault() {
             RadioButtonGroup radio = new RadioButtonGroup<>();
             radio.setItems("Salon de discussion", "Devoir à rendre", "Moodle présentation");
-            radio.setLabel("Séléctionnez type de rédirection: ");
+            radio.setLabel("Sélectionnez le type de redirection: ");
             radio.setValue("Salon de discussion");
             return radio;
         }
