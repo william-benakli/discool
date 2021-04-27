@@ -290,7 +290,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
 
         public Div interneLinkDiv() {
             Div interne = new Div();
-            AtomicReference<String> url = new AtomicReference<>("/channels/");
+            AtomicReference<String> url = new AtomicReference<>("channels");
             List<Assignment> assigment = getAssignmentController().getAssignmentsForCourse(course.getId());
             List<TextChannel> channels = getController().getAllChannelsForCourse(course.getId());
             Map<Integer, Component> selectMap = new HashMap<>();
@@ -333,17 +333,14 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
                     selectMap.values().forEach(e -> e.setVisible(false));
                     select_channel.setVisible(true);
                     url.set("channels");
-                    targetId = select_channel.getValue().getId();
                 } else if (event.getValue().equals("Devoir à rendre")) {
                     selectMap.values().forEach(e -> e.setVisible(false));
                     select_assignment.setVisible(true);
                     url.set("assignment");
-                    targetId = select_assignment.getValue().getId();
                 } else {
                     selectMap.values().forEach(e -> e.setVisible(false));
                     select_moodle.setVisible(true);
                     url.set("moodle");
-                    targetId = select_moodle.getValue().getId();
                 }
             });
 
@@ -355,7 +352,22 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
                     text.setValue("Erreur champs invalide");
                 } else {
                     //TODO: à changer pour le serveur ne plus mettre https://localhost:8080/
-                    text.setValue("[" + msg.getValue() + "](http://localhost:8080/" + url + "/" + targetId + " )");
+                    String urlRadicale = "http://localhost:8080/";
+
+                    switch (url.get()) {
+                        case "channels":
+                            targetId = select_channel.getValue().getId();
+                            text.setValue("[" + msg.getValue() + "](" + urlRadicale + url + "/" + targetId + " )");
+                            break;
+                        case "assignment":
+                            targetId = select_assignment.getValue().getId();
+                            text.setValue("[" + msg.getValue() + "](" + urlRadicale + url + "/" + targetId + " )");
+                            break;
+                        case "moodle":
+                            targetId = select_moodle.getValue().getId();
+                            text.setValue("[" + msg.getValue() + "](" + urlRadicale + url + "/" + targetId + " )");
+                            break;
+                    }
                 }
             });
 
