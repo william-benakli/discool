@@ -41,6 +41,7 @@ import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Route(value = "moodle", layout = Navbar.class)
 public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, HasUrlParameter<Long> {
@@ -308,6 +309,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
 
 
             TextField msg = new TextField();
+            AtomicReference<String> url = new AtomicReference<>("/channels/");
             List<Assignment> assigment = getAssignmentController().getAssignmentsForCourse(course.getId());
             List<TextChannel> channels = getController().getAllChannelsForCourse(course.getId());
             Map<Integer, Component> selectMap = new HashMap<>();
@@ -335,16 +337,18 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
 
             RadioButtonGroup<String> radio = new RadioButtonGroup<>();
             radio.setLabel("Label");
-            radio.setItems("Salon de discusion", "Devoir à rendre", "Moodle présentation");
+            radio.setItems("Salon de discussion", "Devoir à rendre", "Moodle présentation");
 
             radio.addValueChangeListener(event -> {
 
-                if (event.getValue().equals("Salon de discusion")) {
+                if (event.getValue().equals("Salon de discussion")) {
                     selectMap.values().forEach(e -> e.setVisible(false));
                     select_channel.setVisible(true);
+                    url.set("channels");
                 } else if (event.getValue().equals("Devoir à rendre")) {
                     selectMap.values().forEach(e -> e.setVisible(false));
                     select_assignment.setVisible(true);
+                    url.set("assignment");
                 } else {
 
                 }
@@ -363,7 +367,11 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             Button close = new Button("fermer");
             buttonLayout.add(valide, copie, close);
             valide.addClickListener(event -> {
-                text.setValue("[" + msg.getValue() + "](assignment/" + radio.getValue() + ")");
+                if (msg.isEmpty() || url.get().isEmpty()) {
+                    text.setValue("Erreur champs invalide");
+                } else {
+                    text.setValue("[" + msg.getValue() + "](http://localhost:8080/" + url + "/" + course.getId() + " )");
+                }
             });
 
             close.addClickListener(event -> {
