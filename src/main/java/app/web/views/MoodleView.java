@@ -37,6 +37,7 @@ import com.vaadin.ui.Notification;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -203,8 +204,8 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             VerticalLayout layout = new VerticalLayout();
             HorizontalLayout layout_horizontal = new HorizontalLayout();
 
-            AtomicReference<DialogLink> dialoglink = new AtomicReference<>(new DialogLink(modifyPopup, DialogType.LINK));
-            AtomicReference<DialogLink> dialogimage = new AtomicReference<>(new DialogLink(modifyPopup, DialogType.IMAGE));
+            AtomicReference<DialogMoodle> dialoglink = new AtomicReference<>(new DialogMoodle(modifyPopup, DialogType.LINK));
+            AtomicReference<DialogMoodle> dialogimage = new AtomicReference<>(new DialogMoodle(modifyPopup, DialogType.IMAGE));
 
 
             Button link = new Button("Liens");
@@ -222,15 +223,15 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             });
 
             link.addClickListener(event -> {
-                dialoglink.set(new DialogLink(modifyPopup, DialogType.LINK));
-                dialoglink.get().open();
+                dialoglink.set(new DialogMoodle(modifyPopup, DialogType.LINK));
                 modifyPopup.close();
+                dialoglink.get().open();
             });
 
             image.addClickListener(event -> {
-                dialogimage.set(new DialogLink(modifyPopup, DialogType.IMAGE));
-                dialogimage.get().open();
+                dialogimage.set(new DialogMoodle(modifyPopup, DialogType.IMAGE));
                 modifyPopup.close();
+                dialogimage.get().open();
             });
 
 
@@ -248,7 +249,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
         Cette classe permet de générer un dialog avec des Tabs
      */
 
-    public class DialogLink extends Dialog {
+    public class DialogMoodle extends Dialog {
 
         private Dialog parent;
         private Map<Tab, Component> tabsToPages = new HashMap<>();
@@ -257,7 +258,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
         private Div div_interne;
 
 
-        DialogLink(Dialog parent, DialogType type) {
+        DialogMoodle(Dialog parent, DialogType type) {
             this.parent = parent;
             if (type == DialogType.LINK) {
                 createTab(interneLinkDiv(), externeLinkDiv(), "Lien");
@@ -465,6 +466,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
 
             TextField lien = createTextField("Votre lien: ", "Entre votre lien ici....");
             TextArea text = createTextArea("Texte généré:", "");
+            Paragraph warning = new Paragraph("Les liens autorisés doivent finir par : .png, .jpg ou .jpeg");
 
             Button valide = new Button("Generer");
             Button copie = new Button("Copier");
@@ -492,7 +494,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             buttonLayout.add(valide, copie, close);
             insertLayout.add(lien);
             mainLayout.setDefaultHorizontalComponentAlignment(Alignment.CENTER);
-            mainLayout.add(insertLayout, text, buttonLayout);
+            mainLayout.add(warning, insertLayout, text, buttonLayout);
             d.add(mainLayout);
             return d;
         }
@@ -510,12 +512,14 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             VerticalLayout mainLayout = new VerticalLayout();
 
             TextArea text = createTextArea("Texte généré:", "");
+            Paragraph warning = new Paragraph("Les fichiers autorisées sont .png, .jpg, .jpeg \n Les limites d'upload sont de 5Mo");
 
-
-            Button valide = new Button("Generer");
             Button copie = new Button("Copier");
             Button close = new Button("Fermer");
-            valide.addClickListener(event -> {
+            uploadComponent.addSucceededListener(event -> {
+                com.vaadin.flow.component.notification.Notification.show("Votre fichier est bien téléchargé");
+                text.setValue("![image](/upload/moodlepage/images/" + getCourse().getId() + "_" +
+                        String.valueOf(SecurityUtils.getCurrentUser(personRepository).getId()) + uploadComponent.getFileName() + ")");
 
             });
 
@@ -528,9 +532,9 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             });
 
             insertLayout.add(uploadComponent);
-            buttonLayout.add(valide, copie, close);
+            buttonLayout.add(copie, close);
             mainLayout.setDefaultHorizontalComponentAlignment(Alignment.CENTER);
-            mainLayout.add(insertLayout, text, buttonLayout);
+            mainLayout.add(warning, insertLayout, text, buttonLayout);
             interne.add(mainLayout);
             return interne;
         }
@@ -592,6 +596,20 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             radio.setValue("Salon de discussion");
             radio.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
             return radio;
+        }
+
+        public String getExtensionImage(String name) {
+            String[] tab_name = name.toLowerCase().split(".");
+            if (tab_name.length > 2) return "";
+            if (tab_name[1].contains("jpg") || tab_name[1].contains("jpeg") || tab_name[1].contains("png")) {
+                return tab_name[1];
+            }
+            return "";
+        }
+
+        public boolean ImageExist(String url) {
+            File f = new File(url);
+            return f.exists();
         }
         /* *** Fonction auxiliaire pour alleger le code  *** */
     }
