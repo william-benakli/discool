@@ -38,10 +38,7 @@ import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Route(value = "moodle", layout = Navbar.class)
@@ -521,7 +518,8 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
 
             uploadComponent.addSucceededListener(event -> {
                 com.vaadin.flow.component.notification.Notification.show("Votre fichier est bien téléchargé");
-                String url_file = newDirName + "/" + uploadComponent.getFileName();
+                uploadComponent.setFileName(getRandomId() + "_" + String.valueOf(getCourse().getId()) + "_" + String.valueOf(SecurityUtils.getCurrentUser(personRepository).getId()));
+                String url_file = uploadComponent.getFileName();
                 if (ImageExist(url_file)) {
                     text.setValue("![image](" + url_file + ")");
                 } else {
@@ -619,8 +617,12 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
         }
 
         public boolean ImageExist(String url) {
-            File f = new File("/" + url);
+            File f = new File(url);
             return f.exists();
+        }
+
+        public long getRandomId() {
+            return new Random().nextLong();
         }
         /* *** Fonction auxiliaire pour alleger le code  *** */
     }
