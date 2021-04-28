@@ -10,6 +10,7 @@ import app.model.chat.TextChannel;
 import app.model.courses.Assignment;
 import app.model.courses.Course;
 import app.model.courses.MoodlePage;
+import app.web.components.UploadComponent;
 import app.web.layout.Navbar;
 import com.vaadin.component.VaadinClipboard;
 import com.vaadin.component.VaadinClipboardImpl;
@@ -261,7 +262,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             if (type == DialogType.LINK) {
                 createTab(interneLinkDiv(), externeLinkDiv(), "Lien");
             } else if (type == DialogType.IMAGE) {
-                createTab(interneLinkDiv(), externeLinkDiv(), "Image");
+                createTab(interneImageDiv(), externeImageDiv(), "Image");
             } else {
                 Notification.show("Erreur: Impossible de charger le dialog demandé.");
             }
@@ -341,7 +342,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
         public Div interneLinkDiv() {
             Div interne = new Div();
             AtomicReference<String> url = new AtomicReference<>("channels");
-            List<Assignment> assigment = getAssignmentController().getAssignmentsForCourse(getCourse().getId());
+            List<Assignment> assignment = getAssignmentController().getAssignmentsForCourse(getCourse().getId());
             List<TextChannel> channels = getController().getAllChannelsForCourse(getCourse().getId());
             List<MoodlePage> moodle = getController().getAllMoodlePageForCourse(getCourse().getId());
 
@@ -358,7 +359,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             Select<Assignment> select_assignment = new Select<>();
             select_assignment.setLabel("Sélectionnez une redirection : ");
             select_assignment.setTextRenderer(Assignment::getName);
-            select_assignment.setItems(assigment);
+            select_assignment.setItems(assignment);
 
             Select<TextChannel> select_channel = new Select<>();
             select_channel.setLabel("Sélectionnez une redirection : ");
@@ -496,6 +497,43 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             return d;
         }
 
+        /*
+             Cette fonction créer la partie du tab qui s'occupe des images internes
+        */
+        public Div interneImageDiv() {
+            Div interne = new Div();
+
+            UploadComponent uploadComponent = new UploadComponent("500", "500", 1, 1, "", "jpg", "JPG");
+
+            HorizontalLayout insertLayout = new HorizontalLayout();
+            HorizontalLayout buttonLayout = new HorizontalLayout();
+            VerticalLayout mainLayout = new VerticalLayout();
+
+            TextArea text = createTextArea("Texte généré:", "");
+
+
+            Button valide = new Button("Generer");
+            Button copie = new Button("Copier");
+            Button close = new Button("Fermer");
+            valide.addClickListener(event -> {
+
+            });
+
+            close.addClickListener(event -> {
+                this.close();
+                this.parent.open();
+            });
+            copie.addClickListener(event -> {
+                copyInClipBoard(text.getValue());
+            });
+
+            insertLayout.add(uploadComponent);
+            buttonLayout.add(valide, copie, close);
+            mainLayout.setDefaultHorizontalComponentAlignment(Alignment.CENTER);
+            mainLayout.add(insertLayout, text, buttonLayout);
+            interne.add(mainLayout);
+            return interne;
+        }
 
         /*
            Fonction de copy (dependance Maven)
