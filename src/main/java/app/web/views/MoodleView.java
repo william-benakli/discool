@@ -505,7 +505,9 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
         public Div interneImageDiv() {
             Div interne = new Div();
 
-            UploadComponent uploadComponent = new UploadComponent("500", "500", 1, 1, "", "jpg", "JPG");
+            String newDirName = "uploads/moodle/images/" + String.valueOf(getCourse().getId()) + "_" +
+                    String.valueOf(SecurityUtils.getCurrentUser(personRepository).getId());
+            UploadComponent uploadComponent = new UploadComponent("100%", "100%", 1, 30000000, newDirName, ".jpg", ".jpeg", ".png");
 
             HorizontalLayout insertLayout = new HorizontalLayout();
             HorizontalLayout buttonLayout = new HorizontalLayout();
@@ -516,11 +518,20 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
 
             Button copie = new Button("Copier");
             Button close = new Button("Fermer");
+
             uploadComponent.addSucceededListener(event -> {
                 com.vaadin.flow.component.notification.Notification.show("Votre fichier est bien téléchargé");
-                text.setValue("![image](/upload/moodlepage/images/" + getCourse().getId() + "_" +
-                        String.valueOf(SecurityUtils.getCurrentUser(personRepository).getId()) + uploadComponent.getFileName() + ")");
+                String url_file = newDirName + "/" + uploadComponent.getFileName();
+                if (ImageExist(url_file)) {
+                    text.setValue("![image](" + url_file + ")");
+                } else {
+                    text.setValue("Une erreur est survenue, le fichier est inexistant");
+                }
+            });
 
+            uploadComponent.addFileRejectedListener(event -> {
+                com.vaadin.flow.component.notification.Notification.show("Enrengistrement de l'image impossible");
+                com.vaadin.flow.component.notification.Notification.show(event.getErrorMessage());
             });
 
             close.addClickListener(event -> {
@@ -608,7 +619,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
         }
 
         public boolean ImageExist(String url) {
-            File f = new File(url);
+            File f = new File("/" + url);
             return f.exists();
         }
         /* *** Fonction auxiliaire pour alleger le code  *** */
