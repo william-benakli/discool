@@ -10,6 +10,7 @@ import app.model.chat.TextChannel;
 import app.model.courses.Assignment;
 import app.model.courses.Course;
 import app.model.courses.MoodlePage;
+import app.web.components.UploadComponent;
 import app.web.layout.Navbar;
 import com.vaadin.component.VaadinClipboard;
 import com.vaadin.component.VaadinClipboardImpl;
@@ -20,10 +21,6 @@ import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
-import com.vaadin.flow.component.select.Select;
-import com.vaadin.flow.component.tabs.Tab;
-import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.radiobutton.RadioGroupVariant;
 import com.vaadin.flow.component.select.Select;
@@ -44,8 +41,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Route(value = "moodle", layout = Navbar.class)
@@ -203,6 +198,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             AtomicReference<DialogLink> dialoglink = new AtomicReference<>(new DialogLink(modifyPopup));
 
             Button link = new Button("Liens");
+            Button image = new Button("Images");
             Label label = new Label("Modify the section here");
             TextField title = new TextField("Title");
             title.setValue(section.getTitle());
@@ -220,7 +216,15 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
                 dialoglink.get().open();
                 modifyPopup.close();
             });
-            layout_horizontal.add(okButton, link);
+
+            image.addClickListener(event -> {
+                DialogImage d = new DialogImage();
+                d.open();
+                modifyPopup.close();
+            });
+
+
+            layout_horizontal.add(okButton, image, link);
             layout_horizontal.setPadding(true);
             layout_horizontal.setSpacing(true);
             layout.add(label, title, content, layout_horizontal);
@@ -483,6 +487,15 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             return radio;
         }
         /* *** Fonction auxiliaire pour alleger le code  *** */
+    }
+
+
+    public class DialogImage extends Dialog {
+
+        DialogImage() {
+            add(new UploadComponent("500", "500", 1, 1, "", "jpg", "JPG"));
+
+        }
 
     }
 }
