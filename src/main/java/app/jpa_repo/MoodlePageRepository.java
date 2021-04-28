@@ -7,6 +7,6 @@ import java.util.ArrayList;
 
 public interface MoodlePageRepository extends JpaRepository<MoodlePage, Long> {
 
-    ArrayList<MoodlePage> findAllSectionsByCourseId(long id);
+    ArrayList<MoodlePage> findAllByCourseId(long id);
 
 }

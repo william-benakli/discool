@@ -341,6 +341,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         }
         Optional<Course> c = courseRepository.findById(textChannel.getCourseId());
         setCourse(c.orElse(null));
+
         createSidebar(textChannel.getCourseId());
         createMembersBar(textChannel.getCourseId());
         createLayout(chatBar);

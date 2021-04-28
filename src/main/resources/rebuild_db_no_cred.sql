@@ -42,6 +42,7 @@ CREATE TABLE IF NOT EXISTS moodle_pages (
     courseid BIGINT UNSIGNED NOT NULL,
     title VARCHAR(255) NOT NULL,
     content TEXT NOT NULL,
+    homepage BIT NOT NULL,
 
     CONSTRAINT fk_courseid_course
         FOREIGN KEY(courseid) REFERENCES courses(id),
@@ -184,18 +185,18 @@ INSERT INTO channels VALUES
     (NULL, 3, "chat course 3");
 
 INSERT INTO moodle_pages VALUES
-    (NULL, 1, "course 1 page 1", "course 1 **page** 1 content"),
-    (NULL, 1, "course 1 page 2", "course 1 ~~page 2~~ content"),
-    (NULL, 1, "course 1 page 3", "link : [link to google.fr](http://google.fr)"),
-    (NULL, 1, "course 1 page 4", "course 1 page 4 content"),
-    (NULL, 2, "course 2 page 1", "course 2 page 1 content"),
-    (NULL, 2, "course 2 page 2", "course 2 page 2 content"),
-    (NULL, 2, "course 2 page 3", "course 2 page 3 content"),
-    (NULL, 2, "course 2 page 4", "course 2 page 4 content"),
-    (NULL, 3, "course 3 page 1", "course 3 page 1 content"),
-    (NULL, 3, "course 3 page 2", "course 3 page 2 content"),
-    (NULL, 3, "course 3 page 3", "course 3 page 3 content"),
-    (NULL, 3, "course 3 page 4", "course 3 page 4 content");
+    (NULL, 1, "course 1 page 1", "course 1 **page** 1 content", 1),
+    (NULL, 1, "course 1 page 2", "course 1 ~~page 2~~ content", 0),
+    (NULL, 1, "course 1 page 3", "link : [link to google.fr](http://google.fr)", 0),
+    (NULL, 1, "course 1 page 4", "course 1 page 4 content", 0),
+    (NULL, 2, "course 2 page 1", "course 2 page 1 content", 1),
+    (NULL, 2, "course 2 page 2", "course 2 page 2 content", 0),
+    (NULL, 2, "course 2 page 3", "course 2 page 3 content", 0),
+    (NULL, 2, "course 2 page 4", "course 2 page 4 content", 0),
+    (NULL, 3, "course 3 page 1", "course 3 page 1 content", 1),
+    (NULL, 3, "course 3 page 2", "course 3 page 2 content", 0),
+    (NULL, 3, "course 3 page 3", "course 3 page 3 content", 0),
+    (NULL, 3, "course 3 page 4", "course 3 page 4 content", 0);
 
 INSERT INTO groups VALUES
     (NULL, 1, "group dans le course 1", "", ""),

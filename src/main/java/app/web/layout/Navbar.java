@@ -2,8 +2,10 @@ package app.web.layout;
 
 import app.controller.security.SecurityUtils;
 import app.jpa_repo.CourseRepository;
+import app.jpa_repo.MoodlePageRepository;
 import app.jpa_repo.PersonRepository;
 import app.model.courses.Course;
+import app.model.courses.MoodlePage;
 import app.model.users.Person;
 import app.web.components.ComponentButton;
 import app.web.components.UploadComponent;
@@ -52,13 +54,17 @@ public class Navbar extends AppLayout {
 
     private final CourseRepository courseRepository;
     private final PersonRepository personRepository;
+    private final MoodlePageRepository moodlePageRepository;
     private Person currentUser;
     private HorizontalLayout courseNavigationDock;
     private HorizontalLayout rightMenuLayout;
 
-    public Navbar(@Autowired CourseRepository courseRepository, @Autowired PersonRepository personRepository) {
+    public Navbar(@Autowired CourseRepository courseRepository,
+                  @Autowired PersonRepository personRepository,
+                  @Autowired MoodlePageRepository moodlePageRepository) {
         this.personRepository=personRepository;
         this.courseRepository = courseRepository;
+        this.moodlePageRepository = moodlePageRepository;
         createLeftSubMenu();
         createCourseNavigationMenu();
         createRightSubMenu();
@@ -141,7 +147,8 @@ public class Navbar extends AppLayout {
                 ), Key.NAVIGATE_NEXT);
         button.getStyle()
                 .set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml());
-        RouterLink routerLink = new RouterLink("", MoodleView.class, c.getId());
+        long pageId = findHomePageId(c.getId());
+        RouterLink routerLink = new RouterLink("", MoodleView.class, pageId);
         linkRouteurImage(courseNavigationDock, button, routerLink);
         //TODO: edit with the correct redirect values #42
         if (splitURI.length>=4 && splitURI[3].equals("moodle") && cleanURI.equals(c.getId()+"")){
@@ -150,6 +157,16 @@ public class Navbar extends AppLayout {
                     .set("padding","0 10px")
                     .set("background-color", ViewWithSidebars.ColorHTML.GREY.getColorHtml());
         }
+    }
+
+    private long findHomePageId(long courseId) {
+        ArrayList<MoodlePage> pages = moodlePageRepository.findAllByCourseId(courseId);
+        for (MoodlePage moodlePage : pages) {
+            if (moodlePage.isHomePage()) {
+                return moodlePage.getId();
+            }
+        }
+        return 0; // no homepage for this course, should throw an error
     }
 
     /**

@@ -66,10 +66,7 @@ public class StudentAssignmentView extends ViewWithSidebars implements HasDynami
         }
         Optional<Course> c = courseRepository.findById(assignment.getCourseId());
         setCourse(c.orElse(null));
-        if (getCourse() == null) {
-            throw new Exception("There is no course with this ID.");
-            // TODO : take care of the exception (issue 28)
-        }
+
         currentUser = SecurityUtils.getCurrentUser(personRepository);
         studentAssignmentUpload = getAssignmentController()
                 .findStudentAssignmentSubmission(assignment.getId(), currentUser.getId());

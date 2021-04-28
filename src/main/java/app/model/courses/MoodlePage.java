@@ -41,4 +41,10 @@ public class MoodlePage {
             columnDefinition = "TEXT"
     )
     private String content;
+
+    @Column(
+            name = "homepage",
+            nullable = false
+    )
+    private boolean homePage;
 }

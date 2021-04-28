@@ -79,10 +79,7 @@ public class TeacherAssignmentView extends ViewWithSidebars implements HasDynami
         }
         Optional<Course> c = courseRepository.findById(assignment.getCourseId());
         setCourse(c.orElse(null));
-        if (getCourse() == null) {
-            throw new Exception("There is no course with this ID.");
-            // TODO : take care of the exception (issue 28)
-        }
+
         createSidebar(getCourse().getId());
         createMembersBar(getCourse().getId());
         createAdminPanelBar();
