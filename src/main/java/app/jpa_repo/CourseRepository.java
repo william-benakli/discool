@@ -11,11 +11,4 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 
 public interface CourseRepository extends JpaRepository<Course, Long> {
-    ArrayList<Course> findAll();
-
-    @Modifying
-    @Transactional
-    @Query(value = "INSERT INTO courses (teacherid , name, pathicon) VALUES (:teacherid ,:name , :pathicon)", nativeQuery = true)
-    void createServer(@Param(value = "teacherid") Long teacherid, @Param(value = "name") String name, @Param(value = "pathicon") String pathicon);
-
 }

@@ -7,6 +7,7 @@ import app.jpa_repo.PersonRepository;
 import app.model.chat.TextChannel;
 import app.model.courses.Assignment;
 import app.model.courses.Course;
+import app.model.courses.MoodlePage;
 import app.model.users.Person;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
@@ -192,18 +193,30 @@ public abstract class ViewWithSidebars extends VerticalLayout {
         sideBar.add(button);
     }
 
-    // TODO : allow the teacher to have several Moodle pages #96
-    // this will require changing the model, currently the database only supports 1 page per course.
     private void addMoodleLinksToSidebar(long courseId) {
-        RouterLink linkHome = new RouterLink("Page d'accueil", MoodleView.class, courseId);
-        linkHome.getStyle()
+        long homePageId = getController().findHomePageId(courseId);
+        RouterLink linkHome = new RouterLink("Page d'accueil", MoodleView.class, homePageId);
+        styleMoodleLink(linkHome);
+        sideBar.add(linkHome);
+        
+        ArrayList<MoodlePage> moodlePages = getController().getAllMoodlePagesForCourse(courseId);
+        moodlePages.forEach(page -> {
+            if (page.getId() != homePageId) {
+                RouterLink link = new RouterLink(page.getTitle(), MoodleView.class, page.getId());
+                styleMoodleLink(link);
+                sideBar.add(link);
+            }
+        });
+    }
+
+    private void styleMoodleLink(RouterLink link) {
+        link.getStyle()
                 .set("border-bottom","1px solid rgba(112, 112, 122, .75)")
                 .set("color",ColorHTML.TEXTGREY.getColorHtml())
                 .set("padding-left","25px")
                 .set("margin","20px 10px 10px -8px")
                 .set("font-weight","700")
                 .set("pointer-event","none");
-        sideBar.add(linkHome);
     }
 
     /**
@@ -395,8 +408,6 @@ public abstract class ViewWithSidebars extends VerticalLayout {
             AddAssignmentForm assignmentForm = new AddAssignmentForm();
             assignmentLayout.add(assignmentForm);
         }
-
-
 
         private void createMoodlePage() {
             TextField title = new TextField();

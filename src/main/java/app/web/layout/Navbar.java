@@ -1,9 +1,8 @@
 package app.web.layout;
 
+import app.controller.Controller;
 import app.controller.security.SecurityUtils;
-import app.jpa_repo.CourseRepository;
-import app.jpa_repo.MoodlePageRepository;
-import app.jpa_repo.PersonRepository;
+import app.jpa_repo.*;
 import app.model.courses.Course;
 import app.model.courses.MoodlePage;
 import app.model.users.Person;
@@ -44,6 +43,7 @@ import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Push(transport = Transport.LONG_POLLING)
@@ -52,19 +52,24 @@ import java.util.Map;
 public class Navbar extends AppLayout {
     //TODO: the background of the selected button changes color when clicked #42
 
-    private final CourseRepository courseRepository;
     private final PersonRepository personRepository;
     private final MoodlePageRepository moodlePageRepository;
+    private final Controller controller;
     private Person currentUser;
     private HorizontalLayout courseNavigationDock;
     private HorizontalLayout rightMenuLayout;
 
     public Navbar(@Autowired CourseRepository courseRepository,
+                  @Autowired TextChannelRepository textChannelRepository,
                   @Autowired PersonRepository personRepository,
-                  @Autowired MoodlePageRepository moodlePageRepository) {
-        this.personRepository=personRepository;
-        this.courseRepository = courseRepository;
+                  @Autowired MoodlePageRepository moodlePageRepository,
+                  @Autowired PublicChatMessageRepository publicChatMessageRepository,
+                  @Autowired GroupRepository groupRepository,
+                  @Autowired GroupMembersRepository groupMembersRepository) {
+        this.personRepository = personRepository;
         this.moodlePageRepository = moodlePageRepository;
+        this.controller = new Controller(personRepository, textChannelRepository, publicChatMessageRepository, courseRepository,
+                                         moodlePageRepository, groupRepository, groupMembersRepository);
         createLeftSubMenu();
         createCourseNavigationMenu();
         createRightSubMenu();
@@ -106,7 +111,7 @@ public class Navbar extends AppLayout {
         String[] splitURI = tmp.split("/");
 
         courseNavigationDock = createCustomHorizontalLayout();
-        ArrayList<Course> courses = courseRepository.findAll();
+        List<Course> courses = controller.findAllCourses();
         for (Course c : courses) {
             createCourseButton(c, splitURI, cleanURI);
         }
@@ -122,7 +127,7 @@ public class Navbar extends AppLayout {
         Dialog dialog = new Dialog();
         TextField field = new TextField();
         Button valider = new Button("Valider", buttonClickEvent1 -> {
-            courseRepository.createServer(currentUser.getId(), field.getValue(), "img/DDiscool.svg");
+            controller.createServer(currentUser.getId(), field.getValue(), "img/DDiscool.svg");
             dialog.close();
             UI.getCurrent().getPage().reload();
         });
@@ -160,7 +165,7 @@ public class Navbar extends AppLayout {
     }
 
     private long findHomePageId(long courseId) {
-        ArrayList<MoodlePage> pages = moodlePageRepository.findAllByCourseId(courseId);
+        ArrayList<MoodlePage> pages = controller.getAllMoodlePagesForCourse(courseId);
         for (MoodlePage moodlePage : pages) {
             if (moodlePage.isHomePage()) {
                 return moodlePage.getId();

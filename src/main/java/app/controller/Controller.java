@@ -135,7 +135,7 @@ public class Controller {
     }
 
     public void createMoodlePage(String title, long courseId) {
-        MoodlePage toSave = MoodlePage.builder().courseId(courseId).title(title).content("").build();
+        MoodlePage toSave = MoodlePage.builder().courseId(courseId).title(title).content("").homePage(false).build();
         moodlePageRepository.save(toSave);
     }
 
@@ -146,6 +146,49 @@ public class Controller {
         if (formatter.format(date).equals(formatter.format(new Date(System.currentTimeMillis()))))
             return "Aujourd'hui à " + heure.format(date);
         return formatter.format(date) + " à " + heure.format(date);
+    }
+
+    /**
+     * Returns the id of the moodle home page
+     * @param courseId  the id of the course
+     * @return the id of the homepage
+     */
+    public long findHomePageId(long courseId) {
+        ArrayList<MoodlePage> pages = moodlePageRepository.findAllByCourseId(courseId);
+        for (MoodlePage moodlePage : pages) {
+            if (moodlePage.isHomePage()) {
+                return moodlePage.getId();
+            }
+        }
+        return 0; // no homepage for this course, should throw an error
+    }
+
+    public ArrayList<MoodlePage> getAllMoodlePagesForCourse(long courseId) {
+        return moodlePageRepository.findAllByCourseId(courseId);
+    }
+
+    /**
+     * Creates a server and the associated homepage
+     * @param teacherId The id of the teacher
+     * @param title     The name of the course
+     * @param iconPath  The path to the course's picture
+     */
+    public void createServer(long teacherId, String title, String iconPath) {
+        Course toSave = Course.builder()
+                .teacherId(teacherId)
+                .name(title)
+                .pathIcon(iconPath).build();
+        courseRepository.save(toSave);
+        MoodlePage moodlePage = MoodlePage.builder()
+                .homePage(true)
+                .content("")
+                .title("Homepage")
+                .courseId(toSave.getId()).build();
+        moodlePageRepository.save(moodlePage);
+    }
+
+    public List<Course> findAllCourses() {
+        return courseRepository.findAll();
     }
 
     public List<MoodlePage> getAllMoodlePageForCourse(long courseID) {
