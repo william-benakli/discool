@@ -128,6 +128,14 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
         return getCourse().getName();
     }
 
+    public enum DialogType {
+        LINKS, IMAGES;
+
+        public static DialogType[] getDilogType() {
+            return DialogType.class.getEnumConstants();
+        }
+    }
+
     /**
      * The Layout that contains for each section :
      * - the title
@@ -196,6 +204,8 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             HorizontalLayout layout_horizontal = new HorizontalLayout();
 
             AtomicReference<DialogLink> dialoglink = new AtomicReference<>(new DialogLink(modifyPopup));
+            AtomicReference<DialogImage> dialogimage = new AtomicReference<>(new DialogImage(modifyPopup));
+
 
             Button link = new Button("Liens");
             Button image = new Button("Images");
@@ -218,8 +228,8 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             });
 
             image.addClickListener(event -> {
-                DialogImage d = new DialogImage();
-                d.open();
+                dialogimage.set(new DialogImage(modifyPopup));
+                dialogimage.get().open();
                 modifyPopup.close();
             });
 
@@ -246,10 +256,12 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
         private Div div_externe;
         private Div div_interne;
 
+
         DialogLink(Dialog parent) {
             this.parent = parent;
             createTab();
         }
+
 
         /*
             Cette fonction crée les Tabs
@@ -492,7 +504,11 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
 
     public class DialogImage extends Dialog {
 
-        DialogImage() {
+        Dialog parent;
+
+        DialogImage(Dialog parent) {
+            this.parent = parent;
+
             add(new UploadComponent("500", "500", 1, 1, "", "jpg", "JPG"));
 
         }
