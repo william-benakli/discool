@@ -192,6 +192,6 @@ public class Controller {
     }
 
     public List<MoodlePage> getAllMoodlePageForCourse(long courseID) {
-        return moodlePageRepository.findAllSectionsByCourseId(courseID);
+        return moodlePageRepository.findAllByCourseId(courseID);
     }
 }

@@ -30,6 +30,9 @@ public class Markdown {
      * @return the HTML code
      */
     private static String convertStringFromMarkdown(String markdown) {
+        if (markdown.equals("")) {
+            return markdown;
+        }
         // init the parser and renderer
         MutableDataSet options = new MutableDataSet();
         Parser parser = Parser.builder(options).build();

@@ -196,27 +196,29 @@ public abstract class ViewWithSidebars extends VerticalLayout {
     private void addMoodleLinksToSidebar(long courseId) {
         long homePageId = getController().findHomePageId(courseId);
         RouterLink linkHome = new RouterLink("Page d'accueil", MoodleView.class, homePageId);
-        styleMoodleLink(linkHome);
+        styleMoodleLink(linkHome, true);
         sideBar.add(linkHome);
-        
+
         ArrayList<MoodlePage> moodlePages = getController().getAllMoodlePagesForCourse(courseId);
         moodlePages.forEach(page -> {
             if (page.getId() != homePageId) {
                 RouterLink link = new RouterLink(page.getTitle(), MoodleView.class, page.getId());
-                styleMoodleLink(link);
+                styleMoodleLink(link, false);
                 sideBar.add(link);
             }
         });
     }
 
-    private void styleMoodleLink(RouterLink link) {
+    private void styleMoodleLink(RouterLink link, boolean isHomePage) {
         link.getStyle()
-                .set("border-bottom","1px solid rgba(112, 112, 122, .75)")
                 .set("color",ColorHTML.TEXTGREY.getColorHtml())
                 .set("padding-left","25px")
                 .set("margin","20px 10px 10px -8px")
                 .set("font-weight","700")
                 .set("pointer-event","none");
+        if (isHomePage) {
+            link.getStyle().set("border-bottom","1px solid rgba(112, 112, 122, .75)");
+        }
     }
 
     /**
