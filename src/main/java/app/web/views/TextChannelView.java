@@ -383,7 +383,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
             optionsUser.setPadding(false);
             onHover();
             createResponseMessage(publicMessage);
-            createPictureSetting(publicMessage.getId());
+            createPictureSetting(publicMessage.getSender());
             createDeleteButton(publicMessage);
             createModifyButton(publicMessage);
             createResponseButton(publicMessage);
