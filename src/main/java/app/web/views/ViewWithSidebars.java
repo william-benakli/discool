@@ -290,10 +290,9 @@ public abstract class ViewWithSidebars extends VerticalLayout {
                 .set("pointer-event","none")
                 .set("padding-bottom","2.5px")
                 .set("background","none")
-                .set("margin-left","-60px");
+                .set("margin-left","30px");
         button.getStyle()
                 .set("font-weight","700")
-                .set("width","100%")
                 .set("background","none")
                 .set("cursor","pointer");
     }
