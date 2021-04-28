@@ -159,7 +159,6 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                         if (obj instanceof MessageLayout
                                 && ((MessageLayout) obj).getPublicChatMessage().getId() == message.getId()) {
                             // we found the layout to update
-                            Notification.show("TEST");
                             MessageLayout toChange = (MessageLayout) obj;
                             toChange.publicChatMessage = publicChatMessageRepository.findById(message.getId());
                             toChange.messageParagraph.removeAll();
