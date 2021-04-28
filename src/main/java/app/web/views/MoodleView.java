@@ -10,7 +10,6 @@ import app.model.chat.TextChannel;
 import app.model.courses.Assignment;
 import app.model.courses.Course;
 import app.model.courses.MoodlePage;
-import app.web.components.UploadComponent;
 import app.web.layout.Navbar;
 import com.vaadin.component.VaadinClipboard;
 import com.vaadin.component.VaadinClipboardImpl;
@@ -129,7 +128,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
     }
 
     public enum DialogType {
-        LINKS, IMAGES;
+        LINK, IMAGE;
 
         public static DialogType[] getDilogType() {
             return DialogType.class.getEnumConstants();
@@ -203,8 +202,8 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             VerticalLayout layout = new VerticalLayout();
             HorizontalLayout layout_horizontal = new HorizontalLayout();
 
-            AtomicReference<DialogLink> dialoglink = new AtomicReference<>(new DialogLink(modifyPopup));
-            AtomicReference<DialogImage> dialogimage = new AtomicReference<>(new DialogImage(modifyPopup));
+            AtomicReference<DialogLink> dialoglink = new AtomicReference<>(new DialogLink(modifyPopup, DialogType.LINK));
+            AtomicReference<DialogLink> dialogimage = new AtomicReference<>(new DialogLink(modifyPopup, DialogType.IMAGE));
 
 
             Button link = new Button("Liens");
@@ -222,13 +221,13 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             });
 
             link.addClickListener(event -> {
-                dialoglink.set(new DialogLink(modifyPopup));
+                dialoglink.set(new DialogLink(modifyPopup, DialogType.LINK));
                 dialoglink.get().open();
                 modifyPopup.close();
             });
 
             image.addClickListener(event -> {
-                dialogimage.set(new DialogImage(modifyPopup));
+                dialogimage.set(new DialogLink(modifyPopup, DialogType.IMAGE));
                 dialogimage.get().open();
                 modifyPopup.close();
             });
@@ -257,22 +256,26 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
         private Div div_interne;
 
 
-        DialogLink(Dialog parent) {
+        DialogLink(Dialog parent, DialogType type) {
             this.parent = parent;
-            createTab();
+            if (type == DialogType.LINK) {
+                createTab(interneLinkDiv(), externeLinkDiv(), "Lien");
+            } else if (type == DialogType.IMAGE) {
+                createTab(interneLinkDiv(), externeLinkDiv(), "Image");
+            } else {
+                Notification.show("Erreur: Impossible de charger le dialog demandé.");
+            }
         }
 
-
+        //            add(new UploadComponent("500", "500", 1, 1, "", "jpg", "JPG"));
         /*
             Cette fonction crée les Tabs
          */
-        public void createTab() {
-            Tab externe = new Tab("Lien externe");
-            div_externe = externeLinkDiv();
+        public void createTab(Div div_interne, Div div_externe, String name) {
+            Tab externe = new Tab(name + " externe");
             tabsToPages.put(externe, div_externe);
 
-            Tab interne = new Tab("Lien interne");
-            div_interne = interneLinkDiv();
+            Tab interne = new Tab(name + " interne");
             tabsToPages.put(interne, div_interne);
             div_interne.setVisible(false);
 
@@ -448,6 +451,52 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             return interne;
         }
 
+
+        /*
+            Cette fonction créer la partie du tab qui s'occupe des images externes
+         */
+        public Div externeImageDiv() {
+            Div d = new Div();
+
+            HorizontalLayout insertLayout = new HorizontalLayout();
+            HorizontalLayout buttonLayout = new HorizontalLayout();
+            VerticalLayout mainLayout = new VerticalLayout();
+
+            TextField lien = createTextField("Votre lien: ", "Entre votre lien ici....");
+            TextArea text = createTextArea("Texte généré:", "");
+
+            Button valide = new Button("Generer");
+            Button copie = new Button("Copier");
+            Button close = new Button("Fermer");
+            valide.addClickListener(event -> {
+                if (lien.isEmpty()) {
+                    text.setValue("Erreur champs invalide");
+                } else if (!isLinks(lien.getValue())) {
+                    text.setValue("Erreur lien non valide");
+                } else if (!isImages(lien.getValue())) {
+                    text.setValue("Erreur ce lien n'est pas une image");
+                } else {
+                    text.setValue("![image](" + lien.getValue() + ")");
+                }
+            });
+
+            close.addClickListener(event -> {
+                this.close();
+                this.parent.open();
+            });
+
+            copie.addClickListener(event -> {
+                copyInClipBoard(text.getValue());
+            });
+            buttonLayout.add(valide, copie, close);
+            insertLayout.add(lien);
+            mainLayout.setDefaultHorizontalComponentAlignment(Alignment.CENTER);
+            mainLayout.add(insertLayout, text, buttonLayout);
+            d.add(mainLayout);
+            return d;
+        }
+
+
         /*
            Fonction de copy (dependance Maven)
          */
@@ -472,6 +521,14 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             return false;
         }
 
+        /*
+             Cette fonction verifie qu'il s'agit d'un lien et non d'une entree interdite
+        */
+        public boolean isImages(String s) {
+            if ((s.toLowerCase().endsWith("jpg") || s.toLowerCase().endsWith("png") || s.toLowerCase().endsWith("jpeg")) && s.contains("."))
+                return true;
+            return false;
+        }
 
         /* *** Fonction auxiliaire pour alleger le code  *** */
         public TextField createTextField(String label, String placeHolder) {
@@ -502,16 +559,4 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
     }
 
 
-    public class DialogImage extends Dialog {
-
-        Dialog parent;
-
-        DialogImage(Dialog parent) {
-            this.parent = parent;
-
-            add(new UploadComponent("500", "500", 1, 1, "", "jpg", "JPG"));
-
-        }
-
-    }
 }
