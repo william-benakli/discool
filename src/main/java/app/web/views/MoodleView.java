@@ -409,7 +409,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
                             }
                             break;
                         case "moodle":
-                            if (select_assignment.getValue() == null) {
+                            if (select_moodle.getValue() == null) {
                                 text.setValue("Erreur aucune séléction");
                             } else {
                                 targetId = select_moodle.getValue().getId();
