@@ -82,6 +82,7 @@ import java.nio.charset.StandardCharsets;
             return false;
         }
 
+
         private HorizontalLayout createButtonsLayout() {
             save.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
             delete.addThemeVariants(ButtonVariant.LUMO_ERROR);
