@@ -213,6 +213,10 @@ public class StudentAssignmentView extends ViewWithSidebars implements HasDynami
             return res;
         }
 
+        /**
+         * Rate the user and place him in the group
+         * @return a hashmap that contains the current user's grade, average, median, highest and lowest grade in the group for an assignment
+         */
         private HashMap<String, Integer> showGrade(){
             List<Integer> listAllGrade = new ArrayList<>();
             for (StudentAssignmentUpload user: studentAssignmentsUploadsRepository.findAllByAssignmentId(assignment.getId())) {listAllGrade.add(user.getGrade());}
