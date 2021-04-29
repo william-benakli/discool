@@ -172,7 +172,7 @@ public class StudentAssignmentView extends ViewWithSidebars implements HasDynami
             if(gradeAllUser.get("user")!=null) {
                 gradeAllUser.forEach((key, value) -> {
                     divLeft.add(constTab(new Div(), key, ColorHTML.GREYTAB, true));
-                    constTab(new Div(), Integer.toString(value), ColorHTML.GREYTAB, false);
+                    divRight.add(constTab(new Div(), Integer.toString(value), ColorHTML.GREYTAB, false));
                 });
             }
 
