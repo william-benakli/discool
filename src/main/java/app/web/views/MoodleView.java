@@ -502,30 +502,37 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
         public Div interneImageDiv() {
             Div interne = new Div();
 
-            String newDirName = "uploads/moodle/images/" + String.valueOf(getCourse().getId()) + "_" +
+            String newDirName = "src/main/webapp/moodle/images/" + String.valueOf(getCourse().getId()) + "_" +
                     String.valueOf(SecurityUtils.getCurrentUser(personRepository).getId());
-            UploadComponent uploadComponent = new UploadComponent("100%", "100%", 1, 30000000, newDirName, ".jpg", ".jpeg", ".png");
 
+            UploadComponent uploadComponent = new UploadComponent("100%", "100%", 1, 30000000, newDirName, ".jpg", ".jpeg", ".png");
+            String nameChiffre = getRandomId() + "_" + String.valueOf(getCourse().getId()) + "_" + String.valueOf(SecurityUtils.getCurrentUser(personRepository).getId());
             HorizontalLayout insertLayout = new HorizontalLayout();
             HorizontalLayout buttonLayout = new HorizontalLayout();
             VerticalLayout mainLayout = new VerticalLayout();
 
             TextArea text = createTextArea("Texte généré:", "");
-            Paragraph warning = new Paragraph("Les fichiers autorisées sont .png, .jpg, .jpeg \n Les limites d'upload sont de 5Mo");
+            Paragraph warning = new Paragraph("Les fichiers autorisés sont .png, .jpg, .jpeg \n Les limites d'upload sont de 5Mo");
 
             Button copie = new Button("Copier");
             Button close = new Button("Fermer");
 
             uploadComponent.addSucceededListener(event -> {
+                String newPath = "";
                 com.vaadin.flow.component.notification.Notification.show("Votre fichier est bien téléchargé");
-                uploadComponent.setFileName(getRandomId() + "_" + String.valueOf(getCourse().getId()) + "_" + String.valueOf(SecurityUtils.getCurrentUser(personRepository).getId()));
-                String url_file = uploadComponent.getFileName();
-                if (ImageExist(url_file)) {
-                    text.setValue("![image](" + url_file + ")");
+                try {
+                    newPath = renameFile(uploadComponent.getFileName(), newDirName, nameChiffre);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                if (ImageExist(newPath)) {
+                    text.setValue("![image](" + newPath + ")");
                 } else {
                     text.setValue("Une erreur est survenue, le fichier est inexistant");
                 }
             });
+
 
             uploadComponent.addFileRejectedListener(event -> {
                 com.vaadin.flow.component.notification.Notification.show("Enrengistrement de l'image impossible");
@@ -608,7 +615,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
         }
 
         public String getExtensionImage(String name) {
-            String[] tab_name = name.toLowerCase().split(".");
+            String[] tab_name = name.toLowerCase().split("\\.");
             if (tab_name.length > 2) return "";
             if (tab_name[1].contains("jpg") || tab_name[1].contains("jpeg") || tab_name[1].contains("png")) {
                 return tab_name[1];
@@ -619,6 +626,18 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
         public boolean ImageExist(String url) {
             File f = new File(url);
             return f.exists();
+        }
+
+        private String renameFile(String oldName, String path, String linkName) throws Exception {
+            String extension = getExtensionImage(oldName);
+            String newPath = path + "/" + linkName + "." + extension;
+            File old = new File(oldName);
+            File newFile = new File(newPath); //extension.toLowerCase());
+            System.out.println(newFile.getName());
+            if (!old.renameTo(newFile)) {
+                throw new Exception("File can't be renamed");
+            }
+            return newPath;
         }
 
         public long getRandomId() {
