@@ -23,7 +23,7 @@ import com.vaadin.flow.router.Route;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Optional;
+import java.util.*;
 
 @Route(value = "assignment", layout = Navbar.class)
 public class StudentAssignmentView extends ViewWithSidebars implements HasDynamicTitle, HasUrlParameter<Long> {
@@ -36,6 +36,7 @@ public class StudentAssignmentView extends ViewWithSidebars implements HasDynami
     private Person currentUser;
     private StudentAssignmentUpload studentAssignmentUpload;
     private final FlexLayout assignmentBar = new FlexLayout();
+    private StudentAssignmentsUploadsRepository studentAssignmentsUploadsRepository;
 
     public StudentAssignmentView(@Autowired CourseRepository courseRepository,
                                  @Autowired TextChannelRepository textChannelRepository,
@@ -87,15 +88,17 @@ public class StudentAssignmentView extends ViewWithSidebars implements HasDynami
         H1 title = new H1(assignment.getName());
         title.getStyle().set("color",ColorHTML.PURPLE.getColorHtml());
         assignmentBar.add(title);
-        StudentAssignmentLayout layout = new StudentAssignmentLayout(assignment);
+        StudentAssignmentLayout layout = new StudentAssignmentLayout(assignment, studentAssignmentsUploadsRepository);
         assignmentBar.add(layout);
     }
 
     private class StudentAssignmentLayout extends VerticalLayout {
         private final Assignment assignment;
+        private final StudentAssignmentsUploadsRepository studentAssignmentsUploadsRepository;
 
-        public StudentAssignmentLayout(Assignment assignment) {
+        public StudentAssignmentLayout(Assignment assignment, StudentAssignmentsUploadsRepository studentAssignmentsUploadsRepository) {
             this.assignment = assignment;
+            this.studentAssignmentsUploadsRepository = studentAssignmentsUploadsRepository;
             writeInfo();
 
             if (studentAssignmentUpload == null) {
@@ -164,6 +167,15 @@ public class StudentAssignmentView extends ViewWithSidebars implements HasDynami
                     constTab(new Div(), Long.toString(assignment.getMaxGrade()), ColorHTML.GREYTAB, false),
                     constTab(statusR, writeGradeInfo(), changeColor(), false));
 
+            HashMap<String, Integer> gradeAllUser = showGrade();
+
+            if(gradeAllUser.get("user")!=null) {
+                gradeAllUser.forEach((key, value) -> {
+                    divLeft.add(constTab(new Div(), key, ColorHTML.GREYTAB, true));
+                    constTab(new Div(), Integer.toString(value), ColorHTML.GREYTAB, false);
+                });
+            }
+
             div.add(divLeft, divRight);
             add(div);
         }
@@ -198,6 +210,20 @@ public class StudentAssignmentView extends ViewWithSidebars implements HasDynami
             } else {
                 res+="You have not submitted an answer yet !";
             }
+            return res;
+        }
+
+        private HashMap<String, Integer> showGrade(){
+            List<Integer> listAllGrade = new ArrayList<>();
+            for (StudentAssignmentUpload user: studentAssignmentsUploadsRepository.findAllByAssignmentId(assignment.getId())) {listAllGrade.add(user.getGrade());}
+            Collections.sort(listAllGrade);
+
+            HashMap<String, Integer> res = new HashMap<>();
+            res.put("median",listAllGrade.get((listAllGrade.size()+1)/2));
+            res.put("lowest",listAllGrade.get(0));
+            res.put("highest",listAllGrade.get(listAllGrade.size()-1));
+            res.put("average",listAllGrade.stream().mapToInt(Integer::intValue).sum()/listAllGrade.size());
+            res.put("user",studentAssignmentsUploadsRepository.findByAssignmentIdAndStudentId(assignment.getId(), currentUser.getId()).getGrade());
             return res;
         }
 
