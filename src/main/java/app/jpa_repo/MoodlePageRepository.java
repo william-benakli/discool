@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.ArrayList;
 
 public interface MoodlePageRepository extends JpaRepository<MoodlePage, Long> {
-
     ArrayList<MoodlePage> findAllByCourseId(long id);
+    MoodlePage findFirstByCourseIdOrderByIdDesc(long courseId);
 
 }

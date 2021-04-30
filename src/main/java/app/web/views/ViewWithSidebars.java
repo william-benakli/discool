@@ -40,6 +40,7 @@ import lombok.Setter;
 import lombok.SneakyThrows;
 import org.vaadin.firitin.fields.LocalDateTimeField;
 
+import java.math.BigInteger;
 import java.net.URI;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -401,7 +402,7 @@ public abstract class ViewWithSidebars extends VerticalLayout {
         private void closeUpdate(String text){
             Notification notification = new Notification(text, 9000);
             notification.open();
-            UI.getCurrent().getPage().reload();
+            this.close();
         }
 
         private void createChannelPage() {
@@ -414,13 +415,14 @@ public abstract class ViewWithSidebars extends VerticalLayout {
             valider.addClickListener(event -> {
                 controller.createChannel(name.getValue(), getCourse().getId());
                 closeUpdate("text chat created");
+                UI.getCurrent().navigate("channels/"+getController().getLastTextChannelRepository(course.getId()).getId());
             });
 
             chanelLayout.add(name, valider);
         }
 
         private void createAssignmentPage() {
-            AddAssignmentForm assignmentForm = new AddAssignmentForm();
+            AddAssignmentForm assignmentForm = new AddAssignmentForm(this);
             assignmentLayout.add(assignmentForm);
         }
 
@@ -433,6 +435,7 @@ public abstract class ViewWithSidebars extends VerticalLayout {
             valider.addClickListener(event -> {
                 controller.createMoodlePage(title.getValue(), getCourse().getId());
                 closeUpdate("moodle page created");
+                UI.getCurrent().navigate("moodle/"+getController().getLastMoodlePage(course.getId()).getId());
             });
 
             moodleLayout.add(title, valider);
@@ -449,18 +452,18 @@ public abstract class ViewWithSidebars extends VerticalLayout {
         DateTimePicker cutoffDate;
         Checkbox allowLate;
 
-        public AddAssignmentForm() {
-            createTextFields();
+        public AddAssignmentForm(CustomAddDialog customAddDialog) {
+            createTextFields(customAddDialog);
             createDatePickers();
         }
 
-        private void closeUpdate(String text){
+        private void closeUpdate(String text, CustomAddDialog customAddDialog){
             Notification notification = new Notification(text, 9000);
             notification.open();
-            UI.getCurrent().getPage().reload();
+            customAddDialog.close();
         }
 
-        private void createTextFields() {
+        private void createTextFields(CustomAddDialog customAddDialog) {
             title = new TextField();
             title.setLabel("Title");
             title.setRequired(true);
@@ -482,7 +485,7 @@ public abstract class ViewWithSidebars extends VerticalLayout {
                     .bind(AssignmentModel::getMaxGrade, AssignmentModel::setMaxGrade);
 
             VerticalLayout layout = new VerticalLayout();
-            layout.add(title, description, maxGrade, createButtons());
+            layout.add(title, description, maxGrade, createButtons(customAddDialog));
             this.add(layout);
         }
 
@@ -526,7 +529,7 @@ public abstract class ViewWithSidebars extends VerticalLayout {
             }
         }
 
-        private HorizontalLayout createButtons() {
+        private HorizontalLayout createButtons(CustomAddDialog customAddDialog) {
             Label infoLabel = new Label();
             Button save = new Button("Save");
             Button reset = new Button("Reset");
@@ -550,7 +553,8 @@ public abstract class ViewWithSidebars extends VerticalLayout {
                                                                allowLate.getValue(),
                                                                dueDate.getValue(), cutoffDate.getValue());
                     infoLabel.setText("Saved");
-                    closeUpdate("assignement created");
+                    closeUpdate("assignement created", customAddDialog);
+                    UI.getCurrent().navigate("assignment/"+getAssignmentController().getLastAssignement(course.getId()).getId());
                 } else {
                     BinderValidationStatus<AssignmentModel> validate = binder.validate();
                     String errorText = validate.getFieldValidationStatuses()

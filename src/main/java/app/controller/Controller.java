@@ -4,6 +4,7 @@ package app.controller;
 import app.jpa_repo.*;
 import app.model.chat.PublicChatMessage;
 import app.model.chat.TextChannel;
+import app.model.courses.Assignment;
 import app.model.courses.Course;
 import app.model.courses.MoodlePage;
 import app.model.users.Group;
@@ -56,6 +57,17 @@ public class Controller {
         publicChatMessageRepository.save(messageToSave);
         return messageToSave;
     }
+
+
+
+    public MoodlePage getLastMoodlePage(long courseId){
+        return moodlePageRepository.findFirstByCourseIdOrderByIdDesc(courseId);
+    }
+
+    public TextChannel getLastTextChannelRepository(long courseId){
+        return textChannelRepository.findFirstByCourseIdOrderByIdDesc(courseId);
+    }
+
 
     public void changeMessage(PublicChatMessage publicChatMessage, String messageText) {
         publicChatMessageRepository.updateMessageById(publicChatMessage.getId(), messageText);

@@ -60,6 +60,10 @@ public class AssignmentController {
         return assignmentRepository.findAllByCourseId(courseId);
     }
 
+    public Assignment getLastAssignement(long courseId){
+        return assignmentRepository.findFirstByCourseIdOrderByIdDesc(courseId);
+    }
+
     public ArrayList<StudentAssignmentUpload> getUploadsForAssignment(long assignmentId) {
         return studentAssignmentsUploadsRepository.findAllByAssignmentId(assignmentId);
     }
