@@ -107,6 +107,19 @@ public class Person {
         return role.toString();
     }
 
+    public Role setRoleAsString(String role){
+        if(role.equals("STUDENT") || role.equals("student") ) {
+            this.role = Role.STUDENT;
+        }
+        if(role.equals("TEACHER") || role.equals("teacher")) {
+            this.role = Role.TEACHER;
+        }
+        if(role.equals("ADMIN") || role.equals("admin")) {
+            this.role = Role.ADMIN;
+        }
+        return this.role ;
+    }
+
     //TODO: find a way to see if the user is logged in
     public boolean isConnected(){ return true; }
 

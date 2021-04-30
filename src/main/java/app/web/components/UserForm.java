@@ -4,6 +4,8 @@
 import app.jpa_repo.PersonRepository;
 import app.model.users.Person;
 import app.web.views.PanelAdminView;
+import com.helger.commons.csv.CSVParser;
+import com.helger.commons.csv.CSVReader;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.Key;
@@ -12,11 +14,16 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.upload.Upload;
+import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
@@ -26,7 +33,7 @@ import com.vaadin.flow.shared.Registration;
 import org.hibernate.event.spi.DeleteEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.io.ByteArrayInputStream;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 
     public class UserForm extends FormLayout {
@@ -70,6 +77,7 @@ import java.nio.charset.StandardCharsets;
                     createButtonsLayout());
         }
 
+
         public void setPerson(Person person){
             this.person = person;
             binder.readBean(person);
@@ -81,7 +89,6 @@ import java.nio.charset.StandardCharsets;
             }
             return false;
         }
-
 
         private HorizontalLayout createButtonsLayout() {
             save.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
@@ -95,15 +102,15 @@ import java.nio.charset.StandardCharsets;
                     notification = new Notification("pseudo is empty !",3000,Notification.Position.MIDDLE);
                     notification.open();
                 }
-                if(this.password.isEmpty()) {
+                else if(this.password.isEmpty()) {
                     notification = new Notification("password is empty !",3000,Notification.Position.MIDDLE);
                     notification.open();
                 }
-                if(this.email.isEmpty()) {
+                else if(this.email.isEmpty()) {
                     notification = new Notification("email is empty !",3000,Notification.Position.MIDDLE);
                     notification.open();
                 }
-                if(this.role.isEmpty()){
+                else if(this.role.isEmpty()){
                     notification = new Notification("you have to select a role !",3000,Notification.Position.MIDDLE);
                     notification.open();
                 }
