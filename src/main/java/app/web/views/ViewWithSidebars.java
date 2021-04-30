@@ -10,6 +10,7 @@ import app.model.courses.Course;
 import app.model.courses.MoodlePage;
 import app.model.users.Person;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.datetimepicker.DateTimePicker;
@@ -18,6 +19,7 @@ import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -32,6 +34,7 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinServletRequest;
+import com.vaadin.server.Page;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
@@ -392,6 +395,12 @@ public abstract class ViewWithSidebars extends VerticalLayout {
                     .set("flex-direction","column");
         }
 
+        private void closeUpdate(String text){
+            Notification notification = new Notification(text, 9000);
+            notification.open();
+            UI.getCurrent().getPage().reload();
+        }
+
         private void createChannelPage() {
             TextField name = new TextField();
             name.setLabel("Create a new text channel");
@@ -399,7 +408,10 @@ public abstract class ViewWithSidebars extends VerticalLayout {
             name.focus();
 
             Button valider = new Button("Valider");
-            valider.addClickListener(event -> controller.createChannel(name.getValue(), getCourse().getId()));
+            valider.addClickListener(event -> {
+                controller.createChannel(name.getValue(), getCourse().getId());
+                closeUpdate("text chat created");
+            });
 
             chanelLayout.add(name, valider);
         }
@@ -415,7 +427,10 @@ public abstract class ViewWithSidebars extends VerticalLayout {
             title.setLabel("Title");
 
             Button valider = new Button("Valider");
-            valider.addClickListener(event -> controller.createMoodlePage(title.getValue(), getCourse().getId()));
+            valider.addClickListener(event -> {
+                controller.createMoodlePage(title.getValue(), getCourse().getId());
+                closeUpdate("moodle page created");
+            });
 
             moodleLayout.add(title, valider);
         }
@@ -434,6 +449,12 @@ public abstract class ViewWithSidebars extends VerticalLayout {
         public AddAssignmentForm() {
             createTextFields();
             createDatePickers();
+        }
+
+        private void closeUpdate(String text){
+            Notification notification = new Notification(text, 9000);
+            notification.open();
+            UI.getCurrent().getPage().reload();
         }
 
         private void createTextFields() {
@@ -519,6 +540,7 @@ public abstract class ViewWithSidebars extends VerticalLayout {
                                                                allowLate.getValue(),
                                                                dueDate.getValue(), cutoffDate.getValue());
                     infoLabel.setText("Saved");
+                    closeUpdate("assignement created");
                 } else {
                     BinderValidationStatus<AssignmentModel> validate = binder.validate();
                     String errorText = validate.getFieldValidationStatuses()
