@@ -59,7 +59,15 @@ public interface PersonRepository extends JpaRepository<Person, Long> {
     @Query("select c from users c " +
             "where lower(c.firstName) like lower(concat('%', :searchTerm, '%')) " +
             "or lower(c.lastName) like lower(concat('%', :searchTerm, '%'))")
-    List<Person> search(@Param("searchTerm") String searchTerm);
+            List<Person> search(@Param("searchTerm") String searchTerm);
+
+    @Query("select c from users c " +
+            "where lower(c.username) like lower(concat('%', :searchTerm, '%')) ")
+    List<Person> searchByUserName(@Param("searchTerm") String searchTerm);
+
+    @Query("select c from users c " +
+            "where lower(c.email) like lower(concat('%', :searchTerm, '%')) ")
+    List<Person> searchByEmail(@Param("searchTerm") String searchTerm);
 
     Person findByUsername(String username);
 

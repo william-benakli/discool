@@ -11,6 +11,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
+import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.grid.editor.Editor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -36,7 +37,9 @@ public class PanelAdminView extends VerticalLayout {
     private final CourseRepository courseRepository;
     private UserForm form;
     TextField filterText = new TextField() ;
-    private Button addUser = new Button("add User");
+    TextField filterText2 = new TextField() ;
+    TextField filterText3 = new TextField() ;
+    private Button addUser = new Button("Add +");
     private final Tab usersTab = new Tab("Users");
     private final Tab coursesTab = new Tab("Courses");
     private final Tabs tabs = new Tabs(usersTab, coursesTab);
@@ -46,15 +49,30 @@ public class PanelAdminView extends VerticalLayout {
     public PanelAdminView(@Autowired PersonRepository personRepository, @Autowired CourseRepository courseRepository) {
         this.personRepository = personRepository;
         this.courseRepository = courseRepository;
+        Div div = new Div();
+        div.add(filterText,filterText2,filterText3,addUser);
+        div.getStyle().set("display","inline-block");
         addClassName("list-view");
         addUser.addClickListener(buttonClickEvent -> {
             addPerson();
         });
-        add(filterText,addUser);
+        add(div);
         createUserGrid();
         createCoursesGrid();
         createTabs();
-        configureFilter();
+        if(filterText.getValue()==null || filterText.getValue().isEmpty()){
+            configureFilter2();
+            configureFilter();
+            configureFilter3();
+        }
+        else if(filterText2.getValue()==null || filterText2.getValue().isEmpty()) {
+            configureFilter3();
+        }
+        else{
+            configureFilter();
+            configureFilter3();
+            configureFilter2();
+        }
         form.addListener(UserForm.SaveEvent.class,this::savePerson);
         form.addListener(UserForm.DeleteEvent.class,this::deletePerson);
         form.addListener(UserForm.CloseEvent.class,e ->closeEditor());
@@ -79,26 +97,53 @@ public class PanelAdminView extends VerticalLayout {
         editPerson(new Person());
     }
 
-    public void updateList(){
-        usersGrid.setItems(findAll(filterText.getValue()));
+    public void updateList() {
+
+        if((filterText2.getValue()==null || filterText2.getValue().isEmpty()) && (filterText.getValue()==null || filterText.getValue().isEmpty())){
+            usersGrid.setItems(findAll(filterText3.getValue()));
+        }
+        else if((filterText2.getValue()==null || filterText2.getValue().isEmpty()) && (filterText3.getValue()==null || filterText3.getValue().isEmpty())) {
+            usersGrid.setItems(findAll(filterText.getValue()));
+        }else{
+            usersGrid.setItems(findAll(filterText2.getValue()));
+        }
     }
 
     public List<Person>findAll(String stringFilter){
-        if (stringFilter == null || stringFilter.isEmpty()) {
+        if((filterText2.getValue()==null || filterText2.getValue().isEmpty()) && (filterText.getValue()==null || filterText.getValue().isEmpty())&& (filterText3.getValue()==null || filterText3.getValue().isEmpty())){
             return personRepository.findAll();
+        }
+        else if ((filterText.getValue()==null || filterText.getValue().isEmpty()) && (filterText3.getValue()==null || filterText3.getValue().isEmpty())){
+            return personRepository.searchByEmail(stringFilter);
+        }
+        else if ((filterText2.getValue()==null || filterText2.getValue().isEmpty())&& (filterText.getValue()==null || filterText.getValue().isEmpty())){
+            return personRepository.searchByUserName(stringFilter);
         }
         else{
             return personRepository.search(stringFilter);
         }
+
     }
 
-    public void configureFilter(){
+    public void configureFilter() {
         filterText.setPlaceholder("filtrer par nom...");
         filterText.setClearButtonVisible(true);
         filterText.setValueChangeMode(ValueChangeMode.LAZY);
-        filterText.addValueChangeListener(e ->updateList());
+        filterText.addValueChangeListener(e -> updateList());
+    }
+    public void configureFilter2(){
+        filterText2.setPlaceholder("filtrer par mail...");
+        filterText2.setClearButtonVisible(true);
+        filterText2.setValueChangeMode(ValueChangeMode.LAZY);
+        filterText2.addValueChangeListener(e ->updateList());
     }
 
+    public void configureFilter3(){
+        filterText3.setPlaceholder("filtrer par Username...");
+        filterText3.setClearButtonVisible(true);
+        filterText3.setValueChangeMode(ValueChangeMode.LAZY);
+        filterText3.addValueChangeListener(e ->updateList());
+    }
     private void closeEditor() {
         form.setPerson(null);
         form.setVisible(false);
