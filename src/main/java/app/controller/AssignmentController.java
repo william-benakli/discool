@@ -6,11 +6,15 @@ import app.jpa_repo.PersonRepository;
 import app.jpa_repo.StudentAssignmentsUploadsRepository;
 import app.model.courses.Assignment;
 import app.model.courses.StudentAssignmentUpload;
+import app.model.users.Person;
 import app.web.views.TeacherAssignmentView;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 
 
 public class AssignmentController {
@@ -50,6 +54,25 @@ public class AssignmentController {
             studentAssignmentsUploadsRepository.save(submissionToSave);
         }
 
+    }
+
+    /**
+     * Rate the user and place him in the group
+     * @return a hashmap that contains the current user's grade, average, median, highest and lowest grade in the group for an assignment
+     */
+    public HashMap<String, Integer> showGrade(Assignment assignment, Person currentUser){
+        List<Integer> listAllGrade = new ArrayList<>();
+        for (StudentAssignmentUpload user: studentAssignmentsUploadsRepository.findAllByAssignmentId(assignment.getId())) {listAllGrade.add(user.getGrade());}
+        Collections.sort(listAllGrade);
+
+        HashMap<String, Integer> res = new HashMap<>();
+        if(listAllGrade.size()==0)return res;
+        res.put("median",listAllGrade.get((listAllGrade.size()+1)/2));
+        res.put("lowest",listAllGrade.get(0));
+        res.put("highest",listAllGrade.get(listAllGrade.size()-1));
+        res.put("average",listAllGrade.stream().mapToInt(Integer::intValue).sum()/listAllGrade.size());
+        res.put("user",studentAssignmentsUploadsRepository.findByAssignmentIdAndStudentId(assignment.getId(), currentUser.getId()).getGrade());
+        return res;
     }
 
     public StudentAssignmentUpload findStudentAssignmentSubmission(long assignmentId, long studentId) {
