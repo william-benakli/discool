@@ -184,6 +184,9 @@ public abstract class ViewWithSidebars extends VerticalLayout {
      */
     private void createAddButton() {
         Button button = new Button("Add", new Icon(VaadinIcon.PLUS_CIRCLE));
+        button.getStyle()
+                .set("color",ColorHTML.WHITE.getColorHtml())
+                .set("background-color",ColorHTML.PURPLE.getColorHtml());
         button.addClickListener(event -> {
             CustomAddDialog dialog = new CustomAddDialog();
             dialog.setHeight("50%");
@@ -290,7 +293,7 @@ public abstract class ViewWithSidebars extends VerticalLayout {
                 .set("pointer-event","none")
                 .set("padding-bottom","2.5px")
                 .set("background","none")
-                .set("margin-left","30px");
+                .set("margin-left","3px");
         button.getStyle()
                 .set("font-weight","700")
                 .set("background","none")
@@ -525,8 +528,15 @@ public abstract class ViewWithSidebars extends VerticalLayout {
 
         private HorizontalLayout createButtons() {
             Label infoLabel = new Label();
-            NativeButton save = new NativeButton("Save");
-            NativeButton reset = new NativeButton("Reset");
+            Button save = new Button("Save");
+            Button reset = new Button("Reset");
+
+            save.getStyle()
+                    .set("color",ColorHTML.WHITE.getColorHtml())
+                    .set("background",ColorHTML.PURPLE.getColorHtml());
+            reset.getStyle()
+                    .set("color",ColorHTML.WHITE.getColorHtml())
+                    .set("background",ColorHTML.PURPLE.getColorHtml());
 
             reset.addClickListener(event -> {
                 binder.readBean(null);
