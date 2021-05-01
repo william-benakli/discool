@@ -52,6 +52,9 @@ public class PanelAdminView extends VerticalLayout {
         Div div = new Div();
         div.add(filterText,filterText2,filterText3,addUser);
         div.getStyle().set("display","inline-block");
+        filterText.getStyle().set("padding","5px");
+        filterText2.getStyle().set("padding","5px");
+        filterText3.getStyle().set("padding","5px");
         addClassName("list-view");
         addUser.addClickListener(buttonClickEvent -> {
             addPerson();
