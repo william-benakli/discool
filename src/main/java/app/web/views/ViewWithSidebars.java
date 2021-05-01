@@ -214,8 +214,14 @@ public abstract class ViewWithSidebars extends VerticalLayout {
 
 
         long homePageId = getController().findHomePageId(courseId);
-        RouterLink linkHome = new RouterLink("Page d'accueil", MoodleView.class, homePageId);
+        RouterLink linkHome = new RouterLink("", MoodleView.class, homePageId);
+        Button buttonHome = new Button("Page d'accueil");
+        buttonHome.addClassName(homePageId + "");
+        styleButton(linkHome, buttonHome);
         styleMoodleLink( linkHome, true);
+        if (s2.length >= 4 && s2[3].equals("moodle") && t.equals(homePageId + "")) {
+            buttonHome.getStyle().set("color", ColorHTML.PURPLE.getColorHtml());
+        } else buttonHome.getStyle().set("color", ColorHTML.TEXTGREY.getColorHtml());
         sideBar.add(linkHome);
 
         ArrayList<MoodlePage> moodlePages = getController().getAllMoodlePagesForCourse(courseId);
@@ -242,15 +248,15 @@ public abstract class ViewWithSidebars extends VerticalLayout {
                 System.out.println(page.getId());
                 System.out.println("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb");
 
-                sideBar.add(link);
+                //sideBar.add(link);
             }
         });
     }
 
     private void styleMoodleLink( RouterLink link, boolean isHomePage) {
         link.getStyle()
-                .set("padding-left","25px")
-                .set("margin","20px 10px 10px -8px")
+                //.set("padding-left","25px")
+                .set("margin-top","20px")
                 .set("font-weight","700")
                 .set("pointer-event","none")
                 .set("color", ColorHTML.TEXTGREY.getColorHtml());
