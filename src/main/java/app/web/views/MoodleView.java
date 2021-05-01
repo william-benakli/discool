@@ -35,6 +35,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.ui.Notification;
 import lombok.SneakyThrows;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.File;
@@ -128,7 +129,6 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
 
     public enum DialogType {
         LINK, IMAGE;
-
         public static DialogType[] getDilogType() {
             return DialogType.class.getEnumConstants();
         }
@@ -152,8 +152,8 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             this.section = section;
             if (section == null) return;
 
-            if(! SecurityUtils.isUserStudent()){
-                FlexLayout f=new FlexLayout();
+            if (!SecurityUtils.isUserStudent()) {
+                FlexLayout f = new FlexLayout();
                 f.add(createDeleteButton(), createModifyButton());
                 this.add(f);
             }
@@ -164,17 +164,30 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
 
         private void initContent() {
             title.add(Markdown.getHtmlFromMarkdown(section.getTitle()));
-            content.add(Markdown.getHtmlFromMarkdown(section.getContent()));
+            for (Image i : getListOfImage()) {
+                content.add(i);
+                content.add(Markdown.getHtmlFromMarkdown(section.getContent()));
+            }
             add(title);
             add(content);
+        }
+
+        private List<Image> getListOfImage() {
+            List<Image> img = new ArrayList<Image>();
+            String imgContent = StringUtils.substringBetween(section.getContent(), "!$", "!$");
+            String src = StringUtils.substringBetween(section.getContent(), "%$", "%$");
+            if (src != null) {
+                img.add(new Image(src, "image"));
+            }
+            return img;
         }
 
         private Button createDeleteButton() {
             Button deleteButton = new Button();
             Image img = new Image("img/corbeille.svg", "edition");
             img.getStyle()
-                    .set("width","25px")
-                    .set("margin","auto");
+                    .set("width", "25px")
+                    .set("margin", "auto");
             deleteButton.setIcon(img);
             deleteButton.addClickListener(event -> {
                 getController().deletePage(section);
@@ -476,7 +489,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
                 } else if (!isImages(lien.getValue())) {
                     text.setValue("Erreur ce lien n'est pas une image");
                 } else {
-                    text.setValue("![image](" + lien.getValue() + ")");
+                    text.setValue("![](" + lien.getValue() + ")");
                 }
             });
 
@@ -527,7 +540,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
                 }
 
                 if (ImageExist(newPath)) {
-                    text.setValue("![image](" + newPath + ")");
+                    text.setValue("!$[image](src=%$" + newPath + "%$)!$");
                 } else {
                     text.setValue("Une erreur est survenue, le fichier est inexistant");
                 }
@@ -560,7 +573,6 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
          */
         public void copyInClipBoard(String text) {
             //il faut que ce soit en https
-            System.out.println(text);
             VaadinClipboard vaadinClipboard = VaadinClipboardImpl.GetInstance();
             vaadinClipboard.copyToClipboard(text, copySuccess -> {
                 if (copySuccess) {
@@ -633,7 +645,6 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             String newPath = path + "/" + linkName + "." + extension;
             File old = new File(oldName);
             File newFile = new File(newPath); //extension.toLowerCase());
-            System.out.println(newFile.getName());
             if (!old.renameTo(newFile)) {
                 throw new Exception("File can't be renamed");
             }
