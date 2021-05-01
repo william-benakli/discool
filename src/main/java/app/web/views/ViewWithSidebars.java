@@ -160,8 +160,6 @@ public abstract class ViewWithSidebars extends VerticalLayout {
         String s = getUrl();
         String t=s.substring(s.length()-1);
         String[] s2=s.split("/");
-        // TODO : clean up the s2 and t Strings (what do they even do ???) +
-        //  comment the doc of addChannels() and addAssignments()
 
         sideBar = new FlexLayout();
         if (! SecurityUtils.isUserStudent()) {
@@ -243,8 +241,8 @@ public abstract class ViewWithSidebars extends VerticalLayout {
      * Add links to all the assignments for this course
      *
      * @param courseId The id of the course
-     * @param s2
-     * @param t
+     * @param s2 parameter to check if the user is in a text page
+     * @param t have the number of the channel in which the user is
      */
     private void addAssignmentsLinksToSidebar(long courseId, String[] s2, String t) {
         ArrayList<Assignment> assignments = assignmentController.getAssignmentsForCourse(courseId);
@@ -279,8 +277,8 @@ public abstract class ViewWithSidebars extends VerticalLayout {
      * Add links to all the text channels of the course
      *
      * @param courseId The id of the course
-     * @param s2
-     * @param t
+     * @param s2 parameter to check if the user is in a text page
+     * @param t have the number of the channel in which the user is
      */
     private void addChannelsLinksToSidebar(long courseId, String[] s2, String t) {
         ArrayList<TextChannel> textChannels = controller.getAllChannelsForCourse(courseId);
