@@ -138,9 +138,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
     private void receiveBroadcast(String type, PublicChatMessage message) {
         switch (type) {
             case "NEW_MESSAGE":
-                UI.getCurrent().access(() -> {
-                    messageContainer.add(new MessageLayout(message));
-                });
+                UI.getCurrent().access(() -> messageContainer.add(new MessageLayout(message)));
                 break;
             case "DELETE_MESSAGE":
                 UI.getCurrent().access(() -> {
@@ -293,7 +291,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         }
 
         public void setMessage(String userTo) {
-            message.setText("Repondre à " + userTo);
+            message.setText("Répondre à " + userTo);
         }
 
         public void eventClickMessage() {
@@ -407,10 +405,10 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                 if (messageParent != null) {
                     Paragraph answerInfo;
                     if (!messageParent.isDeleted()) {
-                        answerInfo = new Paragraph("Reponse à " + personRepository.findById(messageParent.getSender()).getUsername() + " | "
+                        answerInfo = new Paragraph("Réponse à " + personRepository.findById(messageParent.getSender()).getUsername() + " | "
                                                            + ((messageParent.getMessage().length() > 50) ? messageParent.getMessage().substring(0, 50) + "..." : messageParent.getMessage()));
                     } else {
-                        answerInfo = new Paragraph("Message suprimée par l'utilisateur");
+                        answerInfo = new Paragraph("Message supprimé par l'utilisateur");
                     }
                     messageFullWithResponseLayout.add(answerInfo);
                 }
@@ -422,7 +420,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
 
             delete.addClickListener(event -> {
                 Dialog dialog = new Dialog();
-                dialog.add(new Paragraph("Voulez vous vraiment supprimer votre message ?"));
+                dialog.add(new Paragraph("Voulez-vous vraiment supprimer votre message ?"));
                 Button oui = new Button("Oui");
                 Button non = new Button("Non");
 
@@ -452,7 +450,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
 
                 TextField messageUpdate = new TextField();
                 messageUpdate.setValue(publicMessage.getMessage());
-                dialog.add(new Paragraph("Modifiez votre message ?"));
+                dialog.add(new Paragraph("Voulez-vous modifier votre message?"));
                 dialog.add(messageUpdate);
 
                 dialog.add(oui);
