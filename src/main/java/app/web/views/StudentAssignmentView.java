@@ -195,17 +195,17 @@ public class StudentAssignmentView extends ViewWithSidebars implements HasDynami
             String res="";
             if (studentAssignmentUpload != null) {
                 if (studentAssignmentUpload.getGrade() == -1) {
-                    res+="Your assignment hasn't been graded yet";
+                    res+="Votre devoir n'a pas encore été noté";
                 } else {
-                    res+="Your grade is : " + studentAssignmentUpload.getGrade();
+                    res+="Votre note est : " + studentAssignmentUpload.getGrade();
                     if (studentAssignmentUpload.getTeacherComments() == null) {
-                        res+="Your teacher didn't write any comments";
+                        res+="Votre professeur n'a écrit aucun commentaire";
                     } else {
-                        res+="Teacher's comments : \n" + studentAssignmentUpload.getTeacherComments();
+                        res+="Commentaires de l'enseignant : \n" + studentAssignmentUpload.getTeacherComments();
                     }
                 }
             } else {
-                res+="You have not submitted an answer yet !";
+                res+="Vous n'avez pas encore soumis de document!";
             }
             return res;
         }
@@ -219,11 +219,11 @@ public class StudentAssignmentView extends ViewWithSidebars implements HasDynami
             uploadComponent.addSucceededListener(event -> {
                 getAssignmentController().saveStudentUploadIfNeeded(assignment.getId(), assignment.getCourseId(),
                                                                     currentUser.getId());
-                Notification.show("You successfully uploaded your file !");
+                Notification.show("Vous avez téléchargé votre fichier avec succès!");
             });
 
             uploadComponent.addFileRejectedListener(event -> {
-                Notification.show("Couldn't upload the file");
+                Notification.show("Impossible de télécharger le fichier");
                 Notification.show(event.getErrorMessage());
             });
 
