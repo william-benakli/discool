@@ -25,11 +25,10 @@ public class LoginView extends VerticalLayout {
     public LoginView(@Autowired AuthenticationManager authenticationManager, CustomRequestCache requestCache) {
         // configures login dialog and adds it to the main view
         login.setOpened(true);
-        login.setTitle("Log into Discool");
-        login.setDescription("Please put your username and password");
+        login.setTitle("Connectez-vous");
+        login.setDescription("Veuillez saisir votre nom d'utilisateur et votre mot de passe");
 
         add(login);
-
         login.addLoginListener(e -> { // this listener has access to the provided username and password
             try {
                 // try to authenticate with given credentials
