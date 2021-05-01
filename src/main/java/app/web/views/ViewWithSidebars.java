@@ -156,29 +156,12 @@ public abstract class ViewWithSidebars extends VerticalLayout {
      *
      * @param courseId The id of the course
      */
-    @SneakyThrows
     public void createSidebar(long courseId) {
-        VaadinServletRequest req = (VaadinServletRequest) VaadinService.getCurrentRequest();
-        StringBuffer uriString = req.getRequestURL();
-        URI uri = new URI(uriString.toString()); //TODO: Del
-        String s=uri.toString();
-        String t=s.substring(s.length()-1);//TODO: edit with the correct redirect values
+        String s = getUrl();
+        String t=s.substring(s.length()-1);
         String[] s2=s.split("/");
         // TODO : clean up the s2 and t Strings (what do they even do ???) +
         //  comment the doc of addChannels() and addAssignments()
-
-        /*System.out.println("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-        System.out.println(s);
-        System.out.println(t);
-        System.out.println(Arrays.toString(s2));
-
-        VaadinServletRequest request = (VaadinServletRequest) VaadinService.getCurrentRequest();
-        StringBuffer uriStringA = request.getRequestURL();
-        URI url = new URI(uriStringA.toString());
-        System.out.print(Arrays.toString(url.toString().split("/")));
-        System.out.println("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");*/
-
-        //getController().moo
 
         sideBar = new FlexLayout();
         if (! SecurityUtils.isUserStudent()) {
@@ -191,6 +174,14 @@ public abstract class ViewWithSidebars extends VerticalLayout {
         sideBar.addClassName("card");
         sideBar.addClassName("cardLeft");
         setCardStyle(sideBar, "20%", TextChannelView.ColorHTML.DARKGREY);
+    }
+
+    @SneakyThrows
+    private String getUrl(){
+        VaadinServletRequest req = (VaadinServletRequest) VaadinService.getCurrentRequest();
+        StringBuffer uriString = req.getRequestURL();
+        URI uri = new URI(uriString.toString());
+        return uri.toString();
     }
 
     /**
@@ -210,15 +201,14 @@ public abstract class ViewWithSidebars extends VerticalLayout {
         sideBar.add(button);
     }
 
-    private void addMoodleLinksToSidebar(long courseId, String s2[], String t) {
-
+    private void addMoodleLinksToSidebar(long courseId, String[] s2, String t) {
 
         long homePageId = getController().findHomePageId(courseId);
         RouterLink linkHome = new RouterLink("", MoodleView.class, homePageId);
         Button buttonHome = new Button("Page d'accueil");
         buttonHome.addClassName(homePageId + "");
         styleButton(linkHome, buttonHome);
-        styleMoodleLink( linkHome, true);
+        styleMoodleLink( linkHome);
         if (s2.length >= 4 && s2[3].equals("moodle") && t.equals(homePageId + "")) {
             buttonHome.getStyle().set("color", ColorHTML.PURPLE.getColorHtml());
         } else buttonHome.getStyle().set("color", ColorHTML.TEXTGREY.getColorHtml());
@@ -232,37 +222,21 @@ public abstract class ViewWithSidebars extends VerticalLayout {
                 button.addClassName(page.getId() + "");
                 styleButton(link, button);
                 button.addClassName("color" + page.getId());
-
                 if (s2.length >= 4 && s2[3].equals("moodle") && t.equals(page.getId() + "")) {
                     button.getStyle().set("color", ColorHTML.PURPLE.getColorHtml());
                 } else button.getStyle().set("color", ColorHTML.TEXTGREY.getColorHtml());
                 sideBar.add(link);
-
-
-                //styleMoodleLink(page, s2, t, link, false);
-
-                System.out.println("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb");
-                System.out.println(s2.length>=4 && s2[3].equals("moodle") && t.equals(page.getId()+""));
-                System.out.println(t);
-                System.out.println(Arrays.toString(s2));
-                System.out.println(page.getId());
-                System.out.println("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb");
-
-                //sideBar.add(link);
             }
         });
     }
 
-    private void styleMoodleLink( RouterLink link, boolean isHomePage) {
+    private void styleMoodleLink( RouterLink link) {
         link.getStyle()
-                //.set("padding-left","25px")
                 .set("margin-top","20px")
                 .set("font-weight","700")
                 .set("pointer-event","none")
-                .set("color", ColorHTML.TEXTGREY.getColorHtml());
-        if (isHomePage) {
-            link.getStyle().set("border-bottom","1px solid rgba(112, 112, 122, .75)");
-        }
+                .set("color", ColorHTML.TEXTGREY.getColorHtml())
+                .set("border-bottom","1px solid rgba(112, 112, 122, .75)");
     }
 
     /**
@@ -272,7 +246,7 @@ public abstract class ViewWithSidebars extends VerticalLayout {
      * @param s2
      * @param t
      */
-    private void addAssignmentsLinksToSidebar(long courseId, String s2[], String t) {
+    private void addAssignmentsLinksToSidebar(long courseId, String[] s2, String t) {
         ArrayList<Assignment> assignments = assignmentController.getAssignmentsForCourse(courseId);
         assignments.forEach(assignment -> {
             RouterLink studentLink = new RouterLink("", StudentAssignmentView.class, assignment.getId());
@@ -308,7 +282,7 @@ public abstract class ViewWithSidebars extends VerticalLayout {
      * @param s2
      * @param t
      */
-    private void addChannelsLinksToSidebar(long courseId, String s2[], String t) {
+    private void addChannelsLinksToSidebar(long courseId, String[] s2, String t) {
         ArrayList<TextChannel> textChannels = controller.getAllChannelsForCourse(courseId);
         textChannels.forEach(channel -> {
             RouterLink link = new RouterLink("", TextChannelView.class, channel.getId());
