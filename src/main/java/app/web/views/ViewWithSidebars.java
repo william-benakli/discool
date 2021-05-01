@@ -97,7 +97,7 @@ public abstract class ViewWithSidebars extends VerticalLayout {
         status.getStyle()
                 .set("color", ColorHTML.TEXTGREY.getColorHtml())
                 .set("margin","0");
-        Image img = new Image((p.isConnected())?"img/dotgreen.svg":"img/dotred.svg", "Status");
+        Image img = new Image((p.isConnected())?"img/dotgreen.svg":"img/dotred.svg", "Statut");
         img.getStyle()
                 .set("margin-right","5px")
                 .set("margin-top","-2.5px");
@@ -348,20 +348,20 @@ public abstract class ViewWithSidebars extends VerticalLayout {
         }
 
         private void addTabs() {
-            Tab channelTab = new Tab("Add a text channel");
+            Tab channelTab = new Tab("Créer un salon textuel");
             Div channelDiv = new Div();
             chanelLayout = new FlexLayout();
             styleTab(channelTab, chanelLayout);
             channelDiv.add(chanelLayout);
 
-            Tab assignmentTab = new Tab("Add an assignment");
+            Tab assignmentTab = new Tab("Créer un devoirs");
             Div assignmentDiv = new Div();
             assignmentDiv.setVisible(false);
             assignmentLayout = new FlexLayout();
             styleTab(assignmentTab, assignmentLayout);
             assignmentDiv.add(assignmentLayout);
 
-            Tab moodleTab = new Tab("Add a Moodle page");
+            Tab moodleTab = new Tab("Créer une page moodle");
             Div moodleDiv = new Div();
             moodleDiv.setVisible(false);
             moodleLayout = new FlexLayout();
@@ -407,14 +407,14 @@ public abstract class ViewWithSidebars extends VerticalLayout {
 
         private void createChannelPage() {
             TextField name = new TextField();
-            name.setLabel("Create a new text channel");
-            name.setPlaceholder("Channel name");
+            name.setLabel("Créer un salon textuel");
+            name.setPlaceholder("Nom du salon");
             name.focus();
 
             Button valider = new Button("Valider");
             valider.addClickListener(event -> {
                 controller.createChannel(name.getValue(), getCourse().getId());
-                closeUpdate("text chat created");
+                closeUpdate("Salon textuel créé");
                 UI.getCurrent().navigate("channels/"+getController().getLastTextChannelRepository(course.getId()).getId());
             });
 
@@ -428,13 +428,13 @@ public abstract class ViewWithSidebars extends VerticalLayout {
 
         private void createMoodlePage() {
             TextField title = new TextField();
-            title.setPlaceholder("Title");
-            title.setLabel("Title");
+            title.setPlaceholder("Titre");
+            title.setLabel("Titre");
 
             Button valider = new Button("Valider");
             valider.addClickListener(event -> {
                 controller.createMoodlePage(title.getValue(), getCourse().getId());
-                closeUpdate("moodle page created");
+                closeUpdate("Page moodle créée");
                 UI.getCurrent().navigate("moodle/"+getController().getLastMoodlePage(course.getId()).getId());
             });
 
@@ -465,7 +465,7 @@ public abstract class ViewWithSidebars extends VerticalLayout {
 
         private void createTextFields(CustomAddDialog customAddDialog) {
             title = new TextField();
-            title.setLabel("Title");
+            title.setLabel("Titre");
             title.setRequired(true);
             title.setValueChangeMode(ValueChangeMode.EAGER);
             binder.forField(title)
@@ -478,10 +478,10 @@ public abstract class ViewWithSidebars extends VerticalLayout {
             binder.forField(description)
                     .bind(AssignmentModel::getDescription, AssignmentModel::setDescription);
 
-            maxGrade = new TextField("Max grade");
+            maxGrade = new TextField("Note maximale");
             maxGrade.setRequired(true);
             binder.forField(maxGrade)
-                    .withConverter(new StringToIntegerConverter("Must be a number"))
+                    .withConverter(new StringToIntegerConverter("Veuillez saisir un nombre"))
                     .bind(AssignmentModel::getMaxGrade, AssignmentModel::setMaxGrade);
 
             VerticalLayout layout = new VerticalLayout();
@@ -490,13 +490,13 @@ public abstract class ViewWithSidebars extends VerticalLayout {
         }
 
         private void createDatePickers() {
-            dueDate = new DateTimePicker("Due date");
+            dueDate = new DateTimePicker("Date d'échéance");
             dueDate.addValueChangeListener(event -> cutoffDate.setValue(dueDate.getValue()));
-            cutoffDate = new DateTimePicker("Cut-off date");
+            cutoffDate = new DateTimePicker("Date limite");
             cutoffDate.setVisible(false);
             setDatePickers(dueDate, cutoffDate);
 
-            allowLate = new Checkbox("Allow late ?", false);
+            allowLate = new Checkbox("Ajouter une date limite de rendu ?", false);
             allowLate.setRequiredIndicatorVisible(true);
             allowLate.addClickListener(event -> {
                 // date picker only visible if late work is accepted
@@ -511,10 +511,10 @@ public abstract class ViewWithSidebars extends VerticalLayout {
             LocalDateTimeField now = new LocalDateTimeField();
             now.setValue(LocalDateTime.now());
             binder.forField(dueDate)
-                    .withValidator(date -> !date.isBefore(LocalDateTime.now()), "Due date can't be in the past")
+                    .withValidator(date -> !date.isBefore(LocalDateTime.now()), "Impossible de créer un évènement dans le passé")
                     .bind(AssignmentModel::getDueDate, AssignmentModel::setDueDate);
             binder.forField(cutoffDate)
-                    .withValidator(date -> !date.isBefore(dueDate.getValue()), "Can't be before the due date")
+                    .withValidator(date -> !date.isBefore(dueDate.getValue()), "Impossible de créer un évènement dans le passé")
                     .bind(AssignmentModel::getCutoffDate, AssignmentModel::setCutoffDate);
             binder.forField(allowLate).bind(AssignmentModel::isAllowLate, AssignmentModel::setAllowLate);
 
@@ -531,8 +531,8 @@ public abstract class ViewWithSidebars extends VerticalLayout {
 
         private HorizontalLayout createButtons(CustomAddDialog customAddDialog) {
             Label infoLabel = new Label();
-            Button save = new Button("Save");
-            Button reset = new Button("Reset");
+            Button save = new Button("Sauvegarder");
+            Button reset = new Button("Réinitialiser");
 
             save.getStyle()
                     .set("color",ColorHTML.WHITE.getColorHtml())
@@ -552,8 +552,8 @@ public abstract class ViewWithSidebars extends VerticalLayout {
                                                                getCourse().getId(), maxGrade.getValue(),
                                                                allowLate.getValue(),
                                                                dueDate.getValue(), cutoffDate.getValue());
-                    infoLabel.setText("Saved");
-                    closeUpdate("assignement created", customAddDialog);
+                    infoLabel.setText("Sauvegarder");
+                    closeUpdate("Devoir créé", customAddDialog);
                     UI.getCurrent().navigate("assignment/"+getAssignmentController().getLastAssignement(course.getId()).getId());
                 } else {
                     BinderValidationStatus<AssignmentModel> validate = binder.validate();
@@ -562,7 +562,7 @@ public abstract class ViewWithSidebars extends VerticalLayout {
                             .map(BindingValidationStatus::getMessage)
                             .map(Optional::get).distinct()
                             .collect(Collectors.joining(", "));
-                    infoLabel.setText("Errors : " + errorText);
+                    infoLabel.setText("Problème : " + errorText);
                 }
             });
 
