@@ -11,21 +11,19 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
-import com.vaadin.flow.component.grid.HeaderRow;
-import com.vaadin.flow.component.grid.editor.Editor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.data.binder.Binder;
-import com.vaadin.flow.data.converter.StringToIntegerConverter;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Route(value = "admin", layout = Navbar.class)
 @PageTitle("Discool : Admin Panel")
@@ -38,7 +36,8 @@ public class PanelAdminView extends VerticalLayout {
     private UserForm form;
     TextField filterText = new TextField() ;
     TextField filterText2 = new TextField() ;
-    TextField filterText3 = new TextField() ;
+    TextField filterText3 = new TextField();
+    private Div listUser = new Div();
     private Button addUser = new Button("Add +");
     private final Tab usersTab = new Tab("Users");
     private final Tab coursesTab = new Tab("Courses");
@@ -59,7 +58,7 @@ public class PanelAdminView extends VerticalLayout {
         addUser.addClickListener(buttonClickEvent -> {
             addPerson();
         });
-        add(div);
+        listUser.add(div);
         createUserGrid();
         createCoursesGrid();
         createTabs();
@@ -154,7 +153,6 @@ public class PanelAdminView extends VerticalLayout {
     }
 
     private void createUserGrid() {
-
         usersGrid.setItems(personRepository.findAll());
         usersGrid.addColumn(Person::getUsername).setHeader("Pseudo");
         usersGrid.addColumn(Person::getLastName).setHeader("Last Name");
@@ -194,19 +192,21 @@ public class PanelAdminView extends VerticalLayout {
     private void createTabs() {
 
         form = new UserForm(personRepository);
-        form.getStyle().set("flex","1");
-        form.getStyle().set("display","list-item");
+        form.getStyle().set("flex", "1");
+        form.getStyle().set("display", "list-item");
         Div content = new Div(usersGrid, form);
+        VerticalLayout content_layout = new VerticalLayout(listUser, content);
         Div content2 = new Div(coursesGrid);
+        VerticalLayout content2_layout = new VerticalLayout(content2);
         content.setSizeFull();
         content2.setSizeFull();
         content2.setVisible(true);
         content.addClassName("content");
-        usersTab.getStyle().set("flex-direction","column");
-        tabs.add(usersTab,coursesTab);
-        Map<Tab, Div > tabsToPages = new HashMap<>();
-        tabsToPages.put(usersTab, content);
-        tabsToPages.put(coursesTab, content2);
+        usersTab.getStyle().set("flex-direction", "column");
+        tabs.add(usersTab, coursesTab);
+        Map<Tab, VerticalLayout> tabsToPages = new HashMap<>();
+        tabsToPages.put(usersTab, content_layout);
+        tabsToPages.put(coursesTab, content2_layout);
         tabsToPages.values().forEach(page -> page.setVisible(false));
         Component selectedPage = tabsToPages.get(tabs.getSelectedTab());
         selectedPage.setVisible(true);
@@ -216,7 +216,7 @@ public class PanelAdminView extends VerticalLayout {
             insideSelectedPage.setVisible(true);
         });
 
-        add(tabs, content, content2);
+        add(tabs, content_layout, content2_layout);
     }
 }
 
