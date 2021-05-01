@@ -148,9 +148,9 @@ public class TeacherAssignmentView extends ViewWithSidebars implements HasDynami
          */
         private void createColumnsAndEditor() {
             lateColumn = grid.addComponentColumn(RowModel::getLateButton).setHeader("Late");
-            nameColumn = grid.addColumn(RowModel::getName).setHeader("Name");
-            gradeColumn = grid.addColumn(RowModel::getGrade).setHeader("Grade");
-            commentsColumn = grid.addColumn(RowModel::getComments).setHeader("Comments").setAutoWidth(true);
+            nameColumn = grid.addColumn(RowModel::getName).setHeader("Nom");
+            gradeColumn = grid.addColumn(RowModel::getGrade).setHeader("Note");
+            commentsColumn = grid.addColumn(RowModel::getComments).setHeader("Commentaire").setAutoWidth(true);
             tarColumn = grid.addComponentColumn(RowModel::getDownloadButton).setHeader(".tar.gz");
             TextField gradeField = new TextField();
             TextField commentsField = new TextField();
@@ -170,7 +170,7 @@ public class TeacherAssignmentView extends ViewWithSidebars implements HasDynami
 
             binder.forField(gradeField)
                     .withConverter(
-                            new StringToIntegerConverter("Grade must be a number."))
+                            new StringToIntegerConverter("La note doit être un nombre."))
                     .withStatusLabel(validationStatus).bind("grade");
             gradeColumn.setEditorComponent(gradeField);
 
@@ -182,7 +182,7 @@ public class TeacherAssignmentView extends ViewWithSidebars implements HasDynami
         private void createEditor(TextField gradeField) {
             Collection<Button> editButtons = Collections.newSetFromMap(new WeakHashMap<>());
             editorColumn = grid.addComponentColumn(row -> {
-                Button edit = new Button("Grade");
+                Button edit = new Button("Noter");
                 edit.addClassName("edit");
                 edit.addClickListener(e -> {
                     editor.editItem(row);
@@ -198,10 +198,10 @@ public class TeacherAssignmentView extends ViewWithSidebars implements HasDynami
             editor.addCloseListener(e -> editButtons.stream()
                     .forEach(button -> button.setEnabled(!editor.isOpen())));
 
-            Button save = new Button("Save", e -> editor.save());
+            Button save = new Button("Sauvegarder", e -> editor.save());
             save.addClassName("save");
 
-            Button cancel = new Button("Cancel", e -> editor.cancel());
+            Button cancel = new Button("Annuler", e -> editor.cancel());
             cancel.addClassName("cancel");
 
             // add a key listener for "escape" to cancel the editing
@@ -229,13 +229,13 @@ public class TeacherAssignmentView extends ViewWithSidebars implements HasDynami
         }
 
         private void createLateFilter() {
-            String[] lateLabels = {"All", "Late", "Not turned in", "Turned in"};
+            String[] lateLabels = {"Tout", "Retard", "Non remis", "Remis"};
             lateStatus = new ComboBox<>("");
             lateStatus.setItems(lateLabels);
-            lateStatus.setValue("All");
+            lateStatus.setValue("Tout");
             lateStatus.addValueChangeListener(event -> {
                 dataProvider.clearFilters();
-                if (! event.getValue().equals("All")) {
+                if (! event.getValue().equals("Tout")) {
                     dataProvider.addFilter(row -> event.getValue().equals(row.getLateStatus()));
                     deleteFilters.setEnabled(true);
                 }
@@ -253,11 +253,11 @@ public class TeacherAssignmentView extends ViewWithSidebars implements HasDynami
             });
             nameFilterField.setValueChangeMode(ValueChangeMode.EAGER);
             filterRow.getCell(nameColumn).setComponent(nameFilterField);
-            nameFilterField.setPlaceholder("Name");
+            nameFilterField.setPlaceholder("Nom");
         }
 
         private void createDeleteAllFilters() {
-            deleteFilters = new Button("Remove filters", new Icon(VaadinIcon.CLOSE_SMALL));
+            deleteFilters = new Button("Supprimer les filtres", new Icon(VaadinIcon.CLOSE_SMALL));
             deleteFilters.setEnabled(false);
             deleteFilters.addClickListener(event -> {
                 nameFilterField.setValue("");
@@ -293,10 +293,10 @@ public class TeacherAssignmentView extends ViewWithSidebars implements HasDynami
                 createDownloadButton();
                 if (upload.getDateUpload() > assignment.getDuedate()) {
                     lateButton = new Icon(VaadinIcon.EXCLAMATION);
-                    lateStatus = "Late";
+                    lateStatus = "Retard";
                 } else {
                     lateButton = new Icon(VaadinIcon.CHECK);
-                    lateStatus = "Turned in";
+                    lateStatus = "Remis";
                 }
             } else {
                 this.comments = "";
@@ -304,7 +304,7 @@ public class TeacherAssignmentView extends ViewWithSidebars implements HasDynami
                 this.studentId = studentId;
                 downloadButton = new DownloadController();
                 lateButton = new Icon(VaadinIcon.ASTERISK);
-                lateStatus = "Not turned in";
+                lateStatus = "Non remis";
             }
         }
 
@@ -312,7 +312,7 @@ public class TeacherAssignmentView extends ViewWithSidebars implements HasDynami
             String outputName = "downloads/" + name + "_" + studentId + ".tar.gz";
             String sourceDir = "uploads/assignments/" + assignment.getId() + "_" + studentId;
 
-            downloadButton = new DownloadController("Download", outputName,
+            downloadButton = new DownloadController("Télécharger", outputName,
             outputStream -> {
                 downloadButton.createTarGZ(sourceDir, outputName);
                 try {
