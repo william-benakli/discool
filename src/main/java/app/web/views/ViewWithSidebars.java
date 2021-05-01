@@ -167,11 +167,24 @@ public abstract class ViewWithSidebars extends VerticalLayout {
         // TODO : clean up the s2 and t Strings (what do they even do ???) +
         //  comment the doc of addChannels() and addAssignments()
 
+        /*System.out.println("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+        System.out.println(s);
+        System.out.println(t);
+        System.out.println(Arrays.toString(s2));
+
+        VaadinServletRequest request = (VaadinServletRequest) VaadinService.getCurrentRequest();
+        StringBuffer uriStringA = request.getRequestURL();
+        URI url = new URI(uriStringA.toString());
+        System.out.print(Arrays.toString(url.toString().split("/")));
+        System.out.println("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");*/
+
+        //getController().moo
+
         sideBar = new FlexLayout();
         if (! SecurityUtils.isUserStudent()) {
             createAddButton();
         }
-        addMoodleLinksToSidebar(courseId);
+        addMoodleLinksToSidebar(courseId, s2, t);
         addAssignmentsLinksToSidebar(courseId, s2, t);
         addChannelsLinksToSidebar(courseId, s2, t);
         // add the style
@@ -197,29 +210,50 @@ public abstract class ViewWithSidebars extends VerticalLayout {
         sideBar.add(button);
     }
 
-    private void addMoodleLinksToSidebar(long courseId) {
+    private void addMoodleLinksToSidebar(long courseId, String s2[], String t) {
+
+
         long homePageId = getController().findHomePageId(courseId);
         RouterLink linkHome = new RouterLink("Page d'accueil", MoodleView.class, homePageId);
-        styleMoodleLink(linkHome, true);
+        styleMoodleLink( linkHome, true);
         sideBar.add(linkHome);
 
         ArrayList<MoodlePage> moodlePages = getController().getAllMoodlePagesForCourse(courseId);
         moodlePages.forEach(page -> {
             if (page.getId() != homePageId) {
-                RouterLink link = new RouterLink(page.getTitle(), MoodleView.class, page.getId());
-                styleMoodleLink(link, false);
+                RouterLink link = new RouterLink("", MoodleView.class, page.getId());
+                Button button = new Button(page.getTitle());
+                button.addClassName(page.getId() + "");
+                styleButton(link, button);
+                button.addClassName("color" + page.getId());
+
+                if (s2.length >= 4 && s2[3].equals("moodle") && t.equals(page.getId() + "")) {
+                    button.getStyle().set("color", ColorHTML.PURPLE.getColorHtml());
+                } else button.getStyle().set("color", ColorHTML.TEXTGREY.getColorHtml());
+                sideBar.add(link);
+
+
+                //styleMoodleLink(page, s2, t, link, false);
+
+                System.out.println("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb");
+                System.out.println(s2.length>=4 && s2[3].equals("moodle") && t.equals(page.getId()+""));
+                System.out.println(t);
+                System.out.println(Arrays.toString(s2));
+                System.out.println(page.getId());
+                System.out.println("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb");
+
                 sideBar.add(link);
             }
         });
     }
 
-    private void styleMoodleLink(RouterLink link, boolean isHomePage) {
+    private void styleMoodleLink( RouterLink link, boolean isHomePage) {
         link.getStyle()
-                .set("color",ColorHTML.TEXTGREY.getColorHtml())
                 .set("padding-left","25px")
                 .set("margin","20px 10px 10px -8px")
                 .set("font-weight","700")
-                .set("pointer-event","none");
+                .set("pointer-event","none")
+                .set("color", ColorHTML.TEXTGREY.getColorHtml());
         if (isHomePage) {
             link.getStyle().set("border-bottom","1px solid rgba(112, 112, 122, .75)");
         }
@@ -253,7 +287,7 @@ public abstract class ViewWithSidebars extends VerticalLayout {
         }
         styleButton(link, button);
         button.addClassName("color" + assignment.getId());
-        if (s2.length>=4 && s2[3].equals("assignment") && t.equals(assignment.getId()+"")) {
+        if (s2.length>=4 && (s2[3].equals("assignment") || s2[3].equals("teacher_assignment")) && t.equals(assignment.getId()+"")) {
             button.getStyle().set("color",ColorHTML.PURPLE.getColorHtml());
         } else {
             button.getStyle().set("color",ColorHTML.TEXTGREY.getColorHtml());
