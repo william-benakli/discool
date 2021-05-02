@@ -111,6 +111,11 @@ public class Navbar extends AppLayout {
         String cleanURI = splitURI[splitURI.length-1];
 
         courseNavigationDock = createCustomHorizontalLayout();
+        courseNavigationDock.getStyle()
+                .set("width","750px")
+                .set("overflow","auto")
+                .set("overflow-y","hidden")
+                .set("transform","rotateX(180deg)");
         List<Course> courses = controller.findAllCourses();
         for (Course c : courses) {
             createCourseButton(c, splitURI, cleanURI);
@@ -151,7 +156,8 @@ public class Navbar extends AppLayout {
                         (c.getPathIcon().length() != 0) ? c.getName() : "DDiscool"
                 ), Key.NAVIGATE_NEXT);
         button.getStyle()
-                .set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml());
+                .set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml())
+                .set("transform","rotateX(180deg)");
         long pageId = findHomePageId(c.getId());
         RouterLink routerLink = new RouterLink("", MoodleView.class, pageId);
         linkRouteurImage(courseNavigationDock, button, routerLink);
@@ -171,7 +177,8 @@ public class Navbar extends AppLayout {
         routerLink.getStyle()
                 .set("border-radius","10px 10px 0 0")
                 .set("padding","0 10px")
-                .set("background-color", ViewWithSidebars.ColorHTML.GREY.getColorHtml());
+                .set("background-color", ViewWithSidebars.ColorHTML.GREY.getColorHtml())
+                .set("transform","rotateX(180deg)");
     }
 
     private long findHomePageId(long courseId) {
@@ -190,7 +197,9 @@ public class Navbar extends AppLayout {
     @SneakyThrows
     private void createRightSubMenu() {
         rightMenuLayout = createCustomHorizontalLayout();
-        rightMenuLayout.getStyle().set("margin", "0");
+        rightMenuLayout.getStyle()
+                .set("margin", "0")
+                .set("padding-left","16px");
 
         createDirectMessageButton();
         createUserParamButton();
