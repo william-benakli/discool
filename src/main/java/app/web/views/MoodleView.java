@@ -171,12 +171,15 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             add(content);
         }
 
+        /*
+            Cette fonction prend un content (un string avec toutes les informations données) et convertie une chaine
+            de caractere specifique "!$ valeur !$ en img html
+         */
         private String convertIfImagePresent(String content) {
             String src = StringUtils.substringBetween(content, "!$", "!$");
             while (src != null) {
                 String src_original = "!$" + src + "!$";
-                String src_image = src.replace("src/main/webapp/", "");
-                content = content.replace(src_original, "\n ㅤ<img src='" + src_image + "' >ㅤ");
+                content = content.replace(src_original, "\n ㅤ<img src='moodle/images/" + src + "' >ㅤ");
                 src = StringUtils.substringBetween(content, "!$", "!$");
             }
             return content;
@@ -542,7 +545,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
                 }
 
                 if (ImageExist(newPath)) {
-                    text.setValue("!$" + newPath + "!$");
+                    text.setValue("!$" + newPath.replace("src/main/webapp/moodle/images/", "") + "!$");
                     uploadComponent.setDropAllowed(false);
                 } else {
                     text.setValue("Une erreur est survenue, le fichier est inexistant");
