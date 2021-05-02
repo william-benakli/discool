@@ -68,6 +68,10 @@ public class Controller {
         return textChannelRepository.findFirstByCourseIdOrderByIdDesc(courseId);
     }
 
+    public TextChannel getTextChannel(long textChannelId){
+        return textChannelRepository.findTextChannelById(textChannelId);
+    }
+
     public MoodlePage getMoodlePage(long MoodlePageId){
         return moodlePageRepository.findMoodlePageById(MoodlePageId);
     }

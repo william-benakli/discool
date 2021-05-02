@@ -173,7 +173,11 @@ public class Navbar extends AppLayout {
                         .set("padding","0 10px")
                         .set("background-color", ViewWithSidebars.ColorHTML.GREY.getColorHtml());
             }else if((splitURI[3].equals("assignment") || splitURI[3].equals("teacher_assignment")) && assignmentController.getAssignment(Integer.valueOf(cleanURI)).getCourseId()==c.getId()){
-                System.out.println(assignmentController.getAssignment(Integer.valueOf(cleanURI)).getCourseId()+"AssignmentController");
+                routerLink.getStyle()
+                        .set("border-radius","10px 10px 0 0")
+                        .set("padding","0 10px")
+                        .set("background-color", ViewWithSidebars.ColorHTML.GREY.getColorHtml());
+            }else if(splitURI[3].equals("channels") && controller.getTextChannel(Integer.valueOf(cleanURI)).getCourseId()==c.getId()){
                 routerLink.getStyle()
                         .set("border-radius","10px 10px 0 0")
                         .set("padding","0 10px")

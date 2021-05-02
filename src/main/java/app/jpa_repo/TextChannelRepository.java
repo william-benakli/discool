@@ -10,4 +10,5 @@ import java.util.ArrayList;
 public interface TextChannelRepository extends JpaRepository<TextChannel, Long> {
     ArrayList<TextChannel> findAllByCourseId(long courseId);
     TextChannel findFirstByCourseIdOrderByIdDesc(long courseId);
+    TextChannel findTextChannelById(long courseId);
 }
