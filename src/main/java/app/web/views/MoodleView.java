@@ -213,13 +213,14 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
         private void createModifyPopup() {
             VerticalLayout layout = new VerticalLayout();
             HorizontalLayout layout_horizontal = new HorizontalLayout();
+            HorizontalLayout layout_horizontal_button = new HorizontalLayout();
 
             AtomicReference<DialogMoodle> dialoglink = new AtomicReference<>(new DialogMoodle(modifyPopup, DialogType.LINK));
             AtomicReference<DialogMoodle> dialogimage = new AtomicReference<>(new DialogMoodle(modifyPopup, DialogType.IMAGE));
 
 
-            Button link = new Button("Liens");
-            Button image = new Button("Images");
+            Button link = new Button("Ajouter un lien");
+            Button image = new Button("Ajouter une Image");
             Label label = new Label("Modify the section here");
             TextField title = new TextField("Title");
             title.setValue(section.getTitle());
@@ -244,11 +245,11 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
                 dialogimage.get().open();
             });
 
-
-            layout_horizontal.add(okButton, image, link);
+            layout_horizontal_button.add(link, image);
+            layout_horizontal.add(okButton);
             layout_horizontal.setPadding(true);
             layout_horizontal.setSpacing(true);
-            layout.add(label, title, content, layout_horizontal);
+            layout.add(label, title, content, layout_horizontal_button, layout_horizontal);
             layout.setDefaultHorizontalComponentAlignment(Alignment.CENTER);
             modifyPopup.add(layout);
         }
