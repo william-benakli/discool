@@ -536,11 +536,14 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
                 try {
                     newPath = renameFile(uploadComponent.getFileName(), newDirName, nameChiffre);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    text.setValue("Une erreur est survenue, le fichier est inexistant");
+                    close();
+                    this.parent.open();
                 }
 
                 if (ImageExist(newPath)) {
                     text.setValue("!$" + newPath + "!$");
+                    uploadComponent.setDropAllowed(false);
                 } else {
                     text.setValue("Une erreur est survenue, le fichier est inexistant");
                 }
