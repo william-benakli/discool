@@ -9,4 +9,5 @@ import java.util.ArrayList;
 public interface AssignmentRepository extends JpaRepository<Assignment, Long> {
     ArrayList<Assignment> findAllByCourseId(long courseId);
     Assignment findFirstByCourseIdOrderByIdDesc(long courseId);
+    Assignment findAssignmentById(long courseId);
 }

@@ -87,6 +87,10 @@ public class AssignmentController {
         return assignmentRepository.findFirstByCourseIdOrderByIdDesc(courseId);
     }
 
+    public Assignment getAssignment(long AssignmentId){
+        return assignmentRepository.findAssignmentById(AssignmentId);
+    }
+
     public ArrayList<StudentAssignmentUpload> getUploadsForAssignment(long assignmentId) {
         return studentAssignmentsUploadsRepository.findAllByAssignmentId(assignmentId);
     }

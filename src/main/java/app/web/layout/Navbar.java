@@ -1,5 +1,6 @@
 package app.web.layout;
 
+import app.controller.AssignmentController;
 import app.controller.Controller;
 import app.controller.security.SecurityUtils;
 import app.jpa_repo.*;
@@ -55,6 +56,7 @@ public class Navbar extends AppLayout {
     private Person currentUser;
     private HorizontalLayout courseNavigationDock;
     private HorizontalLayout rightMenuLayout;
+    private AssignmentController assignmentController;
 
     public Navbar(@Autowired CourseRepository courseRepository,
                   @Autowired TextChannelRepository textChannelRepository,
@@ -62,7 +64,10 @@ public class Navbar extends AppLayout {
                   @Autowired MoodlePageRepository moodlePageRepository,
                   @Autowired PublicChatMessageRepository publicChatMessageRepository,
                   @Autowired GroupRepository groupRepository,
-                  @Autowired GroupMembersRepository groupMembersRepository) {
+                  @Autowired GroupMembersRepository groupMembersRepository,
+                  @Autowired AssignmentRepository assignmentRepository,
+                  @Autowired StudentAssignmentsUploadsRepository studentAssignmentsUploadsRepository) {
+        this.assignmentController= new AssignmentController(personRepository, assignmentRepository, studentAssignmentsUploadsRepository, courseRepository);
         this.personRepository = personRepository;
         this.moodlePageRepository = moodlePageRepository;
         this.controller = new Controller(personRepository, textChannelRepository, publicChatMessageRepository, courseRepository,
@@ -162,9 +167,13 @@ public class Navbar extends AppLayout {
         System.out.println("bbbbbbbbbbbbbbbbbbbbbbb");*/
 
         if (splitURI.length>=4){
-            System.out.println(Integer.valueOf(cleanURI)+"clearURI");
             if(splitURI[3].equals("moodle") && controller.getMoodlePage(Integer.valueOf(cleanURI)).getCourseId()==c.getId()){
-                System.out.println(controller.getMoodlePage(Integer.valueOf(cleanURI)).getCourseId()+"Controller");
+                routerLink.getStyle()
+                        .set("border-radius","10px 10px 0 0")
+                        .set("padding","0 10px")
+                        .set("background-color", ViewWithSidebars.ColorHTML.GREY.getColorHtml());
+            }else if((splitURI[3].equals("assignment") || splitURI[3].equals("teacher_assignment")) && assignmentController.getAssignment(Integer.valueOf(cleanURI)).getCourseId()==c.getId()){
+                System.out.println(assignmentController.getAssignment(Integer.valueOf(cleanURI)).getCourseId()+"AssignmentController");
                 routerLink.getStyle()
                         .set("border-radius","10px 10px 0 0")
                         .set("padding","0 10px")
