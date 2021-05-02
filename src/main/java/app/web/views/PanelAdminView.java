@@ -38,9 +38,9 @@ public class PanelAdminView extends VerticalLayout {
     TextField filterText2 = new TextField() ;
     TextField filterText3 = new TextField();
     private Div listUser = new Div();
-    private Button addUser = new Button("Add +");
-    private final Tab usersTab = new Tab("Users");
-    private final Tab coursesTab = new Tab("Courses");
+    private Button addUser = new Button("Ajouter +");
+    private final Tab usersTab = new Tab("Utilisateur");
+    private final Tab coursesTab = new Tab("Cours");
     private final Tabs tabs = new Tabs(usersTab, coursesTab);
     private final Grid<Person> usersGrid = new Grid<>();
     private final Grid<Course> coursesGrid = new Grid<>();
@@ -55,9 +55,7 @@ public class PanelAdminView extends VerticalLayout {
         filterText2.getStyle().set("padding","5px");
         filterText3.getStyle().set("padding","5px");
         addClassName("list-view");
-        addUser.addClickListener(buttonClickEvent -> {
-            addPerson();
-        });
+        addUser.addClickListener(buttonClickEvent -> addPerson());
         listUser.add(div);
         createUserGrid();
         createCoursesGrid();
@@ -134,14 +132,14 @@ public class PanelAdminView extends VerticalLayout {
         filterText.addValueChangeListener(e -> updateList());
     }
     public void configureFilter2(){
-        filterText2.setPlaceholder("filtrer par mail...");
+        filterText2.setPlaceholder("filtrer par email...");
         filterText2.setClearButtonVisible(true);
         filterText2.setValueChangeMode(ValueChangeMode.LAZY);
         filterText2.addValueChangeListener(e ->updateList());
     }
 
     public void configureFilter3(){
-        filterText3.setPlaceholder("filtrer par Username...");
+        filterText3.setPlaceholder("filtrer par Prénom...");
         filterText3.setClearButtonVisible(true);
         filterText3.setValueChangeMode(ValueChangeMode.LAZY);
         filterText3.addValueChangeListener(e ->updateList());
@@ -155,12 +153,12 @@ public class PanelAdminView extends VerticalLayout {
     private void createUserGrid() {
         usersGrid.setItems(personRepository.findAll());
         usersGrid.addColumn(Person::getUsername).setHeader("Pseudo");
-        usersGrid.addColumn(Person::getLastName).setHeader("Last Name");
-        usersGrid.addColumn(Person::getFirstName).setHeader("First Name");
+        usersGrid.addColumn(Person::getLastName).setHeader("Nom");
+        usersGrid.addColumn(Person::getFirstName).setHeader("Prénom");
         usersGrid.addColumn(Person::getEmail).setHeader("Email");
         usersGrid.addColumn(Person::getDescription).setHeader("Description");
-        usersGrid.addColumn(Person::getRole).setHeader("Role");
-        usersGrid.addColumn(Person::getWebsite).setHeader("Website");
+        usersGrid.addColumn(Person::getRole).setHeader("Rôle");
+        usersGrid.addColumn(Person::getWebsite).setHeader("Site Web");
         usersGrid.addThemeVariants(GridVariant.LUMO_NO_BORDER,
                               GridVariant.LUMO_NO_ROW_BORDERS, GridVariant.LUMO_ROW_STRIPES);
         usersGrid.getStyle().set("flex","2");
@@ -182,8 +180,8 @@ public class PanelAdminView extends VerticalLayout {
 
     private void createCoursesGrid() {
         coursesGrid.setItems(courseRepository.findAll());
-        coursesGrid.addColumn(Course::getName).setHeader("Name");
-        coursesGrid.addColumn(Course::getTeacherId).setHeader("TeacherID");
+        coursesGrid.addColumn(Course::getName).setHeader("Nom");
+        coursesGrid.addColumn(Course::getTeacherId).setHeader("Identifiant Enseignant");
         coursesGrid.addThemeVariants(GridVariant.LUMO_NO_BORDER,
                                      GridVariant.LUMO_NO_ROW_BORDERS, GridVariant.LUMO_ROW_STRIPES);
         coursesTab.add(coursesGrid);
@@ -219,4 +217,3 @@ public class PanelAdminView extends VerticalLayout {
         add(tabs, content_layout, content2_layout);
     }
 }
-

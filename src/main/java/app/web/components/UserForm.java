@@ -43,18 +43,18 @@ import java.nio.charset.StandardCharsets;
         private Person person ;
         Binder<Person> binder = new BeanValidationBinder<>(Person.class) ;
         TextField username = new TextField("Pseudo");
-        TextField firstName = new TextField("First name");
-        TextField lastName = new TextField("Last name");
+        TextField firstName = new TextField("Prénom");
+        TextField lastName = new TextField("Nom");
         EmailField email = new EmailField("Email");
-        PasswordField password = new PasswordField("Password");
+        PasswordField password = new PasswordField("Mot de passe");
         TextField description = new TextField("Description");
-        ComboBox<Person.Role> role = new ComboBox<>("Role");
-        TextField website = new TextField("Website");
+        ComboBox<Person.Role> role = new ComboBox<>("Rôle");
+        TextField website = new TextField("Site Web");
         Person.Role[] departmentList = Person.Role.getRole();
 
-        Button save = new Button("Save");
-        Button delete = new Button("Delete");
-        Button close = new Button("Cancel");
+        Button save = new Button("Sauvegarder");
+        Button delete = new Button("Supprimer");
+        Button close = new Button("Annuler");
 
 
         public UserForm(@Autowired PersonRepository personRepository) {
@@ -84,10 +84,7 @@ import java.nio.charset.StandardCharsets;
         }
 
         public boolean userExist(String username){
-            if(personRepository.findByUsername(username)!=null){
-                return true ;
-            }
-            return false;
+            return personRepository.findByUsername(username) != null;
         }
 
         private HorizontalLayout createButtonsLayout() {
@@ -99,19 +96,19 @@ import java.nio.charset.StandardCharsets;
             save.addClickListener(click ->{
 
                 if(this.username.isEmpty()) {
-                    notification = new Notification("pseudo is empty !",3000,Notification.Position.MIDDLE);
+                    notification = new Notification("Le champ pseudo est vide !",3000,Notification.Position.MIDDLE);
                     notification.open();
                 }
                 else if(this.password.isEmpty()) {
-                    notification = new Notification("password is empty !",3000,Notification.Position.MIDDLE);
+                    notification = new Notification("Le champ mot de passe est vide !",3000,Notification.Position.MIDDLE);
                     notification.open();
                 }
                 else if(this.email.isEmpty()) {
-                    notification = new Notification("email is empty !",3000,Notification.Position.MIDDLE);
+                    notification = new Notification("Le champ email est vide !",3000,Notification.Position.MIDDLE);
                     notification.open();
                 }
                 else if(this.role.isEmpty()){
-                    notification = new Notification("you have to select a role !",3000,Notification.Position.MIDDLE);
+                    notification = new Notification("Vous n'avez pas sélectionné de rôle !",3000,Notification.Position.MIDDLE);
                     notification.open();
                 }
                 else {
