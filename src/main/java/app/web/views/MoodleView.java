@@ -83,6 +83,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
         });
     }
 
+
     @Override
     protected void onDetach(DetachEvent detachEvent) {
         broadcasterRegistration.remove();
@@ -162,24 +163,23 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             createModifyPopup();
         }
 
+
         private void initContent() {
             title.add(Markdown.getHtmlFromMarkdown(section.getTitle()));
-            for (Image i : getListOfImage()) {
-                content.add(i);
-                content.add(Markdown.getHtmlFromMarkdown(section.getContent()));
-            }
+            content.add(Markdown.getHtmlFromMarkdown(section.getContent()));
+            imageIsPresent();
             add(title);
             add(content);
         }
 
-        private List<Image> getListOfImage() {
-            List<Image> img = new ArrayList<Image>();
-            String imgContent = StringUtils.substringBetween(section.getContent(), "!$", "!$");
-            String src = StringUtils.substringBetween(section.getContent(), "%$", "%$");
-            if (src != null) {
-                img.add(new Image(src, "image"));
+        private void imageIsPresent() {
+            String src = StringUtils.substringBetween(section.getContent(), "!$", "!$");
+            while (src != null) {
+                String src_original = "!$" + src + "!$";
+                String src_image = src.replace("src/main/webapp/", "");
+                section.setContent(section.getContent().replace(src_original, "<img src='" + src_image + "'>"));
+                src = StringUtils.substringBetween(section.getContent(), "!$", "!$");
             }
-            return img;
         }
 
         private Button createDeleteButton() {
@@ -227,6 +227,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             content.setValue(section.getContent());
             Button okButton = new Button("Valider");
             okButton.addClickListener(event -> {
+                imageIsPresent();
                 getController().updateSection(section, title.getValue(), content.getValue());
                 modifyPopup.close();
                 MoodleBroadcaster.broadcast(this);
@@ -279,7 +280,6 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             }
         }
 
-        //            add(new UploadComponent("500", "500", 1, 1, "", "jpg", "JPG"));
         /*
             Cette fonction crée les Tabs
          */
@@ -515,11 +515,11 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
         public Div interneImageDiv() {
             Div interne = new Div();
 
-            String newDirName = "src/main/webapp/moodle/images/" + String.valueOf(getCourse().getId()) + "_" +
-                    String.valueOf(SecurityUtils.getCurrentUser(personRepository).getId());
+            String newDirName = "src/main/webapp/moodle/images/" + String.valueOf(getCourse().getId());
+
 
             UploadComponent uploadComponent = new UploadComponent("100%", "100%", 1, 30000000, newDirName, ".jpg", ".jpeg", ".png");
-            String nameChiffre = getRandomId() + "_" + String.valueOf(getCourse().getId()) + "_" + String.valueOf(SecurityUtils.getCurrentUser(personRepository).getId());
+            String nameChiffre = getRandomId() + "_" + String.valueOf(getCourse().getId());
             HorizontalLayout insertLayout = new HorizontalLayout();
             HorizontalLayout buttonLayout = new HorizontalLayout();
             VerticalLayout mainLayout = new VerticalLayout();
@@ -540,7 +540,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
                 }
 
                 if (ImageExist(newPath)) {
-                    text.setValue("!$[image](src=%$" + newPath + "%$)!$");
+                    text.setValue("!$" + newPath + "!$");
                 } else {
                     text.setValue("Une erreur est survenue, le fichier est inexistant");
                 }
