@@ -158,8 +158,8 @@ public abstract class ViewWithSidebars extends VerticalLayout {
      */
     public void createSidebar(long courseId) {
         String s = getUrl();
-        String t=s.substring(s.length()-1);
         String[] s2=s.split("/");
+        String t=s2[s2.length-1];
 
         sideBar = new FlexLayout();
         if (! SecurityUtils.isUserStudent()) {

@@ -103,8 +103,6 @@ public class Navbar extends AppLayout {
     @SneakyThrows
     private void createCourseNavigationMenu() {
         currentUser = SecurityUtils.getCurrentUser(personRepository);
-
-        //TODO: edit with the correct redirect values #42
         VaadinServletRequest req = (VaadinServletRequest) VaadinService.getCurrentRequest();
         StringBuffer uriString = req.getRequestURL();
         URI uri = new URI(uriString.toString());
