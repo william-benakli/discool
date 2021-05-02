@@ -68,6 +68,9 @@ public class Controller {
         return textChannelRepository.findFirstByCourseIdOrderByIdDesc(courseId);
     }
 
+    public MoodlePage getMoodlePage(long MoodlePageId){
+        return moodlePageRepository.findMoodlePageById(MoodlePageId);
+    }
 
     public void changeMessage(PublicChatMessage publicChatMessage, String messageText) {
         publicChatMessageRepository.updateMessageById(publicChatMessage.getId(), messageText);

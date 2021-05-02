@@ -41,10 +41,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.File;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Push(transport = Transport.LONG_POLLING)
 @CssImport("./styles/style.css")
@@ -107,8 +104,8 @@ public class Navbar extends AppLayout {
         StringBuffer uriString = req.getRequestURL();
         URI uri = new URI(uriString.toString());
         String tmp = uri.toString();
-        String cleanURI = tmp.substring(tmp.length()-1);
         String[] splitURI = tmp.split("/");
+        String cleanURI = splitURI[splitURI.length-1];
 
         courseNavigationDock = createCustomHorizontalLayout();
         List<Course> courses = controller.findAllCourses();
@@ -156,11 +153,23 @@ public class Navbar extends AppLayout {
         RouterLink routerLink = new RouterLink("", MoodleView.class, pageId);
         linkRouteurImage(courseNavigationDock, button, routerLink);
         //TODO: edit with the correct redirect values #42
-        if (splitURI.length>=4 && splitURI[3].equals("moodle") && cleanURI.equals(c.getId()+"")){
-            routerLink.getStyle()
-                    .set("border-radius","10px 10px 0 0")
-                    .set("padding","0 10px")
-                    .set("background-color", ViewWithSidebars.ColorHTML.GREY.getColorHtml());
+
+        /*System.out.println("bbbbbbbbbbbbbbbbbbbbbbb");
+        System.out.println(Arrays.toString(splitURI));
+        System.out.println(c.getId());
+        System.out.println(cleanURI);
+        System.out.println(splitURI.length>=4 && splitURI[3].equals("moodle") && cleanURI.equals(c.getId()+""));
+        System.out.println("bbbbbbbbbbbbbbbbbbbbbbb");*/
+
+        if (splitURI.length>=4){
+            System.out.println(Integer.valueOf(cleanURI)+"clearURI");
+            if(splitURI[3].equals("moodle") && controller.getMoodlePage(Integer.valueOf(cleanURI)).getCourseId()==c.getId()){
+                System.out.println(controller.getMoodlePage(Integer.valueOf(cleanURI)).getCourseId()+"Controller");
+                routerLink.getStyle()
+                        .set("border-radius","10px 10px 0 0")
+                        .set("padding","0 10px")
+                        .set("background-color", ViewWithSidebars.ColorHTML.GREY.getColorHtml());
+            }
         }
     }
 
