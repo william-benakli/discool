@@ -26,6 +26,7 @@ import com.vaadin.flow.component.radiobutton.RadioGroupVariant;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
+import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.BeforeEvent;
@@ -179,7 +180,8 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             String src = StringUtils.substringBetween(content, "!$", "!$");
             while (src != null) {
                 String src_original = "!$" + src + "!$";
-                content = content.replace(src_original, "\n ㅤ<img src='moodle/images/" + src + "' >ㅤ");
+                String[] tab_source = src.split(":");
+                content = content.replace(src_original, "\n ㅤ<img src='moodle/images/" + tab_source[0] + "' width='" + tab_source[1] + "' height='" + tab_source[2] + "' >ㅤ");
                 src = StringUtils.substringBetween(content, "!$", "!$");
             }
             return content;
@@ -268,9 +270,6 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
         private Dialog parent;
         private Map<Tab, Component> tabsToPages = new HashMap<>();
         private long targetId;
-        private Div div_externe;
-        private Div div_interne;
-
 
         DialogMoodle(Dialog parent, DialogType type) {
             this.parent = parent;
@@ -530,6 +529,18 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             TextArea text = createTextArea("Texte généré:", "");
             Paragraph warning = new Paragraph("Les fichiers autorisés sont .png, .jpg, .jpeg \n Les limites d'upload sont de 5Mo");
 
+            Div redimension = new Div();
+            Paragraph p = new Paragraph("Redimensionnez votre image: ");
+            HorizontalLayout layout = new HorizontalLayout();
+            NumberField height = new NumberField("");
+            height.setLabel("Hauteur");
+            height.setMax(1080);
+            NumberField width = new NumberField("");
+            width.setLabel("Largeur");
+            width.setMax(1920);
+            layout.add(width, height);
+            redimension.add(p, layout);
+
             Button copie = new Button("Copier");
             Button close = new Button("Fermer");
 
@@ -545,7 +556,13 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
                 }
 
                 if (ImageExist(newPath)) {
-                    text.setValue("!$" + newPath.replace("src/main/webapp/moodle/images/", "") + "!$");
+                    if (height.isEmpty() && width.isEmpty()) {
+                        text.setValue("!$" + newPath.replace("src/main/webapp/moodle/images/", "") + "!$");
+                    } else if (height.isEmpty()) {
+                        text.setValue("!$" + newPath.replace("src/main/webapp/moodle/images/", "") + ":-1:" + height.getValue().intValue() + "!$");
+                    } else if (width.isEmpty()) {
+                        text.setValue("!$" + newPath.replace("src/main/webapp/moodle/images/", "") + ":" + width.getValue().intValue() + ":" + "-1!$");
+                    }
                     uploadComponent.setDropAllowed(false);
                 } else {
                     text.setValue("Une erreur est survenue, le fichier est inexistant");
@@ -569,7 +586,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             insertLayout.add(uploadComponent);
             buttonLayout.add(copie, close);
             mainLayout.setDefaultHorizontalComponentAlignment(Alignment.CENTER);
-            mainLayout.add(warning, insertLayout, text, buttonLayout);
+            mainLayout.add(warning, insertLayout, redimension, text, buttonLayout);
             interne.add(mainLayout);
             return interne;
         }
@@ -588,6 +605,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
                 }
             });
         }
+
 
         /*
             Cette fonction verifie qu'il s'agit d'un lien et non d'une entree interdite
