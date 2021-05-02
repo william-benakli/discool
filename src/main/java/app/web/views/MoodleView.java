@@ -174,7 +174,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
 
         /*
             Cette fonction prend un content (un string avec toutes les informations données) et convertie une chaine
-            de caractere specifique "!$ valeur !$ en img html
+            de caractere specifique "!$ valeur : hauteur : largeur!$ en img html
          */
         private String convertIfImagePresent(String content) {
             String src = StringUtils.substringBetween(content, "!$", "!$");
@@ -570,7 +570,15 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
                     if (height.isEmpty() && width.isEmpty()) {
                         text.setValue("!$" + newPath.replace("src/main/webapp/moodle/images/", "") + "!$");
                     } else {
-                        text.setValue("!$" + newPath.replace("src/main/webapp/moodle/images/", "") + ":" + width.getValue() + ":" + height.getValue() + "!$");
+                        if (!width.isEmpty() && !height.isEmpty()) {
+                            text.setValue("!$" + newPath.replace("src/main/webapp/moodle/images/", "") + ":" + width.getValue().intValue() + ":" + height.getValue().intValue() + "!$");
+                        }
+                        if (width.isEmpty() && !height.isEmpty()) {
+                            text.setValue("!$" + newPath.replace("src/main/webapp/moodle/images/", "") + ":" + width.getValue() + ":" + height.getValue().intValue() + "!$");
+                        }
+                        if (!width.isEmpty() && height.isEmpty()) {
+                            text.setValue("!$" + newPath.replace("src/main/webapp/moodle/images/", "") + ":" + width.getValue().intValue() + ":" + height.getValue() + "!$");
+                        }
                     }
                     uploadComponent.setDropAllowed(false);
                 } else {
