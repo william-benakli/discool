@@ -166,20 +166,20 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
 
         private void initContent() {
             title.add(Markdown.getHtmlFromMarkdown(section.getTitle()));
-            content.add(Markdown.getHtmlFromMarkdown(section.getContent()));
-            imageIsPresent();
+            content.add(Markdown.getHtmlFromMarkdown(convertIfImagePresent(section.getContent())));
             add(title);
             add(content);
         }
 
-        private void imageIsPresent() {
-            String src = StringUtils.substringBetween(section.getContent(), "!$", "!$");
+        private String convertIfImagePresent(String content) {
+            String src = StringUtils.substringBetween(content, "!$", "!$");
             while (src != null) {
                 String src_original = "!$" + src + "!$";
                 String src_image = src.replace("src/main/webapp/", "");
-                section.setContent(section.getContent().replace(src_original, "<img src='" + src_image + "'>"));
-                src = StringUtils.substringBetween(section.getContent(), "!$", "!$");
+                content = content.replace(src_original, "\n ㅤ<img src='" + src_image + "' >ㅤ");
+                src = StringUtils.substringBetween(content, "!$", "!$");
             }
+            return content;
         }
 
         private Button createDeleteButton() {
@@ -227,7 +227,6 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             content.setValue(section.getContent());
             Button okButton = new Button("Valider");
             okButton.addClickListener(event -> {
-                imageIsPresent();
                 getController().updateSection(section, title.getValue(), content.getValue());
                 modifyPopup.close();
                 MoodleBroadcaster.broadcast(this);
@@ -518,7 +517,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             String newDirName = "src/main/webapp/moodle/images/" + String.valueOf(getCourse().getId());
 
 
-            UploadComponent uploadComponent = new UploadComponent("100%", "100%", 1, 30000000, newDirName, ".jpg", ".jpeg", ".png");
+            UploadComponent uploadComponent = new UploadComponent("100%", "100%", 1, 5242880, newDirName, ".jpg", ".jpeg", ".png");
             String nameChiffre = getRandomId() + "_" + String.valueOf(getCourse().getId());
             HorizontalLayout insertLayout = new HorizontalLayout();
             HorizontalLayout buttonLayout = new HorizontalLayout();
