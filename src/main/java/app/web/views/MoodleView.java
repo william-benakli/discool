@@ -156,7 +156,8 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
 
             if (!SecurityUtils.isUserStudent()) {
                 FlexLayout f = new FlexLayout();
-                f.add(createDeleteButton(), createModifyButton());
+                if (!section.isHomePage())f.add(createDeleteButton());
+                f.add(createModifyButton());
                 this.add(f);
             }
 
@@ -181,9 +182,9 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             while (src != null) {
                 String src_original = "!$" + src + "!$";
                 String[] tab_source = src.split(":");
-                if (tab_source.length == 0 || tab_source.length < 3) {
+                if (tab_source.length < 3) {
                     content = content.replace(src_original, "\n ㅤ<img src='moodle/images/" + src + "' >ㅤ");
-                } else if (tab_source.length >= 3) {
+                } else {
                     if (tab_source[1] == "null") {
                         content = content.replace(src_original, "\n ㅤ<img src='moodle/images/" + tab_source[0] + "' height='" + tab_source[2] + "' >ㅤ");
                     } else if (tab_source[2] == "null") {
@@ -510,9 +511,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
                 this.parent.open();
             });
 
-            copie.addClickListener(event -> {
-                copyInClipBoard(text.getValue());
-            });
+            copie.addClickListener(event -> copyInClipBoard(text.getValue()));
             buttonLayout.add(valide, copie, close);
             insertLayout.add(lien);
             mainLayout.setDefaultHorizontalComponentAlignment(Alignment.CENTER);
@@ -595,9 +594,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
                 this.close();
                 this.parent.open();
             });
-            copie.addClickListener(event -> {
-                copyInClipBoard(text.getValue());
-            });
+            copie.addClickListener(event -> copyInClipBoard(text.getValue()));
 
             insertLayout.add(uploadComponent);
             buttonLayout.add(copie, close);
@@ -635,9 +632,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
              Cette fonction verifie qu'il s'agit d'un lien et non d'une entree interdite
         */
         public boolean isImages(String s) {
-            if ((s.toLowerCase().endsWith("jpg") || s.toLowerCase().endsWith("png") || s.toLowerCase().endsWith("jpeg")) && s.contains("."))
-                return true;
-            return false;
+            return (s.toLowerCase().endsWith("jpg") || s.toLowerCase().endsWith("png") || s.toLowerCase().endsWith("jpeg")) && s.contains(".");
         }
 
         /* *** Fonction auxiliaire pour alleger le code  *** */
