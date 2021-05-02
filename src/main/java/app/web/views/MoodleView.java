@@ -181,7 +181,17 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             while (src != null) {
                 String src_original = "!$" + src + "!$";
                 String[] tab_source = src.split(":");
-                content = content.replace(src_original, "\n ㅤ<img src='moodle/images/" + tab_source[0] + "' width='" + tab_source[1] + "' height='" + tab_source[2] + "' >ㅤ");
+                if (tab_source.length == 0 || tab_source.length < 3) {
+                    content = content.replace(src_original, "\n ㅤ<img src='moodle/images/" + src + "' >ㅤ");
+                } else if (tab_source.length >= 3) {
+                    if (tab_source[1] == "null") {
+                        content = content.replace(src_original, "\n ㅤ<img src='moodle/images/" + tab_source[0] + "' height='" + tab_source[2] + "' >ㅤ");
+                    } else if (tab_source[2] == "null") {
+                        content = content.replace(src_original, "\n ㅤ<img src='moodle/images/" + tab_source[0] + "' width='" + tab_source[1] + ">ㅤ");
+                    } else {
+                        content = content.replace(src_original, "\n ㅤ<img src='moodle/images/" + tab_source[0] + "' width='" + tab_source[1] + "' height='" + tab_source[2] + "' >ㅤ");
+                    }
+                }
                 src = StringUtils.substringBetween(content, "!$", "!$");
             }
             return content;
@@ -521,6 +531,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
 
 
             UploadComponent uploadComponent = new UploadComponent("100%", "100%", 1, 5242880, newDirName, ".jpg", ".jpeg", ".png");
+            uploadComponent.setDropLabel(new Paragraph("Séléctionez votre fichier (5MO max)"));
             String nameChiffre = getRandomId() + "_" + String.valueOf(getCourse().getId());
             HorizontalLayout insertLayout = new HorizontalLayout();
             HorizontalLayout buttonLayout = new HorizontalLayout();
@@ -530,13 +541,13 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             Paragraph warning = new Paragraph("Les fichiers autorisés sont .png, .jpg, .jpeg \n Les limites d'upload sont de 5Mo");
 
             Div redimension = new Div();
-            Paragraph p = new Paragraph("Redimensionnez votre image: ");
+            Paragraph p = new Paragraph("Redimensionnez votre image: (avant Upload) ");
             HorizontalLayout layout = new HorizontalLayout();
             NumberField height = new NumberField("");
-            height.setLabel("Hauteur");
+            height.setLabel("Hauteur (px)");
             height.setMax(1080);
             NumberField width = new NumberField("");
-            width.setLabel("Largeur");
+            width.setLabel("Largeur (px)");
             width.setMax(1920);
             layout.add(width, height);
             redimension.add(p, layout);
@@ -558,17 +569,14 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
                 if (ImageExist(newPath)) {
                     if (height.isEmpty() && width.isEmpty()) {
                         text.setValue("!$" + newPath.replace("src/main/webapp/moodle/images/", "") + "!$");
-                    } else if (height.isEmpty()) {
-                        text.setValue("!$" + newPath.replace("src/main/webapp/moodle/images/", "") + ":-1:" + height.getValue().intValue() + "!$");
-                    } else if (width.isEmpty()) {
-                        text.setValue("!$" + newPath.replace("src/main/webapp/moodle/images/", "") + ":" + width.getValue().intValue() + ":" + "-1!$");
+                    } else {
+                        text.setValue("!$" + newPath.replace("src/main/webapp/moodle/images/", "") + ":" + width.getValue() + ":" + height.getValue() + "!$");
                     }
                     uploadComponent.setDropAllowed(false);
                 } else {
                     text.setValue("Une erreur est survenue, le fichier est inexistant");
                 }
             });
-
 
             uploadComponent.addFileRejectedListener(event -> {
                 com.vaadin.flow.component.notification.Notification.show("Enrengistrement de l'image impossible");
@@ -586,7 +594,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             insertLayout.add(uploadComponent);
             buttonLayout.add(copie, close);
             mainLayout.setDefaultHorizontalComponentAlignment(Alignment.CENTER);
-            mainLayout.add(warning, insertLayout, redimension, text, buttonLayout);
+            mainLayout.add(warning, redimension, insertLayout, text, buttonLayout);
             interne.add(mainLayout);
             return interne;
         }
