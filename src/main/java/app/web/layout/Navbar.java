@@ -157,33 +157,23 @@ public class Navbar extends AppLayout {
         long pageId = findHomePageId(c.getId());
         RouterLink routerLink = new RouterLink("", MoodleView.class, pageId);
         linkRouteurImage(courseNavigationDock, button, routerLink);
-        //TODO: edit with the correct redirect values #42
-
-        /*System.out.println("bbbbbbbbbbbbbbbbbbbbbbb");
-        System.out.println(Arrays.toString(splitURI));
-        System.out.println(c.getId());
-        System.out.println(cleanURI);
-        System.out.println(splitURI.length>=4 && splitURI[3].equals("moodle") && cleanURI.equals(c.getId()+""));
-        System.out.println("bbbbbbbbbbbbbbbbbbbbbbb");*/
-
+        //style server
         if (splitURI.length>=4){
-            if(splitURI[3].equals("moodle") && controller.getMoodlePage(Integer.valueOf(cleanURI)).getCourseId()==c.getId()){
-                routerLink.getStyle()
-                        .set("border-radius","10px 10px 0 0")
-                        .set("padding","0 10px")
-                        .set("background-color", ViewWithSidebars.ColorHTML.GREY.getColorHtml());
-            }else if((splitURI[3].equals("assignment") || splitURI[3].equals("teacher_assignment")) && assignmentController.getAssignment(Integer.valueOf(cleanURI)).getCourseId()==c.getId()){
-                routerLink.getStyle()
-                        .set("border-radius","10px 10px 0 0")
-                        .set("padding","0 10px")
-                        .set("background-color", ViewWithSidebars.ColorHTML.GREY.getColorHtml());
-            }else if(splitURI[3].equals("channels") && controller.getTextChannel(Integer.valueOf(cleanURI)).getCourseId()==c.getId()){
-                routerLink.getStyle()
-                        .set("border-radius","10px 10px 0 0")
-                        .set("padding","0 10px")
-                        .set("background-color", ViewWithSidebars.ColorHTML.GREY.getColorHtml());
+            if(splitURI[3].equals("moodle") && controller.getMoodlePage(Integer.parseInt(cleanURI)).getCourseId()==c.getId()){
+                styleServer(routerLink);
+            }else if((splitURI[3].equals("assignment") || splitURI[3].equals("teacher_assignment")) && assignmentController.getAssignment(Integer.parseInt(cleanURI)).getCourseId()==c.getId()){
+                styleServer(routerLink);
+            }else if(splitURI[3].equals("channels") && controller.getTextChannel(Integer.parseInt(cleanURI)).getCourseId()==c.getId()){
+                styleServer(routerLink);
             }
         }
+    }
+
+    private void styleServer(RouterLink routerLink){
+        routerLink.getStyle()
+                .set("border-radius","10px 10px 0 0")
+                .set("padding","0 10px")
+                .set("background-color", ViewWithSidebars.ColorHTML.GREY.getColorHtml());
     }
 
     private long findHomePageId(long courseId) {
