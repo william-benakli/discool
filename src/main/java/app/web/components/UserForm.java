@@ -19,7 +19,6 @@ import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.shared.Registration;
-import org.springframework.beans.factory.annotation.Autowired;
 
 public class UserForm extends FormLayout {
     private final Controller controller;
@@ -40,7 +39,7 @@ public class UserForm extends FormLayout {
     private Person person;
 
 
-    public UserForm(@Autowired PersonRepository personRepository) {
+    public UserForm(PersonRepository personRepository) {
         this.controller = new Controller(personRepository,
                                          null, null,
                                          null, null,
@@ -117,7 +116,7 @@ public class UserForm extends FormLayout {
         return ok;
     }
 
-    public boolean userExist(String username) {
+    private boolean userExist(String username) {
         return personRepository.findByUsername(username) != null;
     }
 
