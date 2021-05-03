@@ -4,7 +4,6 @@ package app.controller;
 import app.jpa_repo.*;
 import app.model.chat.PublicChatMessage;
 import app.model.chat.TextChannel;
-import app.model.courses.Assignment;
 import app.model.courses.Course;
 import app.model.courses.MoodlePage;
 import app.model.users.Group;
@@ -212,5 +211,12 @@ public class Controller {
 
     public List<MoodlePage> getAllMoodlePageForCourse(long courseID) {
         return moodlePageRepository.findAllByCourseId(courseID);
+    }
+
+    public void deleteUser(Person person) {
+        personRepository.deleteUserByIdGroup_members(person.getId());
+        personRepository.deleteUserByIdIndirect_messages(person.getId());
+        personRepository.updateUserByIdPosts(person.getId());
+        personRepository.deleteUserById(person.getId());
     }
 }
