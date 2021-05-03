@@ -10,7 +10,6 @@ import app.model.chat.TextChannel;
 import app.model.courses.Assignment;
 import app.model.courses.Course;
 import app.model.courses.MoodlePage;
-import app.web.components.UploadComponent;
 import app.web.layout.Navbar;
 import com.vaadin.component.VaadinClipboard;
 import com.vaadin.component.VaadinClipboardImpl;
@@ -26,7 +25,6 @@ import com.vaadin.flow.component.radiobutton.RadioGroupVariant;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
-import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.BeforeEvent;
@@ -36,20 +34,19 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.ui.Notification;
 import lombok.SneakyThrows;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.io.File;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Route(value = "moodle", layout = Navbar.class)
 public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, HasUrlParameter<Long> {
 
-    private final PersonRepository personRepository;
     private final MoodlePageRepository moodlePageRepository;
     private final CourseRepository courseRepository;
-    private Course course;
 
     private final FlexLayout moodleBar = new FlexLayout();
 
@@ -64,7 +61,6 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
                       @Autowired StudentAssignmentsUploadsRepository studentAssignmentsUploadsRepository,
                       @Autowired GroupRepository groupRepository,
                       @Autowired GroupMembersRepository groupMembersRepository) {
-        this.personRepository = personRepository;
         this.courseRepository = courseRepository;
         this.moodlePageRepository = moodlePageRepository;
         setPersonRepository(personRepository);
@@ -83,7 +79,6 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             }
         });
     }
-
 
     @Override
     protected void onDetach(DetachEvent detachEvent) {
@@ -129,13 +124,6 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
         return getCourse().getName();
     }
 
-    public enum DialogType {
-        LINK, IMAGE;
-        public static DialogType[] getDilogType() {
-            return DialogType.class.getEnumConstants();
-        }
-    }
-
     /**
      * The Layout that contains for each section :
      * - the title
@@ -156,46 +144,12 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
 
             if (!SecurityUtils.isUserStudent()) {
                 FlexLayout f = new FlexLayout();
-                if (!section.isHomePage())f.add(createDeleteButton());
-                f.add(createModifyButton());
+                f.add(createDeleteButton(), createModifyButton());
                 this.add(f);
             }
 
             initContent();
             createModifyPopup();
-        }
-
-
-        private void initContent() {
-            title.add(Markdown.getHtmlFromMarkdown(section.getTitle()));
-            content.add(Markdown.getHtmlFromMarkdown(convertIfImagePresent(section.getContent())));
-            add(title);
-            add(content);
-        }
-
-        /*
-            Cette fonction prend un content (un string avec toutes les informations données) et convertie une chaine
-            de caractere specifique "!$ valeur : hauteur : largeur!$ en img html
-         */
-        private String convertIfImagePresent(String content) {
-            String src = StringUtils.substringBetween(content, "!$", "!$");
-            while (src != null) {
-                String src_original = "!$" + src + "!$";
-                String[] tab_source = src.split(":");
-                if (tab_source.length < 3) {
-                    content = content.replace(src_original, "\n ㅤ<img src='moodle/images/" + src + "' >ㅤ");
-                } else {
-                    if (tab_source[1] == "null") {
-                        content = content.replace(src_original, "\n ㅤ<img src='moodle/images/" + tab_source[0] + "' height='" + tab_source[2] + "' >ㅤ");
-                    } else if (tab_source[2] == "null") {
-                        content = content.replace(src_original, "\n ㅤ<img src='moodle/images/" + tab_source[0] + "' width='" + tab_source[1] + ">ㅤ");
-                    } else {
-                        content = content.replace(src_original, "\n ㅤ<img src='moodle/images/" + tab_source[0] + "' width='" + tab_source[1] + "' height='" + tab_source[2] + "' >ㅤ");
-                    }
-                }
-                src = StringUtils.substringBetween(content, "!$", "!$");
-            }
-            return content;
         }
 
         private Button createDeleteButton() {
@@ -212,12 +166,19 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             return deleteButton;
         }
 
+        private void initContent() {
+            title.add(Markdown.getHtmlFromMarkdown(section.getTitle()));
+            content.add(Markdown.getHtmlFromMarkdown(section.getContent()));
+            add(title);
+            add(content);
+        }
+
         private Button createModifyButton() {
             Button modifyButton = new Button();
             Image img = new Image("img/editer.svg", "edition");
             img.getStyle()
-                    .set("width","25px")
-                    .set("margin","auto");
+                    .set("width", "25px")
+                    .set("margin", "auto");
             modifyButton.setIcon(img);
             modifyButton.addClickListener(event -> modifyPopup.open());
             return modifyButton;
@@ -229,18 +190,14 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
         private void createModifyPopup() {
             VerticalLayout layout = new VerticalLayout();
             HorizontalLayout layout_horizontal = new HorizontalLayout();
-            HorizontalLayout layout_horizontal_button = new HorizontalLayout();
 
-            AtomicReference<DialogMoodle> dialoglink = new AtomicReference<>(new DialogMoodle(modifyPopup, DialogType.LINK));
-            AtomicReference<DialogMoodle> dialogimage = new AtomicReference<>(new DialogMoodle(modifyPopup, DialogType.IMAGE));
+            AtomicReference<DialogLink> dialogLink = new AtomicReference<>(new DialogLink(modifyPopup));
 
-
-            Button link = new Button("Ajouter un lien");
-            Button image = new Button("Ajouter une Image");
-            Label label = new Label("Modify the section here");
-            TextField title = new TextField("Title");
+            Button link = new Button("Liens");
+            Label label = new Label("Modifiez la page ici : ");
+            TextField title = new TextField("Titre");
             title.setValue(section.getTitle());
-            TextArea content = new TextArea("Content");
+            TextArea content = new TextArea("Contenu");
             content.setValue(section.getContent());
             Button okButton = new Button("Valider");
             okButton.addClickListener(event -> {
@@ -250,57 +207,52 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             });
 
             link.addClickListener(event -> {
-                dialoglink.set(new DialogMoodle(modifyPopup, DialogType.LINK));
+                dialogLink.set(new DialogLink(modifyPopup));
+                dialogLink.get().open();
                 modifyPopup.close();
-                dialoglink.get().open();
             });
-
-            image.addClickListener(event -> {
-                dialogimage.set(new DialogMoodle(modifyPopup, DialogType.IMAGE));
-                modifyPopup.close();
-                dialogimage.get().open();
-            });
-
-            layout_horizontal_button.add(link, image);
-            layout_horizontal.add(okButton);
+            layout_horizontal.add(okButton, link);
             layout_horizontal.setPadding(true);
             layout_horizontal.setSpacing(true);
-            layout.add(label, title, content, layout_horizontal_button, layout_horizontal);
+            layout.add(label, title, content, layout_horizontal);
             layout.setDefaultHorizontalComponentAlignment(Alignment.CENTER);
             modifyPopup.add(layout);
         }
 
     }
 
-    /*
-        Cette classe permet de générer un dialog avec des Tabs
+    /**
+     * The dialog that opens to let the user generate links
      */
+    public class DialogLink extends Dialog {
+        private final Dialog parent;
+        private final Map<Tab, Component> tabsToPages = new HashMap<>();
 
-    public class DialogMoodle extends Dialog {
+        private final Map<Integer, Component> selectMap = new HashMap<>();
+        private Select<Assignment> select_assignment;
+        private Select<TextChannel> select_channel;
+        private Select<MoodlePage> select_moodle;
+        private AtomicReference<String> url;
 
-        private Dialog parent;
-        private Map<Tab, Component> tabsToPages = new HashMap<>();
-        private long targetId;
+        private TextArea generatedLink;
+        private TextField userInputNameLink;
+        private TextField userInputLinkUrl;
 
-        DialogMoodle(Dialog parent, DialogType type) {
+        DialogLink(Dialog parent) {
             this.parent = parent;
-            if (type == DialogType.LINK) {
-                createTab(interneLinkDiv(), externeLinkDiv(), "Lien");
-            } else if (type == DialogType.IMAGE) {
-                createTab(interneImageDiv(), externeImageDiv(), "Image");
-            } else {
-                Notification.show("Erreur: Impossible de charger le dialog demandé.");
-            }
+            createTab();
         }
 
-        /*
-            Cette fonction crée les Tabs
+        /**
+         * Creates the tabs : one for internal links, one for external ones
          */
-        public void createTab(Div div_interne, Div div_externe, String name) {
-            Tab externe = new Tab(name + " externe");
+        private void createTab() {
+            Tab externe = new Tab("Lien externe");
+            Div div_externe = externalLinksDiv();
             tabsToPages.put(externe, div_externe);
 
-            Tab interne = new Tab(name + " interne");
+            Tab interne = new Tab("Lien interne");
+            Div div_interne = internalLinksDiv();
             tabsToPages.put(interne, div_interne);
             div_interne.setVisible(false);
 
@@ -317,32 +269,23 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             add(tabs, div_externe, div_interne);
         }
 
-        /*
-            Cette fonction créer la partie du tab qui s'occupe des liens externes
+        /**
+         * @return the Div for the user to general external links from
          */
-        public Div externeLinkDiv() {
+        private Div externalLinksDiv() {
             Div d = new Div();
-
             HorizontalLayout insertLayout = new HorizontalLayout();
             HorizontalLayout buttonLayout = new HorizontalLayout();
             VerticalLayout mainLayout = new VerticalLayout();
 
-            TextField msg = createTextField("Texte à l'affichage: ", "Entre le nom du lien ici...");
-            TextField lien = createTextField("Votre lien: ", "Entre votre lien ici....");
-            TextArea text = createTextArea("Texte généré:", "");
+            userInputNameLink = createTextField("Texte à afficher : ", "Entrez le nom du lien ici...");
+            userInputLinkUrl = createTextField("Votre lien : ", "Entrez votre lien ici...");
+            generatedLink = createTextArea();
 
-            Button valide = new Button("Generer");
+            Button valide = new Button("Générer le lien");
             Button copie = new Button("Copier");
             Button close = new Button("Fermer");
-            valide.addClickListener(event -> {
-                if (msg.isEmpty() || lien.isEmpty()) {
-                    text.setValue("Erreur champs invalide");
-                } else if (!isLinks(lien.getValue())) {
-                    text.setValue("Erreur lien non valide");
-                } else {
-                    text.setValue("[" + msg.getValue() + "](" + lien.getValue() + ")");
-                }
-            });
+            valide.addClickListener(event -> createValidateButtonForExternalLinks());
 
             close.addClickListener(event -> {
                 this.close();
@@ -350,347 +293,191 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             });
 
             copie.addClickListener(event -> {
-                copyInClipBoard(text.getValue());
+                copyInClipBoard(generatedLink.getValue());
             });
             buttonLayout.add(valide, copie, close);
-            insertLayout.add(msg, lien);
+            insertLayout.add(userInputNameLink, userInputLinkUrl);
             mainLayout.setDefaultHorizontalComponentAlignment(Alignment.CENTER);
-            mainLayout.add(insertLayout, text, buttonLayout);
+            mainLayout.add(insertLayout, generatedLink, buttonLayout);
             d.add(mainLayout);
             return d;
         }
 
-        /*
-             Cette fonction créer la partie du tab qui s'occupe des liens internes
-        */
-        public Div interneLinkDiv() {
+        /**
+         * @return the Div for the user to generate internal links from
+         */
+        private Div internalLinksDiv() {
             Div interne = new Div();
-            AtomicReference<String> url = new AtomicReference<>("channels");
-            List<Assignment> assignment = getAssignmentController().getAssignmentsForCourse(getCourse().getId());
-            List<TextChannel> channels = getController().getAllChannelsForCourse(getCourse().getId());
-            List<MoodlePage> moodle = getController().getAllMoodlePageForCourse(getCourse().getId());
-
-            Map<Integer, Component> selectMap = new HashMap<>();
-
+            url = new AtomicReference<>("channels");
 
             HorizontalLayout insertLayout = new HorizontalLayout();
             HorizontalLayout buttonLayout = new HorizontalLayout();
             VerticalLayout mainLayout = new VerticalLayout();
 
-            TextField msg = createTextField("Texte à l'affichage: ", "Entre le nom du lien ici...");
-            TextArea text = createTextArea("Texte généré:", "");
+            userInputNameLink = createTextField("Texte à afficher : ", "Entre le nom du lien ici...");
+            generatedLink = createTextArea();
 
-            Select<Assignment> select_assignment = new Select<>();
-            select_assignment.setLabel("Sélectionnez une redirection : ");
-            select_assignment.setTextRenderer(Assignment::getName);
-            select_assignment.setItems(assignment);
-
-            Select<TextChannel> select_channel = new Select<>();
-            select_channel.setLabel("Sélectionnez une redirection : ");
-            select_channel.setTextRenderer(TextChannel::getName);
-            select_channel.setItems(channels);
-
-            Select<MoodlePage> select_moodle = new Select<>();
-            select_moodle.setLabel("Sélectionnez une redirection : ");
-            select_moodle.setTextRenderer(MoodlePage::getTitle);
-            select_moodle.setItems(moodle);
-            //Map
-            selectMap.put(0, select_assignment);
-            selectMap.put(1, select_channel);
-            selectMap.put(2, select_moodle);
-
-            selectMap.values().forEach(e -> e.setVisible(false));
-            select_channel.setVisible(true);
-
+            // the drop-down lists to choose the assignment/moodle page/text channel
+            createSelectLists(selectMap);
+            // the radio button to trigger the right drop-down list to display
             RadioButtonGroup<String> radio = createRadioDefault();
-
             radio.addValueChangeListener(event -> {
-
-                if (event.getValue().equals("Salon de discussion")) {
-                    selectMap.values().forEach(e -> e.setVisible(false));
-                    select_channel.setVisible(true);
-                    url.set("channels");
-                } else if (event.getValue().equals("Devoir à rendre")) {
-                    selectMap.values().forEach(e -> e.setVisible(false));
-                    select_assignment.setVisible(true);
-                    url.set("assignment");
-                } else {
-                    selectMap.values().forEach(e -> e.setVisible(false));
-                    select_moodle.setVisible(true);
-                    url.set("moodle");
-                }
+                changeSelectTab(event.getValue());
             });
 
-            Button valide = new Button("Generer");
-            Button copie = new Button("Copier");
-            Button close = new Button("Fermer");
-            valide.addClickListener(event -> {
-                if (msg.isEmpty()) {
-                    text.setValue("Erreur champs invalide");
-                } else {
-                    //TODO: à changer pour le serveur ne plus mettre https://localhost:8080/
-                    String urlRadicale = "http://localhost:8080/";
-
-                    switch (url.get()) {
-                        case "channels":
-                            if (select_channel.getValue() == null) {
-                                text.setValue("Erreur aucune séléction");
-                            } else {
-                                targetId = select_channel.getValue().getId();
-                                text.setValue("[" + msg.getValue() + "](" + urlRadicale + url + "/" + targetId + " )");
-                            }
-                            break;
-                        case "assignment":
-                            if (select_assignment.getValue() == null) {
-                                text.setValue("Erreur aucune séléction");
-                            } else {
-                                targetId = select_assignment.getValue().getId();
-                                text.setValue("[" + msg.getValue() + "](" + urlRadicale + url + "/" + targetId + " )");
-                            }
-                            break;
-                        case "moodle":
-                            if (select_moodle.getValue() == null) {
-                                text.setValue("Erreur aucune séléction");
-                            } else {
-                                targetId = select_moodle.getValue().getId();
-                                text.setValue("[" + msg.getValue() + "](" + urlRadicale + url + "/" + targetId + " )");
-                            }
-                            break;
-                    }
-                }
-            });
-
-            close.addClickListener(event -> {
-                this.close();
-                this.parent.open();
-            });
-            copie.addClickListener(event -> {
-                copyInClipBoard(text.getValue());
-            });
-
-            insertLayout.add(msg, radio, select_assignment, select_channel, select_moodle);
-            buttonLayout.add(valide, copie, close);
+            insertLayout.add(userInputNameLink, radio, select_assignment, select_channel, select_moodle);
+            buttonLayout.add(createValidateButton(), createCopyButton(), createCloseButton());
             mainLayout.setDefaultHorizontalComponentAlignment(Alignment.CENTER);
-            mainLayout.add(insertLayout, text, buttonLayout);
+            mainLayout.add(insertLayout, generatedLink, buttonLayout);
             interne.add(mainLayout);
             return interne;
         }
 
-
-        /*
-            Cette fonction créer la partie du tab qui s'occupe des images externes
-         */
-        public Div externeImageDiv() {
-            Div d = new Div();
-
-            HorizontalLayout insertLayout = new HorizontalLayout();
-            HorizontalLayout buttonLayout = new HorizontalLayout();
-            VerticalLayout mainLayout = new VerticalLayout();
-
-            TextField lien = createTextField("Votre lien: ", "Entre votre lien ici....");
-            TextArea text = createTextArea("Texte généré:", "");
-            Paragraph warning = new Paragraph("Les liens autorisés doivent finir par : .png, .jpg ou .jpeg");
-
-            Button valide = new Button("Generer");
-            Button copie = new Button("Copier");
-            Button close = new Button("Fermer");
-            valide.addClickListener(event -> {
-                if (lien.isEmpty()) {
-                    text.setValue("Erreur champs invalide");
-                } else if (!isLinks(lien.getValue())) {
-                    text.setValue("Erreur lien non valide");
-                } else if (!isImages(lien.getValue())) {
-                    text.setValue("Erreur ce lien n'est pas une image");
-                } else {
-                    text.setValue("![](" + lien.getValue() + ")");
-                }
-            });
-
-            close.addClickListener(event -> {
-                this.close();
-                this.parent.open();
-            });
-
-            copie.addClickListener(event -> copyInClipBoard(text.getValue()));
-            buttonLayout.add(valide, copie, close);
-            insertLayout.add(lien);
-            mainLayout.setDefaultHorizontalComponentAlignment(Alignment.CENTER);
-            mainLayout.add(warning, insertLayout, text, buttonLayout);
-            d.add(mainLayout);
-            return d;
-        }
-
-        /*
-             Cette fonction créer la partie du tab qui s'occupe des images internes
-        */
-        public Div interneImageDiv() {
-            Div interne = new Div();
-
-            String newDirName = "src/main/webapp/moodle/images/" + String.valueOf(getCourse().getId());
-
-
-            UploadComponent uploadComponent = new UploadComponent("100%", "100%", 1, 5242880, newDirName, ".jpg", ".jpeg", ".png");
-            uploadComponent.setDropLabel(new Paragraph("Séléctionez votre fichier (5MO max)"));
-            String nameChiffre = getRandomId() + "_" + String.valueOf(getCourse().getId());
-            HorizontalLayout insertLayout = new HorizontalLayout();
-            HorizontalLayout buttonLayout = new HorizontalLayout();
-            VerticalLayout mainLayout = new VerticalLayout();
-
-            TextArea text = createTextArea("Texte généré:", "");
-            Paragraph warning = new Paragraph("Les fichiers autorisés sont .png, .jpg, .jpeg \n Les limites d'upload sont de 5Mo");
-
-            Div redimension = new Div();
-            Paragraph p = new Paragraph("Redimensionnez votre image: (avant Upload) ");
-            HorizontalLayout layout = new HorizontalLayout();
-            NumberField height = new NumberField("");
-            height.setLabel("Hauteur (px)");
-            height.setMax(1080);
-            NumberField width = new NumberField("");
-            width.setLabel("Largeur (px)");
-            width.setMax(1920);
-            layout.add(width, height);
-            redimension.add(p, layout);
-
-            Button copie = new Button("Copier");
-            Button close = new Button("Fermer");
-
-            uploadComponent.addSucceededListener(event -> {
-                String newPath = "";
-                com.vaadin.flow.component.notification.Notification.show("Votre fichier est bien téléchargé");
-                try {
-                    newPath = renameFile(uploadComponent.getFileName(), newDirName, nameChiffre);
-                } catch (Exception e) {
-                    text.setValue("Une erreur est survenue, le fichier est inexistant");
-                    close();
-                    this.parent.open();
-                }
-
-                if (ImageExist(newPath)) {
-                    if (height.isEmpty() && width.isEmpty()) {
-                        text.setValue("!$" + newPath.replace("src/main/webapp/moodle/images/", "") + "!$");
-                    } else {
-                        if (!width.isEmpty() && !height.isEmpty()) {
-                            text.setValue("!$" + newPath.replace("src/main/webapp/moodle/images/", "") + ":" + width.getValue().intValue() + ":" + height.getValue().intValue() + "!$");
-                        }
-                        if (width.isEmpty() && !height.isEmpty()) {
-                            text.setValue("!$" + newPath.replace("src/main/webapp/moodle/images/", "") + ":" + width.getValue() + ":" + height.getValue().intValue() + "!$");
-                        }
-                        if (!width.isEmpty() && height.isEmpty()) {
-                            text.setValue("!$" + newPath.replace("src/main/webapp/moodle/images/", "") + ":" + width.getValue().intValue() + ":" + height.getValue() + "!$");
-                        }
-                    }
-                    uploadComponent.setDropAllowed(false);
-                } else {
-                    text.setValue("Une erreur est survenue, le fichier est inexistant");
-                }
-            });
-
-            uploadComponent.addFileRejectedListener(event -> {
-                com.vaadin.flow.component.notification.Notification.show("Enrengistrement de l'image impossible");
-                com.vaadin.flow.component.notification.Notification.show(event.getErrorMessage());
-            });
-
-            close.addClickListener(event -> {
-                this.close();
-                this.parent.open();
-            });
-            copie.addClickListener(event -> copyInClipBoard(text.getValue()));
-
-            insertLayout.add(uploadComponent);
-            buttonLayout.add(copie, close);
-            mainLayout.setDefaultHorizontalComponentAlignment(Alignment.CENTER);
-            mainLayout.add(warning, redimension, insertLayout, text, buttonLayout);
-            interne.add(mainLayout);
-            return interne;
-        }
-
-        /*
-           Fonction de copy (dependance Maven)
-         */
-        public void copyInClipBoard(String text) {
-            //il faut que ce soit en https
-            VaadinClipboard vaadinClipboard = VaadinClipboardImpl.GetInstance();
-            vaadinClipboard.copyToClipboard(text, copySuccess -> {
-                if (copySuccess) {
-                    Notification.show("\'" + text + "\'" + " a bien été copié");
-                } else {
-                    Notification.show("Erreur la copie n'a pas été effectué", Notification.Type.ERROR_MESSAGE);
-                }
-            });
-        }
-
-
-        /*
-            Cette fonction verifie qu'il s'agit d'un lien et non d'une entree interdite
-         */
-        public boolean isLinks(String s) {
-            if ((s.startsWith("http") || s.startsWith("https")) && s.contains(".")) return true;
-            return false;
-        }
-
-        /*
-             Cette fonction verifie qu'il s'agit d'un lien et non d'une entree interdite
-        */
-        public boolean isImages(String s) {
-            return (s.toLowerCase().endsWith("jpg") || s.toLowerCase().endsWith("png") || s.toLowerCase().endsWith("jpeg")) && s.contains(".");
-        }
-
-        /* *** Fonction auxiliaire pour alleger le code  *** */
-        public TextField createTextField(String label, String placeHolder) {
+        private TextField createTextField(String label, String placeHolder) {
             TextField textField = new TextField();
             textField.setLabel(label);
             textField.setPlaceholder(placeHolder);
             return textField;
         }
 
-        public TextArea createTextArea(String label, String placeHolder) {
+        private TextArea createTextArea() {
             TextArea textArea = new TextArea();
-            textArea.setLabel(label);
-            textArea.setPlaceholder(placeHolder);
+            textArea.setLabel("Texte généré:");
+            textArea.setPlaceholder("");
             textArea.setReadOnly(true);
             textArea.getStyle().set("margin", "auto").set("width", "100%");
             return textArea;
         }
 
-        public RadioButtonGroup createRadioDefault() {
-            RadioButtonGroup radio = new RadioButtonGroup<>();
-            radio.setItems("Salon de discussion", "Devoir à rendre", "Moodle présentation");
+        private void createValidateButtonForExternalLinks() {
+            if (userInputNameLink.isEmpty() || userInputLinkUrl.isEmpty()) {
+                generatedLink.setValue("Erreur : champs invalides");
+            } else if (!isValidExternalLink(userInputLinkUrl.getValue())) {
+                generatedLink.setValue("Erreur : lien non valide");
+            } else {
+                generatedLink.setValue("[" + userInputNameLink.getValue() + "](" + userInputLinkUrl.getValue() + ")");
+            }
+        }
+
+        public void copyInClipBoard(String text) {
+            VaadinClipboard vaadinClipboard = VaadinClipboardImpl.GetInstance();
+            vaadinClipboard.copyToClipboard(text, copySuccess -> {
+                if (copySuccess) {
+                    Notification.show("'" + text + "' a bien été copié");
+                } else {
+                    Notification.show("Erreur : la copie n'a pas été effectuée", Notification.Type.ERROR_MESSAGE);
+                }
+            });
+        }
+
+        private void createSelectLists(Map<Integer, Component> selectMap) {
+            List<Assignment> assignments = getAssignmentController().getAssignmentsForCourse(getCourse().getId());
+            List<TextChannel> channels = getController().getAllChannelsForCourse(getCourse().getId());
+            List<MoodlePage> moodlePages = getController().getAllMoodlePageForCourse(getCourse().getId());
+
+            select_assignment = new Select<>();
+            select_assignment.setLabel("Sélectionnez une redirection : ");
+            select_assignment.setTextRenderer(Assignment::getName);
+            select_assignment.setItems(assignments);
+
+            select_channel = new Select<>();
+            select_channel.setLabel("Sélectionnez une redirection : ");
+            select_channel.setTextRenderer(TextChannel::getName);
+            select_channel.setItems(channels);
+
+            select_moodle = new Select<>();
+            select_moodle.setLabel("Sélectionnez une redirection : ");
+            select_moodle.setTextRenderer(MoodlePage::getTitle);
+            select_moodle.setItems(moodlePages);
+
+            selectMap.put(0, select_assignment);
+            selectMap.put(1, select_channel);
+            selectMap.put(2, select_moodle);
+            selectMap.values().forEach(e -> e.setVisible(false));
+            select_channel.setVisible(true);
+        }
+
+        private RadioButtonGroup<String> createRadioDefault() {
+            RadioButtonGroup<String> radio = new RadioButtonGroup<>();
+            radio.setItems("Salon de discussion", "Devoir à rendre", "Page moodle");
             radio.setLabel("Sélectionnez le type de redirection: ");
             radio.setValue("Salon de discussion");
             radio.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
             return radio;
         }
 
-        public String getExtensionImage(String name) {
-            String[] tab_name = name.toLowerCase().split("\\.");
-            if (tab_name.length > 2) return "";
-            if (tab_name[1].contains("jpg") || tab_name[1].contains("jpeg") || tab_name[1].contains("png")) {
-                return tab_name[1];
+        private void changeSelectTab(String pageType) {
+            if (pageType.equals("Salon de discussion")) {
+                selectMap.values().forEach(e -> e.setVisible(false));
+                select_channel.setVisible(true);
+                url.set("channels");
+            } else if (pageType.equals("Devoir à rendre")) {
+                selectMap.values().forEach(e -> e.setVisible(false));
+                select_assignment.setVisible(true);
+                url.set("assignment");
+            } else {
+                selectMap.values().forEach(e -> e.setVisible(false));
+                select_moodle.setVisible(true);
+                url.set("moodle");
             }
-            return "";
         }
 
-        public boolean ImageExist(String url) {
-            File f = new File(url);
-            return f.exists();
+        private Button createValidateButton() {
+            Button valide = new Button("Générer");
+            valide.addClickListener(event -> {
+                if (userInputNameLink.isEmpty()) {
+                    generatedLink.setValue("Erreur : champs invalides");
+                } else {
+                    Select selectToChange = switch (url.get()) {
+                        case "channels" -> select_channel;
+                        case "assignment" -> select_assignment;
+                        case "moodle" -> select_moodle;
+                        default -> null;
+                    };
+                    changeSelectValue(selectToChange);
+
+                }
+            });
+            return valide;
         }
 
-        private String renameFile(String oldName, String path, String linkName) throws Exception {
-            String extension = getExtensionImage(oldName);
-            String newPath = path + "/" + linkName + "." + extension;
-            File old = new File(oldName);
-            File newFile = new File(newPath); //extension.toLowerCase());
-            if (!old.renameTo(newFile)) {
-                throw new Exception("File can't be renamed");
+        private Button createCopyButton() {
+            Button copy = new Button("Copier");
+            copy.addClickListener(event -> {
+                copyInClipBoard(generatedLink.getValue());
+            });
+            return copy;
+        }
+
+        private Button createCloseButton() {
+            Button close = new Button("Fermer");
+            close.addClickListener(event -> {
+                this.close();
+                this.parent.open();
+            });
+            return close;
+        }
+
+        private boolean isValidExternalLink(String s) {
+            return (s.startsWith("http") || s.startsWith("https")) && s.contains(".");
+        }
+
+        private void changeSelectValue(Select select) {
+            String urlRadicale = "http://localhost:8080/";
+            if (select.getValue() == null) {
+                generatedLink.setValue("Erreur aucune séléction");
+            } else {
+                long targetId;
+                if (select.getValue() instanceof Assignment) {
+                    targetId = ((Assignment) select.getValue()).getId();
+                } else if (select.getValue() instanceof MoodlePage) {
+                    targetId = ((MoodlePage) select.getValue()).getId();
+                } else {
+                    targetId = ((TextChannel) select.getValue()).getId();
+                }
+                generatedLink.setValue("[" + userInputNameLink.getValue()
+                                               + "](" + urlRadicale + url + "/" + targetId + " )");
             }
-            return newPath;
         }
-
-        public long getRandomId() {
-            return new Random().nextLong();
-        }
-        /* *** Fonction auxiliaire pour alleger le code  *** */
     }
-
-
 }

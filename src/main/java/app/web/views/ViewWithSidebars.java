@@ -16,7 +16,10 @@ import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.datetimepicker.DateTimePicker;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
-import com.vaadin.flow.component.html.*;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
@@ -34,17 +37,18 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinServletRequest;
-import com.vaadin.server.Page;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
 import org.vaadin.firitin.fields.LocalDateTimeField;
 
-import java.math.BigInteger;
 import java.net.URI;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public abstract class ViewWithSidebars extends VerticalLayout {
@@ -366,7 +370,7 @@ public abstract class ViewWithSidebars extends VerticalLayout {
             styleTab(channelTab, chanelLayout);
             channelDiv.add(chanelLayout);
 
-            Tab assignmentTab = new Tab("Créer un devoirs");
+            Tab assignmentTab = new Tab("Créer un devoir");
             Div assignmentDiv = new Div();
             assignmentDiv.setVisible(false);
             assignmentLayout = new FlexLayout();
