@@ -93,11 +93,11 @@ public class UserForm extends FormLayout {
 
             if (checkIfFieldNotEmpty()) {
                 if (!userExist(this.username.getValue())) {
-                    personRepository.addUser(this.username.getValue(), this.password.getValue(), this.role.getValue(), this.firstName.getValue(), this.lastName.getValue(), this.email.getValue(), this.description.getValue(), this.website.getValue(), 0, 0, 0);
+                    controller.addUser(this.username.getValue(), this.password.getValue(), this.role.getValue(), this.firstName.getValue(), this.lastName.getValue(), this.email.getValue(), this.description.getValue(), this.website.getValue(), 0, 0, 0);
                 } else {
-                    personRepository.updateUserById(person.getId(), email.getValue(), username.getValue(), firstName.getValue(), lastName.getValue(), description.getValue(), role.getValue(), website.getValue());
+                    controller.updateUserById(person.getId(), email.getValue(), username.getValue(), firstName.getValue(), lastName.getValue(), description.getValue(), role.getValue(), website.getValue());
                 }
-                personRepository.deleteNullUsers();
+                controller.deleteNullUsers();
                 validateAndSave();
             }
         });

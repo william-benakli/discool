@@ -9,6 +9,7 @@ import app.model.courses.MoodlePage;
 import app.model.users.Group;
 import app.model.users.GroupMembers;
 import app.model.users.Person;
+import org.springframework.data.repository.query.Param;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -56,6 +57,19 @@ public class Controller {
                 .build();
         publicChatMessageRepository.save(messageToSave);
         return messageToSave;
+    }
+
+
+    public void deleteNullUsers(){
+        personRepository.deleteNullUsers();
+    }
+
+    public void updateUserById(long id, String email, String username , String firstname, String lastname, String description, Person.Role role, String website){
+        personRepository.updateUserById(id, email,username, firstname, lastname ,description, role, website);
+    }
+
+    public void addUser( String username ,String password, Person.Role role, String firstname, String lastname, String email, String description, String website, long firstlogin, long lastlogin, long timecreated){
+        personRepository.addUser(username, password, role, firstname, lastname, email, description, website, firstlogin, lastlogin, timecreated);
     }
 
 
