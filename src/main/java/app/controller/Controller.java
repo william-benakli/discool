@@ -101,7 +101,9 @@ public class Controller {
         return personRepository.searchByEmail(searchTerm);
     }
 
-
+    public boolean userExist(String username) {
+        return findByUsername(username) != null;
+    }
 
     public MoodlePage getLastMoodlePage(long courseId){
         return moodlePageRepository.findFirstByCourseIdOrderByIdDesc(courseId);

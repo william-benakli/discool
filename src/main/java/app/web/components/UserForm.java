@@ -21,6 +21,7 @@ import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.shared.Registration;
+import org.hibernate.event.spi.DeleteEvent;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -59,6 +60,11 @@ public class UserForm extends FormLayout {
                 e.printStackTrace();
             }
         });
+        upload.addFailedListener(failedEvent ->{
+            Notification notification;
+            notification = new Notification("Error with the File", 3000, Notification.Position.MIDDLE);
+            notification.open();
+        });
         this.controller = new Controller(personRepository,
                                          null, null,
                                          null, null,
@@ -92,7 +98,7 @@ public class UserForm extends FormLayout {
         save.addClickListener(click -> {
 
             if (checkIfFieldNotEmpty()) {
-                if (!userExist(this.username.getValue())) {
+                if (!controller.userExist(this.username.getValue())) {
                     controller.addUser(this.username.getValue(), this.password.getValue(), this.role.getValue(), this.firstName.getValue(), this.lastName.getValue(), this.email.getValue(), this.description.getValue(), this.website.getValue(), 0, 0, 0);
                 } else {
                     controller.updateUserById(person.getId(), email.getValue(), username.getValue(), firstName.getValue(), lastName.getValue(), description.getValue(), role.getValue(), website.getValue());
@@ -113,6 +119,7 @@ public class UserForm extends FormLayout {
     /**
      * @return false if one of the required fields is empty, true if everything is ok
      */
+
     private boolean checkIfFieldNotEmpty() {
         boolean ok = true;
         Notification notification;
@@ -148,7 +155,7 @@ public class UserForm extends FormLayout {
                 p.setEmail(values[5]);
                 p.setPassword(values[1]);
                 p.setDescription(values[6]);
-                p.setRoleAsString(values[2]);
+                p.setRoleAsString(values[2]);//can't use the builder that's why i used sets
                 p.setWebsite(values[7]);
 
                 updateForm(values[0],values[3],values[4], values[5], values[1], values[6], p.getRole(),values[7]);
@@ -179,9 +186,6 @@ public class UserForm extends FormLayout {
         this.website.setValue(website);
     }
 
-    private boolean userExist(String username) {
-        return controller.findByUsername(username) != null;
-    }
 
     private void validateAndSave() {
         try {
