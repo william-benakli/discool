@@ -26,6 +26,8 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 public class UserForm extends FormLayout {
     private final Controller controller;
@@ -50,7 +52,13 @@ public class UserForm extends FormLayout {
 
     public UserForm(PersonRepository personRepository) {
         upload.setAcceptedFileTypes(".csv");
-        upload.addFinishedListener(finishedEvent -> uploadCSVFile(upload.getFileName()));
+        upload.addFinishedListener(finishedEvent -> {
+            try {
+                uploadCSVFile(upload.getFileName());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
         this.controller = new Controller(personRepository,
                                          null, null,
                                          null, null,
@@ -127,11 +135,11 @@ public class UserForm extends FormLayout {
         }
         return ok;
     }
-    public void uploadCSVFile(String fileName) {
-
+    public void uploadCSVFile(String fileName) throws IOException {
+        BufferedReader br = new BufferedReader(new FileReader(fileName)) ;
         String line = "";
         try {
-            BufferedReader br = new BufferedReader(new FileReader(fileName)) ;
+
             while((line = br.readLine())!=null){
                 String[] values = line.split(",");
                 Person p = new Person();
@@ -167,6 +175,8 @@ public class UserForm extends FormLayout {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        br.close();
+        Files.delete(Paths.get(fileName));
 
     }
 
