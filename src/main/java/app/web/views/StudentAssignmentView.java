@@ -151,14 +151,14 @@ public class StudentAssignmentView extends ViewWithSidebars implements HasDynami
 
             styleDivAssignment(div, divLeft, divRight, statusL, statusR);
             if (assignment.getAllowLate() == 1) {
-                divLeft.add(constTab(new Div(), "Cut-off date", ColorHTML.GREYTAB, true));
+                divLeft.add(constTab(new Div(), "Date limite", ColorHTML.GREYTAB, true));
                 divRight.add(constTab(new Div(), getController().convertLongToDate(assignment.getCutoffdate()*1000-3600000*2), ColorHTML.GREYTAB, false));
             }
 
             divLeft.add(
-                    constTab(new Div(), "Due date", ColorHTML.WHITE, true),
-                    constTab(new Div(), "Max grade", ColorHTML.GREYTAB, true),
-                    constTab(statusL, "Status", ColorHTML.WHITE, true));
+                    constTab(new Div(), "Date d'échéance", ColorHTML.WHITE, true),
+                    constTab(new Div(), "Note maximale", ColorHTML.GREYTAB, true),
+                    constTab(statusL, "Statut", ColorHTML.WHITE, true));
             divRight.add(
                     constTab(new Div(), getController().convertLongToDate(assignment.getDuedate()*1000-3600000*2), ColorHTML.WHITE, false),
                     constTab(new Div(), Long.toString(assignment.getMaxGrade()), ColorHTML.GREYTAB, false),
