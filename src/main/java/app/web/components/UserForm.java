@@ -139,7 +139,6 @@ public class UserForm extends FormLayout {
         BufferedReader br = new BufferedReader(new FileReader(fileName)) ;
         String line = "";
         try {
-
             while((line = br.readLine())!=null){
                 String[] values = line.split(",");
                 Person p = new Person();
@@ -152,16 +151,9 @@ public class UserForm extends FormLayout {
                 p.setRoleAsString(values[2]);
                 p.setWebsite(values[7]);
 
-                this.username.setValue(values[0]);
-                this.firstName.setValue(values[3]);
-                this.lastName.setValue(values[4]);
-                this.email.setValue(values[5]);
-                this.password.setValue(values[1]);
-                this.description.setValue(values[6]);
-                this.role.setValue(p.setRoleAsString(values[2]));
-                this.website.setValue(values[7]);
-                personRepository.addUser(this.username.getValue(), this.password.getValue(), this.role.getValue(), this.firstName.getValue(), this.lastName.getValue(), this.email.getValue(), this.description.getValue(), this.website.getValue(), 0, 0, 0);
-                personRepository.deleteNullUsers();
+                updateForm(values[0],values[3],values[4], values[5], values[1], values[6], p.getRole(),values[7]);
+                controller.addUser(this.username.getValue(), this.password.getValue(), this.role.getValue(), this.firstName.getValue(), this.lastName.getValue(), this.email.getValue(), this.description.getValue(), this.website.getValue(), 0, 0, 0);
+                controller.deleteNullUsers();
                 try {
                     binder.writeBean(p);
                     fireEvent(new SaveEvent(this, p));
@@ -169,19 +161,26 @@ public class UserForm extends FormLayout {
                     e.printStackTrace();
                 }
             }
-
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
             e.printStackTrace();
         }
         br.close();
         Files.delete(Paths.get(fileName));
+    }
 
+    public void updateForm(String username , String firstName, String lastName, String email, String password, String description, Person.Role role , String website){
+        this.username.setValue(username);
+        this.firstName.setValue(firstName);
+        this.lastName.setValue(lastName);
+        this.email.setValue(email);
+        this.password.setValue(password);
+        this.description.setValue(description);
+        this.role.setValue(role);
+        this.website.setValue(website);
     }
 
     private boolean userExist(String username) {
-        return personRepository.findByUsername(username) != null;
+        return controller.findByUsername(username) != null;
     }
 
     private void validateAndSave() {

@@ -9,6 +9,7 @@ import app.model.courses.MoodlePage;
 import app.model.users.Group;
 import app.model.users.GroupMembers;
 import app.model.users.Person;
+import app.web.components.UserForm;
 import org.springframework.data.repository.query.Param;
 
 import java.text.SimpleDateFormat;
@@ -70,6 +71,34 @@ public class Controller {
 
     public void addUser( String username ,String password, Person.Role role, String firstname, String lastname, String email, String description, String website, long firstlogin, long lastlogin, long timecreated){
         personRepository.addUser(username, password, role, firstname, lastname, email, description, website, firstlogin, lastlogin, timecreated);
+    }
+
+    public Person findByUsername(String name){
+        return personRepository.findByUsername(name);
+    }
+
+    public void delete(Person p){
+        personRepository.delete(p);
+    }
+
+    public void save(Person p){
+        personRepository.save(p);
+    }
+
+    public ArrayList<Person> findAllUsers(){
+        return personRepository.findAll();
+    }
+
+    public List<Person> search( String searchTerm){
+        return personRepository.search(searchTerm);
+    }
+
+    public List<Person> searchByUserName(String searchTerm){
+        return personRepository.searchByUserName(searchTerm);
+    }
+
+    public List<Person> searchByEmail( String searchTerm){
+        return personRepository.searchByEmail(searchTerm);
     }
 
 
