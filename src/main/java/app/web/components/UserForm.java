@@ -1,3 +1,5 @@
+
+
 package app.web.components;
 
 import app.controller.Controller;
@@ -20,6 +22,11 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.shared.Registration;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+
 public class UserForm extends FormLayout {
     private final Controller controller;
 
@@ -37,9 +44,13 @@ public class UserForm extends FormLayout {
     private final Button delete = new Button("Delete");
     private final Button close = new Button("Cancel");
     private Person person;
-
+    private final String path = "./uploads/UsersCSV/" ;
+    private final UploadComponent upload = new UploadComponent("50px", "96%", 1, 30000000,
+            path);
 
     public UserForm(PersonRepository personRepository) {
+        upload.setAcceptedFileTypes(".csv");
+        upload.addFinishedListener(finishedEvent -> uploadCSVFile(upload.getFileName()));
         this.controller = new Controller(personRepository,
                                          null, null,
                                          null, null,
@@ -60,7 +71,8 @@ public class UserForm extends FormLayout {
             description,
             role,
             website,
-            createButtonsLayout());
+            createButtonsLayout(),
+            upload);
     }
 
     private HorizontalLayout createButtonsLayout() {
@@ -114,6 +126,48 @@ public class UserForm extends FormLayout {
             ok = false;
         }
         return ok;
+    }
+    public void uploadCSVFile(String fileName) {
+
+        String line = "";
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(fileName)) ;
+            while((line = br.readLine())!=null){
+                String[] values = line.split(",");
+                Person p = new Person();
+                p.setUsername(values[0]);
+                p.setFirstName(values[3]);
+                p.setLastName(values[4]);
+                p.setEmail(values[5]);
+                p.setPassword(values[1]);
+                p.setDescription(values[6]);
+                p.setRoleAsString(values[2]);
+                p.setWebsite(values[7]);
+
+                this.username.setValue(values[0]);
+                this.firstName.setValue(values[3]);
+                this.lastName.setValue(values[4]);
+                this.email.setValue(values[5]);
+                this.password.setValue(values[1]);
+                this.description.setValue(values[6]);
+                this.role.setValue(p.setRoleAsString(values[2]));
+                this.website.setValue(values[7]);
+                personRepository.addUser(this.username.getValue(), this.password.getValue(), this.role.getValue(), this.firstName.getValue(), this.lastName.getValue(), this.email.getValue(), this.description.getValue(), this.website.getValue(), 0, 0, 0);
+                personRepository.deleteNullUsers();
+                try {
+                    binder.writeBean(p);
+                    fireEvent(new SaveEvent(this, p));
+                } catch (ValidationException e) {
+                    e.printStackTrace();
+                }
+            }
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 
     private boolean userExist(String username) {
