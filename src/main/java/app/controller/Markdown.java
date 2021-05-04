@@ -6,6 +6,9 @@ import com.vladsch.flexmark.parser.Parser;
 import com.vladsch.flexmark.util.ast.Node;
 import com.vladsch.flexmark.util.data.MutableDataSet;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  * This class does all the transformations to and from Markdown with the help of https://github.com/vsch/flexmark-java
  */
@@ -40,7 +43,10 @@ public class Markdown {
         // parse and render the String
         Node tmp = parser.parse(markdown);
         String htmlText = renderer.render(tmp);
-        htmlText = htmlText.substring(3, htmlText.length() - 5); // remove the enclosing <p> tags
+        // remove the enclosing <p> tags
+        Pattern pattern = Pattern.compile("<p>(.+?)</p>", Pattern.DOTALL);
+        Matcher matcher = pattern.matcher(htmlText);
+        htmlText = (matcher.find())?matcher.group(1):htmlText;
         return htmlText;
     }
 }
