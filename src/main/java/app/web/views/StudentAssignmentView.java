@@ -164,13 +164,14 @@ public class StudentAssignmentView extends ViewWithSidebars implements HasDynami
                     constTab(new Div(), Long.toString(assignment.getMaxGrade()), ColorHTML.GREYTAB, false),
                     constTab(statusR, writeGradeInfo(), changeColor(), false));
 
-            HashMap<String, Integer> gradeAllUser = getAssignmentController().showGrade(assignment, currentUser);
-
-            if(gradeAllUser!=null && gradeAllUser.get("user")!=null) {
-                gradeAllUser.forEach((key, value) -> {
-                    divLeft.add(constTab(new Div(), key, ColorHTML.GREYTAB, true));
-                    divRight.add(constTab(new Div(), Integer.toString(value), ColorHTML.GREYTAB, false));
-                });
+            if(SecurityUtils.isUserStudent()) {
+                HashMap<String, Integer> gradeAllUser = getAssignmentController().showGrade(assignment, currentUser);
+                if (gradeAllUser != null && gradeAllUser.get("user") != null) {
+                    gradeAllUser.forEach((key, value) -> {
+                        divLeft.add(constTab(new Div(), key, ColorHTML.GREYTAB, true));
+                        divRight.add(constTab(new Div(), Integer.toString(value), ColorHTML.GREYTAB, false));
+                    });
+                }
             }
 
             div.add(divLeft, divRight);
@@ -195,17 +196,17 @@ public class StudentAssignmentView extends ViewWithSidebars implements HasDynami
             String res="";
             if (studentAssignmentUpload != null) {
                 if (studentAssignmentUpload.getGrade() == -1) {
-                    res+="Votre devoir n'a pas encore été noté";
+                    res+=" Votre devoir n'a pas encore été noté. ";
                 } else {
-                    res+="Votre note est : " + studentAssignmentUpload.getGrade();
+                    res+=" Votre note est : " + studentAssignmentUpload.getGrade();
                     if (studentAssignmentUpload.getTeacherComments() == null) {
-                        res+="Votre professeur n'a écrit aucun commentaire";
+                        res+=" Votre professeur n'a écrit aucun commentaire. ";
                     } else {
-                        res+="Commentaires de l'enseignant : \n" + studentAssignmentUpload.getTeacherComments();
+                        res+=" Commentaires de l'enseignant : \n" + studentAssignmentUpload.getTeacherComments();
                     }
                 }
             } else {
-                res+="Vous n'avez pas encore soumis de document!";
+                res+=" Vous n'avez pas encore soumis de document! ";
             }
             return res;
         }

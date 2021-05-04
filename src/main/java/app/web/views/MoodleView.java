@@ -144,7 +144,8 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
 
             if (!SecurityUtils.isUserStudent()) {
                 FlexLayout f = new FlexLayout();
-                f.add(createDeleteButton(), createModifyButton());
+                if (!section.isHomePage())f.add(createDeleteButton());
+                f.add(createModifyButton());
                 this.add(f);
             }
 
@@ -292,9 +293,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
                 this.parent.open();
             });
 
-            copie.addClickListener(event -> {
-                copyInClipBoard(generatedLink.getValue());
-            });
+            copie.addClickListener(event -> copyInClipBoard(generatedLink.getValue()));
             buttonLayout.add(valide, copie, close);
             insertLayout.add(userInputNameLink, userInputLinkUrl);
             mainLayout.setDefaultHorizontalComponentAlignment(Alignment.CENTER);
@@ -321,9 +320,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             createSelectLists(selectMap);
             // the radio button to trigger the right drop-down list to display
             RadioButtonGroup<String> radio = createRadioDefault();
-            radio.addValueChangeListener(event -> {
-                changeSelectTab(event.getValue());
-            });
+            radio.addValueChangeListener(event -> changeSelectTab(event.getValue()));
 
             insertLayout.add(userInputNameLink, radio, select_assignment, select_channel, select_moodle);
             buttonLayout.add(createValidateButton(), createCopyButton(), createCloseButton());
@@ -443,9 +440,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
 
         private Button createCopyButton() {
             Button copy = new Button("Copier");
-            copy.addClickListener(event -> {
-                copyInClipBoard(generatedLink.getValue());
-            });
+            copy.addClickListener(event -> copyInClipBoard(generatedLink.getValue()));
             return copy;
         }
 
