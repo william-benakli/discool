@@ -151,26 +151,27 @@ public class StudentAssignmentView extends ViewWithSidebars implements HasDynami
 
             styleDivAssignment(div, divLeft, divRight, statusL, statusR);
             if (assignment.getAllowLate() == 1) {
-                divLeft.add(constTab(new Div(), "Cut-off date", ColorHTML.GREYTAB, true));
+                divLeft.add(constTab(new Div(), "Date limite", ColorHTML.GREYTAB, true));
                 divRight.add(constTab(new Div(), getController().convertLongToDate(assignment.getCutoffdate()*1000-3600000*2), ColorHTML.GREYTAB, false));
             }
 
             divLeft.add(
-                    constTab(new Div(), "Due date", ColorHTML.WHITE, true),
-                    constTab(new Div(), "Max grade", ColorHTML.GREYTAB, true),
-                    constTab(statusL, "Status", ColorHTML.WHITE, true));
+                    constTab(new Div(), "Date d'échéance", ColorHTML.WHITE, true),
+                    constTab(new Div(), "Note maximale", ColorHTML.GREYTAB, true),
+                    constTab(statusL, "Statut", ColorHTML.WHITE, true));
             divRight.add(
                     constTab(new Div(), getController().convertLongToDate(assignment.getDuedate()*1000-3600000*2), ColorHTML.WHITE, false),
                     constTab(new Div(), Long.toString(assignment.getMaxGrade()), ColorHTML.GREYTAB, false),
                     constTab(statusR, writeGradeInfo(), changeColor(), false));
 
-            HashMap<String, Integer> gradeAllUser = getAssignmentController().showGrade(assignment, currentUser);
-
-            if(gradeAllUser!=null && gradeAllUser.get("user")!=null) {
-                gradeAllUser.forEach((key, value) -> {
-                    divLeft.add(constTab(new Div(), key, ColorHTML.GREYTAB, true));
-                    divRight.add(constTab(new Div(), Integer.toString(value), ColorHTML.GREYTAB, false));
-                });
+            if(SecurityUtils.isUserStudent()) {
+                HashMap<String, Integer> gradeAllUser = getAssignmentController().showGrade(assignment, currentUser);
+                if (gradeAllUser != null && gradeAllUser.get("user") != null) {
+                    gradeAllUser.forEach((key, value) -> {
+                        divLeft.add(constTab(new Div(), key, ColorHTML.GREYTAB, true));
+                        divRight.add(constTab(new Div(), Integer.toString(value), ColorHTML.GREYTAB, false));
+                    });
+                }
             }
 
             div.add(divLeft, divRight);
@@ -195,17 +196,17 @@ public class StudentAssignmentView extends ViewWithSidebars implements HasDynami
             String res="";
             if (studentAssignmentUpload != null) {
                 if (studentAssignmentUpload.getGrade() == -1) {
-                    res+="Votre devoir n'a pas encore été noté";
+                    res+=" Votre devoir n'a pas encore été noté. ";
                 } else {
-                    res+="Votre note est : " + studentAssignmentUpload.getGrade();
+                    res+=" Votre note est : " + studentAssignmentUpload.getGrade();
                     if (studentAssignmentUpload.getTeacherComments() == null) {
-                        res+="Votre professeur n'a écrit aucun commentaire";
+                        res+=" Votre professeur n'a écrit aucun commentaire. ";
                     } else {
-                        res+="Commentaires de l'enseignant : \n" + studentAssignmentUpload.getTeacherComments();
+                        res+=" Commentaires de l'enseignant : \n" + studentAssignmentUpload.getTeacherComments();
                     }
                 }
             } else {
-                res+="Vous n'avez pas encore soumis de document!";
+                res+=" Vous n'avez pas encore soumis de document! ";
             }
             return res;
         }

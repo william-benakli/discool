@@ -190,7 +190,7 @@ public abstract class ViewWithSidebars extends VerticalLayout {
      * Creates the button & dialog to add a new text channel/assignment/moodle page
      */
     private void createAddButton() {
-        Button button = new Button("Add", new Icon(VaadinIcon.PLUS_CIRCLE));
+        Button button = new Button("Ajouter", new Icon(VaadinIcon.PLUS_CIRCLE));
         button.getStyle()
                 .set("color",ColorHTML.WHITE.getColorHtml())
                 .set("background-color",ColorHTML.PURPLE.getColorHtml());

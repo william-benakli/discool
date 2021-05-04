@@ -175,10 +175,9 @@ public class Navbar extends AppLayout {
 
     private void styleServer(RouterLink routerLink){
         routerLink.getStyle()
-                .set("border-radius","10px 10px 0 0")
+                .set("border-radius","0 0 10px 10px")
                 .set("padding","0 10px")
-                .set("background-color", ViewWithSidebars.ColorHTML.GREY.getColorHtml())
-                .set("transform","rotateX(180deg)");
+                .set("background-color", ViewWithSidebars.ColorHTML.GREY.getColorHtml());
     }
 
     private long findHomePageId(long courseId) {
