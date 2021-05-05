@@ -22,9 +22,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Route(value = "admin", layout = Navbar.class)
 @PageTitle("Discool : Admin Panel")
@@ -45,11 +43,12 @@ public class PanelAdminView extends VerticalLayout {
     private final Grid<Person> usersGrid = new Grid<>();
     private final Grid<Course> coursesGrid = new Grid<>();
 
-    public PanelAdminView( @Autowired PersonRepository personRepository, @Autowired CourseRepository courseRepository) {
+    public PanelAdminView(@Autowired PersonRepository personRepository, @Autowired CourseRepository courseRepository) {
         this.controller = new Controller(personRepository,
                 null, null,
                 null, null,
-                null, null);        this.personRepository = personRepository;
+                null, null);
+        this.personRepository = personRepository;
         this.courseRepository = courseRepository;
         listUser.add(createButtonsDiv());
         createUserGrid();
@@ -63,7 +62,7 @@ public class PanelAdminView extends VerticalLayout {
         closeEditor();
     }
 
-    public void updateFilter(){
+    public void updateFilter() {
         if (lastNameFilter.getValue() == null || lastNameFilter.getValue().isEmpty()) {
             configureFilter2();
             configureFilter();
@@ -102,7 +101,7 @@ public class PanelAdminView extends VerticalLayout {
         closeEditor();
     }
 
-    public void addPerson(){
+    public void addPerson() {
         usersGrid.asSingleSelect().clear();
         editPerson(new Person());
     }
@@ -122,7 +121,7 @@ public class PanelAdminView extends VerticalLayout {
         }
     }
 
-    public List<Person>findAll(String stringFilter) {
+    public List<Person> findAll(String stringFilter) {
         if ((emailFilter.getValue() == null
                 || emailFilter.getValue().isEmpty()) && (lastNameFilter.getValue() == null
                 || lastNameFilter.getValue().isEmpty()) && (firstNameFilter.getValue() == null
@@ -135,7 +134,6 @@ public class PanelAdminView extends VerticalLayout {
         } else {
             return controller.search(stringFilter);
         }
-
     }
 
     public void configureFilter() {
@@ -173,18 +171,17 @@ public class PanelAdminView extends VerticalLayout {
         usersGrid.addColumn(Person::getRole).setHeader("Rôle");
         usersGrid.addColumn(Person::getWebsite).setHeader("Site Web");
         usersGrid.addThemeVariants(GridVariant.LUMO_NO_BORDER,
-                              GridVariant.LUMO_NO_ROW_BORDERS, GridVariant.LUMO_ROW_STRIPES);
-        usersGrid.getStyle().set("flex","2");
-        usersGrid.getColumns().forEach(col ->col.setAutoWidth(true));
+                GridVariant.LUMO_NO_ROW_BORDERS, GridVariant.LUMO_ROW_STRIPES);
+        usersGrid.getStyle().set("flex", "2");
+        usersGrid.getColumns().forEach(col -> col.setAutoWidth(true));
         usersGrid.asSingleSelect().addValueChangeListener(event -> editPerson(event.getValue()));
         usersTab.add(usersGrid);
     }
 
     private void editPerson(Person person) {
-        if(person==null){
+        if (person == null) {
             closeEditor();
-        }
-        else{
+        } else {
             form.setPerson(person);
             form.setVisible(true);
             addClassName("editing");
@@ -196,7 +193,7 @@ public class PanelAdminView extends VerticalLayout {
         coursesGrid.addColumn(Course::getName).setHeader("Nom");
         coursesGrid.addColumn(Course::getTeacherId).setHeader("Nom de l'enseignant.e");
         coursesGrid.addThemeVariants(GridVariant.LUMO_NO_BORDER,
-                                     GridVariant.LUMO_NO_ROW_BORDERS, GridVariant.LUMO_ROW_STRIPES);
+                GridVariant.LUMO_NO_ROW_BORDERS, GridVariant.LUMO_ROW_STRIPES);
         coursesTab.add(coursesGrid);
     }
 

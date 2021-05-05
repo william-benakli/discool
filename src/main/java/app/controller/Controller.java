@@ -77,6 +77,10 @@ public class Controller {
         return personRepository.findByUsername(name);
     }
 
+    public Person findById(long id){
+        return personRepository.findById(id) ;
+    }
+
     public void delete(Person p){
         personRepository.delete(p);
     }
@@ -99,6 +103,10 @@ public class Controller {
 
     public List<Person> searchByEmail( String searchTerm){
         return personRepository.searchByEmail(searchTerm);
+    }
+
+    public Person getUsername(long id){
+        return personRepository.findById(id);
     }
 
     public boolean userExist(String username) {
