@@ -44,7 +44,7 @@ public class Controller {
         return c.map(Course::getName).orElse(null);
     }
 
-    public PublicChatMessage saveMessage(String message, long channelId, long parentId, long userId) {
+    public PublicChatMessage saveMessage(String message, long channelId, long parentId, long userId, int type) {
         PublicChatMessage messageToSave = PublicChatMessage.builder()
                 .message(message)
                 .channelid(channelId)
@@ -52,6 +52,7 @@ public class Controller {
                 .sender(userId)
                 .timeCreated(System.currentTimeMillis())
                 .deleted(false)
+                .type(type)
                 .build();
         publicChatMessageRepository.save(messageToSave);
         return messageToSave;

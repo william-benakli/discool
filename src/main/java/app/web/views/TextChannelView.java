@@ -41,9 +41,11 @@ import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.awt.*;
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Random;
 
 
 @Route(value = "channels", layout = Navbar.class)
@@ -107,9 +109,9 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                     PublicChatMessage newMessage;
 
                     if (targetResponseMessage == 0) {
-                        newMessage = getController().saveMessage(messageTextField.getValue(), textChannel.getId(), 1, currentUser.getId());
+                        newMessage = getController().saveMessage(messageTextField.getValue(), textChannel.getId(), 1, currentUser.getId(), 0);
                     } else {
-                        newMessage = getController().saveMessage(messageTextField.getValue(), textChannel.getId(), targetResponseMessage, currentUser.getId());
+                        newMessage = getController().saveMessage(messageTextField.getValue(), textChannel.getId(), targetResponseMessage, currentUser.getId(), 0);
                         if (newMessage != null) {
                             selectRep.changeStatus();
                             targetResponseMessage = 0;
@@ -297,29 +299,36 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
 
     private Dialog createDialogUpload(){
         final Dialog dialogMain = new Dialog();
-        final UploadComponent fileUpload = new UploadComponent("500", "1000", 1,5000000, "/dede", "jpg");
-        final UploadComponent imageUpload = new UploadComponent("500", "1000", 1,5000000, "/dede", "jpg");
+        final UploadComponent fileUpload = uploadElements(dialogMain,"src/main/webapp/userFileChat/files", 500000);
+        final UploadComponent imageUpload = uploadElements(dialogMain,"src/main/webapp/userFileChat/images", 500000);
         final Div image = createUploadDialog("Télécharger une nouvelle image\n", "Choisissez une nouvelle image depuis votre navigateur (ou faites un glisser-déposer). Seuls les fichiers .jpg et .jpeg sont acceptés.", imageUpload);
-        final Div file =  createUploadDialog("Télécharger une nouveau fichier\n", "Choisissez un nouveau fichier depuis votre navigateur (ou faites un glisser-déposer). Seuls les fichiers de moins de 5MO sont acceptés.", fileUpload);
+        final Div file =  createUploadDialog("Télécharger un nouveau fichier\n", "Choisissez un nouveau fichier depuis votre navigateur (ou faites un glisser-déposer). Seuls les fichiers de moins de 5MO sont acceptés.", fileUpload);
         file.setVisible(false);
         Tabs tabs = createTabElement("Image", "Fichier", image, file);
         dialogMain.add(tabs, image, file);
-        uploadElements(fileUpload, dialogMain);
-        uploadElements(imageUpload, dialogMain);
         return dialogMain;
     }
 
 
-    private UploadComponent uploadElements(UploadComponent component, Dialog courant){
+    private UploadComponent uploadElements(Dialog courant, String sources, int limit, String ...extension){
+        final UploadComponent component = new UploadComponent("500", "500", 1,limit,
+                sources, extension);
         component.addSucceededListener(event -> {
-            Dialog successUpload = successUploadDialog();
+            String oldName = component.getFileName();
+            String newName = "";
+            try {
+                newName = renameFile(oldName, sources);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             courant.close();
+            Dialog successUpload = successUploadDialog(sources, newName);
             successUpload.open();
         });
 
         component.addFailedListener(event -> {
-            Dialog errorDialog = errorUploadDialog();
             courant.close();
+            Dialog errorDialog = errorUploadDialog();
             errorDialog.open();
         });
         return component;
@@ -338,21 +347,35 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         return dialogError;
     }
 
-    private Dialog successUploadDialog(){
-        final Dialog dialogError = new Dialog();
+    private Dialog successUploadDialog(String sources, String nameFile){
+        final Dialog dialogSuccess = new Dialog();
         final H1 h1 = new H1("Fichier téléchager avec succes ");
         final Paragraph p = new Paragraph("Votre fichier est sur le point d'etre envoyé !");
         final Button send = new Button("Envoyer");
         final Button close = new Button("Fermer");
-        close.addClickListener(event -> dialogError.close());
         final VerticalLayout layout = new VerticalLayout();
         final HorizontalLayout buttonLayout = new HorizontalLayout();
+
+
+        close.addClickListener(event -> {
+            deleteFile(new File(sources +"/"+nameFile));
+            dialogSuccess.close();
+        });
+        dialogSuccess.addDialogCloseActionListener(event -> {
+            //deleteFile(new File(sources +"/"+nameFile));
+        });
+
+        send.addClickListener(event -> {
+
+        });
+
+
         buttonLayout.add(close, send);
         h1.getStyle().set("color","#32CD32");
         layout.setDefaultHorizontalComponentAlignment(Alignment.CENTER);
         layout.add(h1, p,buttonLayout);
-        dialogError.add(layout);
-        return dialogError;
+        dialogSuccess.add(layout);
+        return dialogSuccess;
     }
 
     private Button createButtonOpenDialogUpload(){
@@ -364,6 +387,45 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
             d.open();
         });
         return addFileOrImage;
+    }
+
+    private String renameFile(String oldName, String sourceFichier) throws Exception {
+        String extension;
+        if (oldName.endsWith("jpeg")) {
+            extension = ".jpeg";
+        } else if (oldName.endsWith("jpg")){
+            extension = ".jpg";
+        } else if (oldName.endsWith("JPG")) {
+            extension = ".JPG";
+        } else if (oldName.endsWith("JPEG")) {
+            extension = ".JPEG";
+        } else {
+            System.out.println("Problem while tying to figure out the file's name while renaming the profile picture");
+            extension = "";
+        }
+        File old = new File(oldName);
+        String newNameFile = currentUser.getId() +"_"+textChannel.getId() + "_" + randomId() + "_" + extension.toLowerCase();
+        File newFile = new File(sourceFichier +"/" + newNameFile);
+        if (! old.renameTo(newFile)) {
+            throw new Exception("File can't be renamed");
+        }
+        return newNameFile;
+    }
+
+    private void deleteFile(File file){
+        if(file.exists()){
+            file.delete();
+        }
+    }
+
+    public void sendMessageChat(int type){
+        PublicMessagesBroadcaster.broadcast("NEW_MESSAGE",  getController().saveMessage(messageTextField.getValue(), textChannel.getId(), 1, currentUser.getId(), type));
+        scrollDownChat();
+    }
+
+    private long randomId(){
+        Random r = new Random();
+        return r.nextLong();
     }
 
     public class MessageResponsePopComponent extends Div {
@@ -594,7 +656,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
 
             //Protection si l'utilisateur est bien le createur du message
             if (currentUser.getId() == publicMessage.getSender()) {
-                optionsUser.add(modify);
+                if(publicChatMessage.getType() == 0)optionsUser.add(modify);
                 optionsUser.add(delete);
             }
             layoutPop.add(optionsUser);
