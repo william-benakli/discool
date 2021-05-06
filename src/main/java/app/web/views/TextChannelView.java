@@ -387,7 +387,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
     }
 
     private Button createButtonOpenDialogUpload() {
-        Icon a = new Icon(VaadinIcon.PLUS_CIRCLE);
+        final Icon a = new Icon(VaadinIcon.PLUS_CIRCLE);
         a.setColor(ColorHTML.PURPLE.getColorHtml());
         Button addFileOrImage = new Button("", a);
         addFileOrImage.addClickListener(event -> {
@@ -398,9 +398,9 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
     }
 
     private String renameFile(String oldName, String sourceFichier) throws Exception {
-        String extension = getExtension(oldName);
+        final String extension = getExtension(oldName);
         File old = new File(oldName);
-        String newNameFile = currentUser.getId() + "_" + textChannel.getId() + "_" + randomId() + "." + extension.toLowerCase();
+        final String newNameFile = currentUser.getId() + "_" + textChannel.getId() + "_" + randomId() + "." + extension.toLowerCase();
         File newFile = new File(sourceFichier + "/" + newNameFile);
         if (!old.renameTo(newFile)) {
             throw new Exception("File can't be renamed");
@@ -602,6 +602,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                 dialog.open();
 
                 oui.addClickListener(ev -> {
+                    if (publicChatMessage.getType() != 0) deleteFile(new File(publicChatMessage.getMessage()));
                     getController().deleteMessage(publicChatMessage);
                     PublicMessagesBroadcaster.broadcast("DELETE_MESSAGE", publicChatMessage);
                     dialog.close();
@@ -671,6 +672,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
 
         private void createChatBlock(PublicChatMessage publicMessage) {
             Paragraph metaData = createParagrapheAmelioration(getController().getUsernameOfSender(publicMessage) + " | " + getController().convertLongToDate(publicMessage.getTimeCreated()));
+            final Paragraph error = new Paragraph("Erreur fichier introuvable");
             metaData.getStyle()
                     .set("color", ColorHTML.PURPLE.getColorHtml())
                     .set("font-weight", "700");
@@ -680,22 +682,32 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                 chatUserInformation.add(messageParagraph);
             } else if (publicMessage.getType() == 1) {
                 if (publicMessage.getMessage().length() > 0) {
-                    Image image = new Image(publicMessage.getMessage().replace("src/main/webapp/", ""), "imageChat");
-                    image.setWidth("70%");
-                    image.setHeight("70%");
-                    chatUserInformation.setHeight("70%");
-                    chatUserInformation.add(image);
+                    File f = new File(publicMessage.getMessage());
+                    if (f.exists()) {
+                        final Image image = createImageChat(publicMessage);
+                        chatUserInformation.setHeight("70%");
+                        chatUserInformation.add(image);
+                    } else {
+                        chatUserInformation.add(error);
+                    }
                 } else {
-                    chatUserInformation.add(new Paragraph("Erreur fichier introuvable"));
+                    chatUserInformation.add(error);
                 }
             } else if (publicMessage.getType() == 2) {
                 if (publicMessage.getMessage().length() > 0) {
-                    DownloadController downloadController = createDownloadButton(publicMessage.getMessage(), "");
+                    final DownloadController downloadController = createDownloadButton(publicMessage.getMessage(), "");
                     chatUserInformation.add(downloadController);
                 } else {
-                    chatUserInformation.add(new Paragraph("Erreur fichier introuvable"));
+                    chatUserInformation.add(error);
                 }
             }
+        }
+
+        public Image createImageChat(PublicChatMessage publicChatMessage) {
+            Image image = new Image(publicChatMessage.getMessage().replace("src/main/webapp/", ""), "imageChat");
+            image.setWidth("70%");
+            image.setHeight("70%");
+            return image;
         }
 
         private void createPictureSetting(long senderId) {
