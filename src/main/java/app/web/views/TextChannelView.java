@@ -310,8 +310,8 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
     }
 
 
-    private UploadComponent uploadElements(Dialog courant, String sources, int limit, String ...extension){
-        final UploadComponent component = new UploadComponent("500", "500", 1,limit,
+    private UploadComponent uploadElements(Dialog courant, String sources, int limit, String... extension) {
+        final UploadComponent component = new UploadComponent("500", "500", 1, limit,
                 sources, extension);
         component.addSucceededListener(event -> {
             String oldName = component.getFileName();
@@ -333,21 +333,22 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         });
         return component;
     }
-    private Dialog errorUploadDialog(){
+
+    private Dialog errorUploadDialog() {
         final Dialog dialogError = new Dialog();
         final H1 h1 = new H1("Erreur d'envoie de votre fichier");
         final Paragraph p = new Paragraph("Votre fichier n'as pas atteint la bonne destination... Ressayez !");
         final Button close = new Button("Fermer");
         close.addClickListener(event -> dialogError.close());
         final VerticalLayout layout = new VerticalLayout();
-        h1.getStyle().set("color","#FF0000");
+        h1.getStyle().set("color", "#FF0000");
         layout.setDefaultHorizontalComponentAlignment(Alignment.CENTER);
         layout.add(h1, p, close);
         dialogError.add(layout);
         return dialogError;
     }
 
-    private Dialog successUploadDialog(String sources, String nameFile){
+    private Dialog successUploadDialog(String sources, String nameFile) {
         final Dialog dialogSuccess = new Dialog();
         final H1 h1 = new H1("Fichier téléchager avec succes ");
         final Paragraph p = new Paragraph("Votre fichier est sur le point d'etre envoyé !");
@@ -358,27 +359,28 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
 
 
         close.addClickListener(event -> {
-            deleteFile(new File(sources +"/"+nameFile));
             dialogSuccess.close();
+            deleteFile(new File(sources + "/" + nameFile));
         });
         dialogSuccess.addDialogCloseActionListener(event -> {
             //deleteFile(new File(sources +"/"+nameFile));
         });
 
         send.addClickListener(event -> {
-
+            dialogSuccess.close();
+            sendMessageChat(1, sources + "/" + nameFile);
         });
 
 
         buttonLayout.add(close, send);
-        h1.getStyle().set("color","#32CD32");
+        h1.getStyle().set("color", "#32CD32");
         layout.setDefaultHorizontalComponentAlignment(Alignment.CENTER);
-        layout.add(h1, p,buttonLayout);
+        layout.add(h1, p, buttonLayout);
         dialogSuccess.add(layout);
         return dialogSuccess;
     }
 
-    private Button createButtonOpenDialogUpload(){
+    private Button createButtonOpenDialogUpload() {
         Icon a = new Icon(VaadinIcon.PLUS_CIRCLE);
         a.setColor(ColorHTML.PURPLE.getColorHtml());
         Button addFileOrImage = new Button("", a);
@@ -418,8 +420,9 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         }
     }
 
-    public void sendMessageChat(int type){
-        PublicMessagesBroadcaster.broadcast("NEW_MESSAGE",  getController().saveMessage(messageTextField.getValue(), textChannel.getId(), 1, currentUser.getId(), type));
+    public void sendMessageChat(int type, String source) {
+        PublicChatMessage publicChatMessage = getController().saveMessage(source, textChannel.getId(), 1, currentUser.getId(), type);
+        PublicMessagesBroadcaster.broadcast("NEW_MESSAGE", publicChatMessage);
         scrollDownChat();
     }
 
@@ -535,6 +538,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         private Button response;
         private Button delete;
         private Button modify;
+
 
         public MessageLayout(PublicChatMessage publicMessage) {
             this.publicChatMessage = publicMessage;
@@ -671,8 +675,21 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                     .set("color", ColorHTML.PURPLE.getColorHtml())
                     .set("font-weight", "700");
             chatUserInformation.add(metaData);
-            this.messageParagraph = createParagrapheAmelioration(publicMessage.getMessage());
-            chatUserInformation.add(messageParagraph);
+            if (publicMessage.getType() == 0) {
+                this.messageParagraph = createParagrapheAmelioration(publicMessage.getMessage());
+                chatUserInformation.add(messageParagraph);
+            } else if (publicMessage.getType() == 1) {
+                if (publicMessage.getMessage().length() > 0) {
+                    Image image = new Image(publicMessage.getMessage().replace("src/main/webapp/", ""), "imageChat");
+                    image.setWidth("70%");
+                    image.setHeight("70%");
+                    chatUserInformation.setHeight("70%");
+                    chatUserInformation.add(image);
+                } else {
+                    chatUserInformation.add(new Paragraph("Erreur fichier introuvable"));
+                }
+            } else if (publicMessage.getType() == 2) {
+            }
         }
 
         private void createPictureSetting(long senderId) {
