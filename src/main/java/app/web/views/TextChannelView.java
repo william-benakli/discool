@@ -62,7 +62,6 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
     private Registration broadcasterRegistration;
 
     private MessageResponsePopComponent selectRep;
-    private Button addFileOrImage;
     private Button exitButton;
     private Button sendMessage;
     private ComponentButton muteMicrophone;
@@ -245,48 +244,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
 
         VerticalLayout layoutMaster = new VerticalLayout();
         HorizontalLayout messageInputBar = new HorizontalLayout();
-        //TODO: à factoriser
-        Icon a = new Icon(VaadinIcon.PLUS_CIRCLE);
-        a.setColor(ColorHTML.PURPLE.getColorHtml());
-        addFileOrImage = new Button("", a);
-        addFileOrImage.addClickListener(event -> {
-
-            Dialog d = new Dialog();
-            Div file = new Div();
-            Div image = new Div();
-            file.setVisible(false);
-            H1 h1 = new H1("Télécharger une nouvelle image\n");
-            h1.getStyle().set("color", ColorHTML.PURPLE.getColorHtml());
-            Paragraph p = new Paragraph("Choisissez une nouvelle image depuis votre navigateur (ou faites un glisser-déposer). Seuls les fichiers .jpg et .jpeg sont acceptés.");
-
-            VerticalLayout layout = new VerticalLayout();
-            layout.setDefaultHorizontalComponentAlignment(Alignment.CENTER);
-            UploadComponent fileUpload = new UploadComponent("500", "1000", 1,5000000, "/dede", "jpg");
-            UploadComponent imageUpload = new UploadComponent("500", "1000", 1,5000000, "/dede", "jpg");
-
-            layout.add(h1, p, fileUpload);
-            file.add(layout);
-            image.add(layout);
-
-            Tab tab = new Tab("Image");
-            Tab tab2 = new Tab("Fichier");
-            Tabs tabs = new Tabs(tab, tab2);
-            Map<Tab, Div> tabsToPages = new HashMap<>();
-            tabsToPages.put(tab, file);
-            tabsToPages.put(tab2, image);
-
-
-            tabs.addSelectedChangeListener(e -> {
-                tabsToPages.values().forEach(page -> page.setVisible(false));
-                Component selectedPage = tabsToPages.get(tabs.getSelectedTab());
-                selectedPage.setVisible(true);
-            });
-
-            d.add(tabs, file, image);
-            d.open();
-        });
-
-
+        Button addFileOrImage = createButtonOpenDialogUpload();
         messageInputBar.add(addFileOrImage, messageTextField, chatButtonContainer);
         setCardStyle(messageContainer, "99%", ColorHTML.GREY);
         messageContainer.setHeightFull();
@@ -309,7 +267,56 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         chatBar.add(messageContainer, layoutMaster);
     }
 
+    private Div createUploadDialog(String title, String subTitle, UploadComponent component) {
+        final Div element = new Div();
+        final H1 h1 = new H1(title); // "Télécharger une nouvelle image\n"
+        final Paragraph p = new Paragraph(subTitle); // "Choisissez une nouvelle image depuis votre navigateur (ou faites un glisser-déposer). Seuls les fichiers .jpg et .jpeg sont acceptés.")
+        final VerticalLayout layout = new VerticalLayout();
+        h1.getStyle().set("color", ColorHTML.PURPLE.getColorHtml());
+        layout.setDefaultHorizontalComponentAlignment(Alignment.CENTER);
+        layout.add(h1, p, component);
+        element.add(layout);
+        return element;
+    }
 
+    private Tabs createTabElement(String tabName, String tabName2,Div image, Div file){
+        Tab tab = new Tab(tabName);
+        Tab tab2 = new Tab(tabName2);
+        Tabs tabs = new Tabs(tab, tab2);
+        Map<Tab, Div> tabsToPages = new HashMap<>();
+        tabsToPages.put(tab, image);
+        tabsToPages.put(tab2, file);
+        tabs.addSelectedChangeListener(e -> {
+            tabsToPages.values().forEach(page -> page.setVisible(false));
+            Component selectedPage = tabsToPages.get(tabs.getSelectedTab());
+            selectedPage.setVisible(true);
+        });
+        return tabs;
+    }
+
+    private Dialog createDialogUpload(){
+        Dialog d = new Dialog();
+        UploadComponent fileUpload = new UploadComponent("500", "1000", 1,5000000, "/dede", "jpg");
+        UploadComponent imageUpload = new UploadComponent("500", "1000", 1,5000000, "/dede", "jpg");
+        final Div image = createUploadDialog("Télécharger une nouvelle image\n", "Choisissez une nouvelle image depuis votre navigateur (ou faites un glisser-déposer). Seuls les fichiers .jpg et .jpeg sont acceptés.", imageUpload);
+        final Div file =  createUploadDialog("Télécharger une nouveau fichier\n", "Choisissez un nouveau fichier depuis votre navigateur (ou faites un glisser-déposer). Seuls les fichiers de moins de 5MO sont acceptés.", fileUpload);
+        file.setVisible(false);
+        Tabs tabs = createTabElement("Image", "Fichier", image, file);
+        d.add(tabs, image, file);
+        return d;
+    }
+
+    private Button createButtonOpenDialogUpload(){
+        Icon a = new Icon(VaadinIcon.PLUS_CIRCLE);
+        a.setColor(ColorHTML.PURPLE.getColorHtml());
+        Button addFileOrImage = new Button("", a);
+        addFileOrImage.addClickListener(event -> {
+            Dialog d = createDialogUpload();
+            d.open();
+        });
+
+        return addFileOrImage;
+    }
 
     public class MessageResponsePopComponent extends Div {
         HorizontalLayout layoutHorizontalLayout;
