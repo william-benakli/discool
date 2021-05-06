@@ -1,21 +1,17 @@
 package app.web.views;
 
-import app.controller.AssignmentController;
-import app.controller.Controller;
-import app.controller.Markdown;
-import app.controller.PublicMessagesBroadcaster;
+import app.controller.*;
 import app.controller.commands.CommandsClearChat;
 import app.controller.security.SecurityUtils;
 import app.jpa_repo.*;
 import app.model.chat.PublicChatMessage;
 import app.model.chat.TextChannel;
-import app.model.users.Person;
 import app.model.courses.Course;
+import app.model.users.Person;
 import app.web.components.ComponentButton;
 import app.web.components.UploadComponent;
 import app.web.layout.Navbar;
 import com.vaadin.flow.component.*;
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
@@ -38,10 +34,11 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.shared.Registration;
 import lombok.Getter;
 import lombok.SneakyThrows;
+import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.awt.*;
 import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -181,7 +178,6 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                 UI.getCurrent().access(() -> {
                     messageContainer.removeAll();
                     for (PublicChatMessage publicChatMessage : getController().getChatMessagesForChannel(textChannel.getId())) {
-                        System.out.println("Message" + publicChatMessage.getMessage());
                         messageContainer.add(new MessageLayout(publicChatMessage));
                     }
                 });
@@ -297,12 +293,12 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         return tabs;
     }
 
-    private Dialog createDialogUpload(){
+    private Dialog createDialogUpload() {
         final Dialog dialogMain = new Dialog();
-        final UploadComponent fileUpload = uploadElements(dialogMain,"src/main/webapp/userFileChat/files", 500000);
-        final UploadComponent imageUpload = uploadElements(dialogMain,"src/main/webapp/userFileChat/images", 500000);
+        final UploadComponent fileUpload = uploadElements(dialogMain, 2, "src/main/webapp/userFileChat/files", 500000, ".pdf", ".PDF", ".txt", ".TXT", ".docs");
+        final UploadComponent imageUpload = uploadElements(dialogMain, 1, "src/main/webapp/userFileChat/images", 500000, ".jpeg", ".jpg", ".png", ".JPG", ".JPEG");
         final Div image = createUploadDialog("Télécharger une nouvelle image\n", "Choisissez une nouvelle image depuis votre navigateur (ou faites un glisser-déposer). Seuls les fichiers .jpg et .jpeg sont acceptés.", imageUpload);
-        final Div file =  createUploadDialog("Télécharger un nouveau fichier\n", "Choisissez un nouveau fichier depuis votre navigateur (ou faites un glisser-déposer). Seuls les fichiers de moins de 5MO sont acceptés.", fileUpload);
+        final Div file = createUploadDialog("Télécharger un nouveau fichier\n", "Choisissez un nouveau fichier depuis votre navigateur (ou faites un glisser-déposer). Seuls les fichiers de moins de 5MO sont acceptés.", fileUpload);
         file.setVisible(false);
         Tabs tabs = createTabElement("Image", "Fichier", image, file);
         dialogMain.add(tabs, image, file);
@@ -310,7 +306,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
     }
 
 
-    private UploadComponent uploadElements(Dialog courant, String sources, int limit, String... extension) {
+    private UploadComponent uploadElements(Dialog courant, int type, String sources, int limit, String... extension) {
         final UploadComponent component = new UploadComponent("500", "500", 1, limit,
                 sources, extension);
         component.addSucceededListener(event -> {
@@ -322,7 +318,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                 e.printStackTrace();
             }
             courant.close();
-            Dialog successUpload = successUploadDialog(sources, newName);
+            Dialog successUpload = successUploadDialog(sources, newName, type);
             successUpload.open();
         });
 
@@ -348,7 +344,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         return dialogError;
     }
 
-    private Dialog successUploadDialog(String sources, String nameFile) {
+    private Dialog successUploadDialog(String sources, String nameFile, int type) {
         final Dialog dialogSuccess = new Dialog();
         final H1 h1 = new H1("Fichier téléchager avec succes ");
         final Paragraph p = new Paragraph("Votre fichier est sur le point d'etre envoyé !");
@@ -368,7 +364,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
 
         send.addClickListener(event -> {
             dialogSuccess.close();
-            sendMessageChat(1, sources + "/" + nameFile);
+            sendMessageChat(type, sources + "/" + nameFile);
         });
 
 
@@ -392,30 +388,18 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
     }
 
     private String renameFile(String oldName, String sourceFichier) throws Exception {
-        String extension;
-        if (oldName.endsWith("jpeg")) {
-            extension = ".jpeg";
-        } else if (oldName.endsWith("jpg")){
-            extension = ".jpg";
-        } else if (oldName.endsWith("JPG")) {
-            extension = ".JPG";
-        } else if (oldName.endsWith("JPEG")) {
-            extension = ".JPEG";
-        } else {
-            System.out.println("Problem while tying to figure out the file's name while renaming the profile picture");
-            extension = "";
-        }
+        String extension = getExtension(oldName);
         File old = new File(oldName);
-        String newNameFile = currentUser.getId() +"_"+textChannel.getId() + "_" + randomId() + "_" + extension.toLowerCase();
-        File newFile = new File(sourceFichier +"/" + newNameFile);
-        if (! old.renameTo(newFile)) {
+        String newNameFile = currentUser.getId() + "_" + textChannel.getId() + "_" + randomId() + "." + extension.toLowerCase();
+        File newFile = new File(sourceFichier + "/" + newNameFile);
+        if (!old.renameTo(newFile)) {
             throw new Exception("File can't be renamed");
         }
         return newNameFile;
     }
 
-    private void deleteFile(File file){
-        if(file.exists()){
+    private void deleteFile(File file) {
+        if (file.exists()) {
             file.delete();
         }
     }
@@ -426,10 +410,17 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         scrollDownChat();
     }
 
-    private long randomId(){
+    private long randomId() {
         Random r = new Random();
         return r.nextLong();
     }
+
+    private String getExtension(String name) {
+        String[] tab_name = name.toLowerCase().split("\\.");
+        if (tab_name.length > 2) return "";
+        return tab_name[1];
+    }
+
 
     public class MessageResponsePopComponent extends Div {
         HorizontalLayout layoutHorizontalLayout;
@@ -689,6 +680,12 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                     chatUserInformation.add(new Paragraph("Erreur fichier introuvable"));
                 }
             } else if (publicMessage.getType() == 2) {
+                if (publicMessage.getMessage().length() > 0) {
+                    DownloadController downloadController = createDownloadButton(publicMessage.getMessage(), "");
+                    chatUserInformation.add(downloadController);
+                } else {
+                    chatUserInformation.add(new Paragraph("Erreur fichier introuvable"));
+                }
             }
         }
 
@@ -712,6 +709,23 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                     .set("margin", "0")
                     .set("padding", "0");
             return data;
+        }
+
+        private DownloadController createDownloadButton(String outputName, String sourceDir) {
+            String nameFile = outputName.split("/")[outputName.split("/").length - 1];
+
+            DownloadController downloadButton = new DownloadController(nameFile + " | Télécharger", nameFile,
+                    outputStream -> {
+                        try {
+                            File file = new File(outputName);
+                            byte[] toWrite = FileUtils.readFileToByteArray(file);
+                            outputStream.write(toWrite);
+                        } catch (IOException e) {
+                            System.out.println("Problem while writing the file");
+                            e.printStackTrace();
+                        }
+                    });
+            return downloadButton;
         }
 
         private void onHover() {
