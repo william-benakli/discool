@@ -578,10 +578,10 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                 if (messageParent != null) {
                     Paragraph answerInfo;
                     if (!messageParent.isDeleted()) {
-                        if (publicMessage.getType() == 0) {
+                        if (messageParent.getType() == 0) {
                             answerInfo = new Paragraph("Réponse à " + personRepository.findById(messageParent.getSender()).getUsername() + " | "
                                     + ((messageParent.getMessage().length() > 50) ? messageParent.getMessage().substring(0, 50) + "..." : messageParent.getMessage()));
-                        } else if (publicMessage.getType() == 1) {
+                        } else if (messageParent.getType() == 1) {
                             answerInfo = new Paragraph("Réponse à " + personRepository.findById(messageParent.getSender()).getUsername() + " | Image de l'utilisateur");
                         } else {
                             answerInfo = new Paragraph("Réponse à " + personRepository.findById(messageParent.getSender()).getUsername() + " | Fichier de l'utilisateur");
@@ -741,7 +741,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         private DownloadController createDownloadButton(String outputName, String sourceDir) {
             String nameFile = outputName.split("/")[outputName.split("/").length - 1];
 
-            DownloadController downloadButton = new DownloadController(nameFile + " | Télécharger", nameFile,
+            return new DownloadController(nameFile + " | Télécharger", nameFile,
                     outputStream -> {
                         try {
                             File file = new File(outputName);
@@ -752,7 +752,6 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                             e.printStackTrace();
                         }
                     });
-            return downloadButton;
         }
 
         private void onHover() {
