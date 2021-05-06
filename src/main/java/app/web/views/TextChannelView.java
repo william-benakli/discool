@@ -15,6 +15,7 @@ import app.web.components.ComponentButton;
 import app.web.components.UploadComponent;
 import app.web.layout.Navbar;
 import com.vaadin.flow.component.*;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
@@ -39,6 +40,7 @@ import lombok.Getter;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -241,7 +243,6 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         FlexLayout chatButtonContainer = new FlexLayout();
         chatButtonContainer.getStyle().set("padding", "0 2.5px");
         chatButtonContainer.add(sendMessage, muteMicrophone, muteHeadphone, exitButton);
-
         VerticalLayout layoutMaster = new VerticalLayout();
         HorizontalLayout messageInputBar = new HorizontalLayout();
         Button addFileOrImage = createButtonOpenDialogUpload();
@@ -280,9 +281,9 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
     }
 
     private Tabs createTabElement(String tabName, String tabName2,Div image, Div file){
-        Tab tab = new Tab(tabName);
-        Tab tab2 = new Tab(tabName2);
-        Tabs tabs = new Tabs(tab, tab2);
+        final Tab tab = new Tab(tabName);
+        final Tab tab2 = new Tab(tabName2);
+        final Tabs tabs = new Tabs(tab, tab2);
         Map<Tab, Div> tabsToPages = new HashMap<>();
         tabsToPages.put(tab, image);
         tabsToPages.put(tab2, file);
@@ -295,15 +296,63 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
     }
 
     private Dialog createDialogUpload(){
-        Dialog d = new Dialog();
-        UploadComponent fileUpload = new UploadComponent("500", "1000", 1,5000000, "/dede", "jpg");
-        UploadComponent imageUpload = new UploadComponent("500", "1000", 1,5000000, "/dede", "jpg");
+        final Dialog dialogMain = new Dialog();
+        final UploadComponent fileUpload = new UploadComponent("500", "1000", 1,5000000, "/dede", "jpg");
+        final UploadComponent imageUpload = new UploadComponent("500", "1000", 1,5000000, "/dede", "jpg");
         final Div image = createUploadDialog("Télécharger une nouvelle image\n", "Choisissez une nouvelle image depuis votre navigateur (ou faites un glisser-déposer). Seuls les fichiers .jpg et .jpeg sont acceptés.", imageUpload);
         final Div file =  createUploadDialog("Télécharger une nouveau fichier\n", "Choisissez un nouveau fichier depuis votre navigateur (ou faites un glisser-déposer). Seuls les fichiers de moins de 5MO sont acceptés.", fileUpload);
         file.setVisible(false);
         Tabs tabs = createTabElement("Image", "Fichier", image, file);
-        d.add(tabs, image, file);
-        return d;
+        dialogMain.add(tabs, image, file);
+        uploadElements(fileUpload, dialogMain);
+        uploadElements(imageUpload, dialogMain);
+        return dialogMain;
+    }
+
+
+    private UploadComponent uploadElements(UploadComponent component, Dialog courant){
+        component.addSucceededListener(event -> {
+            Dialog successUpload = successUploadDialog();
+            courant.close();
+            successUpload.open();
+        });
+
+        component.addFailedListener(event -> {
+            Dialog errorDialog = errorUploadDialog();
+            courant.close();
+            errorDialog.open();
+        });
+        return component;
+    }
+    private Dialog errorUploadDialog(){
+        final Dialog dialogError = new Dialog();
+        final H1 h1 = new H1("Erreur d'envoie de votre fichier");
+        final Paragraph p = new Paragraph("Votre fichier n'as pas atteint la bonne destination... Ressayez !");
+        final Button close = new Button("Fermer");
+        close.addClickListener(event -> dialogError.close());
+        final VerticalLayout layout = new VerticalLayout();
+        h1.getStyle().set("color","#FF0000");
+        layout.setDefaultHorizontalComponentAlignment(Alignment.CENTER);
+        layout.add(h1, p, close);
+        dialogError.add(layout);
+        return dialogError;
+    }
+
+    private Dialog successUploadDialog(){
+        final Dialog dialogError = new Dialog();
+        final H1 h1 = new H1("Fichier téléchager avec succes ");
+        final Paragraph p = new Paragraph("Votre fichier est sur le point d'etre envoyé !");
+        final Button send = new Button("Envoyer");
+        final Button close = new Button("Fermer");
+        close.addClickListener(event -> dialogError.close());
+        final VerticalLayout layout = new VerticalLayout();
+        final HorizontalLayout buttonLayout = new HorizontalLayout();
+        buttonLayout.add(close, send);
+        h1.getStyle().set("color","#32CD32");
+        layout.setDefaultHorizontalComponentAlignment(Alignment.CENTER);
+        layout.add(h1, p,buttonLayout);
+        dialogError.add(layout);
+        return dialogError;
     }
 
     private Button createButtonOpenDialogUpload(){
@@ -314,7 +363,6 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
             Dialog d = createDialogUpload();
             d.open();
         });
-
         return addFileOrImage;
     }
 
