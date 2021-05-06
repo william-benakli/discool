@@ -298,7 +298,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         final UploadComponent fileUpload = uploadElements(dialogMain, 2, "src/main/webapp/userFileChat/files", 500000, ".pdf", ".PDF", ".txt", ".TXT", ".docs");
         final UploadComponent imageUpload = uploadElements(dialogMain, 1, "src/main/webapp/userFileChat/images", 500000, ".jpeg", ".jpg", ".png", ".JPG", ".JPEG");
         final Div image = createUploadDialog("Télécharger une nouvelle image\n", "Choisissez une nouvelle image depuis votre navigateur (ou faites un glisser-déposer). Seuls les fichiers .jpg et .jpeg sont acceptés.", imageUpload);
-        final Div file = createUploadDialog("Télécharger un nouveau fichier\n", "Choisissez un nouveau fichier depuis votre navigateur (ou faites un glisser-déposer). Seuls les fichiers de moins de 5MO et .pdf .txt et .docs sont acceptés.", fileUpload);
+        final Div file = createUploadDialog("Télécharger un nouveau fichier\n", "Choisissez un nouveau fichier depuis votre navigateur (ou faites un glisser-déposer). Seuls les fichiers de moins de 6MO et .pdf .txt et .docs sont acceptés.", fileUpload);
         file.setVisible(false);
         Tabs tabs = createTabElement("Image", "Fichier", image, file);
         dialogMain.add(tabs, image, file);
