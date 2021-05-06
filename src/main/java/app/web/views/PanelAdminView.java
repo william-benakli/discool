@@ -22,10 +22,12 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.query.Param;
 
 import java.util.HashMap;
 import java.util.List;
@@ -215,12 +217,31 @@ public class PanelAdminView extends VerticalLayout {
 
         Grid<PublicChatMessage> messagesGrid = new Grid<>(PublicChatMessage.class);
         messagesGrid.setItems(publicChatMessageRepository.findAllByParentId(id));
+        messagesGrid.getColumns().get(1).setVisible(false);
+        messagesGrid.getColumns().get(2).setVisible(false);
+        messagesGrid.getColumns().get(4).setVisible(false);
+        messagesGrid.getColumns().get(5).setVisible(false);
+        messagesGrid.getColumns().get(6).setVisible(false); // to hide the date of creation of the message
+        messagesGrid.addComponentColumn(item -> createRemoveButton(messagesGrid, item))
+                .setHeader("Actions");
+        //messagesGrid.addColumn(publicChatMessage -> publicChatMessageRepository.findPublicChatMessageByUserid(id)).setHeader("Id");
 
         dialog.add(messagesGrid);
         button.addClickListener(event -> dialog.open());
         return button;
     }
 
+    private Button createRemoveButton(Grid<PublicChatMessage> grid, PublicChatMessage item) {
+        @SuppressWarnings("unchecked")
+        Button button = new Button("Supprimer", clickEvent -> {
+            ListDataProvider<PublicChatMessage> dataProvider = (ListDataProvider<PublicChatMessage>) grid
+                    .getDataProvider();
+            dataProvider.getItems().remove(item);
+            dataProvider.refreshAll();
+        });
+        button.getStyle().set("color","red");
+        return button;
+    }
     private void createCoursesGrid() {
         coursesGrid.setItems(courseRepository.findAll());
         coursesGrid.addColumn(Course::getName).setHeader("Nom");
