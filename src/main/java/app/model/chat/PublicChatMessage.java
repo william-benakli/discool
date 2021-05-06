@@ -67,7 +67,7 @@ public class PublicChatMessage {
      *  1-Image message
      *  2-File message
      */
-    @Column(name = "type")
+    @Column(name = "typefile")
     private int type;
 
 
