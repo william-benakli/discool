@@ -12,17 +12,23 @@ import app.model.chat.TextChannel;
 import app.model.users.Person;
 import app.model.courses.Course;
 import app.web.components.ComponentButton;
+import app.web.components.UploadComponent;
 import app.web.layout.Navbar;
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.tabs.Tab;
+import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.HasDynamicTitle;
@@ -33,6 +39,8 @@ import lombok.Getter;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 
@@ -54,6 +62,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
     private Registration broadcasterRegistration;
 
     private MessageResponsePopComponent selectRep;
+    private Button addFileOrImage;
     private Button exitButton;
     private Button sendMessage;
     private ComponentButton muteMicrophone;
@@ -236,7 +245,49 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
 
         VerticalLayout layoutMaster = new VerticalLayout();
         HorizontalLayout messageInputBar = new HorizontalLayout();
-        messageInputBar.add(messageTextField, chatButtonContainer);
+        //TODO: à factoriser
+        Icon a = new Icon(VaadinIcon.PLUS_CIRCLE);
+        a.setColor(ColorHTML.PURPLE.getColorHtml());
+        addFileOrImage = new Button("", a);
+        addFileOrImage.addClickListener(event -> {
+
+            Dialog d = new Dialog();
+            Div file = new Div();
+            Div image = new Div();
+            file.setVisible(false);
+            H1 h1 = new H1("Télécharger une nouvelle image\n");
+            h1.getStyle().set("color", ColorHTML.PURPLE.getColorHtml());
+            Paragraph p = new Paragraph("Choisissez une nouvelle image depuis votre navigateur (ou faites un glisser-déposer). Seuls les fichiers .jpg et .jpeg sont acceptés.");
+
+            VerticalLayout layout = new VerticalLayout();
+            layout.setDefaultHorizontalComponentAlignment(Alignment.CENTER);
+            UploadComponent fileUpload = new UploadComponent("500", "1000", 1,5000000, "/dede", "jpg");
+            UploadComponent imageUpload = new UploadComponent("500", "1000", 1,5000000, "/dede", "jpg");
+
+            layout.add(h1, p, fileUpload);
+            file.add(layout);
+            image.add(layout);
+
+            Tab tab = new Tab("Image");
+            Tab tab2 = new Tab("Fichier");
+            Tabs tabs = new Tabs(tab, tab2);
+            Map<Tab, Div> tabsToPages = new HashMap<>();
+            tabsToPages.put(tab, file);
+            tabsToPages.put(tab2, image);
+
+
+            tabs.addSelectedChangeListener(e -> {
+                tabsToPages.values().forEach(page -> page.setVisible(false));
+                Component selectedPage = tabsToPages.get(tabs.getSelectedTab());
+                selectedPage.setVisible(true);
+            });
+
+            d.add(tabs, file, image);
+            d.open();
+        });
+
+
+        messageInputBar.add(addFileOrImage, messageTextField, chatButtonContainer);
         setCardStyle(messageContainer, "99%", ColorHTML.GREY);
         messageContainer.setHeightFull();
         messageContainer.getStyle()
@@ -257,6 +308,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         layoutMaster.add(selectRep, messageInputBar);
         chatBar.add(messageContainer, layoutMaster);
     }
+
 
 
     public class MessageResponsePopComponent extends Div {
