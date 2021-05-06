@@ -298,7 +298,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         final UploadComponent fileUpload = uploadElements(dialogMain, 2, "src/main/webapp/userFileChat/files", 500000, ".pdf", ".PDF", ".txt", ".TXT", ".docs");
         final UploadComponent imageUpload = uploadElements(dialogMain, 1, "src/main/webapp/userFileChat/images", 500000, ".jpeg", ".jpg", ".png", ".JPG", ".JPEG");
         final Div image = createUploadDialog("Télécharger une nouvelle image\n", "Choisissez une nouvelle image depuis votre navigateur (ou faites un glisser-déposer). Seuls les fichiers .jpg et .jpeg sont acceptés.", imageUpload);
-        final Div file = createUploadDialog("Télécharger un nouveau fichier\n", "Choisissez un nouveau fichier depuis votre navigateur (ou faites un glisser-déposer). Seuls les fichiers de moins de 5MO sont acceptés.", fileUpload);
+        final Div file = createUploadDialog("Télécharger un nouveau fichier\n", "Choisissez un nouveau fichier depuis votre navigateur (ou faites un glisser-déposer). Seuls les fichiers de moins de 5MO et .pdf .txt et .docs sont acceptés.", fileUpload);
         file.setVisible(false);
         Tabs tabs = createTabElement("Image", "Fichier", image, file);
         dialogMain.add(tabs, image, file);
@@ -322,18 +322,24 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
             successUpload.open();
         });
 
+        component.addFileRejectedListener(event -> {
+            courant.close();
+            Dialog errorDialog = errorUploadDialog("Votre fichier ne respect pas les conditions d'envoie !");
+            errorDialog.open();
+        });
+
         component.addFailedListener(event -> {
             courant.close();
-            Dialog errorDialog = errorUploadDialog();
+            Dialog errorDialog = errorUploadDialog("Votre fichier n'as pas atteint la bonne destination... Ressayez !");
             errorDialog.open();
         });
         return component;
     }
 
-    private Dialog errorUploadDialog() {
+    private Dialog errorUploadDialog(String subtitle) {
         final Dialog dialogError = new Dialog();
         final H1 h1 = new H1("Erreur d'envoie de votre fichier");
-        final Paragraph p = new Paragraph("Votre fichier n'as pas atteint la bonne destination... Ressayez !");
+        final Paragraph p = new Paragraph(subtitle);
         final Button close = new Button("Fermer");
         close.addClickListener(event -> dialogError.close());
         final VerticalLayout layout = new VerticalLayout();
@@ -358,13 +364,17 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
             dialogSuccess.close();
             deleteFile(new File(sources + "/" + nameFile));
         });
+
         dialogSuccess.addDialogCloseActionListener(event -> {
-            //deleteFile(new File(sources +"/"+nameFile));
+            if (event.getSource().isCloseOnOutsideClick() && event.getSource().isCloseOnEsc()) {
+                deleteFile(new File(sources + "/" + nameFile));
+            }
         });
 
         send.addClickListener(event -> {
             dialogSuccess.close();
             sendMessageChat(type, sources + "/" + nameFile);
+            scrollDownChat();
         });
 
 
@@ -407,7 +417,6 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
     public void sendMessageChat(int type, String source) {
         PublicChatMessage publicChatMessage = getController().saveMessage(source, textChannel.getId(), 1, currentUser.getId(), type);
         PublicMessagesBroadcaster.broadcast("NEW_MESSAGE", publicChatMessage);
-        scrollDownChat();
     }
 
     private long randomId() {
