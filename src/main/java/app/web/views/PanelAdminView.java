@@ -4,12 +4,12 @@ import app.controller.Controller;
 import app.jpa_repo.CourseRepository;
 import app.jpa_repo.DirectMessageRepository;
 import app.jpa_repo.PersonRepository;
+import app.jpa_repo.PublicChatMessageRepository;
 import app.model.chat.PublicChatMessage;
 import app.model.courses.Course;
 import app.model.users.Person;
 import app.web.components.UserForm;
 import app.web.layout.Navbar;
-import com.vaadin.data.provider.ListDataProvider;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
@@ -18,7 +18,6 @@ import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
@@ -39,6 +38,7 @@ import java.util.Map;
 public class PanelAdminView extends VerticalLayout {
     private final Controller controller;
     private final PersonRepository personRepository;
+    private final PublicChatMessageRepository publicChatMessageRepository;
     private final CourseRepository courseRepository;
     private UserForm form;
     private final TextField lastNameFilter = new TextField();
@@ -186,9 +186,8 @@ public class PanelAdminView extends VerticalLayout {
         usersGrid.addColumn(Person::getDescription).setHeader("Description");
         usersGrid.addColumn(Person::getRole).setHeader("Rôle");
         usersGrid.addColumn(Person::getWebsite).setHeader("Site Web");
-        usersGrid.addComponentColumn(item -> createInfoButton(usersGrid, item))
+        usersGrid.addComponentColumn(event -> createInfoButton(event.getId()))
                 .setHeader("info");
-
         usersGrid.addThemeVariants(GridVariant.LUMO_NO_BORDER,
                 GridVariant.LUMO_NO_ROW_BORDERS, GridVariant.LUMO_ROW_STRIPES);
         usersGrid.getStyle().set("flex", "2");
@@ -207,15 +206,16 @@ public class PanelAdminView extends VerticalLayout {
         }
     }
 
-    private Button createInfoButton(Grid<Person> grid, Person item) {
-        @SuppressWarnings("unchecked")
+    private Button createInfoButton(long id) {
         Button button = new Button("Info");
         Dialog dialog = new Dialog();
-        dialog.add(new Text("Close me with the esc-key or an outside click"));
-        dialog.setWidth("400px");
-        dialog.setHeight("150px");
+        dialog.add(new Text("l'ensemble des messages de cet utilisateur :"));
+        dialog.setWidth("50%");
+        dialog.setHeight("65%");
+
         Grid<PublicChatMessage> messagesGrid = new Grid<>(PublicChatMessage.class);
-        messagesGrid.setColumns("message", "channelid");
+        messagesGrid.setItems(publicChatMessageRepository.findAllByParentId(id));
+
         dialog.add(messagesGrid);
         button.addClickListener(event -> dialog.open());
         return button;

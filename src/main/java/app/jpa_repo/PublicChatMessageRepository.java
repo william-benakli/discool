@@ -11,6 +11,8 @@ import java.util.ArrayList;
 
 public interface PublicChatMessageRepository extends JpaRepository<PublicChatMessage, Long> {
 
+    ArrayList<PublicChatMessage> findAllByParentId(long channelId);
+
     ArrayList<PublicChatMessage> findAllByChannelid(long channelId);
 
     @Modifying
