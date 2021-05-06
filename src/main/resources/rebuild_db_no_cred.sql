@@ -108,6 +108,7 @@ CREATE TABLE IF NOT EXISTS posts (
     userid BIGINT UNSIGNED NOT NULL,
     timecreated BIGINT NOT NULL,
     message TEXT NOT NULL,
+    typefile BIGINT NOT NULL,
     deleted BIT NOT NULL,
 
     CONSTRAINT fk_parentid_posts

@@ -62,6 +62,16 @@ public class PublicChatMessage {
     private boolean deleted;
 
     /**
+     * Type of message
+     *  0-Normal message
+     *  1-Image message
+     *  2-File message
+     */
+    @Column(name = "typefile")
+    private int type;
+
+
+    /**
      * The id of the channel this post was sent to.
      */
     @Column(
@@ -69,4 +79,7 @@ public class PublicChatMessage {
             nullable = false
     )
     private long channelid;
+
+
+
 }

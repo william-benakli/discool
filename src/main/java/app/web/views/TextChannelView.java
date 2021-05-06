@@ -1,28 +1,31 @@
 package app.web.views;
 
-import app.controller.AssignmentController;
-import app.controller.Controller;
-import app.controller.Markdown;
-import app.controller.PublicMessagesBroadcaster;
+import app.controller.*;
 import app.controller.commands.CommandsClearChat;
 import app.controller.security.SecurityUtils;
 import app.jpa_repo.*;
 import app.model.chat.PublicChatMessage;
 import app.model.chat.TextChannel;
-import app.model.users.Person;
 import app.model.courses.Course;
+import app.model.users.Person;
 import app.web.components.ComponentButton;
+import app.web.components.UploadComponent;
 import app.web.layout.Navbar;
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.tabs.Tab;
+import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.HasDynamicTitle;
@@ -31,9 +34,15 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.shared.Registration;
 import lombok.Getter;
 import lombok.SneakyThrows;
+import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Random;
 
 
 @Route(value = "channels", layout = Navbar.class)
@@ -97,9 +106,9 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                     PublicChatMessage newMessage;
 
                     if (targetResponseMessage == 0) {
-                        newMessage = getController().saveMessage(messageTextField.getValue(), textChannel.getId(), 1, currentUser.getId());
+                        newMessage = getController().saveMessage(messageTextField.getValue(), textChannel.getId(), 1, currentUser.getId(), 0);
                     } else {
-                        newMessage = getController().saveMessage(messageTextField.getValue(), textChannel.getId(), targetResponseMessage, currentUser.getId());
+                        newMessage = getController().saveMessage(messageTextField.getValue(), textChannel.getId(), targetResponseMessage, currentUser.getId(), 0);
                         if (newMessage != null) {
                             selectRep.changeStatus();
                             targetResponseMessage = 0;
@@ -169,7 +178,6 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                 UI.getCurrent().access(() -> {
                     messageContainer.removeAll();
                     for (PublicChatMessage publicChatMessage : getController().getChatMessagesForChannel(textChannel.getId())) {
-                        System.out.println("Message" + publicChatMessage.getMessage());
                         messageContainer.add(new MessageLayout(publicChatMessage));
                     }
                 });
@@ -233,10 +241,10 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         FlexLayout chatButtonContainer = new FlexLayout();
         chatButtonContainer.getStyle().set("padding", "0 2.5px");
         chatButtonContainer.add(sendMessage, muteMicrophone, muteHeadphone, exitButton);
-
         VerticalLayout layoutMaster = new VerticalLayout();
         HorizontalLayout messageInputBar = new HorizontalLayout();
-        messageInputBar.add(messageTextField, chatButtonContainer);
+        Button addFileOrImage = createButtonOpenDialogUpload();
+        messageInputBar.add(addFileOrImage, messageTextField, chatButtonContainer);
         setCardStyle(messageContainer, "99%", ColorHTML.GREY);
         messageContainer.setHeightFull();
         messageContainer.getStyle()
@@ -256,6 +264,170 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         layoutMaster.getStyle().set("display", "block");
         layoutMaster.add(selectRep, messageInputBar);
         chatBar.add(messageContainer, layoutMaster);
+    }
+
+    private Div createUploadDialog(String title, String subTitle, UploadComponent component) {
+        final Div element = new Div();
+        final H1 h1 = new H1(title); // "Télécharger une nouvelle image\n"
+        final Paragraph p = new Paragraph(subTitle); // "Choisissez une nouvelle image depuis votre navigateur (ou faites un glisser-déposer). Seuls les fichiers .jpg et .jpeg sont acceptés.")
+        final VerticalLayout layout = new VerticalLayout();
+        h1.getStyle().set("color", ColorHTML.PURPLE.getColorHtml());
+        layout.setDefaultHorizontalComponentAlignment(Alignment.CENTER);
+        layout.add(h1, p, component);
+        element.add(layout);
+        return element;
+    }
+
+    private Tabs createTabElement(String tabName, String tabName2,Div image, Div file){
+        final Tab tab = new Tab(tabName);
+        final Tab tab2 = new Tab(tabName2);
+        final Tabs tabs = new Tabs(tab, tab2);
+        Map<Tab, Div> tabsToPages = new HashMap<>();
+        tabsToPages.put(tab, image);
+        tabsToPages.put(tab2, file);
+        tabs.addSelectedChangeListener(e -> {
+            tabsToPages.values().forEach(page -> page.setVisible(false));
+            Component selectedPage = tabsToPages.get(tabs.getSelectedTab());
+            selectedPage.setVisible(true);
+        });
+        return tabs;
+    }
+
+    private Dialog createDialogUpload() {
+        final Dialog dialogMain = new Dialog();
+        final UploadComponent fileUpload = uploadElements(dialogMain, 2, "src/main/webapp/userFileChat/files", 500000, ".pdf", ".PDF", ".txt", ".TXT", ".docs");
+        final UploadComponent imageUpload = uploadElements(dialogMain, 1, "src/main/webapp/userFileChat/images", 500000, ".jpeg", ".jpg", ".png", ".JPG", ".JPEG");
+        final Div image = createUploadDialog("Télécharger une nouvelle image\n", "Choisissez une nouvelle image depuis votre navigateur (ou faites un glisser-déposer). Seuls les fichiers .jpg et .jpeg sont acceptés.", imageUpload);
+        final Div file = createUploadDialog("Télécharger un nouveau fichier\n", "Choisissez un nouveau fichier depuis votre navigateur (ou faites un glisser-déposer). Seuls les fichiers de moins de 5MO et .pdf .txt et .docs sont acceptés.", fileUpload);
+        file.setVisible(false);
+        Tabs tabs = createTabElement("Image", "Fichier", image, file);
+        dialogMain.add(tabs, image, file);
+        return dialogMain;
+    }
+
+
+    private UploadComponent uploadElements(Dialog courant, int type, String sources, int limit, String... extension) {
+        final UploadComponent component = new UploadComponent("500", "500", 1, limit,
+                sources, extension);
+        component.addSucceededListener(event -> {
+            String oldName = component.getFileName();
+            String newName = "";
+            try {
+                newName = renameFile(oldName, sources);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            courant.close();
+            Dialog successUpload = successUploadDialog(sources, newName, type);
+            successUpload.open();
+        });
+
+        component.addFileRejectedListener(event -> {
+            courant.close();
+            Dialog errorDialog = errorUploadDialog("Votre fichier ne respect pas les conditions d'envoie !");
+            errorDialog.open();
+        });
+
+        component.addFailedListener(event -> {
+            courant.close();
+            Dialog errorDialog = errorUploadDialog("Votre fichier n'as pas atteint la bonne destination... Ressayez !");
+            errorDialog.open();
+        });
+        return component;
+    }
+
+    private Dialog errorUploadDialog(String subtitle) {
+        final Dialog dialogError = new Dialog();
+        final H1 h1 = new H1("Erreur d'envoie de votre fichier");
+        final Paragraph p = new Paragraph(subtitle);
+        final Button close = new Button("Fermer");
+        close.addClickListener(event -> dialogError.close());
+        final VerticalLayout layout = new VerticalLayout();
+        h1.getStyle().set("color", "#FF0000");
+        layout.setDefaultHorizontalComponentAlignment(Alignment.CENTER);
+        layout.add(h1, p, close);
+        dialogError.add(layout);
+        return dialogError;
+    }
+
+    private Dialog successUploadDialog(String sources, String nameFile, int type) {
+        final Dialog dialogSuccess = new Dialog();
+        final H1 h1 = new H1("Fichier téléchager avec succes ");
+        final Paragraph p = new Paragraph("Votre fichier est sur le point d'etre envoyé !");
+        final Button send = new Button("Envoyer");
+        final Button close = new Button("Fermer");
+        final VerticalLayout layout = new VerticalLayout();
+        final HorizontalLayout buttonLayout = new HorizontalLayout();
+
+
+        close.addClickListener(event -> {
+            dialogSuccess.close();
+            deleteFile(new File(sources + "/" + nameFile));
+        });
+
+        dialogSuccess.addDialogCloseActionListener(event -> {
+            if (event.getSource().isCloseOnOutsideClick() && event.getSource().isCloseOnEsc()) {
+                deleteFile(new File(sources + "/" + nameFile));
+            }
+        });
+
+        send.addClickListener(event -> {
+            dialogSuccess.close();
+            sendMessageChat(type, sources + "/" + nameFile);
+            scrollDownChat();
+        });
+
+
+        buttonLayout.add(close, send);
+        h1.getStyle().set("color", "#32CD32");
+        layout.setDefaultHorizontalComponentAlignment(Alignment.CENTER);
+        layout.add(h1, p, buttonLayout);
+        dialogSuccess.add(layout);
+        return dialogSuccess;
+    }
+
+    private Button createButtonOpenDialogUpload() {
+        final Icon a = new Icon(VaadinIcon.PLUS_CIRCLE);
+        a.setColor(ColorHTML.PURPLE.getColorHtml());
+        Button addFileOrImage = new Button("", a);
+        addFileOrImage.addClickListener(event -> {
+            Dialog d = createDialogUpload();
+            d.open();
+        });
+        return addFileOrImage;
+    }
+
+    private String renameFile(String oldName, String sourceFichier) throws Exception {
+        final String extension = getExtension(oldName);
+        File old = new File(oldName);
+        final String newNameFile = currentUser.getId() + "_" + textChannel.getId() + "_" + randomId() + "." + extension.toLowerCase();
+        File newFile = new File(sourceFichier + "/" + newNameFile);
+        if (!old.renameTo(newFile)) {
+            throw new Exception("File can't be renamed");
+        }
+        return newNameFile;
+    }
+
+    private void deleteFile(File file) {
+        if (file.exists()) {
+            file.delete();
+        }
+    }
+
+    public void sendMessageChat(int type, String source) {
+        PublicChatMessage publicChatMessage = getController().saveMessage(source, textChannel.getId(), 1, currentUser.getId(), type);
+        PublicMessagesBroadcaster.broadcast("NEW_MESSAGE", publicChatMessage);
+    }
+
+    private long randomId() {
+        Random r = new Random();
+        return r.nextLong();
+    }
+
+    private String getExtension(String name) {
+        String[] tab_name = name.toLowerCase().split("\\.");
+        if (tab_name.length > 2) return "";
+        return tab_name[1];
     }
 
 
@@ -367,6 +539,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         private Button delete;
         private Button modify;
 
+
         public MessageLayout(PublicChatMessage publicMessage) {
             this.publicChatMessage = publicMessage;
             this.chatUserInformation = new VerticalLayout();
@@ -429,6 +602,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                 dialog.open();
 
                 oui.addClickListener(ev -> {
+                    if (publicChatMessage.getType() != 0) deleteFile(new File(publicChatMessage.getMessage()));
                     getController().deleteMessage(publicChatMessage);
                     PublicMessagesBroadcaster.broadcast("DELETE_MESSAGE", publicChatMessage);
                     dialog.close();
@@ -487,7 +661,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
 
             //Protection si l'utilisateur est bien le createur du message
             if (currentUser.getId() == publicMessage.getSender()) {
-                optionsUser.add(modify);
+                if(publicChatMessage.getType() == 0)optionsUser.add(modify);
                 optionsUser.add(delete);
             }
             layoutPop.add(optionsUser);
@@ -498,12 +672,42 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
 
         private void createChatBlock(PublicChatMessage publicMessage) {
             Paragraph metaData = createParagrapheAmelioration(getController().getUsernameOfSender(publicMessage) + " | " + getController().convertLongToDate(publicMessage.getTimeCreated()));
+            final Paragraph error = new Paragraph("Erreur fichier introuvable");
             metaData.getStyle()
                     .set("color", ColorHTML.PURPLE.getColorHtml())
                     .set("font-weight", "700");
             chatUserInformation.add(metaData);
-            this.messageParagraph = createParagrapheAmelioration(publicMessage.getMessage());
-            chatUserInformation.add(messageParagraph);
+            if (publicMessage.getType() == 0) {
+                this.messageParagraph = createParagrapheAmelioration(publicMessage.getMessage());
+                chatUserInformation.add(messageParagraph);
+            } else if (publicMessage.getType() == 1) {
+                if (publicMessage.getMessage().length() > 0) {
+                    File f = new File(publicMessage.getMessage());
+                    if (f.exists()) {
+                        final Image image = createImageChat(publicMessage);
+                        chatUserInformation.setHeight("70%");
+                        chatUserInformation.add(image);
+                    } else {
+                        chatUserInformation.add(error);
+                    }
+                } else {
+                    chatUserInformation.add(error);
+                }
+            } else if (publicMessage.getType() == 2) {
+                if (publicMessage.getMessage().length() > 0) {
+                    final DownloadController downloadController = createDownloadButton(publicMessage.getMessage(), "");
+                    chatUserInformation.add(downloadController);
+                } else {
+                    chatUserInformation.add(error);
+                }
+            }
+        }
+
+        public Image createImageChat(PublicChatMessage publicChatMessage) {
+            Image image = new Image(publicChatMessage.getMessage().replace("src/main/webapp/", ""), "imageChat");
+            image.setWidth("70%");
+            image.setHeight("70%");
+            return image;
         }
 
         private void createPictureSetting(long senderId) {
@@ -526,6 +730,23 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                     .set("margin", "0")
                     .set("padding", "0");
             return data;
+        }
+
+        private DownloadController createDownloadButton(String outputName, String sourceDir) {
+            String nameFile = outputName.split("/")[outputName.split("/").length - 1];
+
+            DownloadController downloadButton = new DownloadController(nameFile + " | Télécharger", nameFile,
+                    outputStream -> {
+                        try {
+                            File file = new File(outputName);
+                            byte[] toWrite = FileUtils.readFileToByteArray(file);
+                            outputStream.write(toWrite);
+                        } catch (IOException e) {
+                            System.out.println("Problem while writing the file");
+                            e.printStackTrace();
+                        }
+                    });
+            return downloadButton;
         }
 
         private void onHover() {
