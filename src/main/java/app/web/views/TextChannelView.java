@@ -578,8 +578,14 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                 if (messageParent != null) {
                     Paragraph answerInfo;
                     if (!messageParent.isDeleted()) {
-                        answerInfo = new Paragraph("Réponse à " + personRepository.findById(messageParent.getSender()).getUsername() + " | "
-                                                           + ((messageParent.getMessage().length() > 50) ? messageParent.getMessage().substring(0, 50) + "..." : messageParent.getMessage()));
+                        if (publicMessage.getType() == 0) {
+                            answerInfo = new Paragraph("Réponse à " + personRepository.findById(messageParent.getSender()).getUsername() + " | "
+                                    + ((messageParent.getMessage().length() > 50) ? messageParent.getMessage().substring(0, 50) + "..." : messageParent.getMessage()));
+                        } else if (publicMessage.getType() == 1) {
+                            answerInfo = new Paragraph("Réponse à " + personRepository.findById(messageParent.getSender()).getUsername() + " | Image de l'utilisateur");
+                        } else {
+                            answerInfo = new Paragraph("Réponse à " + personRepository.findById(messageParent.getSender()).getUsername() + " | Fichier de l'utilisateur");
+                        }
                     } else {
                         answerInfo = new Paragraph("Message supprimé par l'utilisateur");
                     }
