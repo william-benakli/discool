@@ -145,7 +145,6 @@ public class PanelAdminView extends VerticalLayout {
         } else {
             return controller.searchUser(stringFilter);
         }
-
     }
 
     private void configureEmailFilter() {
@@ -205,7 +204,7 @@ public class PanelAdminView extends VerticalLayout {
         usersGrid.addColumn(Person::getRole).setHeader("Rôle");
         usersGrid.addColumn(Person::getWebsite).setHeader("Site Web");
         usersGrid.addComponentColumn(event -> createInfoButton(event.getId()))
-                .setHeader("info");
+                .setHeader("Historique");
         usersGrid.addThemeVariants(GridVariant.LUMO_NO_BORDER,
                 GridVariant.LUMO_NO_ROW_BORDERS, GridVariant.LUMO_ROW_STRIPES);
         usersGrid.getStyle().set("flex", "2");

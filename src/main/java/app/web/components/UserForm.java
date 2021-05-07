@@ -99,18 +99,32 @@ public class UserForm extends FormLayout {
     }
 
     public void setCss(){
-        username.getStyle().set("display","block");
-        username.getStyle().set("height","50px");
-        username.getStyle().set("display","block");
-        password.getStyle().set("display","block");
-        email.getStyle().set("display","block");
-        firstName.getStyle().set("display","block");
-        lastName.getStyle().set("display","block");
-        description.getStyle().set("display","block");
-        role.getStyle().set("display","block");
-        website.getStyle().set("display","block");
+        username.getStyle()
+                .set("display","block")
+                .set("height","50px")
+                .set("margin-top","-20px");
+        password.getStyle()
+                .set("display","block")
+                .set("height","50px");
+        email.getStyle()
+                .set("display","block")
+                .set("height","50px");
+        firstName.getStyle()
+                .set("display","block")
+                .set("height","50px");
+        lastName.getStyle()
+                .set("display","block")
+                .set("height","50px");
+        description.getStyle()
+                .set("display","block")
+                .set("height","50px");
+        role.getStyle()
+                .set("display","block")
+                .set("margin-top","60px");
+        website.getStyle()
+                .set("display","block")
+                .set("margin-top","-50px");
         createButtonsLayout().getStyle().set("display","block");
-
     }
 
     private HorizontalLayout createButtonsLayout() {
