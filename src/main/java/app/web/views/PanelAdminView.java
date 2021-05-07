@@ -72,6 +72,7 @@ public class PanelAdminView extends VerticalLayout {
         form.addListener(UserForm.CloseEvent.class, e -> closeEditor());
         updateList();
         closeEditor();
+        createGrid();
     }
 
     private void updateFilter() {
@@ -278,4 +279,18 @@ public class PanelAdminView extends VerticalLayout {
         });
         add(tabs, content_layout, content2_layout);
     }
+
+    private void createGrid(){
+        List<Course> personList = controller.findAllCourses();
+
+        Grid<Course> grid = new Grid<>(Course.class);
+        grid.setItems(personList);
+        grid.addColumn(Course::getName);
+        grid.addColumn(Course::getTeacherId);
+
+        grid.setThemeName("Course");
+
+        add(grid);
+    }
+
 }
