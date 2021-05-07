@@ -282,43 +282,35 @@ public class PanelAdminView extends VerticalLayout {
 
     private void createGrid(){
         List<CourseWidthName> personList = new ArrayList<>();
-        associate(selectTeacher(controller.getAllUser())).forEach((key, value) ->{
-            personList.add(new CourseWidthName(key.getName(),value));
-        });
+        selectTeacher(controller.getAllUser()).forEach((key, value) -> personList.add(new CourseWidthName(key.getName(),value)));
         Grid<CourseWidthName> grid = new Grid<>(CourseWidthName.class);
         grid.setItems(personList);
         add(grid);
     }
 
-    private HashMap<Long, String> selectTeacher(ArrayList<Person> allPerson){
-        HashMap<Long, String> allTeacher = new HashMap<>();
+    private HashMap<Course, String> selectTeacher(ArrayList<Person> allPerson){
+        HashMap<Long, String> selectTeacher = new HashMap<>();
+        HashMap<Course, String> teacherCourse = new HashMap<>();
         for (Person person: allPerson) {
-            if(!person.getRole().equals(Person.Role.STUDENT)){
-                allTeacher.put(person.getId(), person.getUsername());
-            }
+            if(!person.getRole().equals(Person.Role.STUDENT))selectTeacher.put(person.getId(), person.getUsername());
         }
-        return allTeacher;
-    }
-
-    private HashMap<Course, String> associate(HashMap<Long, String> teacher){
-        HashMap<Course, String> allAssociate = new HashMap<>();
         for (Course course: controller.findAllCourses()) {
-            allAssociate.put(course, teacher.get(course.getTeacherId()));
+            teacherCourse.put(course, selectTeacher.get(course.getTeacherId()));
         }
-        return allAssociate;
+        return teacherCourse;
     }
 
     public class CourseWidthName{
         private final String course;
-        private final String name;
+        private final String teacher;
 
         public CourseWidthName(String course, String name) {
             this.course=course;
-            this.name=name;
+            this.teacher=name;
         }
 
         public String getName() {
-            return name;
+            return teacher;
         }
 
         public String getCourse() {
