@@ -16,6 +16,9 @@ public interface PublicChatMessageRepository extends JpaRepository<PublicChatMes
 
     ArrayList<PublicChatMessage> findAllByChannelid(long channelId);
 
+
+    ArrayList<PublicChatMessage> findAllBySenderAndDeletedFalse(long id);
+
     @Modifying
     @Transactional
     @Query(value = "SELECT courseid FROM channels WHERE id = :id", nativeQuery = true)

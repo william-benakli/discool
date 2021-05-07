@@ -51,7 +51,7 @@ public class PanelAdminView extends VerticalLayout {
     private final Tab coursesTab = new Tab("Cours");
     private final Tabs tabs = new Tabs(usersTab, coursesTab);
     private final Grid<Person> usersGrid = new Grid<>();
-    private final Grid<Course> coursesGrid = new Grid<>();
+    private final Grid<CourseWidthName> coursesGrid = new Grid<>(CourseWidthName.class);
 
     public PanelAdminView(@Autowired PersonRepository personRepository, @Autowired CourseRepository courseRepository,
                           @Autowired DirectMessageRepository directMessageRepository) {
@@ -72,7 +72,6 @@ public class PanelAdminView extends VerticalLayout {
         form.addListener(UserForm.CloseEvent.class, e -> closeEditor());
         updateList();
         closeEditor();
-        createGrid();
     }
 
     private void updateFilter() {
@@ -102,14 +101,14 @@ public class PanelAdminView extends VerticalLayout {
         return div;
     }
 
-    private void savePerson(UserForm.SaveEvent evt) {
-        controller.saveUser(evt.getPerson());
+    private void deletePerson(UserForm.DeleteEvent evt) {
+        controller.delete(evt.getPerson());
         updateList();
         closeEditor();
     }
 
-    private void deletePerson(UserForm.DeleteEvent evt) {
-        controller.deleteUser(evt.getPerson());
+    private void savePerson(UserForm.SaveEvent evt) {
+        controller.save(evt.getPerson());
         updateList();
         closeEditor();
     }
@@ -131,6 +130,22 @@ public class PanelAdminView extends VerticalLayout {
         } else {
             usersGrid.setItems(findAll(emailFilter.getValue()));
         }
+    }
+
+    private List<Person> findAll(String stringFilter) {
+        if ((emailFilter.getValue() == null
+                || emailFilter.getValue().isEmpty()) && (lastNameFilter.getValue() == null
+                || lastNameFilter.getValue().isEmpty()) && (firstNameFilter.getValue() == null
+                || firstNameFilter.getValue().isEmpty())) {
+            return controller.findAllUsers();
+        } else if ((lastNameFilter.getValue() == null || lastNameFilter.getValue().isEmpty()) && (firstNameFilter.getValue() == null || firstNameFilter.getValue().isEmpty())) {
+            return controller.searchByEmail(stringFilter);
+        } else if ((emailFilter.getValue() == null || emailFilter.getValue().isEmpty()) && (lastNameFilter.getValue() == null || lastNameFilter.getValue().isEmpty())) {
+            return controller.searchByUserName(stringFilter);
+        } else {
+            return controller.searchUser(stringFilter);
+        }
+
     }
 
     private void configureEmailFilter() {
@@ -204,7 +219,6 @@ public class PanelAdminView extends VerticalLayout {
             closeEditor();
         } else {
             form.setPerson(person);
-            form.setVisible(true);
             addClassName("editing");
         }
     }
@@ -217,7 +231,7 @@ public class PanelAdminView extends VerticalLayout {
         dialog.setHeight("65%");
 
         Grid<PublicChatMessage> messagesGrid = new Grid<>(PublicChatMessage.class);
-        messagesGrid.setItems(publicChatMessageRepository.findAllByParentId(id));
+        messagesGrid.setItems(publicChatMessageRepository.findAllBySenderAndDeletedFalse(id));
         messagesGrid.getColumns().get(1).setVisible(false);
         messagesGrid.getColumns().get(2).setVisible(false);
         messagesGrid.getColumns().get(4).setVisible(false);
@@ -237,6 +251,7 @@ public class PanelAdminView extends VerticalLayout {
         Button button = new Button("Supprimer", clickEvent -> {
             ListDataProvider<PublicChatMessage> dataProvider = (ListDataProvider<PublicChatMessage>) grid
                     .getDataProvider();
+            controller.deleteMessage(item);
             dataProvider.getItems().remove(item);
             dataProvider.refreshAll();
         });
@@ -245,7 +260,7 @@ public class PanelAdminView extends VerticalLayout {
     }
     private void createCoursesGrid() {
         coursesGrid.setItems(courseRepository.findAll());
-        coursesGrid.addColumn(Course::getName).setHeader("Nom");
+        coursesGrid.addColumn(CourseWidthName::getName).setHeader("Nom");
         coursesGrid.addColumn(Course::getTeacherId).setHeader("Nom de l'enseignant.e");
         coursesGrid.addThemeVariants(GridVariant.LUMO_NO_BORDER,
                 GridVariant.LUMO_NO_ROW_BORDERS, GridVariant.LUMO_ROW_STRIPES);
@@ -280,12 +295,14 @@ public class PanelAdminView extends VerticalLayout {
         add(tabs, content_layout, content2_layout);
     }
 
+
     private void createGrid(){
         List<CourseWidthName> personList = new ArrayList<>();
-        selectTeacher(controller.getAllUser()).forEach((key, value) -> personList.add(new CourseWidthName(key.getName(),value)));
-        Grid<CourseWidthName> grid = new Grid<>(CourseWidthName.class);
-        grid.setItems(personList);
-        add(grid);
+        selectTeacher(controller.getAllUsers()).forEach((key, value) -> personList.add(new CourseWidthName(key.getName(),value)));
+        coursesGrid.setItems(personList);
+        coursesGrid.addThemeVariants(GridVariant.LUMO_NO_BORDER,
+                GridVariant.LUMO_NO_ROW_BORDERS, GridVariant.LUMO_ROW_STRIPES);
+        coursesTab.add(coursesGrid);
     }
 
     private HashMap<Course, String> selectTeacher(ArrayList<Person> allPerson){

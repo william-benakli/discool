@@ -1,5 +1,3 @@
-
-
 package app.web.components;
 
 import app.controller.Controller;
@@ -11,6 +9,7 @@ import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -29,9 +28,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-public class UserForm extends FormLayout {
-    private final Controller controller;
 
+public class UserForm extends FormLayout {
+
+    private final Controller controller;
+    private final Dialog dialog  = new Dialog();
     private final PersonRepository personRepository;
     private final Binder<Person> binder = new BeanValidationBinder<>(Person.class);
     private final TextField username = new TextField("Pseudo");
@@ -75,8 +76,10 @@ public class UserForm extends FormLayout {
         Person.Role[] departmentList = Person.Role.getRole();
         role.setItems(departmentList);
         addClassName("user-form");
-        getStyle().set("display", "block");
-        add(username,
+        dialog.setWidth("50%");
+        dialog.setHeight("65%");
+        setCss();
+        dialog.add(username,
             firstName,
             lastName,
             email,
@@ -85,7 +88,29 @@ public class UserForm extends FormLayout {
             role,
             website,
             createButtonsLayout(),
-            upload);
+                upload);
+    }
+
+    public void openDialog(){
+        dialog.open();
+    }
+    public void closeDialog(){
+        dialog.close();
+    }
+
+    public void setCss(){
+        username.getStyle().set("display","block");
+        username.getStyle().set("height","50px");
+        username.getStyle().set("display","block");
+        password.getStyle().set("display","block");
+        email.getStyle().set("display","block");
+        firstName.getStyle().set("display","block");
+        lastName.getStyle().set("display","block");
+        description.getStyle().set("display","block");
+        role.getStyle().set("display","block");
+        website.getStyle().set("display","block");
+        createButtonsLayout().getStyle().set("display","block");
+
     }
 
     private HorizontalLayout createButtonsLayout() {
@@ -110,7 +135,9 @@ public class UserForm extends FormLayout {
             controller.deleteUser(person);
             fireEvent(new DeleteEvent(this, person));
         });
-        close.addClickListener(click -> fireEvent(new CloseEvent(this)));
+        close.addClickListener(click -> {fireEvent(new CloseEvent(this));
+            closeDialog();
+        });
         binder.addStatusChangeListener(evt -> save.setEnabled(binder.isValid()));
         return new HorizontalLayout(save, delete, close);
     }
@@ -118,7 +145,6 @@ public class UserForm extends FormLayout {
     /**
      * @return false if one of the required fields is empty, true if everything is ok
      */
-
     private boolean checkIfFieldNotEmpty() {
         boolean ok = true;
         Notification notification;
