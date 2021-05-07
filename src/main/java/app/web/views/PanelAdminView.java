@@ -27,8 +27,8 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.repository.query.Param;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -281,16 +281,49 @@ public class PanelAdminView extends VerticalLayout {
     }
 
     private void createGrid(){
-        List<Course> personList = controller.findAllCourses();
-
-        Grid<Course> grid = new Grid<>(Course.class);
+        List<CourseWidthName> personList = new ArrayList<>();
+        associate(selectTeacher(controller.getAllUser())).forEach((key, value) ->{
+            personList.add(new CourseWidthName(key.getName(),value));
+        });
+        Grid<CourseWidthName> grid = new Grid<>(CourseWidthName.class);
         grid.setItems(personList);
-        grid.addColumn(Course::getName);
-        grid.addColumn(Course::getTeacherId);
-
-        grid.setThemeName("Course");
-
         add(grid);
+    }
+
+    private HashMap<Long, String> selectTeacher(ArrayList<Person> allPerson){
+        HashMap<Long, String> allTeacher = new HashMap<>();
+        for (Person person: allPerson) {
+            if(!person.getRole().equals(Person.Role.STUDENT)){
+                allTeacher.put(person.getId(), person.getUsername());
+            }
+        }
+        return allTeacher;
+    }
+
+    private HashMap<Course, String> associate(HashMap<Long, String> teacher){
+        HashMap<Course, String> allAssociate = new HashMap<>();
+        for (Course course: controller.findAllCourses()) {
+            allAssociate.put(course, teacher.get(course.getTeacherId()));
+        }
+        return allAssociate;
+    }
+
+    public class CourseWidthName{
+        private final String course;
+        private final String name;
+
+        public CourseWidthName(String course, String name) {
+            this.course=course;
+            this.name=name;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public String getCourse() {
+            return course;
+        }
     }
 
 }
