@@ -13,15 +13,21 @@ import app.model.users.Group;
 import app.model.users.GroupMembers;
 import app.model.users.Person;
 import app.web.components.ComponentButton;
+import app.web.components.ServerFormComponent;
 import app.web.components.UploadComponent;
-import app.web.views.*;
-import com.vaadin.flow.component.*;
+import app.web.views.HomeView;
+import app.web.views.MoodleView;
+import app.web.views.PanelAdminView;
+import app.web.views.ViewWithSidebars;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Key;
+import com.vaadin.flow.component.KeyModifier;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.dialog.Dialog;
-import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
@@ -32,7 +38,6 @@ import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.PasswordField;
-import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinServletRequest;
@@ -52,6 +57,7 @@ import java.util.Map;
 @CssImport("./styles/style.css")
 @StyleSheet("https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap")
 public class Navbar extends AppLayout {
+    //TODO: the background of the selected button changes color when clicked #42
 
     private final PersonRepository personRepository;
     private final MoodlePageRepository moodlePageRepository;
@@ -142,92 +148,13 @@ public class Navbar extends AppLayout {
     }
 
     private void createAddACourseButton() {
-
-        Map<Tab, Grid> tabsToPages = new HashMap<>();
-        Div tabGrid = new Div();
-
-
-        Grid<Person> teacherUser = new Grid<Person>();
-        createUserTeacherGrid(teacherUser);
-
-        teacherUser.setSelectionMode(Grid.SelectionMode.MULTI);
-        Tab teacherUserTab = new Tab("Liste des professeurs");
-        tabsToPages.put(teacherUserTab, teacherUser);
-
-
-        Grid<Person> studentsUser = new Grid<Person>();
-        createUserStudentGrid(studentsUser);
-
-        studentsUser.setSelectionMode(Grid.SelectionMode.MULTI);
-        Tab studentsUserTab = new Tab("Liste des étudiants");
-        tabsToPages.put(studentsUserTab, studentsUser);
-
-
-        Grid<Group> groupUser = new Grid<Group>();
-        createGroupeGrid(groupUser);
-
-        groupUser.setSelectionMode(Grid.SelectionMode.MULTI);
-        Tab groupUserTab = new Tab("Liste des groupes");
-        tabsToPages.put(groupUserTab, groupUser);
-
-        tabsToPages.values().forEach(e -> e.setVisible(false));
-        teacherUser.setVisible(true);
-
-        Tabs allGrid = new Tabs(teacherUserTab, studentsUserTab, groupUserTab);
-        allGrid.addSelectedChangeListener(event -> {
-            tabsToPages.values().forEach(e -> e.setVisible(false));
-            tabsToPages.get(allGrid.getSelectedTab()).setVisible(true);
-        });
-        allGrid.getStyle().set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml());
-
-
-        String newDirName = "course_pic/";
-        String name = "course_" + getRandomId();
-
-        Dialog main_dialog = new Dialog();
-
-        Image image = new Image(newDirName + "default.png", "image_course");
-        image.setWidth("50px");
-        image.setHeight("50px");
-        ComponentButton server_image = createServDockImage(image, Key.NAVIGATE_NEXT);
-
         ComponentButton button = createServDockImage(new Image("img/add.svg", "Create serveur"), Key.NAVIGATE_NEXT);
-        TextField field = new TextField();
-
-        Button changerpicture = new Button("Changer de profil de serveur", buttonClickEvent1 -> {
-            new ChangeServerPictureDialog(server_image, name);
-        });
-
-        Button valider = new Button("Valider", buttonClickEvent1 -> {
-            controller.createServer(currentUser.getId(), field.getValue(), newDirName + name + ".jpg");
-            Course course = controller.getLastCourse();
-
-            controller.createGroup(course, field.getValue());
-            Group groupCreate = controller.getLastGroup();
-            controller.addPersonToCourse(controller.getPersonById(currentUser.getId()), groupCreate);
-
-            Set<Person> teacher = teacherUser.getSelectedItems();
-            for (Person p : teacher) controller.addPersonToCourse(p, groupCreate);
-
-            Set<Person> Students = studentsUser.getSelectedItems();
-            for (Person p : Students) controller.addPersonToCourse(p, groupCreate);
-
-            Set<Group> group = groupUser.getSelectedItems();
-            for (Group g : group) {
-                ArrayList<GroupMembers> personGroup = controller.getPersonByGroupId(g.getId());
-                for (GroupMembers group_list : personGroup) {
-                    controller.addPersonToCourse(controller.getPersonById(group_list.getUserId()), groupCreate);
-                }
-            }
-
-            main_dialog.close();
-            UI.getCurrent().getPage().reload();
-        });
         button.getStyle()
                 .set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml());
-        tabGrid.add(allGrid, teacherUser, studentsUser, groupUser);
-        main_dialog.add(server_image, changerpicture, field, tabGrid, valider);
-        button.addClickListener(buttonClickEvent -> main_dialog.open());
+        Dialog d = new ServerFormComponent(controller);
+        button.addClickListener(buttonClickEvent -> {
+            d.open();
+        });
         courseNavigationDock.add(button);
     }
 
@@ -836,5 +763,6 @@ public class Navbar extends AppLayout {
         }
         directMessageButton = createAndStyleButton(imagePath, "Messages prives");
     }
+
 
 }
