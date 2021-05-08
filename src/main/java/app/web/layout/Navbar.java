@@ -140,30 +140,24 @@ public class Navbar extends AppLayout {
 
     private void createAddACourseButton() {
         String newDirName = "course_pic/";
-        String nameChiffre = getRandomId() + "_" + String.valueOf(currentUser.getId());
+        String name = "course_" + getRandomId();
 
-        UploadComponent uploadComponent = new UploadComponent("50px", "50px", 500000, 1, "src/main/webapp/course_pic/", "jpg", "jpeg", "png");
         Dialog main_dialog = new Dialog();
-        Dialog upload_dialog = new Dialog();
-
-        upload_dialog.add(uploadComponent);
 
         Image image = new Image(newDirName + "default.png", "image_course");
         image.setWidth("50px");
         image.setHeight("50px");
         ComponentButton server_image = createServDockImage(image, Key.NAVIGATE_NEXT);
-        server_image.getStyle().set("width", "50px")
-                .set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml());
 
         ComponentButton button = createServDockImage(new Image("img/add.svg", "Create serveur"), Key.NAVIGATE_NEXT);
         TextField field = new TextField();
 
         Button changerpicture = new Button("Changer de profil de serveur", buttonClickEvent1 -> {
-            upload_dialog.open();
+            new ChangeServerPictureDialog(server_image, name);
         });
 
         Button valider = new Button("Valider", buttonClickEvent1 -> {
-            controller.createServer(currentUser.getId(), field.getValue(), newDirName + nameChiffre);
+            controller.createServer(currentUser.getId(), field.getValue(), newDirName + name + ".jpg");
             main_dialog.close();
             UI.getCurrent().getPage().reload();
         });
@@ -188,7 +182,7 @@ public class Navbar extends AppLayout {
                 ), Key.NAVIGATE_NEXT);
         button.getStyle()
                 .set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml())
-                .set("transform","rotateX(180deg)");
+                .set("transform", "rotateX(180deg)");
         long pageId = findHomePageId(c.getId());
         RouterLink routerLink = new RouterLink("", MoodleView.class, pageId);
         linkRouteurImage(courseNavigationDock, button, routerLink);
@@ -328,6 +322,31 @@ public class Navbar extends AppLayout {
 
     private long getRandomId() {
         return new Random().nextLong();
+    }
+
+    private String renameFile(String oldName, String path, String linkName) throws Exception {
+        String extension = getExtensionImage(oldName);
+        String newPath = path + "/" + linkName + "." + extension;
+        File old = new File(oldName);
+        File newFile = new File(newPath);
+        if (!old.renameTo(newFile)) {
+            throw new Exception("File can't be renamed");
+        }
+        return newPath;
+    }
+
+    public String getExtensionImage(String name) {
+        String[] tab_name = name.toLowerCase().split("\\.");
+        if (tab_name.length > 2) return "";
+        if (tab_name[1].contains("jpg") || tab_name[1].contains("jpeg") || tab_name[1].contains("png")) {
+            return tab_name[1];
+        }
+        return "";
+    }
+
+    public boolean ImageExist(String url) {
+        File f = new File(url);
+        return f.exists();
     }
 
     /**
@@ -547,6 +566,7 @@ public class Navbar extends AppLayout {
 
         /**
          * Create a layout with the profile picture and a button to change the picture
+         *
          * @return the layout
          */
         private FlexLayout createProfilePicture(Paragraph userName) {
@@ -592,7 +612,7 @@ public class Navbar extends AppLayout {
         private void createDialog() {
             H2 title = new H2("Upload a new profile picture");
             title.getStyle()
-                    .set("text-align","center")
+                    .set("text-align", "center")
                     .set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml());
             Paragraph instructions = new Paragraph("Choose a new picture from your browser (or drag-and-drop).\n " +
                                                         "Only .jpg and .jpeg files are accepted.");
@@ -619,7 +639,7 @@ public class Navbar extends AppLayout {
             String extension;
             if (oldName.endsWith("jpeg")) {
                 extension = ".jpeg";
-            } else if (oldName.endsWith("jpg")){
+            } else if (oldName.endsWith("jpg")) {
                 extension = ".jpg";
             } else if (oldName.endsWith("JPG")) {
                 extension = ".JPG";
@@ -632,6 +652,75 @@ public class Navbar extends AppLayout {
             File old = new File(oldName);
             File newFile = new File("src/main/webapp/profile_pictures/" + currentUser.getId() + extension.toLowerCase());
             if (!old.renameTo(newFile)) {
+                throw new Exception("File can't be renamed");
+            }
+        }
+    }
+
+    private class ChangeServerPictureDialog extends Dialog {
+        ComponentButton button;
+        String name;
+
+        public ChangeServerPictureDialog(ComponentButton button, String name) {
+            this.button = button;
+            this.name = name;
+            createDialog();
+            open();
+        }
+
+        private void createDialog() {
+            H2 title = new H2("Upload a new server picture");
+            title.getStyle()
+                    .set("text-align", "center")
+                    .set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml());
+            Paragraph instructions = new Paragraph("Choose a new picture from your browser (or drag-and-drop).\n " +
+                    "Only .jpg and .jpeg files are accepted.");
+
+
+            UploadComponent uploadComponent = new UploadComponent("50px", "96%", 1, 30000000,
+                    "src/main/webapp/course_pic",
+                    "image/jpeg");
+            uploadComponent.addSucceededListener(event -> {
+                String oldName = uploadComponent.getFileName();
+                String newName = "";
+                try {
+                    if (newName.equals(name)) {
+                        newName = renameFile(name, "src/main/webapp/course_pic", name);
+                    } else {
+                        newName = renameFile(oldName, "src/main/webapp/course_pic", name);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                System.out.println(newName + "name");
+                Image imgServ = new Image(newName.replace("src/main/webapp/", ""), name);
+                button.SetStyle(imgServ).setHeightFull();
+                button.SetStyle(imgServ).setWidthFull();
+                button.setIcon(imgServ);
+                Notification.show("Your server picture was updated successfully");
+                this.close();
+            });
+
+            this.add(title, instructions, uploadComponent);
+        }
+
+        private void renameProfilePicture(String oldName) throws Exception {
+            String extension;
+            if (oldName.endsWith("jpeg")) {
+                extension = ".jpeg";
+            } else if (oldName.endsWith("jpg")){
+                extension = ".jpg";
+            } else if (oldName.endsWith("JPG")) {
+                extension = ".JPG";
+            } else if (oldName.endsWith("JPEG")) {
+                extension = ".JPEG";
+            } else {
+                System.out.println("Problem while tying to figure out the file's name while renaming the profile picture");
+                extension = "";
+            }
+            File old = new File(oldName);
+            File newFile = new File("src/main/webapp/profile_pictures/" + currentUser.getId() + extension.toLowerCase());
+            if (! old.renameTo(newFile)) {
                 throw new Exception("File can't be renamed");
             }
         }
