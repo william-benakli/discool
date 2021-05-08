@@ -142,15 +142,42 @@ public class Navbar extends AppLayout {
 
     private void createAddACourseButton() {
 
+        Map<Tab, Grid> tabsToPages = new HashMap<>();
+        Div tabGrid = new Div();
+
+
         Grid<Person> teacherUser = new Grid<Person>();
         createUserTeacherGrid(teacherUser);
+
+        teacherUser.setSelectionMode(Grid.SelectionMode.MULTI);
+        Tab teacherUserTab = new Tab("Liste des professeurs");
+        tabsToPages.put(teacherUserTab, teacherUser);
 
 
         Grid<Person> studentsUser = new Grid<Person>();
         createUserStudentGrid(studentsUser);
 
+        studentsUser.setSelectionMode(Grid.SelectionMode.MULTI);
+        Tab studentsUserTab = new Tab("Liste des étudiants");
+        tabsToPages.put(studentsUserTab, studentsUser);
+
+
         Grid<Group> groupUser = new Grid<Group>();
         createGroupeGrid(groupUser);
+
+        groupUser.setSelectionMode(Grid.SelectionMode.MULTI);
+        Tab groupUserTab = new Tab("Liste des groupes");
+        tabsToPages.put(groupUserTab, groupUser);
+
+        tabsToPages.values().forEach(e -> e.setVisible(false));
+        teacherUser.setVisible(true);
+
+        Tabs allGrid = new Tabs(teacherUserTab, studentsUserTab, groupUserTab);
+        allGrid.addSelectedChangeListener(event -> {
+            tabsToPages.values().forEach(e -> e.setVisible(false));
+            tabsToPages.get(allGrid.getSelectedTab()).setVisible(true);
+        });
+        allGrid.getStyle().set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml());
 
 
         String newDirName = "course_pic/";
@@ -172,12 +199,18 @@ public class Navbar extends AppLayout {
 
         Button valider = new Button("Valider", buttonClickEvent1 -> {
             controller.createServer(currentUser.getId(), field.getValue(), newDirName + name + ".jpg");
+            Course course = controller.getLastCourse();
+
+            Set<Person> teacher = teacherUser.getSelectedItems();
+            for (Person p : teacher) controller.addPersonToCourse(p, course);
+
             main_dialog.close();
             UI.getCurrent().getPage().reload();
         });
         button.getStyle()
                 .set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml());
-        main_dialog.add(server_image, changerpicture, field, teacherUser, studentsUser, groupUser, valider);
+        tabGrid.add(allGrid, teacherUser, studentsUser, groupUser);
+        main_dialog.add(server_image, changerpicture, field, tabGrid, valider);
         button.addClickListener(buttonClickEvent -> main_dialog.open());
         courseNavigationDock.add(button);
     }

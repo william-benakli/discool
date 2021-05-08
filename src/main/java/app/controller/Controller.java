@@ -283,6 +283,29 @@ public class Controller {
         }
         return values;
     }
+    public Course getLastCourse() {
+        return courseRepository.findTopByOrderByIdDesc();
+    }
+
+    public void addPersonToCourse(Person p, Course c) {
+        groupRepository.save(Group.builder().courseId(c.getId()).name("test").build());
+
+        groupMembersRepository.save(
+                GroupMembers.builder()
+                        .userId(p.getId())
+                        .groupId(c.getId())
+                        .timeAdded(0)
+                        .build());
+
+        if (!existPersoIntoCourse(p)) {
+            System.out.println("Oui + 1");
+        }
+    }
+
+    public boolean existPersoIntoCourse(Person p) {
+        return (courseRepository.findById(p.getId()) != null);
+    }
+
 
     public void removeCourse(long course) {
         courseRepository.deleteById(course);
