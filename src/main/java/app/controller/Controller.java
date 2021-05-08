@@ -287,9 +287,8 @@ public class Controller {
         return courseRepository.findTopByOrderByIdDesc();
     }
 
-    public void addPersonToCourse(Person p, Course c) {
-        if (!existPersoIntoCourse(p, c)) {
-            groupRepository.save(Group.builder().courseId(c.getId()).name("test").build());
+    public void addPersonToCourse(Person p, Group group) {
+        if (!existPersonIntoCourse(p, group)) {
             groupMembersRepository.save(
                     GroupMembers.builder()
                             .userId(p.getId())
@@ -301,14 +300,25 @@ public class Controller {
         }
     }
 
-    public boolean existPersoIntoCourse(Person p, Course c) {
-        return (groupMembersRepository.findByUserIdAndGroupId(p.getId(), c.getId()) != null);
+    public boolean existPersonIntoCourse(Person p, Group group) {
+        return (groupMembersRepository.findByUserIdAndGroupId(p.getId(), group.getId()) != null);
     }
 
     public Group getLastGroup() {
         return groupRepository.findTopByOrderByIdDesc();
     }
 
+    public void createGroup(Course c, String name) {
+        groupRepository.save(Group.builder().courseId(c.getId()).name(name).build());
+    }
+
+    public ArrayList<GroupMembers> getPersonByGroupId(long id) {
+        return groupMembersRepository.findAllByGroupId(id);
+    }
+
+    public Person getPersonById(long id) {
+        return personRepository.findById(id);
+    }
 
 
     public void removeCourse(long course) {

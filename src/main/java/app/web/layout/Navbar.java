@@ -10,6 +10,7 @@ import app.model.courses.Course;
 import app.model.courses.MoodlePage;
 import app.model.users.GroupMembers;
 import app.model.users.Group;
+import app.model.users.GroupMembers;
 import app.model.users.Person;
 import app.web.components.ComponentButton;
 import app.web.components.UploadComponent;
@@ -201,8 +202,23 @@ public class Navbar extends AppLayout {
             controller.createServer(currentUser.getId(), field.getValue(), newDirName + name + ".jpg");
             Course course = controller.getLastCourse();
 
+            controller.createGroup(course, field.getValue());
+            Group groupCreate = controller.getLastGroup();
+            controller.addPersonToCourse(controller.getPersonById(currentUser.getId()), groupCreate);
+
             Set<Person> teacher = teacherUser.getSelectedItems();
-            for (Person p : teacher) controller.addPersonToCourse(p, course);
+            for (Person p : teacher) controller.addPersonToCourse(p, groupCreate);
+
+            Set<Person> Students = studentsUser.getSelectedItems();
+            for (Person p : Students) controller.addPersonToCourse(p, groupCreate);
+
+            Set<Group> group = groupUser.getSelectedItems();
+            for (Group g : group) {
+                ArrayList<GroupMembers> personGroup = controller.getPersonByGroupId(g.getId());
+                for (GroupMembers group_list : personGroup) {
+                    controller.addPersonToCourse(controller.getPersonById(group_list.getUserId()), groupCreate);
+                }
+            }
 
             main_dialog.close();
             UI.getCurrent().getPage().reload();

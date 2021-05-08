@@ -12,7 +12,6 @@ import java.util.ArrayList;
 public interface GroupMembersRepository extends JpaRepository<GroupMembers, Long> {
 
     ArrayList<GroupMembers> findByUserId(long id);
-
     ArrayList<GroupMembers> findByGroupId(long id);
 
     @Modifying
@@ -27,5 +26,7 @@ public interface GroupMembersRepository extends JpaRepository<GroupMembers, Long
 
 
     GroupMembers findByUserIdAndGroupId(long userId, long groupId);
+
+    ArrayList<GroupMembers> findAllByGroupId(long groupId);
 
 }
