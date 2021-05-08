@@ -19,6 +19,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
@@ -139,6 +140,15 @@ public class Navbar extends AppLayout {
     }
 
     private void createAddACourseButton() {
+
+        Grid<Person> teacherUser = new Grid<Person>();
+        createUserTeacherGrid(teacherUser);
+
+
+        Grid<Person> studentsUser = new Grid<Person>();
+        createUserStudentGrid(studentsUser);
+
+
         String newDirName = "course_pic/";
         String name = "course_" + getRandomId();
 
@@ -163,10 +173,25 @@ public class Navbar extends AppLayout {
         });
         button.getStyle()
                 .set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml());
-        main_dialog.add(server_image, changerpicture, field, valider);
+        main_dialog.add(server_image, changerpicture, field, teacherUser, studentsUser, valider);
         button.addClickListener(buttonClickEvent -> main_dialog.open());
         courseNavigationDock.add(button);
     }
+
+    private void createUserTeacherGrid(Grid<Person> grid) {
+        grid.setItems(personRepository.findAll());
+        grid.addColumn(Person::getUsername).setHeader("Nom");
+        grid.addColumn(Person::getRole).setHeader("Role");
+
+    }
+
+    private void createUserStudentGrid(Grid<Person> grid) {
+        grid.setItems(personRepository.findAll());
+        grid.addColumn(Person::getUsername).setHeader("Nom");
+        grid.addColumn(Person::getRole).setHeader("Role");
+
+    }
+
 
     /**
      * Creates a clickable button to redirect to a Course
