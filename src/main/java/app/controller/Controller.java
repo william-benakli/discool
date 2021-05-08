@@ -84,9 +84,6 @@ public class Controller {
         SecurityUtils.online.remove(name);
     }
 
-    public void saveMessage(PublicChatMessage message) {
-        publicChatMessageRepository.save(message);
-    }
 
     public List<Person> searchByUserName(String searchTerm) {
         return personRepository.searchByUserName(searchTerm);
@@ -128,6 +125,9 @@ public class Controller {
         moodlePageRepository.delete(section);
     }
 
+    public String getUsernameOfSender(PublicChatMessage publicChatMessage) {
+        return personRepository.findById(publicChatMessage.getSender()).getUsername();
+    }
 
     public void updateTextChannel(PublicTextChannel courantChannel, String name, boolean mute, boolean visible) {
         courantChannel.setName(name);
@@ -148,6 +148,18 @@ public class Controller {
         section.setTitle(title);
         section.setContent(content);
         moodlePageRepository.save(section);
+    }
+
+    public void clearMessageChat() {
+        publicChatMessageRepository.updateDeletedAll();
+    }
+
+    public void clearMessageChat(int value, long channelid) {
+        publicChatMessageRepository.updateDeleted(channelid, value);
+    }
+
+    public PublicChatMessage getMessageById(long id) {
+        return publicChatMessageRepository.findById(id);
     }
 
     public ArrayList<Person> getAllStudentsForCourse(long courseId) {
@@ -247,6 +259,15 @@ public class Controller {
         publicChatMessageRepository.deletePublicChatMessageById(person.getId());
         personRepository.deleteUserById(person.getId());
     }
+
+    public List<Group> findGroupAll() {
+        return groupRepository.findAll();
+    }
+
+    public List<Person> findAllUserByRole(Person.Role r) {
+        return personRepository.findAllByRole(r);
+    }
+
 
     /**
      * @param users    the list of users to get the data from

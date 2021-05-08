@@ -18,4 +18,6 @@ public interface GroupRepository extends JpaRepository<Group, Long> {
     @Query(value =" DELETE FROM groups WHERE courseid = :idparam ",nativeQuery = true)
     void deleteAllByCourseId(@Param("idparam") long id);
 
+
+    ArrayList<Group> findAll();
 }

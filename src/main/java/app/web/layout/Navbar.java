@@ -9,6 +9,7 @@ import app.jpa_repo.*;
 import app.model.courses.Course;
 import app.model.courses.MoodlePage;
 import app.model.users.GroupMembers;
+import app.model.users.Group;
 import app.model.users.Person;
 import app.web.components.ComponentButton;
 import app.web.components.UploadComponent;
@@ -133,7 +134,7 @@ public class Navbar extends AppLayout {
             }else createCourseButton(c, splitURI, cleanURI);
         }
 
-        if (! SecurityUtils.isUserStudent()) {
+        if (!SecurityUtils.isUserStudent()) {
             createAddACourseButton();
         }
         addToNavbar(courseNavigationDock);
@@ -147,6 +148,9 @@ public class Navbar extends AppLayout {
 
         Grid<Person> studentsUser = new Grid<Person>();
         createUserStudentGrid(studentsUser);
+
+        Grid<Group> groupUser = new Grid<Group>();
+        createGroupeGrid(groupUser);
 
 
         String newDirName = "course_pic/";
@@ -173,25 +177,31 @@ public class Navbar extends AppLayout {
         });
         button.getStyle()
                 .set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml());
-        main_dialog.add(server_image, changerpicture, field, teacherUser, studentsUser, valider);
+        main_dialog.add(server_image, changerpicture, field, teacherUser, studentsUser, groupUser, valider);
         button.addClickListener(buttonClickEvent -> main_dialog.open());
         courseNavigationDock.add(button);
     }
 
     private void createUserTeacherGrid(Grid<Person> grid) {
-        grid.setItems(personRepository.findAll());
+        grid.setItems(controller.findAllUserByRole(Person.Role.TEACHER));
         grid.addColumn(Person::getUsername).setHeader("Nom");
         grid.addColumn(Person::getRole).setHeader("Role");
 
     }
 
     private void createUserStudentGrid(Grid<Person> grid) {
-        grid.setItems(personRepository.findAll());
+        grid.setItems(controller.findAllUserByRole(Person.Role.STUDENT));
         grid.addColumn(Person::getUsername).setHeader("Nom");
         grid.addColumn(Person::getRole).setHeader("Role");
 
     }
 
+    private void createGroupeGrid(Grid<Group> grid) {
+        grid.setItems(controller.findGroupAll());
+        grid.addColumn(Group::getName).setHeader("Groupe");
+        grid.addColumn(Group::getDescription).setHeader("Description");
+
+    }
 
     /**
      * Creates a clickable button to redirect to a Course
