@@ -139,18 +139,38 @@ public class Navbar extends AppLayout {
     }
 
     private void createAddACourseButton() {
+        String newDirName = "course_pic/";
+        String nameChiffre = getRandomId() + "_" + String.valueOf(currentUser.getId());
+
+        UploadComponent uploadComponent = new UploadComponent("50px", "50px", 500000, 1, "src/main/webapp/course_pic/", "jpg", "jpeg", "png");
+        Dialog main_dialog = new Dialog();
+        Dialog upload_dialog = new Dialog();
+
+        upload_dialog.add(uploadComponent);
+
+        Image image = new Image(newDirName + "default.png", "image_course");
+        image.setWidth("50px");
+        image.setHeight("50px");
+        ComponentButton server_image = createServDockImage(image, Key.NAVIGATE_NEXT);
+        server_image.getStyle().set("width", "50px")
+                .set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml());
+
         ComponentButton button = createServDockImage(new Image("img/add.svg", "Create serveur"), Key.NAVIGATE_NEXT);
-        Dialog dialog = new Dialog();
         TextField field = new TextField();
+
+        Button changerpicture = new Button("Changer de profil de serveur", buttonClickEvent1 -> {
+            upload_dialog.open();
+        });
+
         Button valider = new Button("Valider", buttonClickEvent1 -> {
-            controller.createServer(currentUser.getId(), field.getValue(), "img/DDiscool.svg");
-            dialog.close();
+            controller.createServer(currentUser.getId(), field.getValue(), newDirName + nameChiffre);
+            main_dialog.close();
             UI.getCurrent().getPage().reload();
         });
         button.getStyle()
                 .set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml());
-        dialog.add(field, valider);
-        button.addClickListener(buttonClickEvent -> dialog.open());
+        main_dialog.add(server_image, changerpicture, field, valider);
+        button.addClickListener(buttonClickEvent -> main_dialog.open());
         courseNavigationDock.add(button);
     }
 
@@ -304,6 +324,10 @@ public class Navbar extends AppLayout {
         button.getStyle().set("overflow", "hidden");
         routerLink.getElement().appendChild(button.getElement());
         servCardDock.add(routerLink);
+    }
+
+    private long getRandomId() {
+        return new Random().nextLong();
     }
 
     /**
