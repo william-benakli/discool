@@ -25,4 +25,7 @@ public interface GroupMembersRepository extends JpaRepository<GroupMembers, Long
     @Query(value = "DELETE FROM group_members WHERE userid = :idparam", nativeQuery = true)
     void deleteByUserId(@Param("idparam") long id);
 
+
+    GroupMembers findByUserIdAndGroupId(long userId, long groupId);
+
 }

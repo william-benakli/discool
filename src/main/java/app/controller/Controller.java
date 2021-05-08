@@ -288,23 +288,27 @@ public class Controller {
     }
 
     public void addPersonToCourse(Person p, Course c) {
-        groupRepository.save(Group.builder().courseId(c.getId()).name("test").build());
-
-        groupMembersRepository.save(
-                GroupMembers.builder()
-                        .userId(p.getId())
-                        .groupId(c.getId())
-                        .timeAdded(0)
-                        .build());
-
-        if (!existPersoIntoCourse(p)) {
-            System.out.println("Oui + 1");
+        if (!existPersoIntoCourse(p, c)) {
+            groupRepository.save(Group.builder().courseId(c.getId()).name("test").build());
+            groupMembersRepository.save(
+                    GroupMembers.builder()
+                            .userId(p.getId())
+                            .groupId(getLastGroup().getId())
+                            .timeAdded(0)
+                            .build());
+        } else {
+            System.out.println("L'utilisateur est déjà présent sur ce serveur");
         }
     }
 
-    public boolean existPersoIntoCourse(Person p) {
-        return (courseRepository.findById(p.getId()) != null);
+    public boolean existPersoIntoCourse(Person p, Course c) {
+        return (groupMembersRepository.findByUserIdAndGroupId(p.getId(), c.getId()) != null);
     }
+
+    public Group getLastGroup() {
+        return groupRepository.findTopByOrderByIdDesc();
+    }
+
 
 
     public void removeCourse(long course) {

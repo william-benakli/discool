@@ -20,4 +20,6 @@ public interface GroupRepository extends JpaRepository<Group, Long> {
 
 
     ArrayList<Group> findAll();
+
+    Group findTopByOrderByIdDesc();
 }
