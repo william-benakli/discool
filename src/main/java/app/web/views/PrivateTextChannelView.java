@@ -167,7 +167,7 @@ public class PrivateTextChannelView extends TextChannelView implements HasUrlPar
         }
 
         private void createAllComboBox() {
-            ArrayList<Person> users = getController().getAllUser();
+            ArrayList<Person> users = getController().getAllUsers();
             ArrayList<String> namesValues = getController().getAllNamesOrUsernames(users, true);
             createComboBox(names, namesValues);
             ArrayList<String> usernamesValues = getController().getAllNamesOrUsernames(users, false);

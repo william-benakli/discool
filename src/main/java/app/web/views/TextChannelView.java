@@ -1,9 +1,6 @@
 package app.web.views;
 
-import app.controller.AssignmentController;
-import app.controller.ChatController;
-import app.controller.Controller;
-import app.controller.Markdown;
+import app.controller.*;
 import app.controller.broadcasters.ChatMessagesBroadcaster;
 import app.controller.commands.CommandsClearChat;
 import app.controller.security.SecurityUtils;
@@ -12,8 +9,6 @@ import app.model.chat.ChatMessage;
 import app.model.chat.PrivateChatMessage;
 import app.model.chat.PrivateTextChannel;
 import app.model.chat.TextChannel;
-import app.model.users.Person;
-import app.model.courses.Course;
 import app.model.users.Person;
 import app.web.components.ComponentButton;
 import app.web.components.UploadComponent;
@@ -35,17 +30,15 @@ import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.HasDynamicTitle;
+import com.vaadin.flow.router.Route;
 import com.vaadin.flow.shared.Registration;
 import lombok.Getter;
-import lombok.SneakyThrows;
 import org.apache.commons.io.FileUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Random;
 
 
@@ -90,7 +83,8 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         // set the user and the controllers
         currentUser = SecurityUtils.getCurrentUser(personRepository);
         setController(new Controller(personRepository, publicTextChannelRepository, publicChatMessageRepository,
-                                     courseRepository, moodlePageRepository, groupRepository, groupMembersRepository));
+                                     courseRepository, moodlePageRepository, groupRepository, groupMembersRepository,
+                                     privateChatMessageRepository));
         setAssignmentController(new AssignmentController(personRepository, assignmentRepository,
                                                          studentAssignmentsUploadsRepository, courseRepository));
         this.chatController = new ChatController(personRepository, publicTextChannelRepository, publicChatMessageRepository,
@@ -113,11 +107,12 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                     if (targetResponseMessage == 0) {
                         newMessage = chatController.saveMessage(messageTextField.getValue(), textChannel.getId(),
                                                                 1, currentUser.getId(),
-                                                                textChannel instanceof PrivateTextChannel);
+                                                                textChannel instanceof PrivateTextChannel,
+                                                                0);
                     } else {
                         newMessage = chatController.saveMessage(messageTextField.getValue(), textChannel.getId(),
                                                                 targetResponseMessage, currentUser.getId(),
-                                                                textChannel instanceof PrivateTextChannel);
+                                                                textChannel instanceof PrivateTextChannel, 0);
                         if (newMessage != null) {
                             selectRep.changeStatus();
                             targetResponseMessage = 0;
@@ -426,8 +421,9 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
     }
 
     public void sendMessageChat(int type, String source) {
-        PublicChatMessage publicChatMessage = getController().saveMessage(source, textChannel.getId(), 1, currentUser.getId(), type);
-        PublicMessagesBroadcaster.broadcast("NEW_MESSAGE", publicChatMessage);
+        ChatMessage chatMessage = chatController.saveMessage(source, textChannel.getId(), 1, currentUser.getId(),
+                                                             textChannel instanceof PrivateTextChannel, type);
+        ChatMessagesBroadcaster.broadcast("NEW_MESSAGE", chatMessage);
     }
 
     private long randomId() {
@@ -668,6 +664,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         private void createChatBlock() {
             Paragraph metaData = createParagrapheAmelioration(chatController.getUsernameOfSender(chatMessage) + " | "
                                                                       + getController().convertLongToDate(chatMessage.getTimeCreated()));
+            final Paragraph error = new Paragraph("Erreur fichier introuvable");
             metaData.getStyle()
                     .set("color", ColorHTML.PURPLE.getColorHtml())
                     .set("font-weight", "700");

@@ -76,7 +76,7 @@ public class Navbar extends AppLayout {
         this.personRepository = personRepository;
         this.moodlePageRepository = moodlePageRepository;
         this.controller = new Controller(personRepository, publicTextChannelRepository, publicChatMessageRepository, courseRepository,
-                                         moodlePageRepository, groupRepository, groupMembersRepository);
+                                         moodlePageRepository, groupRepository, groupMembersRepository, privateChatMessageRepository);
         this.chatController = new ChatController(personRepository, publicTextChannelRepository, publicChatMessageRepository,
                                                  privateTextChannelRepository, privateChatMessageRepository);
         createLeftSubMenu();

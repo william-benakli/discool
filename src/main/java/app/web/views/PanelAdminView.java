@@ -1,9 +1,10 @@
 package app.web.views;
 
+import app.controller.ChatController;
 import app.controller.Controller;
 import app.jpa_repo.CourseRepository;
-import app.jpa_repo.DirectMessageRepository;
 import app.jpa_repo.PersonRepository;
+import app.jpa_repo.PrivateChatMessageRepository;
 import app.jpa_repo.PublicChatMessageRepository;
 import app.model.chat.PublicChatMessage;
 import app.model.courses.Course;
@@ -38,6 +39,7 @@ import java.util.Map;
 @CssImport("./styles/formStyle.css")
 public class PanelAdminView extends VerticalLayout {
     private final Controller controller;
+    private final ChatController chatController;
     private final PersonRepository personRepository;
     private final CourseRepository courseRepository;
     private final PublicChatMessageRepository publicChatMessageRepository;
@@ -54,7 +56,7 @@ public class PanelAdminView extends VerticalLayout {
 
     public PanelAdminView(@Autowired PersonRepository personRepository,
                           @Autowired CourseRepository courseRepository,
-                          @Autowired DirectMessageRepository directMessageRepository,
+                          @Autowired PrivateChatMessageRepository privateChatMessageRepository,
                           @Autowired PublicChatMessageRepository publicChatMessageRepository) {
         this.personRepository = personRepository;
         this.courseRepository = courseRepository;
@@ -62,8 +64,10 @@ public class PanelAdminView extends VerticalLayout {
         this.controller = new Controller(personRepository,
                                          null, publicChatMessageRepository,
                                          courseRepository, null,
-                                         null, null, directMessageRepository);
-
+                                         null, null, privateChatMessageRepository);
+        this.chatController = new ChatController(personRepository, null,
+                                                 publicChatMessageRepository, null,
+                                                 privateChatMessageRepository);
         listUser.add(createButtonsDiv());
         createUserGrid();
         createCourseGrid();
@@ -275,7 +279,7 @@ public class PanelAdminView extends VerticalLayout {
         Button button = new Button("Supprimer", clickEvent -> {
             ListDataProvider<PublicChatMessage> dataProvider =
                     (ListDataProvider<PublicChatMessage>) grid.getDataProvider();
-            controller.deleteMessage(item);
+            chatController.deleteMessage(item);
             dataProvider.getItems().remove(item);
             dataProvider.refreshAll();
         });

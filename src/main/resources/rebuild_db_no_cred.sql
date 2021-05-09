@@ -81,6 +81,7 @@ CREATE TABLE IF NOT EXISTS direct_messages (
     timecreated BIGINT NOT NULL,
     deleted BIT NOT NULL,
     channelid BIGINT UNSIGNED NOT NULL,
+    typefile INT NOT NULL,
 
     CONSTRAINT fk_parentid_direct
         FOREIGN KEY(parentid) REFERENCES direct_messages(id),

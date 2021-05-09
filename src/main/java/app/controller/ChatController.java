@@ -51,13 +51,12 @@ public class ChatController {
      * @return the message that was saved
      */
     public ChatMessage saveMessage(String message, long channelId, long parentId,
-                                   long userId, boolean isPrivate) {
-        if (isPrivate) return savePrivateMessage(message, channelId, parentId, userId);
-        else return savePublicMessage(message, channelId, parentId, userId);
+                                   long userId, boolean isPrivate, int type) {
+        if (isPrivate) return savePrivateMessage(message, channelId, parentId, userId, type);
+        else return savePublicMessage(message, channelId, parentId, userId, type);
     }
 
-    //----------------
-    private PrivateChatMessage savePrivateMessage(String message, long channelId, long parentId, long userId) {
+    private PrivateChatMessage savePrivateMessage(String message, long channelId, long parentId, long userId, int type) {
         PrivateChatMessage messageToSave = PrivateChatMessage.builder()
                 .message(message)
                 .channelid(channelId)
@@ -65,12 +64,13 @@ public class ChatController {
                 .sender(userId)
                 .timeCreated(System.currentTimeMillis())
                 .deleted(false)
+                .type(type)
                 .build();
         privateChatMessageRepository.save(messageToSave);
         return messageToSave;
     }
 
-    private PublicChatMessage savePublicMessage(String message, long channelId, long parentId, long userId) {
+    private PublicChatMessage savePublicMessage(String message, long channelId, long parentId, long userId, int type) {
         PublicChatMessage messageToSave = PublicChatMessage.builder()
                 .message(message)
                 .channelid(channelId)
@@ -78,6 +78,7 @@ public class ChatController {
                 .sender(userId)
                 .timeCreated(System.currentTimeMillis())
                 .deleted(false)
+                .type(type)
                 .build();
         publicChatMessageRepository.save(messageToSave);
         return messageToSave;
@@ -117,7 +118,7 @@ public class ChatController {
         if (message instanceof PrivateChatMessage) {
             privateChatMessageRepository.updateDeletedById(message.getId());
         } else {
-            publicChatMessageRepository.updateDeletedById(message.getId());
+            publicChatMessageRepository.deletePublicChatMessageById(message.getId());
         }
     }
 

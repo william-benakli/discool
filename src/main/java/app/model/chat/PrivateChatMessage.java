@@ -70,4 +70,13 @@ public class PrivateChatMessage implements ChatMessage {
     )
     private long channelid;
 
+    /**
+     * Type of message
+     * 0-Normal message
+     * 1-Image message
+     * 2-File message
+     */
+    @Column(name = "typefile")
+    private int type;
+
 }

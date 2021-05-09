@@ -8,8 +8,6 @@ import app.model.courses.MoodlePage;
 import app.model.users.Group;
 import app.model.users.GroupMembers;
 import app.model.users.Person;
-import app.web.components.UserForm;
-import org.springframework.data.repository.query.Param;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -17,6 +15,7 @@ import java.util.*;
 public class Controller {
 
     private final PublicTextChannelRepository publicTextChannelRepository;
+    private final PublicChatMessageRepository publicChatMessageRepository;
     private final PersonRepository personRepository;
     private final CourseRepository courseRepository;
     private final MoodlePageRepository moodlePageRepository;
@@ -33,7 +32,7 @@ public class Controller {
                       GroupMembersRepository groupMembersRepository,
                       PrivateChatMessageRepository privateChatMessageRepository) {
         this.publicChatMessageRepository = publicChatMessageRepository;
-        this.textChannelRepository = textChannelRepository;
+        this.publicTextChannelRepository = publicTextChannelRepository;
         this.personRepository = personRepository;
         this.courseRepository = courseRepository;
         this.moodlePageRepository = moodlePageRepository;
@@ -46,8 +45,6 @@ public class Controller {
         Optional<Course> c = courseRepository.findById(id);
         return c.map(Course::getName).orElse(null);
     }
-
-    public MoodlePage getLastMoodlePage(long courseId) {
 
     public void deleteNullUsers(){
         personRepository.deleteNullUsers();
@@ -225,8 +222,8 @@ public class Controller {
 
     public void deleteUser(Person person) {
         groupMembersRepository.deleteByUserId(person.getId());
-        directMessageRepository.deleteByUserId(person.getId());
-        publicChatMessageRepository.deleteByUserId(person.getId());
+        privateChatMessageRepository.updateDeletedById(person.getId());
+        publicChatMessageRepository.deletePublicChatMessageById(person.getId());
         personRepository.deleteUserById(person.getId());
     }
 
