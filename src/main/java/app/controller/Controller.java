@@ -22,6 +22,7 @@ public class Controller {
     private final MoodlePageRepository moodlePageRepository;
     private final GroupRepository groupRepository;
     private final GroupMembersRepository groupMembersRepository;
+    private final DirectMessageRepository directMessageRepository;
 
     public Controller(PersonRepository personRepository,
                       TextChannelRepository textChannelRepository,
@@ -29,7 +30,8 @@ public class Controller {
                       CourseRepository courseRepository,
                       MoodlePageRepository moodlePageRepository,
                       GroupRepository groupRepository,
-                      GroupMembersRepository groupMembersRepository) {
+                      GroupMembersRepository groupMembersRepository,
+                      DirectMessageRepository directMessageRepository) {
         this.publicChatMessageRepository = publicChatMessageRepository;
         this.textChannelRepository = textChannelRepository;
         this.personRepository = personRepository;
@@ -37,6 +39,7 @@ public class Controller {
         this.moodlePageRepository = moodlePageRepository;
         this.groupRepository = groupRepository;
         this.groupMembersRepository = groupMembersRepository;
+        this.directMessageRepository = directMessageRepository;
     }
 
     public String getTitleCourse(long id) {
@@ -59,6 +62,53 @@ public class Controller {
     }
 
 
+    public void deleteNullUsers(){
+        personRepository.deleteNullUsers();
+    }
+
+    public void updateUserById(long id, String email, String username , String firstname, String lastname, String description, Person.Role role, String website){
+        personRepository.updateUserById(id, email,username, firstname, lastname ,description, role, website);
+    }
+
+    public void addUser( String username ,String password, Person.Role role, String firstname, String lastname, String email, String description, String website, long firstlogin, long lastlogin, long timecreated){
+        personRepository.addUser(username, password, role, firstname, lastname, email, description, website, firstlogin, lastlogin, timecreated);
+    }
+
+    public Person findByUsername(String name){
+        return personRepository.findByUsername(name);
+    }
+
+    public Person findUserById(long id) {
+        return personRepository.findById(id);
+    }
+
+    public void saveUser(Person p) {
+        personRepository.save(p);
+    }
+
+    public ArrayList<Person> findAllUsers(){
+        return personRepository.findAll();
+    }
+
+    public List<Person> searchUser(String searchTerm) {
+        return personRepository.search(searchTerm);
+    }
+
+    public List<Person> searchByUserName(String searchTerm){
+        return personRepository.searchByUserName(searchTerm);
+    }
+
+    public List<Person> searchByEmail( String searchTerm){
+        return personRepository.searchByEmail(searchTerm);
+    }
+
+    public Person getUsername(long id){
+        return personRepository.findById(id);
+    }
+
+    public boolean userExist(String username) {
+        return findByUsername(username) != null;
+    }
 
     public MoodlePage getLastMoodlePage(long courseId){
         return moodlePageRepository.findFirstByCourseIdOrderByIdDesc(courseId);
@@ -104,7 +154,7 @@ public class Controller {
         return publicChatMessageRepository.findAllByChannelid(channelId);
     }
 
-    public ArrayList<Person> getAllUser() {
+    public ArrayList<Person> getAllUsers() {
         return personRepository.findAll();
     }
 
@@ -215,9 +265,9 @@ public class Controller {
     }
 
     public void deleteUser(Person person) {
-        personRepository.deleteUserByIdGroup_members(person.getId());
-        personRepository.deleteUserByIdIndirect_messages(person.getId());
-        personRepository.updateUserByIdPosts(person.getId());
+        groupMembersRepository.deleteByUserId(person.getId());
+        directMessageRepository.deleteByUserId(person.getId());
+        publicChatMessageRepository.deleteByUserId(person.getId());
         personRepository.deleteUserById(person.getId());
     }
 }

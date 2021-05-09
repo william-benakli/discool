@@ -1,3 +1,5 @@
+
+
 package app.web.components;
 
 import app.controller.Controller;
@@ -20,6 +22,13 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.shared.Registration;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
 public class UserForm extends FormLayout {
     private final Controller controller;
 
@@ -37,13 +46,28 @@ public class UserForm extends FormLayout {
     private final Button delete = new Button("Delete");
     private final Button close = new Button("Cancel");
     private Person person;
-
+    private final String path = "./uploads/UsersCSV/" ;
+    private final UploadComponent upload = new UploadComponent("50px", "96%", 1, 30000000,
+            path);
 
     public UserForm(PersonRepository personRepository) {
+        upload.setAcceptedFileTypes(".csv");
+        upload.addFinishedListener(finishedEvent -> {
+            try {
+                uploadCSVFile(upload.getFileName());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+        upload.addFailedListener(failedEvent -> {
+            Notification notification;
+            notification = new Notification("Error with the File", 3000, Notification.Position.MIDDLE);
+            notification.open();
+        });
         this.controller = new Controller(personRepository,
                                          null, null,
                                          null, null,
-                                         null, null);
+                                         null, null, null);
         description.setClearButtonVisible(true);
         email.setClearButtonVisible(true);
         this.personRepository = personRepository;
@@ -60,7 +84,8 @@ public class UserForm extends FormLayout {
             description,
             role,
             website,
-            createButtonsLayout());
+            createButtonsLayout(),
+            upload);
     }
 
     private HorizontalLayout createButtonsLayout() {
@@ -72,12 +97,12 @@ public class UserForm extends FormLayout {
         save.addClickListener(click -> {
 
             if (checkIfFieldNotEmpty()) {
-                if (!userExist(this.username.getValue())) {
-                    personRepository.addUser(this.username.getValue(), this.password.getValue(), this.role.getValue(), this.firstName.getValue(), this.lastName.getValue(), this.email.getValue(), this.description.getValue(), this.website.getValue(), 0, 0, 0);
+                if (!controller.userExist(this.username.getValue())) {
+                    controller.addUser(this.username.getValue(), this.password.getValue(), this.role.getValue(), this.firstName.getValue(), this.lastName.getValue(), this.email.getValue(), this.description.getValue(), this.website.getValue(), 0, 0, 0);
                 } else {
-                    personRepository.updateUserById(person.getId(), email.getValue(), username.getValue(), firstName.getValue(), lastName.getValue(), description.getValue(), role.getValue(), website.getValue());
+                    controller.updateUserById(person.getId(), email.getValue(), username.getValue(), firstName.getValue(), lastName.getValue(), description.getValue(), role.getValue(), website.getValue());
                 }
-                personRepository.deleteNullUsers();
+                controller.deleteNullUsers();
                 validateAndSave();
             }
         });
@@ -93,6 +118,7 @@ public class UserForm extends FormLayout {
     /**
      * @return false if one of the required fields is empty, true if everything is ok
      */
+
     private boolean checkIfFieldNotEmpty() {
         boolean ok = true;
         Notification notification;
@@ -115,10 +141,50 @@ public class UserForm extends FormLayout {
         }
         return ok;
     }
+    public void uploadCSVFile(String fileName) throws IOException {
+        BufferedReader br = new BufferedReader(new FileReader(fileName)) ;
+        String line = "";
+        try {
+            while((line = br.readLine())!=null){
+                String[] values = line.split(",");
+                Person p = new Person();
+                p.setUsername(values[0]);
+                p.setFirstName(values[3]);
+                p.setLastName(values[4]);
+                p.setEmail(values[5]);
+                p.setPassword(values[1]);
+                p.setDescription(values[6]);
+                p.setRoleAsString(values[2]);//can't use the builder that's why i used sets
+                p.setWebsite(values[7]);
 
-    private boolean userExist(String username) {
-        return personRepository.findByUsername(username) != null;
+                updateForm(values[0],values[3],values[4], values[5], values[1], values[6], p.getRole(),values[7]);
+                controller.addUser(this.username.getValue(), this.password.getValue(), this.role.getValue(), this.firstName.getValue(), this.lastName.getValue(), this.email.getValue(), this.description.getValue(), this.website.getValue(), 0, 0, 0);
+                controller.deleteNullUsers();
+                try {
+                    binder.writeBean(p);
+                    fireEvent(new SaveEvent(this, p));
+                } catch (ValidationException e) {
+                    e.printStackTrace();
+                }
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        br.close();
+        Files.delete(Paths.get(fileName));
     }
+
+    public void updateForm(String username , String firstName, String lastName, String email, String password, String description, Person.Role role , String website){
+        this.username.setValue(username);
+        this.firstName.setValue(firstName);
+        this.lastName.setValue(lastName);
+        this.email.setValue(email);
+        this.password.setValue(password);
+        this.description.setValue(description);
+        this.role.setValue(role);
+        this.website.setValue(website);
+    }
+
 
     private void validateAndSave() {
         try {

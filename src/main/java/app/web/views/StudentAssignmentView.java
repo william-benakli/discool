@@ -23,7 +23,8 @@ import com.vaadin.flow.router.Route;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Optional;
 
 @Route(value = "assignment", layout = Navbar.class)
 public class StudentAssignmentView extends ViewWithSidebars implements HasDynamicTitle, HasUrlParameter<Long> {
@@ -44,13 +45,15 @@ public class StudentAssignmentView extends ViewWithSidebars implements HasDynami
                                  @Autowired StudentAssignmentsUploadsRepository studentAssignmentsUploadsRepository,
                                  @Autowired GroupRepository groupRepository,
                                  @Autowired GroupMembersRepository groupMembersRepository,
-                                 @Autowired MoodlePageRepository moodlePageRepository) {
+                                 @Autowired MoodlePageRepository moodlePageRepository,
+                                 @Autowired DirectMessageRepository directMessageRepository) {
         this.assignmentRepository = assignmentRepository;
         this.courseRepository = courseRepository;
         this.personRepository = personRepository;
         setPersonRepository(personRepository);
         setController(new Controller(personRepository, textChannelRepository, null,
-                                     courseRepository, moodlePageRepository, groupRepository, groupMembersRepository));
+                                     courseRepository, moodlePageRepository, groupRepository, groupMembersRepository,
+                                     directMessageRepository));
         setAssignmentController(new AssignmentController(personRepository, assignmentRepository,
                                                          studentAssignmentsUploadsRepository, courseRepository));
     }

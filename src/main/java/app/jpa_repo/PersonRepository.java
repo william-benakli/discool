@@ -1,8 +1,6 @@
 package app.jpa_repo;
 
 import app.model.users.Person;
-import org.atmosphere.config.service.Delete;
-import org.springframework.data.domain.Example;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -23,27 +21,12 @@ public interface PersonRepository extends JpaRepository<Person, Long> {
 
     @Modifying
     @Transactional
-    @Query(value = " UPDATE users SET email = :emailparam , username = :usernameparam , firstName = :firstnameparam , lastName = :lastnameparam , description = :descriptionparam , role = :roleparam , website = :websiteparam  WHERE id = :idparam")
+    @Query(value = "UPDATE users SET email = :emailparam , username = :usernameparam , firstName = :firstnameparam , lastName = :lastnameparam , description = :descriptionparam , role = :roleparam , website = :websiteparam  WHERE id = :idparam")
     void updateUserById(@Param("idparam") long id, @Param("emailparam") String email, @Param("usernameparam") String username , @Param("firstnameparam") String firstname, @Param("lastnameparam") String lastname, @Param("descriptionparam") String description, @Param("roleparam") Person.Role role, @Param("websiteparam") String website);
 
     @Modifying
     @Transactional
-    @Query(value =" DELETE FROM direct_messages WHERE useridfrom = :idparam AND useridto = :idparam",nativeQuery = true)
-    void deleteUserByIdIndirect_messages(@Param("idparam") long id);
-
-    @Modifying
-    @Transactional
-    @Query(value =" DELETE FROM group_members WHERE userid = :idparam",nativeQuery = true)
-    void deleteUserByIdGroup_members(@Param("idparam") long id);
-
-    @Modifying
-    @Transactional
-    @Query(value =" UPDATE posts SET userid = 1, deleted = 1 WHERE userid = :idparam", nativeQuery = true)
-    void updateUserByIdPosts(@Param("idparam") long id);
-
-    @Modifying
-    @Transactional
-    @Query(value =" DELETE FROM users WHERE id = :idparam ",nativeQuery = true)
+    @Query(value = "DELETE FROM users WHERE id = :idparam ", nativeQuery = true)
     void deleteUserById(@Param("idparam") long id);
 
     @Modifying

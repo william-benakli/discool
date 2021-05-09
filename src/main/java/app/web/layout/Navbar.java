@@ -42,7 +42,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.File;
 import java.net.URI;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Push(transport = Transport.LONG_POLLING)
 @CssImport("./styles/style.css")
@@ -66,12 +69,13 @@ public class Navbar extends AppLayout {
                   @Autowired GroupRepository groupRepository,
                   @Autowired GroupMembersRepository groupMembersRepository,
                   @Autowired AssignmentRepository assignmentRepository,
-                  @Autowired StudentAssignmentsUploadsRepository studentAssignmentsUploadsRepository) {
-        this.assignmentController= new AssignmentController(personRepository, assignmentRepository, studentAssignmentsUploadsRepository, courseRepository);
+                  @Autowired StudentAssignmentsUploadsRepository studentAssignmentsUploadsRepository,
+                  @Autowired DirectMessageRepository directMessageRepository) {
+        this.assignmentController = new AssignmentController(personRepository, assignmentRepository, studentAssignmentsUploadsRepository, courseRepository);
         this.personRepository = personRepository;
         this.moodlePageRepository = moodlePageRepository;
         this.controller = new Controller(personRepository, textChannelRepository, publicChatMessageRepository, courseRepository,
-                                         moodlePageRepository, groupRepository, groupMembersRepository);
+                                         moodlePageRepository, groupRepository, groupMembersRepository, directMessageRepository);
         createLeftSubMenu();
         createCourseNavigationMenu();
         createRightSubMenu();

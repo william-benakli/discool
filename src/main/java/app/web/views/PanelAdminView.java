@@ -1,6 +1,8 @@
 package app.web.views;
 
+import app.controller.Controller;
 import app.jpa_repo.CourseRepository;
+import app.jpa_repo.DirectMessageRepository;
 import app.jpa_repo.PersonRepository;
 import app.model.courses.Course;
 import app.model.users.Person;
@@ -30,7 +32,7 @@ import java.util.Map;
 @CssImport("./styles/formStyle.css")
 
 public class PanelAdminView extends VerticalLayout {
-
+    private final Controller controller;
     private final PersonRepository personRepository;
     private final CourseRepository courseRepository;
     private UserForm form;
@@ -44,30 +46,39 @@ public class PanelAdminView extends VerticalLayout {
     private final Grid<Person> usersGrid = new Grid<>();
     private final Grid<Course> coursesGrid = new Grid<>();
 
-    public PanelAdminView(@Autowired PersonRepository personRepository, @Autowired CourseRepository courseRepository) {
+    public PanelAdminView(@Autowired PersonRepository personRepository, @Autowired CourseRepository courseRepository,
+                          @Autowired DirectMessageRepository directMessageRepository) {
         this.personRepository = personRepository;
         this.courseRepository = courseRepository;
+        this.controller = new Controller(personRepository,
+                                         null, null,
+                                         null, null,
+                                         null, null, directMessageRepository);
+
         listUser.add(createButtonsDiv());
         createUserGrid();
         createCoursesGrid();
         createTabs();
-        if (lastNameFilter.getValue() == null || lastNameFilter.getValue().isEmpty()) {
-            configureFilter2();
-            configureFilter();
-            configureFilter3();
-        } else if (emailFilter.getValue() == null || emailFilter.getValue().isEmpty()) {
-            configureFilter3();
-        } else {
-            configureFilter();
-            configureFilter3();
-            configureFilter2();
-        }
+        updateFilter();
         form.addListener(UserForm.SaveEvent.class, this::savePerson);
         form.addListener(UserForm.DeleteEvent.class, this::deletePerson);
         form.addListener(UserForm.CloseEvent.class, e -> closeEditor());
         updateList();
         closeEditor();
+    }
 
+    private void updateFilter() {
+        if (lastNameFilter.getValue() == null || lastNameFilter.getValue().isEmpty()) {
+            configureEmailFilter();
+            configureLastNameFilter();
+            configureFirstNameFilter();
+        } else if (emailFilter.getValue() == null || emailFilter.getValue().isEmpty()) {
+            configureFirstNameFilter();
+        } else {
+            configureLastNameFilter();
+            configureFirstNameFilter();
+            configureEmailFilter();
+        }
     }
 
     private Div createButtonsDiv() {
@@ -83,25 +94,24 @@ public class PanelAdminView extends VerticalLayout {
         return div;
     }
 
-    public void deletePerson(UserForm.DeleteEvent evt) {
-        personRepository.delete(evt.getPerson());
+    private void savePerson(UserForm.SaveEvent evt) {
+        controller.saveUser(evt.getPerson());
         updateList();
         closeEditor();
     }
 
-    public void savePerson(UserForm.SaveEvent evt) {
-        personRepository.save(evt.getPerson());
+    private void deletePerson(UserForm.DeleteEvent evt) {
+        controller.deleteUser(evt.getPerson());
         updateList();
         closeEditor();
     }
 
-    public void addPerson(){
+    private void addPerson() {
         usersGrid.asSingleSelect().clear();
         editPerson(new Person());
     }
 
-    public void updateList() {
-
+    private void updateList() {
         if ((emailFilter.getValue() == null
                 || emailFilter.getValue().isEmpty()) && (lastNameFilter.getValue() == null
                 || lastNameFilter.getValue().isEmpty())) {
@@ -115,40 +125,46 @@ public class PanelAdminView extends VerticalLayout {
         }
     }
 
-    public List<Person>findAll(String stringFilter) {
-        if ((emailFilter.getValue() == null
-                || emailFilter.getValue().isEmpty()) && (lastNameFilter.getValue() == null
-                || lastNameFilter.getValue().isEmpty()) && (firstNameFilter.getValue() == null
-                || firstNameFilter.getValue().isEmpty())) {
-            return personRepository.findAll();
-        } else if ((lastNameFilter.getValue() == null || lastNameFilter.getValue().isEmpty()) && (firstNameFilter.getValue() == null || firstNameFilter.getValue().isEmpty())) {
-            return personRepository.searchByEmail(stringFilter);
-        } else if ((emailFilter.getValue() == null || emailFilter.getValue().isEmpty()) && (lastNameFilter.getValue() == null || lastNameFilter.getValue().isEmpty())) {
-            return personRepository.searchByUserName(stringFilter);
-        } else {
-            return personRepository.search(stringFilter);
-        }
-
-    }
-
-    public void configureFilter() {
-        lastNameFilter.setPlaceholder("Filtrer par nom...");
-        lastNameFilter.setClearButtonVisible(true);
-        lastNameFilter.setValueChangeMode(ValueChangeMode.LAZY);
-        lastNameFilter.addValueChangeListener(e -> updateList());
-    }
-    public void configureFilter2() {
+    private void configureEmailFilter() {
         emailFilter.setPlaceholder("Filtrer par email...");
         emailFilter.setClearButtonVisible(true);
         emailFilter.setValueChangeMode(ValueChangeMode.LAZY);
         emailFilter.addValueChangeListener(e -> updateList());
     }
 
-    public void configureFilter3() {
+    private void configureLastNameFilter() {
+        lastNameFilter.setPlaceholder("Filtrer par nom...");
+        lastNameFilter.setClearButtonVisible(true);
+        lastNameFilter.setValueChangeMode(ValueChangeMode.LAZY);
+        lastNameFilter.addValueChangeListener(e -> updateList());
+    }
+
+    private void configureFirstNameFilter() {
         firstNameFilter.setPlaceholder("Filtrer par Prénom...");
         firstNameFilter.setClearButtonVisible(true);
         firstNameFilter.setValueChangeMode(ValueChangeMode.LAZY);
         firstNameFilter.addValueChangeListener(e -> updateList());
+    }
+
+    /**
+     * Fuzzy search all users
+     *
+     * @param stringFilter the string to search for
+     * @return a list of all the users that correspond
+     */
+    private List<Person> findAll(String stringFilter) {
+        if ((emailFilter.getValue() == null
+                || emailFilter.getValue().isEmpty()) && (lastNameFilter.getValue() == null
+                || lastNameFilter.getValue().isEmpty()) && (firstNameFilter.getValue() == null
+                || firstNameFilter.getValue().isEmpty())) {
+            return controller.findAllUsers();
+        } else if ((lastNameFilter.getValue() == null || lastNameFilter.getValue().isEmpty()) && (firstNameFilter.getValue() == null || firstNameFilter.getValue().isEmpty())) {
+            return controller.searchByEmail(stringFilter);
+        } else if ((emailFilter.getValue() == null || emailFilter.getValue().isEmpty()) && (lastNameFilter.getValue() == null || lastNameFilter.getValue().isEmpty())) {
+            return controller.searchByUserName(stringFilter);
+        } else {
+            return controller.searchUser(stringFilter);
+        }
     }
     private void closeEditor() {
         form.setPerson(null);
@@ -157,7 +173,7 @@ public class PanelAdminView extends VerticalLayout {
     }
 
     private void createUserGrid() {
-        usersGrid.setItems(personRepository.findAll());
+        usersGrid.setItems(controller.findAllUsers());
         usersGrid.addColumn(Person::getUsername).setHeader("Pseudo");
         usersGrid.addColumn(Person::getLastName).setHeader("Nom");
         usersGrid.addColumn(Person::getFirstName).setHeader("Prénom");
@@ -166,18 +182,17 @@ public class PanelAdminView extends VerticalLayout {
         usersGrid.addColumn(Person::getRole).setHeader("Rôle");
         usersGrid.addColumn(Person::getWebsite).setHeader("Site Web");
         usersGrid.addThemeVariants(GridVariant.LUMO_NO_BORDER,
-                              GridVariant.LUMO_NO_ROW_BORDERS, GridVariant.LUMO_ROW_STRIPES);
-        usersGrid.getStyle().set("flex","2");
-        usersGrid.getColumns().forEach(col ->col.setAutoWidth(true));
+                GridVariant.LUMO_NO_ROW_BORDERS, GridVariant.LUMO_ROW_STRIPES);
+        usersGrid.getStyle().set("flex", "2");
+        usersGrid.getColumns().forEach(col -> col.setAutoWidth(true));
         usersGrid.asSingleSelect().addValueChangeListener(event -> editPerson(event.getValue()));
         usersTab.add(usersGrid);
     }
 
     private void editPerson(Person person) {
-        if(person==null){
+        if (person == null) {
             closeEditor();
-        }
-        else{
+        } else {
             form.setPerson(person);
             form.setVisible(true);
             addClassName("editing");
@@ -189,7 +204,7 @@ public class PanelAdminView extends VerticalLayout {
         coursesGrid.addColumn(Course::getName).setHeader("Nom");
         coursesGrid.addColumn(Course::getTeacherId).setHeader("Nom de l'enseignant.e");
         coursesGrid.addThemeVariants(GridVariant.LUMO_NO_BORDER,
-                                     GridVariant.LUMO_NO_ROW_BORDERS, GridVariant.LUMO_ROW_STRIPES);
+                GridVariant.LUMO_NO_ROW_BORDERS, GridVariant.LUMO_ROW_STRIPES);
         coursesTab.add(coursesGrid);
     }
 
