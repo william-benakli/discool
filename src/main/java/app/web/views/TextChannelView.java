@@ -1,6 +1,10 @@
 package app.web.views;
 
-import app.controller.*;
+import app.controller.AssignmentController;
+import app.controller.ChatController;
+import app.controller.Controller;
+import app.controller.Markdown;
+import app.controller.broadcasters.ChatMessagesBroadcaster;
 import app.controller.commands.CommandsClearChat;
 import app.controller.security.SecurityUtils;
 import app.jpa_repo.*;

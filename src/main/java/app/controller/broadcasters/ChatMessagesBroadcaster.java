@@ -1,4 +1,4 @@
-package app.controller;
+package app.controller.broadcasters;
 
 import app.model.chat.ChatMessage;
 import com.vaadin.flow.shared.Registration;

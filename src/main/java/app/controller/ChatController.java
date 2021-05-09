@@ -156,6 +156,22 @@ public class ChatController {
     }
 
     /**
+     * @param userId the id of the user
+     * @return true if the user has unread messages, false otherwise
+     */
+    public boolean hasUnreadMessages(long userId) {
+        ArrayList<PrivateTextChannel> channels = privateTextChannelRepository.findAllByUserA(userId);
+        for (PrivateTextChannel channel : channels) {
+            if (!channel.isUser1Read()) return true;
+        }
+        channels = privateTextChannelRepository.findAllByUserB(userId);
+        for (PrivateTextChannel channel : channels) {
+            if (!channel.isUser2Read()) return true;
+        }
+        return false;
+    }
+
+    /**
      * Creates a new private channel between the 2 users
      *
      * @param currentUserId the id of the person creating the channel

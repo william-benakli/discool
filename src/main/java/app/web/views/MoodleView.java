@@ -3,7 +3,7 @@ package app.web.views;
 import app.controller.AssignmentController;
 import app.controller.Controller;
 import app.controller.Markdown;
-import app.controller.MoodleBroadcaster;
+import app.controller.broadcasters.MoodleBroadcaster;
 import app.controller.security.SecurityUtils;
 import app.jpa_repo.*;
 import app.model.chat.PublicTextChannel;
