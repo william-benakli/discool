@@ -158,6 +158,9 @@ public class Controller {
         return personRepository.findAll();
     }
 
+    public ArrayList<GroupMembers> findByUserId(long id){
+        return groupMembersRepository.findByUserId(id);
+    }
 
     public void updateSection(MoodlePage section, String title, String content) {
         section.setTitle(title);

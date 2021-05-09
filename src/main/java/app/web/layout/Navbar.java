@@ -6,6 +6,7 @@ import app.controller.security.SecurityUtils;
 import app.jpa_repo.*;
 import app.model.courses.Course;
 import app.model.courses.MoodlePage;
+import app.model.users.GroupMembers;
 import app.model.users.Person;
 import app.web.components.ComponentButton;
 import app.web.components.UploadComponent;
@@ -122,7 +123,11 @@ public class Navbar extends AppLayout {
                 .set("transform","rotateX(180deg)");
         List<Course> courses = controller.findAllCourses();
         for (Course c : courses) {
-            createCourseButton(c, splitURI, cleanURI);
+            if (!SecurityUtils.isUserAdmin()) {
+                for (GroupMembers groupeMembers : controller.findByUserId(currentUser.getId())) {
+                    if (groupeMembers.getGroupId() == c.getId()) createCourseButton(c, splitURI, cleanURI);
+                }
+            }else createCourseButton(c, splitURI, cleanURI);
         }
 
         if (! SecurityUtils.isUserStudent()) {
