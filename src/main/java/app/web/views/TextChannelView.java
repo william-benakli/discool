@@ -554,7 +554,6 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
             messageFullLayout.add(chatUserInformation);
             messageFullWithResponseLayout.add(messageFullLayout);
             messageFullWithResponseLayout.getStyle().set("padding", "5px");
-
             add(messageFullWithResponseLayout);
             add(layoutPop);
         }
@@ -669,8 +668,6 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                     .set("color", ColorHTML.PURPLE.getColorHtml())
                     .set("font-weight", "700");
             chatUserInformation.add(metaData);
-            this.messageParagraph = createParagrapheAmelioration(chatMessage.getMessage());
-            chatUserInformation.add(messageParagraph);
             if (chatMessage.getType() == 0) {
                 this.messageParagraph = createParagrapheAmelioration(chatMessage.getMessage());
                 chatUserInformation.add(messageParagraph);

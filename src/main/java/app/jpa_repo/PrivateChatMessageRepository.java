@@ -15,6 +15,10 @@ public interface PrivateChatMessageRepository extends JpaRepository<PrivateChatM
 
     ArrayList<ChatMessage> findAllByChannelid(long channelId);
 
+    @Modifying
+    @Transactional
+    @Query(value = "DELETE FROM direct_messages WHERE useridfrom = :idparam OR useridto = :idparam", nativeQuery = true)
+    void deleteByUserId(@Param("idparam") long id);
 
     @Modifying
     @Transactional
