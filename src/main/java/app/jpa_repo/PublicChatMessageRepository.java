@@ -1,5 +1,6 @@
 package app.jpa_repo;
 
+import app.model.chat.ChatMessage;
 import app.model.chat.PublicChatMessage;
 import app.model.chat.TextChannel;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,8 +14,7 @@ import java.util.ArrayList;
 public interface PublicChatMessageRepository extends JpaRepository<PublicChatMessage, Long> {
 
     ArrayList<PublicChatMessage> findAllByParentId(long parentId);
-
-    ArrayList<PublicChatMessage> findAllByChannelid(long channelId);
+    ArrayList<ChatMessage> findAllByChannelid(long channelId);
 
 
     ArrayList<PublicChatMessage> findAllBySenderAndDeletedFalse(long id);
@@ -38,7 +38,6 @@ public interface PublicChatMessageRepository extends JpaRepository<PublicChatMes
     @Transactional
     @Query(value = "UPDATE posts set MESSAGE = :msg WHERE ID = :idpost")
     void updateMessageById(@Param("idpost") long id, @Param("msg") String messageText);
-
 
     @Modifying
     @Transactional

@@ -13,7 +13,7 @@ public class UserHomeView extends HorizontalLayout {
     public UserHomeView() {
         VerticalLayout layout = new VerticalLayout();
         this.add(new RouterLink("moodle 1", MoodleView.class, 1L));
-        this.add(new RouterLink("chat1cours1", TextChannelView.class, 1L));
+        this.add(new RouterLink("chat1cours1", PublicTextChannelView.class, 1L));
     }
 
 }

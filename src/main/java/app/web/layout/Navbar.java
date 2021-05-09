@@ -10,10 +10,7 @@ import app.model.users.GroupMembers;
 import app.model.users.Person;
 import app.web.components.ComponentButton;
 import app.web.components.UploadComponent;
-import app.web.views.HomeView;
-import app.web.views.MoodleView;
-import app.web.views.PanelAdminView;
-import app.web.views.ViewWithSidebars;
+import app.web.views.*;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.KeyModifier;
@@ -63,7 +60,7 @@ public class Navbar extends AppLayout {
     private AssignmentController assignmentController;
 
     public Navbar(@Autowired CourseRepository courseRepository,
-                  @Autowired TextChannelRepository textChannelRepository,
+                  @Autowired PublicTextChannelRepository publicTextChannelRepository,
                   @Autowired PersonRepository personRepository,
                   @Autowired MoodlePageRepository moodlePageRepository,
                   @Autowired PublicChatMessageRepository publicChatMessageRepository,
@@ -222,7 +219,8 @@ public class Navbar extends AppLayout {
 
     private void createDirectMessageButton() {
         ComponentButton button = createAndStyleButton("img/chatBubble.svg", "Messages privés");
-        rightMenuLayout.add(button);
+        RouterLink routerLink = new RouterLink("", PrivateTextChannelView.class, (long) -1);
+        linkRouteurImage(rightMenuLayout, button, routerLink);
     }
 
     private void createUserParamButton() {

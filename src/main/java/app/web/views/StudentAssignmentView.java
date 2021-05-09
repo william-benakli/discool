@@ -39,21 +39,21 @@ public class StudentAssignmentView extends ViewWithSidebars implements HasDynami
     private final FlexLayout assignmentBar = new FlexLayout();
 
     public StudentAssignmentView(@Autowired CourseRepository courseRepository,
-                                 @Autowired TextChannelRepository textChannelRepository,
+                                 @Autowired PublicTextChannelRepository publicTextChannelRepository,
                                  @Autowired AssignmentRepository assignmentRepository,
                                  @Autowired PersonRepository personRepository,
                                  @Autowired StudentAssignmentsUploadsRepository studentAssignmentsUploadsRepository,
                                  @Autowired GroupRepository groupRepository,
                                  @Autowired GroupMembersRepository groupMembersRepository,
                                  @Autowired MoodlePageRepository moodlePageRepository,
-                                 @Autowired DirectMessageRepository directMessageRepository) {
+                                 @Autowired PrivateChatMessageRepository privateChatMessageRepository) {
         this.assignmentRepository = assignmentRepository;
         this.courseRepository = courseRepository;
         this.personRepository = personRepository;
         setPersonRepository(personRepository);
-        setController(new Controller(personRepository, textChannelRepository, null,
-                                     courseRepository, moodlePageRepository, groupRepository, groupMembersRepository,directMessageRepository
-                                     ));
+        setController(new Controller(personRepository, publicTextChannelRepository, null,
+                                     courseRepository, moodlePageRepository, groupRepository, groupMembersRepository,
+                                     privateChatMessageRepository));
         setAssignmentController(new AssignmentController(personRepository, assignmentRepository,
                                                          studentAssignmentsUploadsRepository, courseRepository));
     }

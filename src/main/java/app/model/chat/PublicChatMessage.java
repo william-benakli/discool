@@ -15,7 +15,7 @@ import javax.persistence.*;
 @Setter
 @Entity(name = "posts")
 @Table(name = "posts")
-public class PublicChatMessage {
+public class PublicChatMessage implements ChatMessage {
     @Id // to say this is the primary key in the database
     @GeneratedValue(strategy = GenerationType.IDENTITY) // to generate the id
     @Column(

@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
-public interface DirectMessageRepository extends JpaRepository<DirectMessage, Long> {
+public interface PrivateMessageRepository extends JpaRepository<DirectMessage, Long> {
 
     @Modifying
     @Transactional
