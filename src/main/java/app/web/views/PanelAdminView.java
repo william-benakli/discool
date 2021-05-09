@@ -36,12 +36,11 @@ import java.util.Map;
 @Route(value = "admin", layout = Navbar.class)
 @PageTitle("Discool : Admin Panel")
 @CssImport("./styles/formStyle.css")
-
 public class PanelAdminView extends VerticalLayout {
     private final Controller controller;
     private final PersonRepository personRepository;
-    private final PublicChatMessageRepository publicChatMessageRepository;
     private final CourseRepository courseRepository;
+    private final PublicChatMessageRepository publicChatMessageRepository;
     private UserForm form;
     private final TextField lastNameFilter = new TextField();
     private final TextField emailFilter = new TextField();
@@ -51,20 +50,23 @@ public class PanelAdminView extends VerticalLayout {
     private final Tab coursesTab = new Tab("Cours");
     private final Tabs tabs = new Tabs(usersTab, coursesTab);
     private final Grid<Person> usersGrid = new Grid<>();
-    private final Grid<CourseWidthName> coursesGrid = new Grid<>(CourseWidthName.class);
+    private final Grid<CourseWithName> coursesGrid = new Grid<>(CourseWithName.class);
 
-    public PanelAdminView(@Autowired PersonRepository personRepository, @Autowired CourseRepository courseRepository,
-                          @Autowired DirectMessageRepository directMessageRepository) {
+    public PanelAdminView(@Autowired PersonRepository personRepository,
+                          @Autowired CourseRepository courseRepository,
+                          @Autowired DirectMessageRepository directMessageRepository,
+                          @Autowired PublicChatMessageRepository publicChatMessageRepository) {
         this.personRepository = personRepository;
         this.courseRepository = courseRepository;
+        this.publicChatMessageRepository = publicChatMessageRepository;
         this.controller = new Controller(personRepository,
-                                         null, null,
-                                         null, null,
+                                         null, publicChatMessageRepository,
+                                         courseRepository, null,
                                          null, null, directMessageRepository);
 
         listUser.add(createButtonsDiv());
         createUserGrid();
-        createCoursesGrid();
+        createCourseGrid();
         createTabs();
         updateFilter();
         form.addListener(UserForm.SaveEvent.class, this::savePerson);
@@ -101,14 +103,17 @@ public class PanelAdminView extends VerticalLayout {
         return div;
     }
 
-    private void deletePerson(UserForm.DeleteEvent evt) {
-        controller.delete(evt.getPerson());
-        updateList();
-        closeEditor();
+    private void createCourseGrid() {
+        List<CourseWithName> personList = new ArrayList<>();
+        selectTeacher(controller.getAllUsers()).forEach((key, value) -> personList.add(new CourseWithName(key.getName(), value)));
+        coursesGrid.setItems(personList);
+        coursesGrid.addThemeVariants(GridVariant.LUMO_NO_BORDER,
+                                     GridVariant.LUMO_NO_ROW_BORDERS, GridVariant.LUMO_ROW_STRIPES);
+        coursesTab.add(coursesGrid);
     }
 
     private void savePerson(UserForm.SaveEvent evt) {
-        controller.save(evt.getPerson());
+        controller.saveUser(evt.getPerson());
         updateList();
         closeEditor();
     }
@@ -129,21 +134,6 @@ public class PanelAdminView extends VerticalLayout {
             usersGrid.setItems(findAll(lastNameFilter.getValue()));
         } else {
             usersGrid.setItems(findAll(emailFilter.getValue()));
-        }
-    }
-
-    private List<Person> findAll(String stringFilter) {
-        if ((emailFilter.getValue() == null
-                || emailFilter.getValue().isEmpty()) && (lastNameFilter.getValue() == null
-                || lastNameFilter.getValue().isEmpty()) && (firstNameFilter.getValue() == null
-                || firstNameFilter.getValue().isEmpty())) {
-            return controller.findAllUsers();
-        } else if ((lastNameFilter.getValue() == null || lastNameFilter.getValue().isEmpty()) && (firstNameFilter.getValue() == null || firstNameFilter.getValue().isEmpty())) {
-            return controller.searchByEmail(stringFilter);
-        } else if ((emailFilter.getValue() == null || emailFilter.getValue().isEmpty()) && (lastNameFilter.getValue() == null || lastNameFilter.getValue().isEmpty())) {
-            return controller.searchByUserName(stringFilter);
-        } else {
-            return controller.searchUser(stringFilter);
         }
     }
 
@@ -188,6 +178,7 @@ public class PanelAdminView extends VerticalLayout {
             return controller.searchUser(stringFilter);
         }
     }
+
     private void closeEditor() {
         form.setPerson(null);
         form.setVisible(false);
@@ -245,25 +236,10 @@ public class PanelAdminView extends VerticalLayout {
         return button;
     }
 
-    private Button createRemoveButton(Grid<PublicChatMessage> grid, PublicChatMessage item) {
-        @SuppressWarnings("unchecked")
-        Button button = new Button("Supprimer", clickEvent -> {
-            ListDataProvider<PublicChatMessage> dataProvider = (ListDataProvider<PublicChatMessage>) grid
-                    .getDataProvider();
-            controller.deleteMessage(item);
-            dataProvider.getItems().remove(item);
-            dataProvider.refreshAll();
-        });
-        button.getStyle().set("color","red");
-        return button;
-    }
-    private void createCoursesGrid() {
-        coursesGrid.setItems(courseRepository.findAll());
-        coursesGrid.addColumn(CourseWidthName::getName).setHeader("Nom");
-        coursesGrid.addColumn(Course::getTeacherId).setHeader("Nom de l'enseignant.e");
-        coursesGrid.addThemeVariants(GridVariant.LUMO_NO_BORDER,
-                GridVariant.LUMO_NO_ROW_BORDERS, GridVariant.LUMO_ROW_STRIPES);
-        coursesTab.add(coursesGrid);
+    private void deletePerson(UserForm.DeleteEvent evt) {
+        controller.deleteUser(evt.getPerson());
+        updateList();
+        closeEditor();
     }
 
     private void createTabs() {
@@ -294,35 +270,37 @@ public class PanelAdminView extends VerticalLayout {
         add(tabs, content_layout, content2_layout);
     }
 
-
-    private void createGrid(){
-        List<CourseWidthName> personList = new ArrayList<>();
-        selectTeacher(controller.getAllUsers()).forEach((key, value) -> personList.add(new CourseWidthName(key.getName(),value)));
-        coursesGrid.setItems(personList);
-        coursesGrid.addThemeVariants(GridVariant.LUMO_NO_BORDER,
-                GridVariant.LUMO_NO_ROW_BORDERS, GridVariant.LUMO_ROW_STRIPES);
-        coursesTab.add(coursesGrid);
+    private Button createRemoveButton(Grid<PublicChatMessage> grid, PublicChatMessage item) {
+        Button button = new Button("Supprimer", clickEvent -> {
+            ListDataProvider<PublicChatMessage> dataProvider =
+                    (ListDataProvider<PublicChatMessage>) grid.getDataProvider();
+            controller.deleteMessage(item);
+            dataProvider.getItems().remove(item);
+            dataProvider.refreshAll();
+        });
+        button.getStyle().set("color", "red");
+        return button;
     }
 
-    private HashMap<Course, String> selectTeacher(ArrayList<Person> allPerson){
+    private HashMap<Course, String> selectTeacher(ArrayList<Person> allPerson) {
         HashMap<Long, String> selectTeacher = new HashMap<>();
         HashMap<Course, String> teacherCourse = new HashMap<>();
-        for (Person person: allPerson) {
-            if(!person.getRole().equals(Person.Role.STUDENT))selectTeacher.put(person.getId(), person.getUsername());
+        for (Person person : allPerson) {
+            if (!person.getRole().equals(Person.Role.STUDENT)) selectTeacher.put(person.getId(), person.getUsername());
         }
-        for (Course course: controller.findAllCourses()) {
+        for (Course course : controller.findAllCourses()) {
             teacherCourse.put(course, selectTeacher.get(course.getTeacherId()));
         }
         return teacherCourse;
     }
 
-    public class CourseWidthName{
+    public static class CourseWithName {
         private final String course;
         private final String teacher;
 
-        public CourseWidthName(String course, String name) {
-            this.course=course;
-            this.teacher=name;
+        public CourseWithName(String course, String name) {
+            this.course = course;
+            this.teacher = name;
         }
 
         public String getName() {
