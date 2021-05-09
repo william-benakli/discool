@@ -1,6 +1,7 @@
 package app.jpa_repo;
 
 import app.model.chat.PublicChatMessage;
+import app.model.chat.TextChannel;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -11,7 +12,22 @@ import java.util.ArrayList;
 
 public interface PublicChatMessageRepository extends JpaRepository<PublicChatMessage, Long> {
 
+    ArrayList<PublicChatMessage> findAllByParentId(long parentId);
+
     ArrayList<PublicChatMessage> findAllByChannelid(long channelId);
+
+
+    ArrayList<PublicChatMessage> findAllBySenderAndDeletedFalse(long id);
+
+    @Modifying
+    @Transactional
+    @Query(value = "SELECT courseid FROM channels WHERE id = :id", nativeQuery = true)
+    ArrayList<TextChannel>findCourseByChannelId(@Param(value = "id") long id);
+
+    @Modifying
+    @Transactional
+    @Query(value =" DELETE FROM posts WHERE id = :idparam ",nativeQuery = true)
+    void deletePublicChatMessageById(@Param("idparam") long id);
 
     @Modifying
     @Transactional
