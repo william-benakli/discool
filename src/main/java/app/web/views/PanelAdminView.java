@@ -208,6 +208,7 @@ public class PanelAdminView extends VerticalLayout {
         if (person == null) {
             closeEditor();
         } else {
+            form.openDialog();
             form.setPerson(person);
             addClassName("editing");
         }
