@@ -60,12 +60,14 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
                       @Autowired AssignmentRepository assignmentRepository,
                       @Autowired StudentAssignmentsUploadsRepository studentAssignmentsUploadsRepository,
                       @Autowired GroupRepository groupRepository,
-                      @Autowired GroupMembersRepository groupMembersRepository) {
+                      @Autowired GroupMembersRepository groupMembersRepository,
+                      @Autowired DirectMessageRepository directMessageRepository) {
         this.courseRepository = courseRepository;
         this.moodlePageRepository = moodlePageRepository;
         setPersonRepository(personRepository);
         setController(new Controller(personRepository, textChannelRepository, null,
-                                     courseRepository, moodlePageRepository, groupRepository, groupMembersRepository));
+                                     courseRepository, moodlePageRepository, groupRepository, groupMembersRepository,
+                                     directMessageRepository));
         setAssignmentController(new AssignmentController(personRepository, assignmentRepository,
                                                          studentAssignmentsUploadsRepository, courseRepository));
     }

@@ -9,8 +9,6 @@ import app.model.courses.MoodlePage;
 import app.model.users.Group;
 import app.model.users.GroupMembers;
 import app.model.users.Person;
-import app.web.components.UserForm;
-import org.springframework.data.repository.query.Param;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -24,6 +22,7 @@ public class Controller {
     private final MoodlePageRepository moodlePageRepository;
     private final GroupRepository groupRepository;
     private final GroupMembersRepository groupMembersRepository;
+    private final DirectMessageRepository directMessageRepository;
 
     public Controller(PersonRepository personRepository,
                       TextChannelRepository textChannelRepository,
@@ -31,7 +30,8 @@ public class Controller {
                       CourseRepository courseRepository,
                       MoodlePageRepository moodlePageRepository,
                       GroupRepository groupRepository,
-                      GroupMembersRepository groupMembersRepository) {
+                      GroupMembersRepository groupMembersRepository,
+                      DirectMessageRepository directMessageRepository) {
         this.publicChatMessageRepository = publicChatMessageRepository;
         this.textChannelRepository = textChannelRepository;
         this.personRepository = personRepository;
@@ -39,6 +39,7 @@ public class Controller {
         this.moodlePageRepository = moodlePageRepository;
         this.groupRepository = groupRepository;
         this.groupMembersRepository = groupMembersRepository;
+        this.directMessageRepository = directMessageRepository;
     }
 
     public String getTitleCourse(long id) {
@@ -77,15 +78,11 @@ public class Controller {
         return personRepository.findByUsername(name);
     }
 
-    public Person findById(long id){
-        return personRepository.findById(id) ;
+    public Person findUserById(long id) {
+        return personRepository.findById(id);
     }
 
-    public void delete(Person p){
-        personRepository.delete(p);
-    }
-
-    public void save(Person p){
+    public void saveUser(Person p) {
         personRepository.save(p);
     }
 
@@ -93,7 +90,7 @@ public class Controller {
         return personRepository.findAll();
     }
 
-    public List<Person> search( String searchTerm){
+    public List<Person> searchUser(String searchTerm) {
         return personRepository.search(searchTerm);
     }
 
@@ -157,7 +154,7 @@ public class Controller {
         return publicChatMessageRepository.findAllByChannelid(channelId);
     }
 
-    public ArrayList<Person> getAllUser() {
+    public ArrayList<Person> getAllUsers() {
         return personRepository.findAll();
     }
 
@@ -268,9 +265,9 @@ public class Controller {
     }
 
     public void deleteUser(Person person) {
-        personRepository.deleteUserByIdGroup_members(person.getId());
-        personRepository.deleteUserByIdIndirect_messages(person.getId());
-        personRepository.updateUserByIdPosts(person.getId());
+        groupMembersRepository.deleteByUserId(person.getId());
+        directMessageRepository.deleteByUserId(person.getId());
+        publicChatMessageRepository.deleteByUserId(person.getId());
         personRepository.deleteUserById(person.getId());
     }
 }

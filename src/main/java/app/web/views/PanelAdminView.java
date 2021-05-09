@@ -2,6 +2,7 @@ package app.web.views;
 
 import app.controller.Controller;
 import app.jpa_repo.CourseRepository;
+import app.jpa_repo.DirectMessageRepository;
 import app.jpa_repo.PersonRepository;
 import app.model.courses.Course;
 import app.model.users.Person;
@@ -22,7 +23,9 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Route(value = "admin", layout = Navbar.class)
 @PageTitle("Discool : Admin Panel")
@@ -43,13 +46,14 @@ public class PanelAdminView extends VerticalLayout {
     private final Grid<Person> usersGrid = new Grid<>();
     private final Grid<Course> coursesGrid = new Grid<>();
 
-    public PanelAdminView(@Autowired PersonRepository personRepository, @Autowired CourseRepository courseRepository) {
+    public PanelAdminView(@Autowired PersonRepository personRepository, @Autowired CourseRepository courseRepository,
+                          @Autowired DirectMessageRepository directMessageRepository) {
         this.personRepository = personRepository;
         this.courseRepository = courseRepository;
         this.controller = new Controller(personRepository,
-                null, null,
-                null, null,
-                null, null);
+                                         null, null,
+                                         null, null,
+                                         null, null, directMessageRepository);
 
         listUser.add(createButtonsDiv());
         createUserGrid();
@@ -65,15 +69,15 @@ public class PanelAdminView extends VerticalLayout {
 
     private void updateFilter() {
         if (lastNameFilter.getValue() == null || lastNameFilter.getValue().isEmpty()) {
-            configureFilter2();
-            configureFilter();
-            configureFilter3();
+            configureEmailFilter();
+            configureLastNameFilter();
+            configureFirstNameFilter();
         } else if (emailFilter.getValue() == null || emailFilter.getValue().isEmpty()) {
-            configureFilter3();
+            configureFirstNameFilter();
         } else {
-            configureFilter();
-            configureFilter3();
-            configureFilter2();
+            configureLastNameFilter();
+            configureFirstNameFilter();
+            configureEmailFilter();
         }
     }
 
@@ -90,14 +94,14 @@ public class PanelAdminView extends VerticalLayout {
         return div;
     }
 
-    private void deletePerson(UserForm.DeleteEvent evt) {
-        controller.delete(evt.getPerson());
+    private void savePerson(UserForm.SaveEvent evt) {
+        controller.saveUser(evt.getPerson());
         updateList();
         closeEditor();
     }
 
-    private void savePerson(UserForm.SaveEvent evt) {
-        controller.save(evt.getPerson());
+    private void deletePerson(UserForm.DeleteEvent evt) {
+        controller.deleteUser(evt.getPerson());
         updateList();
         closeEditor();
     }
@@ -108,7 +112,6 @@ public class PanelAdminView extends VerticalLayout {
     }
 
     private void updateList() {
-
         if ((emailFilter.getValue() == null
                 || emailFilter.getValue().isEmpty()) && (lastNameFilter.getValue() == null
                 || lastNameFilter.getValue().isEmpty())) {
@@ -122,6 +125,33 @@ public class PanelAdminView extends VerticalLayout {
         }
     }
 
+    private void configureEmailFilter() {
+        emailFilter.setPlaceholder("Filtrer par email...");
+        emailFilter.setClearButtonVisible(true);
+        emailFilter.setValueChangeMode(ValueChangeMode.LAZY);
+        emailFilter.addValueChangeListener(e -> updateList());
+    }
+
+    private void configureLastNameFilter() {
+        lastNameFilter.setPlaceholder("Filtrer par nom...");
+        lastNameFilter.setClearButtonVisible(true);
+        lastNameFilter.setValueChangeMode(ValueChangeMode.LAZY);
+        lastNameFilter.addValueChangeListener(e -> updateList());
+    }
+
+    private void configureFirstNameFilter() {
+        firstNameFilter.setPlaceholder("Filtrer par Prénom...");
+        firstNameFilter.setClearButtonVisible(true);
+        firstNameFilter.setValueChangeMode(ValueChangeMode.LAZY);
+        firstNameFilter.addValueChangeListener(e -> updateList());
+    }
+
+    /**
+     * Fuzzy search all users
+     *
+     * @param stringFilter the string to search for
+     * @return a list of all the users that correspond
+     */
     private List<Person> findAll(String stringFilter) {
         if ((emailFilter.getValue() == null
                 || emailFilter.getValue().isEmpty()) && (lastNameFilter.getValue() == null
@@ -133,28 +163,8 @@ public class PanelAdminView extends VerticalLayout {
         } else if ((emailFilter.getValue() == null || emailFilter.getValue().isEmpty()) && (lastNameFilter.getValue() == null || lastNameFilter.getValue().isEmpty())) {
             return controller.searchByUserName(stringFilter);
         } else {
-            return controller.search(stringFilter);
+            return controller.searchUser(stringFilter);
         }
-    }
-
-    private void configureFilter() {
-        lastNameFilter.setPlaceholder("Filtrer par nom...");
-        lastNameFilter.setClearButtonVisible(true);
-        lastNameFilter.setValueChangeMode(ValueChangeMode.LAZY);
-        lastNameFilter.addValueChangeListener(e -> updateList());
-    }
-    private void configureFilter2() {
-        emailFilter.setPlaceholder("Filtrer par email...");
-        emailFilter.setClearButtonVisible(true);
-        emailFilter.setValueChangeMode(ValueChangeMode.LAZY);
-        emailFilter.addValueChangeListener(e -> updateList());
-    }
-
-    private void configureFilter3() {
-        firstNameFilter.setPlaceholder("Filtrer par Prénom...");
-        firstNameFilter.setClearButtonVisible(true);
-        firstNameFilter.setValueChangeMode(ValueChangeMode.LAZY);
-        firstNameFilter.addValueChangeListener(e -> updateList());
     }
     private void closeEditor() {
         form.setPerson(null);

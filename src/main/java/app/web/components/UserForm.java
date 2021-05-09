@@ -21,7 +21,6 @@ import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.shared.Registration;
-import org.hibernate.event.spi.DeleteEvent;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -60,7 +59,7 @@ public class UserForm extends FormLayout {
                 e.printStackTrace();
             }
         });
-        upload.addFailedListener(failedEvent ->{
+        upload.addFailedListener(failedEvent -> {
             Notification notification;
             notification = new Notification("Error with the File", 3000, Notification.Position.MIDDLE);
             notification.open();
@@ -68,7 +67,7 @@ public class UserForm extends FormLayout {
         this.controller = new Controller(personRepository,
                                          null, null,
                                          null, null,
-                                         null, null);
+                                         null, null, null);
         description.setClearButtonVisible(true);
         email.setClearButtonVisible(true);
         this.personRepository = personRepository;

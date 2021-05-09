@@ -77,7 +77,8 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                            @Autowired StudentAssignmentsUploadsRepository studentAssignmentsUploadsRepository,
                            @Autowired GroupRepository groupRepository,
                            @Autowired GroupMembersRepository groupMembersRepository,
-                           @Autowired MoodlePageRepository moodlePageRepository) {
+                           @Autowired MoodlePageRepository moodlePageRepository,
+                           @Autowired DirectMessageRepository directMessageRepository) {
         this.textChannelRepository = textChannelRepository;
         this.personRepository = personRepository;
         this.courseRepository = courseRepository;
@@ -86,7 +87,8 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         currentUser = SecurityUtils.getCurrentUser(personRepository);
         setPersonRepository(personRepository);
         setController(new Controller(personRepository, textChannelRepository, publicChatMessageRepository,
-                                     courseRepository, moodlePageRepository, groupRepository, groupMembersRepository));
+                                     courseRepository, moodlePageRepository, groupRepository, groupMembersRepository,
+                                     directMessageRepository));
         setAssignmentController(new AssignmentController(personRepository, assignmentRepository,
                                                          studentAssignmentsUploadsRepository, courseRepository));
         this.messageTextField = createTextField();
