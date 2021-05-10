@@ -147,17 +147,26 @@ public class Navbar extends AppLayout {
         addToNavbar(courseNavigationDock);
     }
 
-    private void createAddACourseButton() {
-        ComponentButton button = createServDockImage(new Image("img/add.svg", "Create serveur"), Key.NAVIGATE_NEXT);
-        button.getStyle()
-                .set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml());
-        Dialog d = new ServerFormComponent(controller);
-        button.addClickListener(buttonClickEvent -> {
-            d.open();
-        });
-        courseNavigationDock.add(button);
-    }
+    /**
+     * Create a button in one of the docks of the navigation bar
+     *
+     * @param img      The picture to put in the navbar to represent a course
+     * @param shortCut Shortcuts to access the course
+     * @return the button with an Anchor link to the course
+     */
+    public static ComponentButton createServDockImage(Image img, Key shortCut) {
 
+        ComponentButton imgButton = new ComponentButton(img, 50, 50);
+        imgButton.getStyle()
+                .set("padding", "0")
+                .set("margin", "12px 6px 6px 6px")
+                .set("height", "50px")
+                .set("width", "50px")
+                .set("border-radius", "10px")
+                .set("cursor", "pointer");
+        imgButton.addFocusShortcut(shortCut, KeyModifier.ALT);
+        return imgButton;
+    }
     private void createUserTeacherGrid(Grid<Person> grid) {
         grid.setItems(controller.findAllUserByRole(Person.Role.TEACHER));
         grid.addColumn(Person::getUsername).setHeader("Nom");
@@ -296,26 +305,15 @@ public class Navbar extends AppLayout {
         return servCardDock;
     }
 
-    /**
-     * Create a button in one of the docks of the navigation bar
-     *
-     * @param img      The picture to put in the navbar to represent a course
-     * @param shortCut Shortcuts to access the course
-     * @return the button with an Anchor link to the course
-     */
-    public static ComponentButton createServDockImage(Image img, Key shortCut) {
-        img.setHeightFull();
-        img.setWidthFull();
-        ComponentButton imgButton = new ComponentButton(img);
-        imgButton.getStyle()
-                .set("padding", "0")
-                .set("margin", "12px 6px 6px 6px")
-                .set("height", "50px")
-                .set("width", "50px")
-                .set("border-radius", "10px")
-                .set("cursor", "pointer");
-        imgButton.addFocusShortcut(shortCut, KeyModifier.ALT);
-        return imgButton;
+    private void createAddACourseButton() {
+        ComponentButton button = createServDockImage(new Image("img/add.svg", "Create serveur"), Key.NAVIGATE_NEXT);
+        button.getStyle()
+                .set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml());
+        Dialog d = new ServerFormComponent(controller, currentUser);
+        button.addClickListener(buttonClickEvent -> {
+            d.open();
+        });
+        courseNavigationDock.add(button);
     }
 
     /**
@@ -732,6 +730,7 @@ public class Navbar extends AppLayout {
             File old = new File(oldName);
             File newFile = new File("src/main/webapp/profile_pictures/" + currentUser.getId() + extension.toLowerCase());
             if (! old.renameTo(newFile)) {
+              
                 throw new Exception("File can't be renamed");
             }
         }
