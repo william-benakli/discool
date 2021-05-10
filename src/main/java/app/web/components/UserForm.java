@@ -11,9 +11,13 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
@@ -37,18 +41,17 @@ public class UserForm extends FormLayout {
     private final PersonRepository personRepository;
     private final Binder<Person> binder = new BeanValidationBinder<>(Person.class);
     private final TextField username = new TextField("Pseudo");
-    private final TextField firstName = new TextField("First name");
-    private final TextField lastName = new TextField("Last name");
+    private final TextField firstName = new TextField("Nom");
+    private final TextField lastName = new TextField("Prenom");
     private final EmailField email = new EmailField("Email");
-    private final PasswordField password = new PasswordField("Password");
+    private final PasswordField password = new PasswordField("Mot-de-passe");
     private final TextField description = new TextField("Description");
     private final ComboBox<Person.Role> role = new ComboBox<>("Role");
     private final TextField website = new TextField("Website");
-    private final Button save = new Button("Save");
-    private final Button delete = new Button("Delete");
-    private final Button close = new Button("Cancel");
-    private final Button infoBtn = new Button("?");
-
+    private final Button save = new Button("Enregistrer");
+    private final Button delete = new Button("Supprimer");
+    private final Button close = new Button("Retour");
+    private final Button infoBtn = new Button("Aide");
     private Person person;
     private final String path = "./uploads/UsersCSV/" ;
     private final UploadComponent upload = new UploadComponent("50px", "96%", 1, 30000000,
@@ -102,7 +105,7 @@ public class UserForm extends FormLayout {
         dialog.close();
     }
 
-    public void setCss(){
+    private void setCss(){
         username.getStyle()
                 .set("display","block")
                 .set("height","50px")
@@ -129,6 +132,10 @@ public class UserForm extends FormLayout {
                 .set("display","block")
                 .set("margin-top","-50px");
     }
+
+    /**
+     * Return a layout where the buttons are
+     */
 
     private HorizontalLayout createButtonsLayout() {
         final HorizontalLayout horizontalLayout = new HorizontalLayout();
@@ -163,18 +170,24 @@ public class UserForm extends FormLayout {
         return horizontalLayout;
     }
 
-    public void infoCsv(){
-        Dialog info = new Dialog();
-        info.setWidth("30%");
+    /**
+     * create a dialog in which we indicate to the user the form of how the fields in the CSV file should be
+     */
+
+    private void infoCsv(){
+        final VerticalLayout masterLayout = new VerticalLayout();
+        final Dialog info = new Dialog();
+        final H1 p = new H1("Format du fichier .csv");
+        final Paragraph paragraph = new Paragraph("La première ligne n'est pas necessaire.Voici deux examples ci-dessous.");
+        final Image image = new Image("img/exampleCSV.png","");
+        image.setWidth("60%");
+        image.setHeight("auto");
+        info.setWidth("40%");
         info.setHeight("auto");
-        Paragraph p = new Paragraph("the form of the csv file should be :");
         p.getStyle().set("margin-top","50px");
-        TextField textField = new TextField();
-        textField.setValue("username,password,Role,firstName,lastName,email,description,website");
-        textField.getStyle().set("display","block")
-                            .set("margin-bottom","50px");
-        textField.setEnabled(false);
-        info.add(p,textField);
+        masterLayout.add(p,paragraph,image);
+        masterLayout.setAlignItems(FlexComponent.Alignment.CENTER);
+        info.add(masterLayout);
         info.open();
     }
 
@@ -203,8 +216,8 @@ public class UserForm extends FormLayout {
         }
         return ok;
     }
-    public void uploadCSVFile(String fileName) throws IOException {
-        BufferedReader br = new BufferedReader(new FileReader(fileName)) ;
+    private void uploadCSVFile(String fileName) throws IOException {
+        final BufferedReader br = new BufferedReader(new FileReader(fileName)) ;
         String line = "";
         try {
             while((line = br.readLine())!=null){
@@ -236,7 +249,7 @@ public class UserForm extends FormLayout {
         Files.delete(Paths.get(fileName));
     }
 
-    public void updateForm(String username , String firstName, String lastName, String email, String password, String description, Person.Role role , String website){
+    private void updateForm(String username , String firstName, String lastName, String email, String password, String description, Person.Role role , String website){
         this.username.setValue(username);
         this.firstName.setValue(firstName);
         this.lastName.setValue(lastName);
