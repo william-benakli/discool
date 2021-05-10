@@ -11,6 +11,7 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.EmailField;
@@ -46,6 +47,8 @@ public class UserForm extends FormLayout {
     private final Button save = new Button("Save");
     private final Button delete = new Button("Delete");
     private final Button close = new Button("Cancel");
+    private final Button infoBtn = new Button("?");
+
     private Person person;
     private final String path = "./uploads/UsersCSV/" ;
     private final UploadComponent upload = new UploadComponent("50px", "96%", 1, 30000000,
@@ -88,7 +91,8 @@ public class UserForm extends FormLayout {
             role,
             website,
             createButtonsLayout(),
-                upload);
+            upload
+                );
     }
 
     public void openDialog(){
@@ -124,10 +128,11 @@ public class UserForm extends FormLayout {
         website.getStyle()
                 .set("display","block")
                 .set("margin-top","-50px");
-        createButtonsLayout().getStyle().set("display","block");
     }
 
     private HorizontalLayout createButtonsLayout() {
+        final HorizontalLayout horizontalLayout = new HorizontalLayout();
+        horizontalLayout.getStyle().set("display","block");
         save.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         delete.addThemeVariants(ButtonVariant.LUMO_ERROR);
         close.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
@@ -152,8 +157,25 @@ public class UserForm extends FormLayout {
         close.addClickListener(click -> {fireEvent(new CloseEvent(this));
             closeDialog();
         });
+        infoBtn.addClickListener(click -> infoCsv());
         binder.addStatusChangeListener(evt -> save.setEnabled(binder.isValid()));
-        return new HorizontalLayout(save, delete, close);
+        horizontalLayout.add(save, delete, close, infoBtn);
+        return horizontalLayout;
+    }
+
+    public void infoCsv(){
+        Dialog info = new Dialog();
+        info.setWidth("30%");
+        info.setHeight("auto");
+        Paragraph p = new Paragraph("the form of the csv file should be :");
+        p.getStyle().set("margin-top","50px");
+        TextField textField = new TextField();
+        textField.setValue("username,password,Role,firstName,lastName,email,description,website");
+        textField.getStyle().set("display","block")
+                            .set("margin-bottom","50px");
+        textField.setEnabled(false);
+        info.add(p,textField);
+        info.open();
     }
 
     /**
