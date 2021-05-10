@@ -6,6 +6,7 @@ import app.jpa_repo.*;
 import app.model.chat.PublicChatMessage;
 import app.model.courses.Course;
 import app.model.users.Person;
+import app.web.components.UploadComponent;
 import app.web.components.UserForm;
 import app.web.layout.Navbar;
 import com.vaadin.flow.component.Component;
@@ -16,6 +17,11 @@ import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
@@ -26,6 +32,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -45,6 +52,9 @@ public class PanelAdminView extends VerticalLayout {
     private final TextField lastNameFilter = new TextField();
     private final TextField emailFilter = new TextField();
     private final TextField firstNameFilter = new TextField();
+    private final String path = "./uploads/UsersCSV/" ;
+    private final UploadComponent upload = new UploadComponent("50px", "96%", 1, 30000000,
+            path);
     private final Div listUser = new Div();
     private final Tab usersTab = new Tab("Utilisateurs");
     private final Tab coursesTab = new Tab("Cours");
@@ -57,6 +67,19 @@ public class PanelAdminView extends VerticalLayout {
                           @Autowired PrivateChatMessageRepository privateChatMessageRepository,
                           @Autowired PublicChatMessageRepository publicChatMessageRepository,
                           @Autowired GroupMembersRepository groupMembersRepository) {
+        upload.setAcceptedFileTypes(".csv");
+        upload.addFinishedListener(finishedEvent -> {
+            try {
+                form.uploadCSVFile(upload.getFileName());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+        upload.addFailedListener(failedEvent -> {
+            Notification notification;
+            notification = new Notification("Error with the File", 3000, Notification.Position.MIDDLE);
+            notification.open();
+        });
         this.groupMembersRepository = groupMembersRepository;
         this.personRepository = personRepository;
         this.courseRepository = courseRepository;
@@ -94,16 +117,41 @@ public class PanelAdminView extends VerticalLayout {
         }
     }
 
+
+    /**
+     * create a dialog in which we indicate to the user the form of how the fields in the CSV file should be
+     */
+
+    private void infoCsv(){
+        final VerticalLayout masterLayout = new VerticalLayout();
+        final Dialog info = new Dialog();
+        final H1 p = new H1("Format du fichier .csv");
+        final Paragraph paragraph = new Paragraph("La première ligne n'est pas necessaire.Voici deux examples ci-dessous.");
+        final Image image = new Image("img/exampleCSV.png","");
+        image.setWidth("60%");
+        image.setHeight("auto");
+        info.setWidth("40%");
+        info.setHeight("auto");
+        p.getStyle().set("margin-top","50px");
+        masterLayout.add(p,paragraph,image,upload);
+        masterLayout.setAlignItems(FlexComponent.Alignment.CENTER);
+        info.add(masterLayout);
+        info.open();
+    }
+
+
     private Div createButtonsDiv() {
         Div div = new Div();
         Button addUser = new Button("Ajouter des utilisateurs");
-        div.add(lastNameFilter, emailFilter, firstNameFilter, addUser);
+        Button addCsvFile = new Button("Importer un fichier .csv");
+        div.add(lastNameFilter, emailFilter, firstNameFilter, addUser, addCsvFile);
         div.getStyle().set("display", "inline-block");
         lastNameFilter.getStyle().set("padding", "5px");
         emailFilter.getStyle().set("padding", "5px");
         firstNameFilter.getStyle().set("padding", "5px");
         addClassName("list-view");
         addUser.addClickListener(buttonClickEvent -> addPerson());
+        addCsvFile.addClickListener(buttonClickEvent -> infoCsv());
         return div;
     }
 

@@ -57,7 +57,6 @@ public class UserForm extends FormLayout {
     private final Button save = new Button("Enregistrer");
     private final Button delete = new Button("Supprimer");
     private final Button close = new Button("Retour");
-    private final Button infoBtn = new Button("Aide");
     private Person person;
     private final String path = "./uploads/UsersCSV/" ;
     private final UploadComponent upload = new UploadComponent("50px", "96%", 1, 30000000,
@@ -66,19 +65,6 @@ public class UserForm extends FormLayout {
     public UserForm(PersonRepository personRepository, CourseRepository courseRepository ,
                     PublicChatMessageRepository publicChatMessageRepository,
                     GroupMembersRepository groupMembersRepository, DirectMessageRepository directMessageRepository) {
-        upload.setAcceptedFileTypes(".csv");
-        upload.addFinishedListener(finishedEvent -> {
-            try {
-                uploadCSVFile(upload.getFileName());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
-        upload.addFailedListener(failedEvent -> {
-            Notification notification;
-            notification = new Notification("Error with the File", 3000, Notification.Position.MIDDLE);
-            notification.open();
-        });
         this.courseRepository = courseRepository ;
         this.publicChatMessageRepository = publicChatMessageRepository ;
         this.groupMembersRepository = groupMembersRepository;
@@ -105,8 +91,7 @@ public class UserForm extends FormLayout {
             description,
             role,
             website,
-            createButtonsLayout(),
-            upload
+            createButtonsLayout()
                 );
     }
 
@@ -176,31 +161,9 @@ public class UserForm extends FormLayout {
         close.addClickListener(click -> {fireEvent(new CloseEvent(this));
             closeDialog();
         });
-        infoBtn.addClickListener(click -> infoCsv());
         binder.addStatusChangeListener(evt -> save.setEnabled(binder.isValid()));
-        horizontalLayout.add(save, delete, close, infoBtn);
+        horizontalLayout.add(save, delete, close);
         return horizontalLayout;
-    }
-
-    /**
-     * create a dialog in which we indicate to the user the form of how the fields in the CSV file should be
-     */
-
-    private void infoCsv(){
-        final VerticalLayout masterLayout = new VerticalLayout();
-        final Dialog info = new Dialog();
-        final H1 p = new H1("Format du fichier .csv");
-        final Paragraph paragraph = new Paragraph("La première ligne n'est pas necessaire.Voici deux examples ci-dessous.");
-        final Image image = new Image("img/exampleCSV.png","");
-        image.setWidth("60%");
-        image.setHeight("auto");
-        info.setWidth("40%");
-        info.setHeight("auto");
-        p.getStyle().set("margin-top","50px");
-        masterLayout.add(p,paragraph,image);
-        masterLayout.setAlignItems(FlexComponent.Alignment.CENTER);
-        info.add(masterLayout);
-        info.open();
     }
 
     /**
@@ -228,7 +191,7 @@ public class UserForm extends FormLayout {
         }
         return ok;
     }
-    private void uploadCSVFile(String fileName) throws IOException {
+    public void uploadCSVFile(String fileName) throws IOException {
         final BufferedReader br = new BufferedReader(new FileReader(fileName)) ;
         String line = "";
         try {
