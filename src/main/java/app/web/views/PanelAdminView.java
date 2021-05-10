@@ -2,10 +2,7 @@ package app.web.views;
 
 import app.controller.ChatController;
 import app.controller.Controller;
-import app.jpa_repo.CourseRepository;
-import app.jpa_repo.PersonRepository;
-import app.jpa_repo.PrivateChatMessageRepository;
-import app.jpa_repo.PublicChatMessageRepository;
+import app.jpa_repo.*;
 import app.model.chat.PublicChatMessage;
 import app.model.courses.Course;
 import app.model.users.Person;
@@ -43,6 +40,7 @@ public class PanelAdminView extends VerticalLayout {
     private final PersonRepository personRepository;
     private final CourseRepository courseRepository;
     private final PublicChatMessageRepository publicChatMessageRepository;
+    private final GroupMembersRepository groupMembersRepository;
     private UserForm form;
     private final TextField lastNameFilter = new TextField();
     private final TextField emailFilter = new TextField();
@@ -57,7 +55,9 @@ public class PanelAdminView extends VerticalLayout {
     public PanelAdminView(@Autowired PersonRepository personRepository,
                           @Autowired CourseRepository courseRepository,
                           @Autowired PrivateChatMessageRepository privateChatMessageRepository,
-                          @Autowired PublicChatMessageRepository publicChatMessageRepository) {
+                          @Autowired PublicChatMessageRepository publicChatMessageRepository,
+                          @Autowired GroupMembersRepository groupMembersRepository) {
+        this.groupMembersRepository = groupMembersRepository;
         this.personRepository = personRepository;
         this.courseRepository = courseRepository;
         this.publicChatMessageRepository = publicChatMessageRepository;
@@ -186,6 +186,7 @@ public class PanelAdminView extends VerticalLayout {
     private void closeEditor() {
         form.setPerson(null);
         form.setVisible(false);
+        form.closeDialog();
         removeClassName("editing");
     }
 
@@ -219,7 +220,7 @@ public class PanelAdminView extends VerticalLayout {
     }
 
     private Button createInfoButton(long id) {
-        Button button = new Button("Info");
+        Button button = new Button("Messages");
         Dialog dialog = new Dialog();
         dialog.add(new Text("l'ensemble des messages de cet utilisateur :"));
         dialog.setWidth("50%");
@@ -248,7 +249,7 @@ public class PanelAdminView extends VerticalLayout {
     }
 
     private void createTabs() {
-        form = new UserForm(personRepository);
+        form = new UserForm(personRepository, courseRepository, publicChatMessageRepository, groupMembersRepository);
         form.getStyle().set("flex", "1");
         form.getStyle().set("display", "list-item");
         Div content = new Div(usersGrid, form);

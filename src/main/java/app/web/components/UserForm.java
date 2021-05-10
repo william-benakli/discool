@@ -1,7 +1,7 @@
 package app.web.components;
 
 import app.controller.Controller;
-import app.jpa_repo.PersonRepository;
+import app.jpa_repo.*;
 import app.model.users.Person;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -25,6 +25,7 @@ import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.shared.Registration;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -39,6 +40,11 @@ public class UserForm extends FormLayout {
     private final Controller controller;
     private final Dialog dialog  = new Dialog();
     private final PersonRepository personRepository;
+    private final CourseRepository courseRepository;
+    private final PublicChatMessageRepository publicChatMessageRepository;
+    private final DirectMessageRepository directMessageRepository;
+    private final GroupMembersRepository groupMembersRepository;
+
     private final Binder<Person> binder = new BeanValidationBinder<>(Person.class);
     private final TextField username = new TextField("Pseudo");
     private final TextField firstName = new TextField("Nom");
@@ -57,7 +63,9 @@ public class UserForm extends FormLayout {
     private final UploadComponent upload = new UploadComponent("50px", "96%", 1, 30000000,
             path);
 
-    public UserForm(PersonRepository personRepository) {
+    public UserForm(PersonRepository personRepository, CourseRepository courseRepository ,
+                    PublicChatMessageRepository publicChatMessageRepository,
+                    GroupMembersRepository groupMembersRepository, DirectMessageRepository directMessageRepository) {
         upload.setAcceptedFileTypes(".csv");
         upload.addFinishedListener(finishedEvent -> {
             try {
@@ -71,10 +79,14 @@ public class UserForm extends FormLayout {
             notification = new Notification("Error with the File", 3000, Notification.Position.MIDDLE);
             notification.open();
         });
+        this.courseRepository = courseRepository ;
+        this.publicChatMessageRepository = publicChatMessageRepository ;
+        this.groupMembersRepository = groupMembersRepository;
+        this.directMessageRepository = directMessageRepository;
         this.controller = new Controller(personRepository,
-                                         null, null,
-                                         null, null,
-                                         null, null, null);
+                                         null, publicChatMessageRepository,
+                courseRepository, null,
+                                         null, groupMembersRepository, directMessageRepository);
         description.setClearButtonVisible(true);
         email.setClearButtonVisible(true);
         this.personRepository = personRepository;
@@ -265,6 +277,7 @@ public class UserForm extends FormLayout {
         try {
             binder.writeBean(person);
             fireEvent(new SaveEvent(this, person));
+            closeDialog();
         } catch (ValidationException e) {
             e.printStackTrace();
         }
