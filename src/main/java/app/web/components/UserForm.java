@@ -59,8 +59,6 @@ public class UserForm extends FormLayout {
     private final Button close = new Button("Retour");
     private Person person;
     private final String path = "./uploads/UsersCSV/" ;
-    private final UploadComponent upload = new UploadComponent("50px", "96%", 1, 30000000,
-            path);
 
     public UserForm(PersonRepository personRepository, CourseRepository courseRepository ,
                     PublicChatMessageRepository publicChatMessageRepository,
