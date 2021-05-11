@@ -1,6 +1,8 @@
 package app.web.views;
 
 import app.controller.security.CustomRequestCache;
+import app.controller.security.SecurityUtils;
+import app.model.users.Person;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.login.LoginOverlay;
@@ -13,6 +15,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
+
+import javax.servlet.http.HttpSession;
 
 @Tag("sa-login-view")
 @Route(value = "login")
@@ -37,9 +41,13 @@ public class LoginView extends VerticalLayout {
 
                 // if authentication was successful we will update the security context and redirect to the page requested first
                 SecurityContextHolder.getContext().setAuthentication(authentication);
+
+                SecurityUtils.online.add(authentication.getName());
+
+
+
                 login.close();
                 UI.getCurrent().navigate(requestCache.resolveRedirectUrl());
-
             } catch (AuthenticationException ex) { //
                 // show default error message
                 login.setError(true);

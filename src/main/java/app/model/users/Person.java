@@ -1,5 +1,6 @@
 package app.model.users;
 
+import app.controller.security.SecurityUtils;
 import com.vaadin.flow.component.html.Image;
 import lombok.*;
 import org.jetbrains.annotations.NotNull;
@@ -121,7 +122,9 @@ public class Person {
     }
 
     //TODO: find a way to see if the user is logged in
-    public boolean isConnected(){ return true; }
+    public boolean isConnected(){
+        return SecurityUtils.online.contains(getUsername());
+    }
 
     @Override
     public boolean equals(Object o) {

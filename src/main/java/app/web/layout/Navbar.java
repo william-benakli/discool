@@ -37,6 +37,7 @@ import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinServletRequest;
 import com.vaadin.flow.shared.ui.Transport;
+import com.vaadin.server.Page;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -301,19 +302,18 @@ public class Navbar extends AppLayout {
         private PasswordField passwordFieldConfirmation;
         private Button valider;
         private FlexLayout audioControlsLayout;
-        private Anchor logoutAnchor;
+        //private Anchor logoutAnchor;
         private Paragraph paramUser;
 
         public UserParametersDialog() {
             createUserParametersForm();
             createUserTabs();
             createAudioControls();
-            createLogoutButton();
             createAdminButtonForUserParamDialog();
             styleUserParamLayout();
 
-            if (SecurityUtils.isUserAdmin()) layoutL.add(paramUser, logoutAnchor, divAdmin);
-            else layoutL.add(paramUser, logoutAnchor);
+            if (SecurityUtils.isUserAdmin()) layoutL.add(paramUser, createLogoutButton(),/* logoutAnchor,*/ divAdmin);
+            else layoutL.add(paramUser,  createLogoutButton()/*, logoutAnchor*/);
 
             /*Set Dialog*/
             add(layout);
@@ -416,18 +416,31 @@ public class Navbar extends AppLayout {
         /**
          * Creates the logout button to go in the user parameters dialog
          */
-        private void createLogoutButton() {
+        private Div createLogoutButton() {
             Button logoutButton = new Button("Déconnexion");
+            logoutButton.addClickListener(buttonClickEvent -> {
+                controller.removeUserOnline(currentUser.getUsername());
+                //System.out.println(Page.getCurrent().getLocation().toString());
+                UI.getCurrent().getPage().executeJs("window.location.href='http://localhost:8080/logout'");
+                //new Anchor("logout","");
+            });
             logoutButton.getStyle()
                     .set("background-color", ViewWithSidebars.ColorHTML.DANGER.getColorHtml())
-                    .set("color", ViewWithSidebars.ColorHTML.WHITE.getColorHtml());
-            logoutAnchor = new Anchor("logout", "");
-            logoutAnchor.getStyle()
+                    .set("color", ViewWithSidebars.ColorHTML.WHITE.getColorHtml())
+                    /*.set("position","absolute")
+                    .set("bottom","24px")
+                    .set("width","125px")
+                    .set("text-align","center")*/;
+
+            //logoutAnchor = new Anchor("logout", "");
+            Div div = new Div(logoutButton);
+            div.getStyle()
                     .set("position","absolute")
                     .set("bottom","24px")
                     .set("width","25%")
                     .set("text-align","center");
-            logoutAnchor.add(logoutButton);
+            //logoutAnchor.add(logoutButton);
+            return div;
         }
 
         /**
