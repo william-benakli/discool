@@ -1,6 +1,6 @@
 package app.controller.commands;
 
-import app.controller.Controller;
+import app.controller.ChatController;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Paragraph;
@@ -11,12 +11,12 @@ public class CommandsClearChat {
     /**
      * Verification des la commandes entrée et application des changements de la command
      *
-     * @param controller permet d'avoir un acces direct au controller
-     * @param sender     id de l'utilisateur
-     * @param channel    id du channel concernée
-     * @param arg        le nombre d'argument dans un tableau
+     * @param chatController permet d'avoir un acces direct au controller
+     * @param sender         id de l'utilisateur
+     * @param channel        id du channel concernée
+     * @param arg            le nombre d'argument dans un tableau
      */
-    public CommandsClearChat(Controller controller, long sender, long channel, String arg[]) {
+    public CommandsClearChat(ChatController chatController, long sender, long channel, String arg[]) {
         if (arg.length <= 0 || arg.length > 3) return;
         //TODO: verification à finaliser
         //if(channel.exist())
@@ -26,13 +26,13 @@ public class CommandsClearChat {
             //faire afficher l'aide
             displayHelp();
         } else if (arg[1].equalsIgnoreCase("all")) {
-            controller.clearMessageChat();
+            chatController.clearMessageChat();
             //suppression de tous les messages;
         } else if (arg.length == 1) {
             if (isInteger(arg[1])) {
                 int value = Integer.valueOf(arg[1]);
                 if (value >= 1 || value <= 50) {
-                    controller.clearMessageChat(value, channel);
+                    chatController.clearMessageChat(value, channel);
                 } else {
                     displayErreur("Nombre trop grand");
                 }

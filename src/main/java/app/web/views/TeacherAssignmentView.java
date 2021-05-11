@@ -51,18 +51,20 @@ public class TeacherAssignmentView extends ViewWithSidebars implements HasDynami
     private final FlexLayout assignmentBar = new FlexLayout();
 
     public TeacherAssignmentView(@Autowired CourseRepository courseRepository,
-                                 @Autowired TextChannelRepository textChannelRepository,
+                                 @Autowired PublicTextChannelRepository publicTextChannelRepository,
                                  @Autowired AssignmentRepository assignmentRepository,
                                  @Autowired PersonRepository personRepository,
                                  @Autowired StudentAssignmentsUploadsRepository studentAssignmentsUploadsRepository,
                                  @Autowired GroupRepository groupRepository,
                                  @Autowired GroupMembersRepository groupMembersRepository,
-                                 @Autowired MoodlePageRepository moodlePageRepository) {
+                                 @Autowired MoodlePageRepository moodlePageRepository,
+                                 @Autowired PrivateChatMessageRepository privateChatMessageRepository) {
         this.assignmentRepository = assignmentRepository;
         this.courseRepository = courseRepository;
         setPersonRepository(personRepository);
-        setController(new Controller(personRepository, textChannelRepository, null,
-                                     courseRepository, moodlePageRepository, groupRepository, groupMembersRepository));
+        setController(new Controller(personRepository, publicTextChannelRepository, null,
+                                     courseRepository, moodlePageRepository, groupRepository, groupMembersRepository,
+                                     privateChatMessageRepository));
         setAssignmentController(new AssignmentController(personRepository, assignmentRepository,
                                                          studentAssignmentsUploadsRepository, courseRepository));
     }

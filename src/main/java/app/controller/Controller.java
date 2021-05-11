@@ -3,8 +3,7 @@ package app.controller;
 
 import app.controller.security.SecurityUtils;
 import app.jpa_repo.*;
-import app.model.chat.PublicChatMessage;
-import app.model.chat.TextChannel;
+import app.model.chat.PublicTextChannel;
 import app.model.courses.Course;
 import app.model.courses.MoodlePage;
 import app.model.users.Group;
@@ -16,28 +15,31 @@ import java.util.*;
 
 public class Controller {
 
-    private final TextChannelRepository textChannelRepository;
+    private final PublicTextChannelRepository publicTextChannelRepository;
     private final PublicChatMessageRepository publicChatMessageRepository;
     private final PersonRepository personRepository;
     private final CourseRepository courseRepository;
     private final MoodlePageRepository moodlePageRepository;
     private final GroupRepository groupRepository;
     private final GroupMembersRepository groupMembersRepository;
+    private final PrivateChatMessageRepository privateChatMessageRepository;
 
     public Controller(PersonRepository personRepository,
-                      TextChannelRepository textChannelRepository,
+                      PublicTextChannelRepository publicTextChannelRepository,
                       PublicChatMessageRepository publicChatMessageRepository,
                       CourseRepository courseRepository,
                       MoodlePageRepository moodlePageRepository,
                       GroupRepository groupRepository,
-                      GroupMembersRepository groupMembersRepository) {
+                      GroupMembersRepository groupMembersRepository,
+                      PrivateChatMessageRepository privateChatMessageRepository) {
         this.publicChatMessageRepository = publicChatMessageRepository;
-        this.textChannelRepository = textChannelRepository;
+        this.publicTextChannelRepository = publicTextChannelRepository;
         this.personRepository = personRepository;
         this.courseRepository = courseRepository;
         this.moodlePageRepository = moodlePageRepository;
         this.groupRepository = groupRepository;
         this.groupMembersRepository = groupMembersRepository;
+        this.privateChatMessageRepository = privateChatMessageRepository;
     }
 
     public String getTitleCourse(long id) {
@@ -45,40 +47,36 @@ public class Controller {
         return c.map(Course::getName).orElse(null);
     }
 
-    public PublicChatMessage saveMessage(String message, long channelId, long parentId, long userId, int type) {
-        PublicChatMessage messageToSave = PublicChatMessage.builder()
-                .message(message)
-                .channelid(channelId)
-                .parentId(parentId)
-                .sender(userId)
-                .timeCreated(System.currentTimeMillis())
-                .deleted(false)
-                .type(type)
-                .build();
-        publicChatMessageRepository.save(messageToSave);
-        return messageToSave;
+    public void deleteNullUsers(){
+        personRepository.deleteNullUsers();
     }
 
-
-
-    public MoodlePage getLastMoodlePage(long courseId){
-        return moodlePageRepository.findFirstByCourseIdOrderByIdDesc(courseId);
+    public void updateUserById(long id, String email, String username , String firstname, String lastname, String description, Person.Role role, String website){
+        personRepository.updateUserById(id, email,username, firstname, lastname ,description, role, website);
     }
 
-    public TextChannel getLastTextChannelRepository(long courseId){
-        return textChannelRepository.findFirstByCourseIdOrderByIdDesc(courseId);
+    public void addUser( String username ,String password, Person.Role role, String firstname, String lastname, String email, String description, String website, long firstlogin, long lastlogin, long timecreated){
+        personRepository.addUser(username, password, role, firstname, lastname, email, description, website, firstlogin, lastlogin, timecreated);
     }
 
-    public TextChannel getTextChannel(long textChannelId){
-        return textChannelRepository.findTextChannelById(textChannelId);
+    public Person findByUsername(String name){
+        return personRepository.findByUsername(name);
     }
 
-    public MoodlePage getMoodlePage(long MoodlePageId){
-        return moodlePageRepository.findMoodlePageById(MoodlePageId);
+    public Person findUserById(long id) {
+        return personRepository.findById(id);
     }
 
-    public void changeMessage(PublicChatMessage publicChatMessage, String messageText) {
-        publicChatMessageRepository.updateMessageById(publicChatMessage.getId(), messageText);
+    public void saveUser(Person p) {
+        personRepository.save(p);
+    }
+
+    public ArrayList<Person> findAllUsers(){
+        return personRepository.findAll();
+    }
+
+    public List<Person> searchUser(String searchTerm) {
+        return personRepository.search(searchTerm);
     }
 
     public void removeUserOnline(String name){
@@ -89,47 +87,59 @@ public class Controller {
         publicChatMessageRepository.save(message);
     }
 
-    public ArrayList<TextChannel> getAllChannelsForCourse(long courseId) {
-        return textChannelRepository.findAllByCourseId(courseId);
+    public List<Person> searchByUserName(String searchTerm){
+        return personRepository.searchByUserName(searchTerm);
     }
 
-    public void deleteMessage(PublicChatMessage message) {
-        publicChatMessageRepository.updateDeletedById(message.getId());
+    public List<Person> searchByEmail( String searchTerm){
+        return personRepository.searchByEmail(searchTerm);
+    }
+
+    public Person getUsername(long id){
+        return personRepository.findById(id);
+    }
+
+    public boolean userExist(String username) {
+        return findByUsername(username) != null;
+    }
+
+    public MoodlePage getLastMoodlePage(long courseId){
+        return moodlePageRepository.findFirstByCourseIdOrderByIdDesc(courseId);
+    }
+
+    public PublicTextChannel getLastTextChannelRepository(long courseId) {
+        return publicTextChannelRepository.findFirstByCourseIdOrderByIdDesc(courseId);
+    }
+
+    public PublicTextChannel getTextChannel(long textChannelId) {
+        return publicTextChannelRepository.findTextChannelById(textChannelId);
+    }
+
+    public MoodlePage getMoodlePage(long MoodlePageId) {
+        return moodlePageRepository.findMoodlePageById(MoodlePageId);
+    }
+
+    public ArrayList<PublicTextChannel> getAllChannelsForCourse(long courseId) {
+        return publicTextChannelRepository.findAllByCourseId(courseId);
     }
 
     public void deletePage(MoodlePage section) {
         moodlePageRepository.delete(section);
     }
 
-    public String getUsernameOfSender(PublicChatMessage publicChatMessage) {
-        return personRepository.findById(publicChatMessage.getSender()).getUsername();
-    }
 
-    public ArrayList<PublicChatMessage> getChatMessagesForChannel(long channelId) {
-        return publicChatMessageRepository.findAllByChannelid(channelId);
-    }
-
-    public ArrayList<Person> getAllUser() {
+    public ArrayList<Person> getAllUsers() {
         return personRepository.findAll();
     }
 
+    public ArrayList<GroupMembers> findByUserId(long id){
+        return groupMembersRepository.findByUserId(id);
+    }
 
     public void updateSection(MoodlePage section, String title, String content) {
         section.setTitle(title);
         section.setContent(content);
         moodlePageRepository.save(section);
-    }
-
-    public void clearMessageChat() {
-        publicChatMessageRepository.updateDeletedAll();
-    }
-
-    public void clearMessageChat(int value, long channelid) {
-        publicChatMessageRepository.updateDeleted(channelid, value);
-    }
-
-    public PublicChatMessage getMessageById(long id) {
-        return publicChatMessageRepository.findById(id);
     }
 
     public ArrayList<Person> getAllStudentsForCourse(long courseId) {
@@ -154,8 +164,8 @@ public class Controller {
     }
 
     public void createChannel(String name, long courseId) {
-        TextChannel toSave = TextChannel.builder().name(name).courseId(courseId).build();
-        textChannelRepository.save(toSave);
+        PublicTextChannel toSave = PublicTextChannel.builder().name(name).courseId(courseId).build();
+        publicTextChannelRepository.save(toSave);
     }
 
     public void createMoodlePage(String title, long courseId) {
@@ -220,9 +230,24 @@ public class Controller {
     }
 
     public void deleteUser(Person person) {
-        personRepository.deleteUserByIdGroup_members(person.getId());
-        personRepository.deleteUserByIdIndirect_messages(person.getId());
-        personRepository.updateUserByIdPosts(person.getId());
+        groupMembersRepository.deleteByUserId(person.getId());
+        privateChatMessageRepository.updateDeletedById(person.getId());
+        publicChatMessageRepository.deletePublicChatMessageById(person.getId());
         personRepository.deleteUserById(person.getId());
+    }
+
+    /**
+     * @param users    the list of users to get the data from
+     * @param getNames true to get the names (first+last), false to get the usernames
+     * @return an ArrayList of names or usernames
+     */
+    public ArrayList<String> getAllNamesOrUsernames(ArrayList<Person> users, boolean getNames) {
+        ArrayList<String> values = new ArrayList<>();
+        if (getNames) {
+            users.forEach(user -> values.add(user.getFirstName() + ", " + user.getLastName()));
+        } else {
+            users.forEach(user -> values.add(user.getUsername()));
+        }
+        return values;
     }
 }

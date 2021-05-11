@@ -15,7 +15,7 @@ import javax.persistence.*;
 @Setter
 @Entity(name = "direct_messages")
 @Table(name = "direct_messages")
-public class DirectMessage {
+public class PrivateChatMessage implements ChatMessage {
 
     @Id // to say this is the primary key in the database
     @GeneratedValue(strategy = GenerationType.IDENTITY) // to generate the id
@@ -59,23 +59,24 @@ public class DirectMessage {
      * The user sending the message.
      */
     @Column(
-            name = "useridfrom",
+            name = "senderid",
             nullable = false
     )
     private long sender;
 
-    /**
-     * The user receiving the message
-     */
     @Column(
-            name = "useridto",
+            name = "channelid",
             nullable = false
     )
-    private long addresse;
+    private long channelid;
 
     /**
-     * The subject of the message
+     * Type of message
+     * 0-Normal message
+     * 1-Image message
+     * 2-File message
      */
-    @Column(name = "subject")
-    private String subject;
+    @Column(name = "typefile")
+    private int type;
+
 }
