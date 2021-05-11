@@ -418,7 +418,7 @@ public class Navbar extends AppLayout {
             Button logoutButton = new Button("Déconnexion");
             logoutButton.addClickListener(buttonClickEvent -> {
                 controller.removeUserOnline(currentUser.getUsername());
-                UI.getCurrent().getPage().executeJs("window.location.href='http://localhost:8080/logout'");
+                UI.getCurrent().getPage().executeJs("window.location.href='"+getUrl()+"logout'");
             });
             logoutButton.getStyle()
                     .set("background-color", ViewWithSidebars.ColorHTML.DANGER.getColorHtml())
@@ -431,6 +431,14 @@ public class Navbar extends AppLayout {
                     .set("width","25%")
                     .set("text-align","center");
             return div;
+        }
+
+        @SneakyThrows
+        private String getUrl(){
+            VaadinServletRequest req = (VaadinServletRequest) VaadinService.getCurrentRequest();
+            StringBuffer uriString = req.getRequestURL();
+            URI uri = new URI(uriString.toString());
+            return uri.toString();
         }
 
         /**
