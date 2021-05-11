@@ -4,7 +4,7 @@ import app.controller.AssignmentController;
 import app.controller.Controller;
 import app.controller.security.SecurityUtils;
 import app.jpa_repo.PersonRepository;
-import app.model.chat.TextChannel;
+import app.model.chat.PublicTextChannel;
 import app.model.courses.Assignment;
 import app.model.courses.Course;
 import app.model.courses.MoodlePage;
@@ -53,7 +53,7 @@ import java.util.stream.Collectors;
 
 public abstract class ViewWithSidebars extends VerticalLayout {
 
-    private FlexLayout sideBar;
+    protected FlexLayout sideBar;
     private FlexLayout membersBar;
     @Getter @Setter
     private Controller controller;
@@ -73,7 +73,11 @@ public abstract class ViewWithSidebars extends VerticalLayout {
                 .set("bottom", "0")
                 .set("margin", "0")
                 .set("padding", "0");
-        layout.add(sideBar, centerElement, membersBar);
+        if (membersBar != null) {
+            layout.add(sideBar, centerElement, membersBar);
+        } else {
+            layout.add(sideBar, centerElement);
+        }
         this.add(layout);
     }
 
@@ -277,6 +281,7 @@ public abstract class ViewWithSidebars extends VerticalLayout {
         sideBar.add(link);
     }
 
+
     /**
      * Add links to all the text channels of the course
      *
@@ -285,9 +290,9 @@ public abstract class ViewWithSidebars extends VerticalLayout {
      * @param t have the number of the channel in which the user is
      */
     private void addChannelsLinksToSidebar(long courseId, String[] s2, String t) {
-        ArrayList<TextChannel> textChannels = controller.getAllChannelsForCourse(courseId);
-        textChannels.forEach(channel -> {
-            RouterLink link = new RouterLink("", TextChannelView.class, channel.getId());
+        ArrayList<PublicTextChannel> publicTextChannels = controller.getAllChannelsForCourse(courseId);
+        publicTextChannels.forEach(channel -> {
+            RouterLink link = new RouterLink("", PublicTextChannelView.class, channel.getId());
             Button button = new Button(channel.getName());
             button.addClassName(channel.getId() + "");
             styleButton(link, button);

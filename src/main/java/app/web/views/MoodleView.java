@@ -3,10 +3,10 @@ package app.web.views;
 import app.controller.AssignmentController;
 import app.controller.Controller;
 import app.controller.Markdown;
-import app.controller.MoodleBroadcaster;
+import app.controller.broadcasters.MoodleBroadcaster;
 import app.controller.security.SecurityUtils;
 import app.jpa_repo.*;
-import app.model.chat.TextChannel;
+import app.model.chat.PublicTextChannel;
 import app.model.courses.Assignment;
 import app.model.courses.Course;
 import app.model.courses.MoodlePage;
@@ -55,19 +55,19 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
 
     public MoodleView(@Autowired MoodlePageRepository moodlePageRepository,
                       @Autowired CourseRepository courseRepository,
-                      @Autowired TextChannelRepository textChannelRepository,
+                      @Autowired PublicTextChannelRepository publicTextChannelRepository,
                       @Autowired PersonRepository personRepository,
                       @Autowired AssignmentRepository assignmentRepository,
                       @Autowired StudentAssignmentsUploadsRepository studentAssignmentsUploadsRepository,
                       @Autowired GroupRepository groupRepository,
                       @Autowired GroupMembersRepository groupMembersRepository,
-                      @Autowired DirectMessageRepository directMessageRepository) {
+                      @Autowired PrivateChatMessageRepository privateChatMessageRepository) {
         this.courseRepository = courseRepository;
         this.moodlePageRepository = moodlePageRepository;
         setPersonRepository(personRepository);
-        setController(new Controller(personRepository, textChannelRepository, null,
-                                     courseRepository, moodlePageRepository, groupRepository, groupMembersRepository, directMessageRepository
-                                     ));
+        setController(new Controller(personRepository, publicTextChannelRepository, null,
+                                     courseRepository, moodlePageRepository, groupRepository, groupMembersRepository,
+                                     privateChatMessageRepository));
         setAssignmentController(new AssignmentController(personRepository, assignmentRepository,
                                                          studentAssignmentsUploadsRepository, courseRepository));
     }
@@ -233,7 +233,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
 
         private final Map<Integer, Component> selectMap = new HashMap<>();
         private Select<Assignment> select_assignment;
-        private Select<TextChannel> select_channel;
+        private Select<PublicTextChannel> select_channel;
         private Select<MoodlePage> select_moodle;
         private AtomicReference<String> url;
 
@@ -371,7 +371,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
 
         private void createSelectLists(Map<Integer, Component> selectMap) {
             List<Assignment> assignments = getAssignmentController().getAssignmentsForCourse(getCourse().getId());
-            List<TextChannel> channels = getController().getAllChannelsForCourse(getCourse().getId());
+            List<PublicTextChannel> channels = getController().getAllChannelsForCourse(getCourse().getId());
             List<MoodlePage> moodlePages = getController().getAllMoodlePageForCourse(getCourse().getId());
 
             select_assignment = new Select<>();
@@ -381,7 +381,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
 
             select_channel = new Select<>();
             select_channel.setLabel("Sélectionnez une redirection : ");
-            select_channel.setTextRenderer(TextChannel::getName);
+            select_channel.setTextRenderer(PublicTextChannel::getName);
             select_channel.setItems(channels);
 
             select_moodle = new Select<>();
@@ -470,7 +470,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
                 } else if (select.getValue() instanceof MoodlePage) {
                     targetId = ((MoodlePage) select.getValue()).getId();
                 } else {
-                    targetId = ((TextChannel) select.getValue()).getId();
+                    targetId = ((PublicTextChannel) select.getValue()).getId();
                 }
                 generatedLink.setValue("[" + userInputNameLink.getValue()
                                                + "](" + urlRadicale + url + "/" + targetId + " )");

@@ -1,4 +1,4 @@
-package app.controller;
+package app.controller.broadcasters;
 
 import app.web.views.MoodleView;
 import com.vaadin.flow.shared.Registration;

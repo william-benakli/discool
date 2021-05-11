@@ -1,7 +1,9 @@
 package app.web.layout;
 
 import app.controller.AssignmentController;
+import app.controller.ChatController;
 import app.controller.Controller;
+import app.controller.broadcasters.MessageNotificationBroadcaster;
 import app.controller.security.SecurityUtils;
 import app.jpa_repo.*;
 import app.model.courses.Course;
@@ -10,14 +12,8 @@ import app.model.users.GroupMembers;
 import app.model.users.Person;
 import app.web.components.ComponentButton;
 import app.web.components.UploadComponent;
-import app.web.views.HomeView;
-import app.web.views.MoodleView;
-import app.web.views.PanelAdminView;
-import app.web.views.ViewWithSidebars;
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.Key;
-import com.vaadin.flow.component.KeyModifier;
-import com.vaadin.flow.component.UI;
+import app.web.views.*;
+import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
@@ -37,6 +33,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinServletRequest;
+import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.shared.ui.Transport;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,18 +49,20 @@ import java.util.Map;
 @CssImport("./styles/style.css")
 @StyleSheet("https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap")
 public class Navbar extends AppLayout {
-    //TODO: the background of the selected button changes color when clicked #42
 
     private final PersonRepository personRepository;
     private final MoodlePageRepository moodlePageRepository;
     private final Controller controller;
+    private final ChatController chatController;
     private Person currentUser;
     private HorizontalLayout courseNavigationDock;
     private HorizontalLayout rightMenuLayout;
     private AssignmentController assignmentController;
+    private Registration messageNotificationRegistration;
+    private ComponentButton directMessageButton;
 
     public Navbar(@Autowired CourseRepository courseRepository,
-                  @Autowired TextChannelRepository textChannelRepository,
+                  @Autowired PublicTextChannelRepository publicTextChannelRepository,
                   @Autowired PersonRepository personRepository,
                   @Autowired MoodlePageRepository moodlePageRepository,
                   @Autowired PublicChatMessageRepository publicChatMessageRepository,
@@ -71,12 +70,15 @@ public class Navbar extends AppLayout {
                   @Autowired GroupMembersRepository groupMembersRepository,
                   @Autowired AssignmentRepository assignmentRepository,
                   @Autowired StudentAssignmentsUploadsRepository studentAssignmentsUploadsRepository,
-                  @Autowired DirectMessageRepository directMessageRepository) {
+                  @Autowired PrivateTextChannelRepository privateTextChannelRepository,
+                  @Autowired PrivateChatMessageRepository privateChatMessageRepository) {
         this.assignmentController = new AssignmentController(personRepository, assignmentRepository, studentAssignmentsUploadsRepository, courseRepository);
         this.personRepository = personRepository;
         this.moodlePageRepository = moodlePageRepository;
-        this.controller = new Controller(personRepository, textChannelRepository, publicChatMessageRepository, courseRepository,
-                                         moodlePageRepository, groupRepository, groupMembersRepository, directMessageRepository);
+        this.controller = new Controller(personRepository, publicTextChannelRepository, publicChatMessageRepository, courseRepository,
+                                         moodlePageRepository, groupRepository, groupMembersRepository, privateChatMessageRepository);
+        this.chatController = new ChatController(personRepository, publicTextChannelRepository, publicChatMessageRepository,
+                                                 privateTextChannelRepository, privateChatMessageRepository);
         createLeftSubMenu();
         createCourseNavigationMenu();
         createRightSubMenu();
@@ -221,8 +223,15 @@ public class Navbar extends AppLayout {
     }
 
     private void createDirectMessageButton() {
-        ComponentButton button = createAndStyleButton("img/chatBubble.svg", "Messages privés");
-        rightMenuLayout.add(button);
+        String imagePath;
+        if (chatController.hasUnreadMessages(currentUser.getId())) {
+            imagePath = "img/message_unread.svg";
+        } else {
+            imagePath = "img/message_read.svg";
+        }
+        directMessageButton = createAndStyleButton(imagePath, "Messages privés");
+        RouterLink routerLink = new RouterLink("", PrivateTextChannelView.class, (long) -1);
+        linkRouteurImage(rightMenuLayout, directMessageButton, routerLink);
     }
 
     private void createUserParamButton() {
@@ -587,9 +596,37 @@ public class Navbar extends AppLayout {
             }
             File old = new File(oldName);
             File newFile = new File("src/main/webapp/profile_pictures/" + currentUser.getId() + extension.toLowerCase());
-            if (! old.renameTo(newFile)) {
+            if (!old.renameTo(newFile)) {
                 throw new Exception("File can't be renamed");
             }
         }
     }
+
+    //--------- methods to update the direct messages button if there is an unread message
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        UI ui = attachEvent.getUI();
+        messageNotificationRegistration = MessageNotificationBroadcaster.register((notify) -> {
+            if (ui.isEnabled() && ui.getUI().isPresent()) {
+                ui.access(() -> receiveBroadcast(notify));
+            }
+        });
+    }
+
+    @Override
+    protected void onDetach(DetachEvent detachEvent) {
+        messageNotificationRegistration.remove();
+        messageNotificationRegistration = null;
+    }
+
+    private void receiveBroadcast(Boolean notify) {
+        String imagePath;
+        if (chatController.hasUnreadMessages(currentUser.getId())) {
+            imagePath = "img/message_unread.svg";
+        } else {
+            imagePath = "img/message_read.svg";
+        }
+        directMessageButton = createAndStyleButton(imagePath, "Messages prives");
+    }
+
 }

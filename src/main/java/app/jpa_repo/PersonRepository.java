@@ -36,13 +36,13 @@ public interface PersonRepository extends JpaRepository<Person, Long> {
 
     @Modifying
     @Transactional
-    @Query(value = " INSERT INTO users (username ,password ,role ,firstName ,lastName ,email ,description ,website ,firstlogin ,lastlogin ,timecreated ) VALUES ( username ,password ,role ,firstname ,lastname ,email ,description ,website ,firstlogin ,lastlogin ,timecreated )",nativeQuery = true)
+    @Query(value = "INSERT INTO users (username ,password ,role ,firstName ,lastName ,email ,description ,website ,firstlogin ,lastlogin ,timecreated ) VALUES ( username ,password ,role ,firstname ,lastname ,email ,description ,website ,firstlogin ,lastlogin ,timecreated )", nativeQuery = true)
     void addUser(@Param("usernameparam") String username , @Param("passwordParam") String password, @Param("roleparam") Person.Role role,  @Param("firstnameparam") String firstname, @Param("lastnameparam") String lastname, @Param("emailparam") String email,@Param("descriptionparam") String description, @Param("websiteparam") String website,@Param("firstloginparam") long firstlogin,@Param("lastloginparam") long lastlogin,@Param("timecreatedparam") long timecreated);
 
     @Query("select c from users c " +
             "where lower(c.firstName) like lower(concat('%', :searchTerm, '%')) " +
             "or lower(c.lastName) like lower(concat('%', :searchTerm, '%'))")
-            List<Person> search(@Param("searchTerm") String searchTerm);
+    List<Person> search(@Param("searchTerm") String searchTerm);
 
     @Query("select c from users c " +
             "where lower(c.username) like lower(concat('%', :searchTerm, '%')) ")
@@ -56,5 +56,6 @@ public interface PersonRepository extends JpaRepository<Person, Long> {
 
     ArrayList<Person> findAll();
 
+    Person findByFirstNameAndLastName(String firstName, String lastName);
 
 }

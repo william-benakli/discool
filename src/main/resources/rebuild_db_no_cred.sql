@@ -75,22 +75,35 @@ CREATE TABLE IF NOT EXISTS group_members (
 
 CREATE TABLE IF NOT EXISTS direct_messages (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE,
-    useridfrom BIGINT UNSIGNED NOT NULL,
-    useridto BIGINT UNSIGNED NOT NULL,
-    subject VARCHAR(255),
+    senderid BIGINT UNSIGNED NOT NULL,
     parentid BIGINT UNSIGNED,
     message TEXT NOT NULL,
     timecreated BIGINT NOT NULL,
     deleted BIT NOT NULL,
+    channelid BIGINT UNSIGNED NOT NULL,
+    typefile INT NOT NULL,
 
     CONSTRAINT fk_parentid_direct
-    FOREIGN KEY(parentid) REFERENCES direct_messages(id),
-    CONSTRAINT fk_useridfrom
-	FOREIGN KEY (useridfrom) REFERENCES users(id),
-    CONSTRAINT fk_useridto
-	FOREIGN KEY(useridto) REFERENCES users(id),
+        FOREIGN KEY(parentid) REFERENCES direct_messages(id),
+    CONSTRAINT fk_useridfrom_direct
+	    FOREIGN KEY (senderid) REFERENCES users(id),
     PRIMARY KEY (id)
 ) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS private_channels (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE,
+    userA BIGINT UNSIGNED NOT NULL,
+    userB BIGINT UNSIGNED NOT NULL,
+    user1_read BIT NOT NULL,
+    user2_read BIT NOT NULL,
+
+    CONSTRAINT fk_user1
+    FOREIGN KEY (userA) REFERENCES users(id),
+    CONSTRAINT fk_user2
+    FOREIGN KEY(userB) REFERENCES users(id),
+    PRIMARY KEY(id)
+) ENGINE=InnoDB;
+
 
 CREATE TABLE IF NOT EXISTS channels (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE,
