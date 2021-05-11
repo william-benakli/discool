@@ -11,7 +11,6 @@ import app.model.users.Group;
 import app.model.users.GroupMembers;
 import app.model.users.Person;
 
-import javax.servlet.http.HttpSession;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -80,10 +79,6 @@ public class Controller {
 
     public void changeMessage(PublicChatMessage publicChatMessage, String messageText) {
         publicChatMessageRepository.updateMessageById(publicChatMessage.getId(), messageText);
-    }
-
-    public void addUserOnline(String name){
-        SecurityUtils.online.add(name);
     }
 
     public void removeUserOnline(String name){
