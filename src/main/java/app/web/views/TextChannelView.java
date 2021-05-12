@@ -97,7 +97,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
     }
 
     private void createSendMessageButton() {
-        sendMessage = createButtonWithLabel("Envoyer", "#000");
+        sendMessage = createButtonWithLabel("Envoyer", ColorHTML.PURPLE.getColorHtml());
         sendMessage.addClickShortcut(Key.ENTER);
 
         sendMessage.addClickListener(event -> {
@@ -245,8 +245,8 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                 .set("padding", "10px");
 
         FlexLayout chatButtonContainer = new FlexLayout();
-        chatButtonContainer.getStyle().set("padding", "0 2.5px");
-        chatButtonContainer.add(sendMessage, muteMicrophone, muteHeadphone, exitButton);
+        chatButtonContainer.getStyle().set("margin-left", "2.5px");
+        chatButtonContainer.add(sendMessage/*, muteMicrophone, muteHeadphone, exitButton*/);
         VerticalLayout layoutMaster = new VerticalLayout();
         HorizontalLayout messageInputBar = new HorizontalLayout();
         Button addFileOrImage = createButtonOpenDialogUpload();
