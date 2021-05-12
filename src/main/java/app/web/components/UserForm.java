@@ -1,7 +1,7 @@
 package app.web.components;
 
 import app.controller.Controller;
-import app.jpa_repo.PersonRepository;
+import app.jpa_repo.*;
 import app.model.users.Person;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -11,8 +11,13 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
@@ -20,6 +25,7 @@ import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.shared.Registration;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -34,41 +40,35 @@ public class UserForm extends FormLayout {
     private final Controller controller;
     private final Dialog dialog  = new Dialog();
     private final PersonRepository personRepository;
+    private final CourseRepository courseRepository;
+    private final PublicChatMessageRepository publicChatMessageRepository;
+    private final GroupMembersRepository groupMembersRepository;
+
     private final Binder<Person> binder = new BeanValidationBinder<>(Person.class);
     private final TextField username = new TextField("Pseudo");
-    private final TextField firstName = new TextField("First name");
-    private final TextField lastName = new TextField("Last name");
+    private final TextField firstName = new TextField("Nom");
+    private final TextField lastName = new TextField("Prenom");
     private final EmailField email = new EmailField("Email");
-    private final PasswordField password = new PasswordField("Password");
+    private final PasswordField password = new PasswordField("Mot-de-passe");
     private final TextField description = new TextField("Description");
     private final ComboBox<Person.Role> role = new ComboBox<>("Role");
     private final TextField website = new TextField("Website");
-    private final Button save = new Button("Save");
-    private final Button delete = new Button("Delete");
-    private final Button close = new Button("Cancel");
+    private final Button save = new Button("Enregistrer");
+    private final Button delete = new Button("Supprimer");
+    private final Button close = new Button("Retour");
     private Person person;
     private final String path = "./uploads/UsersCSV/" ;
-    private final UploadComponent upload = new UploadComponent("50px", "96%", 1, 30000000,
-            path);
 
-    public UserForm(PersonRepository personRepository) {
-        upload.setAcceptedFileTypes(".csv");
-        upload.addFinishedListener(finishedEvent -> {
-            try {
-                uploadCSVFile(upload.getFileName());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
-        upload.addFailedListener(failedEvent -> {
-            Notification notification;
-            notification = new Notification("Error with the File", 3000, Notification.Position.MIDDLE);
-            notification.open();
-        });
+    public UserForm(PersonRepository personRepository, CourseRepository courseRepository ,
+                    PublicChatMessageRepository publicChatMessageRepository,
+                    GroupMembersRepository groupMembersRepository) {
+        this.courseRepository = courseRepository ;
+        this.publicChatMessageRepository = publicChatMessageRepository ;
+        this.groupMembersRepository = groupMembersRepository;
         this.controller = new Controller(personRepository,
-                                         null, null,
-                                         null, null,
-                                         null, null, null);
+                                         null, publicChatMessageRepository,
+                courseRepository, null,
+                                         null, groupMembersRepository, null);
         description.setClearButtonVisible(true);
         email.setClearButtonVisible(true);
         this.personRepository = personRepository;
@@ -87,8 +87,8 @@ public class UserForm extends FormLayout {
             description,
             role,
             website,
-            createButtonsLayout(),
-                upload);
+            createButtonsLayout()
+                );
     }
 
     public void openDialog(){
@@ -98,7 +98,7 @@ public class UserForm extends FormLayout {
         dialog.close();
     }
 
-    public void setCss(){
+    private void setCss(){
         username.getStyle()
                 .set("display","block")
                 .set("height","50px")
@@ -124,10 +124,15 @@ public class UserForm extends FormLayout {
         website.getStyle()
                 .set("display","block")
                 .set("margin-top","-50px");
-        createButtonsLayout().getStyle().set("display","block");
     }
 
+    /**
+     * Return a layout where the buttons are
+     */
+
     private HorizontalLayout createButtonsLayout() {
+        final HorizontalLayout horizontalLayout = new HorizontalLayout();
+        horizontalLayout.getStyle().set("display","block");
         save.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         delete.addThemeVariants(ButtonVariant.LUMO_ERROR);
         close.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
@@ -153,7 +158,8 @@ public class UserForm extends FormLayout {
             closeDialog();
         });
         binder.addStatusChangeListener(evt -> save.setEnabled(binder.isValid()));
-        return new HorizontalLayout(save, delete, close);
+        horizontalLayout.add(save, delete, close);
+        return horizontalLayout;
     }
 
     /**
@@ -182,7 +188,7 @@ public class UserForm extends FormLayout {
         return ok;
     }
     public void uploadCSVFile(String fileName) throws IOException {
-        BufferedReader br = new BufferedReader(new FileReader(fileName)) ;
+        final BufferedReader br = new BufferedReader(new FileReader(fileName)) ;
         String line = "";
         try {
             while((line = br.readLine())!=null){
@@ -214,7 +220,7 @@ public class UserForm extends FormLayout {
         Files.delete(Paths.get(fileName));
     }
 
-    public void updateForm(String username , String firstName, String lastName, String email, String password, String description, Person.Role role , String website){
+    private void updateForm(String username , String firstName, String lastName, String email, String password, String description, Person.Role role , String website){
         this.username.setValue(username);
         this.firstName.setValue(firstName);
         this.lastName.setValue(lastName);
@@ -230,6 +236,7 @@ public class UserForm extends FormLayout {
         try {
             binder.writeBean(person);
             fireEvent(new SaveEvent(this, person));
+            closeDialog();
         } catch (ValidationException e) {
             e.printStackTrace();
         }

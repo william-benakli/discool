@@ -2,13 +2,11 @@ package app.web.views;
 
 import app.controller.ChatController;
 import app.controller.Controller;
-import app.jpa_repo.CourseRepository;
-import app.jpa_repo.PersonRepository;
-import app.jpa_repo.PrivateChatMessageRepository;
-import app.jpa_repo.PublicChatMessageRepository;
+import app.jpa_repo.*;
 import app.model.chat.PublicChatMessage;
 import app.model.courses.Course;
 import app.model.users.Person;
+import app.web.components.UploadComponent;
 import app.web.components.UserForm;
 import app.web.layout.Navbar;
 import com.vaadin.flow.component.Component;
@@ -19,6 +17,11 @@ import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
@@ -29,6 +32,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -43,10 +47,15 @@ public class PanelAdminView extends VerticalLayout {
     private final PersonRepository personRepository;
     private final CourseRepository courseRepository;
     private final PublicChatMessageRepository publicChatMessageRepository;
+    private final GroupMembersRepository groupMembersRepository;
+    private final PrivateChatMessageRepository privateChatMessageRepository;
     private UserForm form;
     private final TextField lastNameFilter = new TextField();
     private final TextField emailFilter = new TextField();
     private final TextField firstNameFilter = new TextField();
+    private final String path = "./uploads/UsersCSV/" ;
+    private final UploadComponent upload = new UploadComponent("50px", "96%", 1, 30000000,
+            path);
     private final Div listUser = new Div();
     private final Tab usersTab = new Tab("Utilisateurs");
     private final Tab coursesTab = new Tab("Cours");
@@ -56,11 +65,28 @@ public class PanelAdminView extends VerticalLayout {
 
     public PanelAdminView(@Autowired PersonRepository personRepository,
                           @Autowired CourseRepository courseRepository,
-                          @Autowired PrivateChatMessageRepository privateChatMessageRepository,
-                          @Autowired PublicChatMessageRepository publicChatMessageRepository) {
+                          @Autowired PublicChatMessageRepository publicChatMessageRepository,
+                          @Autowired GroupMembersRepository groupMembersRepository,
+                          @Autowired PrivateTextChannelRepository privateTextChannelRepository,
+                          @Autowired PrivateChatMessageRepository privateChatMessageRepository) {
+        upload.setAcceptedFileTypes(".csv");
+        upload.addFinishedListener(finishedEvent -> {
+            try {
+                form.uploadCSVFile(upload.getFileName());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+        upload.addFailedListener(failedEvent -> {
+            Notification notification;
+            notification = new Notification("Error with the File", 3000, Notification.Position.MIDDLE);
+            notification.open();
+        });
+        this.groupMembersRepository = groupMembersRepository;
         this.personRepository = personRepository;
         this.courseRepository = courseRepository;
         this.publicChatMessageRepository = publicChatMessageRepository;
+        this.privateChatMessageRepository = privateChatMessageRepository;
         this.controller = new Controller(personRepository,
                                          null, publicChatMessageRepository,
                                          courseRepository, null,
@@ -94,16 +120,41 @@ public class PanelAdminView extends VerticalLayout {
         }
     }
 
+
+    /**
+     * create a dialog in which we indicate to the user the form of how the fields in the CSV file should be
+     */
+
+    private void infoCsv(){
+        VerticalLayout masterLayout = new VerticalLayout();
+        Dialog info = new Dialog();
+        H1 p = new H1("Format du fichier .csv");
+        Paragraph paragraph = new Paragraph("Voici un exemple de l'ordre des valeurs. Ne pas mettre la première ligne avec le nom des colonnes.");
+        Image image = new Image("img/exampleCSV.png","");
+        image.setWidth("60%");
+        image.setHeight("auto");
+        info.setWidth("40%");
+        info.setHeight("auto");
+        p.getStyle().set("margin-top","50px");
+        masterLayout.add(p,paragraph,image,upload);
+        masterLayout.setAlignItems(FlexComponent.Alignment.CENTER);
+        info.add(masterLayout);
+        info.open();
+    }
+
+
     private Div createButtonsDiv() {
         Div div = new Div();
         Button addUser = new Button("Ajouter des utilisateurs");
-        div.add(lastNameFilter, emailFilter, firstNameFilter, addUser);
+        Button addCsvFile = new Button("Importer un fichier .csv");
+        div.add(lastNameFilter, emailFilter, firstNameFilter, addUser, addCsvFile);
         div.getStyle().set("display", "inline-block");
         lastNameFilter.getStyle().set("padding", "5px");
         emailFilter.getStyle().set("padding", "5px");
         firstNameFilter.getStyle().set("padding", "5px");
         addClassName("list-view");
         addUser.addClickListener(buttonClickEvent -> addPerson());
+        addCsvFile.addClickListener(buttonClickEvent -> infoCsv());
         return div;
     }
 
@@ -186,6 +237,7 @@ public class PanelAdminView extends VerticalLayout {
     private void closeEditor() {
         form.setPerson(null);
         form.setVisible(false);
+        form.closeDialog();
         removeClassName("editing");
     }
 
@@ -219,7 +271,7 @@ public class PanelAdminView extends VerticalLayout {
     }
 
     private Button createInfoButton(long id) {
-        Button button = new Button("Info");
+        Button button = new Button("Messages");
         Dialog dialog = new Dialog();
         dialog.add(new Text("l'ensemble des messages de cet utilisateur :"));
         dialog.setWidth("50%");
@@ -248,7 +300,7 @@ public class PanelAdminView extends VerticalLayout {
     }
 
     private void createTabs() {
-        form = new UserForm(personRepository);
+        form = new UserForm(personRepository,courseRepository,publicChatMessageRepository,groupMembersRepository);
         form.getStyle().set("flex", "1");
         form.getStyle().set("display", "list-item");
         Div content = new Div(usersGrid, form);
