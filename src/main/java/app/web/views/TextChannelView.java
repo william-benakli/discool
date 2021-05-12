@@ -14,10 +14,7 @@ import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.dialog.Dialog;
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.html.Image;
-import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
@@ -475,7 +472,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
     }
 
     private Dialog createDialogSettings() {
-        final H1 title = new H1("Modifier votre channel de text");
+        final H2 title = new H2("Modification du channel");
         final Dialog settingsDialog = new Dialog();
         final TextField name = new TextField();
         final Button valider = new Button("Valider");
@@ -488,7 +485,8 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         final Checkbox mute = new Checkbox("Channel écriture reservé aux professeurs");
         final Checkbox visible = new Checkbox("Channel reservé aux professeur");
         final PublicTextChannel channel = getController().getTextChannel(textChannel.getId());
-        layout.setAlignItems(Alignment.CENTER);
+        layout.setAlignItems(Alignment.START);
+
         title.getStyle().set("color", ColorHTML.PURPLE.getColorHtml());
         name.setLabel("Nom du channel : ");
         name.getStyle().set("color", ColorHTML.PURPLE.getColorHtml());
@@ -507,6 +505,8 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
 
         clear.addClickListener(event -> {
             chatController.clearMessageChat();
+            settingsDialog.close();
+            UI.getCurrent().getPage().reload();
             Notification.show("Nettoyage de tous les messages du tchat");
         });
         settingsDialog.add(layout);

@@ -445,10 +445,8 @@ public abstract class ViewWithSidebars extends VerticalLayout {
         private void createChannelPage() {
             TextField name = new TextField();
             HorizontalLayout layout = new HorizontalLayout();
-            Checkbox mute = new Checkbox("Mute");
-            Checkbox visible = new Checkbox("Visible");
-            mute.setLabel("Channel écriture reservé aux professeurs");
-            mute.setLabel("Channel reservé aux professeurs");
+            Checkbox mute = new Checkbox("Channel écriture reservé aux professeurs");
+            Checkbox visible = new Checkbox("Channel reservé aux professeurs");
             name.setLabel("Créer un salon textuel");
             name.setPlaceholder("Nom du salon");
             name.focus();
