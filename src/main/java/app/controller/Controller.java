@@ -1,7 +1,9 @@
 package app.controller;
 
 
+import app.controller.security.SecurityUtils;
 import app.jpa_repo.*;
+import app.model.chat.PublicChatMessage;
 import app.model.chat.PublicTextChannel;
 import app.model.courses.Course;
 import app.model.courses.MoodlePage;
@@ -76,6 +78,14 @@ public class Controller {
 
     public List<Person> searchUser(String searchTerm) {
         return personRepository.search(searchTerm);
+    }
+
+    public void removeUserOnline(String name){
+        SecurityUtils.online.remove(name);
+    }
+
+    public void saveMessage(PublicChatMessage message) {
+        publicChatMessageRepository.save(message);
     }
 
     public List<Person> searchByUserName(String searchTerm){

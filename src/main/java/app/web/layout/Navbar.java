@@ -319,19 +319,17 @@ public class Navbar extends AppLayout {
         private PasswordField passwordFieldConfirmation;
         private Button valider;
         private FlexLayout audioControlsLayout;
-        private Anchor logoutAnchor;
         private Paragraph paramUser;
 
         public UserParametersDialog() {
             createUserParametersForm();
             createUserTabs();
             createAudioControls();
-            createLogoutButton();
             createAdminButtonForUserParamDialog();
             styleUserParamLayout();
 
-            if (SecurityUtils.isUserAdmin()) layoutL.add(paramUser, logoutAnchor, divAdmin);
-            else layoutL.add(paramUser, logoutAnchor);
+            if (SecurityUtils.isUserAdmin()) layoutL.add(paramUser, createLogoutButton(), divAdmin);
+            else layoutL.add(paramUser,  createLogoutButton());
 
             /*Set Dialog*/
             add(layout);
@@ -434,18 +432,31 @@ public class Navbar extends AppLayout {
         /**
          * Creates the logout button to go in the user parameters dialog
          */
-        private void createLogoutButton() {
+        private Div createLogoutButton() {
             Button logoutButton = new Button("Déconnexion");
+            logoutButton.addClickListener(buttonClickEvent -> {
+                controller.removeUserOnline(currentUser.getUsername());
+                UI.getCurrent().getPage().executeJs("window.location.href='"+getUrl()+"logout'");
+            });
             logoutButton.getStyle()
                     .set("background-color", ViewWithSidebars.ColorHTML.DANGER.getColorHtml())
                     .set("color", ViewWithSidebars.ColorHTML.WHITE.getColorHtml());
-            logoutAnchor = new Anchor("logout", "");
-            logoutAnchor.getStyle()
+
+            Div div = new Div(logoutButton);
+            div.getStyle()
                     .set("position","absolute")
                     .set("bottom","24px")
                     .set("width","25%")
                     .set("text-align","center");
-            logoutAnchor.add(logoutButton);
+            return div;
+        }
+
+        @SneakyThrows
+        private String getUrl(){
+            VaadinServletRequest req = (VaadinServletRequest) VaadinService.getCurrentRequest();
+            StringBuffer uriString = req.getRequestURL();
+            URI uri = new URI(uriString.toString());
+            return uri.toString();
         }
 
         /**

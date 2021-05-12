@@ -10,13 +10,16 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.stream.Stream;
 
 /**
  * SecurityUtils takes care of all such static operations that have to do with
  * security and querying rights from different beans of the UI.
  */
-public final class SecurityUtils {
+public final class SecurityUtils{
+
+	public static ArrayList<String> online =new ArrayList<>();
 
 	private SecurityUtils() {
 		// Util methods only

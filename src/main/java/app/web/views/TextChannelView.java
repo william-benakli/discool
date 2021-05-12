@@ -97,7 +97,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
     }
 
     private void createSendMessageButton() {
-        sendMessage = createButtonWithLabel("Envoyer", "#000");
+        sendMessage = createButtonWithLabel("Envoyer", ColorHTML.PURPLE.getColorHtml());
         sendMessage.addClickShortcut(Key.ENTER);
 
         sendMessage.addClickListener(event -> {
@@ -245,8 +245,8 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                 .set("padding", "10px");
 
         FlexLayout chatButtonContainer = new FlexLayout();
-        chatButtonContainer.getStyle().set("padding", "0 2.5px");
-        chatButtonContainer.add(sendMessage, muteMicrophone, muteHeadphone, exitButton);
+        chatButtonContainer.getStyle().set("margin-left", "2.5px");
+        chatButtonContainer.add(sendMessage/*, muteMicrophone, muteHeadphone, exitButton*/);
         VerticalLayout layoutMaster = new VerticalLayout();
         HorizontalLayout messageInputBar = new HorizontalLayout();
         Button addFileOrImage = createButtonOpenDialogUpload();
@@ -439,34 +439,45 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
 
 
     public class MessageResponsePopComponent extends Div {
-        HorizontalLayout layoutHorizontalLayout;
+        VerticalLayout layoutVerticalLayout;
 
         Paragraph message;
         Button annuler;
 
         public MessageResponsePopComponent() {
-            annuler = new Button("X");
-            message = new Paragraph();
-            message.getStyle().set("padding-right", "70%").set("padding", "10px");
-            layoutHorizontalLayout = new HorizontalLayout();
+            annuler = new Button("", new Icon(VaadinIcon.CLOSE_SMALL));
+            message = new Paragraph("");
+            message.getStyle()
+                    .set("margin","auto auto auto 12px")
+                    .set("padding","0")
+                    .set("margin-left","0")
+                    .set("float","left")
+                    .set("left","0")
+                    .set("color",ColorHTML.PURPLE.getColorHtml());
+            annuler.getStyle()
+                    .set("margin","auto 0px auto auto")
+                    .set("padding","0")
+                    .set("margin-right","0")
+                    .set("float","right")
+                    .set("right","0")
+                    .set("color",ColorHTML.PURPLE.getColorHtml());
+            layoutVerticalLayout = new VerticalLayout();
             getStyle().set("background-color", ColorHTML.DARKGREY.getColorHtml());
             setVisible(false);
             setStyle();
             eventClickMessage();
-            layoutHorizontalLayout.add(message, annuler);
-            add(layoutHorizontalLayout);
+            layoutVerticalLayout.add(message, annuler);
+            layoutVerticalLayout.getStyle()
+                    .set("flex-direction","row")
+                    .set("padding","5px");
+            add(layoutVerticalLayout);
         }
 
         public void setStyle() {
-            this.getStyle().set("-webkit-border-top-left-radius", "30px")
-                    .set("-webkit-border-top-right-radius", "30px")
-                    .set("-moz-border-radius-topleft", "30px")
-                    .set("-moz-border-radius-topright", "30px")
-                    .set("border-top-left-radius", "30px")
-                    .set("border-top-right-radius", "30px")
-                    .set("box-shadow", " -2px -24px 46px -27px rgba(0,0,0,0.43)")
-                    .set("-webkit-box-shadow", "-2px -24px 46px -27px rgba(0,0,0,0.43)")
-                    .set("-moz-box-shadow", "-2px -24px 46px -27px rgba(0,0,0,0.43)");
+            this.getStyle()
+                    .set("flex-direction","row")
+                    .set("display","flex")
+                    .set("border-radius","4px");
         }
 
         public void setMessage(String userTo) {
@@ -553,7 +564,8 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
             messageFullLayout.add(profilPicture);
             messageFullLayout.add(chatUserInformation);
             messageFullWithResponseLayout.add(messageFullLayout);
-            messageFullWithResponseLayout.getStyle().set("padding", "5px");
+            messageFullWithResponseLayout.getStyle()
+                    .set("padding", "2.5px");
             add(messageFullWithResponseLayout);
             add(layoutPop);
         }
