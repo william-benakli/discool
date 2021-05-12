@@ -17,15 +17,16 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
-import com.vaadin.flow.component.radiobutton.RadioGroupVariant;
 import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouterLink;
-import com.vaadin.server.Page;
+import com.vaadin.flow.server.VaadinService;
+import com.vaadin.flow.server.VaadinServletRequest;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Optional;
 
@@ -108,10 +109,17 @@ public class PrivateTextChannelView extends TextChannelView implements HasUrlPar
     private RouterLink createChannelButton(PrivateTextChannel channel) {
         Person otherPerson = getOtherPerson(channel);
         RouterLink routerLink = new RouterLink("", PrivateTextChannelView.class, channel.getId());
-        Button button = new Button(styleStatusUsers(otherPerson));
+        Button button = new Button(styleStatusUsers(otherPerson, channel.getId()));
         styleButton(routerLink, button);
-        //button.getStyle().set("border","solid 1px red");
         return routerLink;
+    }
+
+    @SneakyThrows
+    private String getUrl(){
+        VaadinServletRequest req = (VaadinServletRequest) VaadinService.getCurrentRequest();
+        StringBuffer uriString = req.getRequestURL();
+        URI uri = new URI(uriString.toString());
+        return uri.toString();
     }
 
     /**
@@ -120,7 +128,9 @@ public class PrivateTextChannelView extends TextChannelView implements HasUrlPar
      * @param p The user and his information
      * @return a card containing a user and his connection status
      */
-    public FlexLayout styleStatusUsers(Person p){
+    public FlexLayout styleStatusUsers(Person p, long id){
+        String s = getUrl();
+        String[] s2=s.split("/");
         FlexLayout divUser = new FlexLayout();
         FlexLayout div = new FlexLayout();
         div.getStyle()
@@ -129,7 +139,7 @@ public class PrivateTextChannelView extends TextChannelView implements HasUrlPar
                 .set("margin","5px 0");
         Paragraph pseudo = new Paragraph(p.getUsername());
         pseudo.getStyle()
-                .set("color",ColorHTML.PURPLE.getColorHtml())
+                .set("color",(Long.parseLong(s2[s2.length-1])==id)?ColorHTML.PURPLE.getColorHtml():ColorHTML.TEXTGREY.getColorHtml())
                 .set("font-weight","700")
                 .set("margin","0")
                 .set("margin-top","5px")
@@ -156,7 +166,6 @@ public class PrivateTextChannelView extends TextChannelView implements HasUrlPar
 
         divUser.add(iconUser);
         divUser.add(div);
-        //divUser.getStyle().set("border","solid 1px red");
         return divUser;
     }
 
@@ -262,7 +271,6 @@ public class PrivateTextChannelView extends TextChannelView implements HasUrlPar
                 }
                 long ok = chatController.createNewPrivateChannel(currentUser.getId(), radioButtons.getValue(), value);
                 closeAndShowError(ok);
-                Page.getCurrent().reload();
             });
             validate.getStyle()
                     .set("margin-left","2.5px")
