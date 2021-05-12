@@ -5,10 +5,7 @@ import app.controller.broadcasters.ChatMessagesBroadcaster;
 import app.controller.commands.CommandsClearChat;
 import app.controller.security.SecurityUtils;
 import app.jpa_repo.*;
-import app.model.chat.ChatMessage;
-import app.model.chat.PrivateChatMessage;
-import app.model.chat.PrivateTextChannel;
-import app.model.chat.TextChannel;
+import app.model.chat.*;
 import app.model.users.Person;
 import app.web.components.ComponentButton;
 import app.web.components.UploadComponent;
@@ -245,8 +242,18 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                 .set("padding", "10px");
 
         FlexLayout chatButtonContainer = new FlexLayout();
-        chatButtonContainer.getStyle().set("margin-left", "2.5px");
-        chatButtonContainer.add(sendMessage/*, muteMicrophone, muteHeadphone, exitButton*/);
+        chatButtonContainer.getStyle().set("padding", "0 2.5px");
+        PublicTextChannel channel = getController().getTextChannel(textChannel.getId());
+        if(channel.isMute()){
+            if(currentUser.getRole() == Person.Role.STUDENT){
+                chatButtonContainer.add(new Paragraph("Ce channel est reservé aux professeurs"));
+            }else{
+                chatButtonContainer.add(sendMessage);
+            }
+        }else{
+            chatButtonContainer.add(sendMessage);
+        }
+        chatButtonContainer.add(sendMessage);
         VerticalLayout layoutMaster = new VerticalLayout();
         HorizontalLayout messageInputBar = new HorizontalLayout();
         Button addFileOrImage = createButtonOpenDialogUpload();

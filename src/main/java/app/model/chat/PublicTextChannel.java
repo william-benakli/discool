@@ -44,4 +44,26 @@ public class PublicTextChannel implements TextChannel {
     )
     private String name;
 
+    /**
+     * True if the message is deleted, false otherwise.
+     * All messages are kept for monitoring purposes.
+     */
+    @Column(
+            name = "mute",
+            columnDefinition = "bit",
+            nullable = false
+    )
+    private boolean mute;
+
+    /**
+     * True if the message is deleted, false otherwise.
+     * All messages are kept for monitoring purposes.
+     */
+    @Column(
+            name = "private",
+            columnDefinition = "bit",
+            nullable = false
+    )
+    private boolean privateTeacher;
+
 }

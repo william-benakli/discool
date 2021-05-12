@@ -109,6 +109,8 @@ CREATE TABLE IF NOT EXISTS channels (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE,
     courseid BIGINT UNSIGNED NOT NULL,
     name VARCHAR(255),
+    mute BIT NOT NULL,
+    private BIT NOT NULL,
     CONSTRAINT fk_courseid_channels
 	FOREIGN KEY (courseid) REFERENCES courses(id),
     PRIMARY KEY(id)
@@ -190,13 +192,13 @@ INSERT INTO courses VALUES
     (NULL, "course 3", 3, "course_pic/course3.png");
 
 INSERT INTO channels VALUES
-    (NULL, 1, "text chat 1"),
-    (NULL, 1, "text chat 2"),
-    (NULL, 1, "text chat 3"),
-    (NULL, 2, "text chat cours 2 n.1"),
-    (NULL, 2, "text chat cours 2, n.2"),
-    (NULL, 1, "text chat 4"),
-    (NULL, 3, "chat course 3");
+    (NULL, 1, "text chat 1", false, false),
+    (NULL, 1, "text chat 2", false, false),
+    (NULL, 1, "text chat 3", false, false),
+    (NULL, 2, "text chat cours 2 n.1", false, false),
+    (NULL, 2, "text chat cours 2, n.2", false, false),
+    (NULL, 1, "text chat 4", false, false),
+    (NULL, 3, "chat course 3", false, false);
 
 INSERT INTO moodle_pages VALUES
     (NULL, 1, "course 1 page 1", "course 1 **page** 1 content", 1),

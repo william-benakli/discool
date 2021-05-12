@@ -164,8 +164,8 @@ public class Controller {
         return new ArrayList<>(users);
     }
 
-    public void createChannel(String name, long courseId) {
-        PublicTextChannel toSave = PublicTextChannel.builder().name(name).courseId(courseId).build();
+    public void createChannel(String name, boolean mute, boolean prive, long courseId) {
+        PublicTextChannel toSave = PublicTextChannel.builder().name(name).courseId(courseId).mute(mute).privateTeacher(prive).build();
         publicTextChannelRepository.save(toSave);
     }
 
