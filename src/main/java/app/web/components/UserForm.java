@@ -42,7 +42,6 @@ public class UserForm extends FormLayout {
     private final PersonRepository personRepository;
     private final CourseRepository courseRepository;
     private final PublicChatMessageRepository publicChatMessageRepository;
-    private final DirectMessageRepository directMessageRepository;
     private final GroupMembersRepository groupMembersRepository;
 
     private final Binder<Person> binder = new BeanValidationBinder<>(Person.class);
@@ -62,15 +61,14 @@ public class UserForm extends FormLayout {
 
     public UserForm(PersonRepository personRepository, CourseRepository courseRepository ,
                     PublicChatMessageRepository publicChatMessageRepository,
-                    GroupMembersRepository groupMembersRepository, DirectMessageRepository directMessageRepository) {
+                    GroupMembersRepository groupMembersRepository) {
         this.courseRepository = courseRepository ;
         this.publicChatMessageRepository = publicChatMessageRepository ;
         this.groupMembersRepository = groupMembersRepository;
-        this.directMessageRepository = directMessageRepository;
         this.controller = new Controller(personRepository,
                                          null, publicChatMessageRepository,
                 courseRepository, null,
-                                         null, groupMembersRepository, directMessageRepository);
+                                         null, groupMembersRepository, null);
         description.setClearButtonVisible(true);
         email.setClearButtonVisible(true);
         this.personRepository = personRepository;

@@ -48,6 +48,7 @@ public class PanelAdminView extends VerticalLayout {
     private final CourseRepository courseRepository;
     private final PublicChatMessageRepository publicChatMessageRepository;
     private final GroupMembersRepository groupMembersRepository;
+    private final PrivateChatMessageRepository privateChatMessageRepository;
     private UserForm form;
     private final TextField lastNameFilter = new TextField();
     private final TextField emailFilter = new TextField();
@@ -64,9 +65,10 @@ public class PanelAdminView extends VerticalLayout {
 
     public PanelAdminView(@Autowired PersonRepository personRepository,
                           @Autowired CourseRepository courseRepository,
-                          @Autowired PrivateChatMessageRepository privateChatMessageRepository,
                           @Autowired PublicChatMessageRepository publicChatMessageRepository,
-                          @Autowired GroupMembersRepository groupMembersRepository) {
+                          @Autowired GroupMembersRepository groupMembersRepository,
+                          @Autowired PrivateTextChannelRepository privateTextChannelRepository,
+                          @Autowired PrivateChatMessageRepository privateChatMessageRepository) {
         upload.setAcceptedFileTypes(".csv");
         upload.addFinishedListener(finishedEvent -> {
             try {
@@ -84,6 +86,7 @@ public class PanelAdminView extends VerticalLayout {
         this.personRepository = personRepository;
         this.courseRepository = courseRepository;
         this.publicChatMessageRepository = publicChatMessageRepository;
+        this.privateChatMessageRepository = privateChatMessageRepository;
         this.controller = new Controller(personRepository,
                                          null, publicChatMessageRepository,
                                          courseRepository, null,
@@ -297,7 +300,7 @@ public class PanelAdminView extends VerticalLayout {
     }
 
     private void createTabs() {
-        form = new UserForm(personRepository, courseRepository, publicChatMessageRepository, groupMembersRepository);
+        form = new UserForm(personRepository,courseRepository,publicChatMessageRepository,groupMembersRepository);
         form.getStyle().set("flex", "1");
         form.getStyle().set("display", "list-item");
         Div content = new Div(usersGrid, form);
