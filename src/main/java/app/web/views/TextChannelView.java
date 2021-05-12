@@ -479,20 +479,35 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         final Dialog settingsDialog = new Dialog();
         final TextField name = new TextField();
         final Button valider = new Button("Valider");
+        final Button clear = new Button("Nettoyer tous les messages");
+
         final VerticalLayout layout = new VerticalLayout();
-        final Checkbox mute = new Checkbox("mute");
-        final Checkbox visible = new Checkbox("visible");
+        final HorizontalLayout layoutButton = new HorizontalLayout();
+        final HorizontalLayout layoutCheckBox = new HorizontalLayout();
+
+        final Checkbox mute = new Checkbox("Channel écriture reservé aux professeurs");
+        final Checkbox visible = new Checkbox("Channel reservé aux professeur");
         final PublicTextChannel channel = getController().getTextChannel(textChannel.getId());
         layout.setAlignItems(Alignment.CENTER);
+        title.getStyle().set("color", ColorHTML.PURPLE.getColorHtml());
         name.setLabel("Nom du channel : ");
+        name.getStyle().set("color", ColorHTML.PURPLE.getColorHtml());
         name.setValue(channel.getName());
         mute.setValue(channel.isMute());
         visible.setValue(channel.isPrivateTeacher());
-        layout.add(title, name, mute, visible, valider);
+        layoutButton.add(clear, valider);
+        layoutCheckBox.add(mute, visible);
+        layout.add(title, name, layoutCheckBox, layoutButton);
         valider.addClickListener(event -> {
             getController().updateTextChannel(channel, name.getValue(), mute.getValue(), visible.getValue());
             settingsDialog.close();
             UI.getCurrent().getPage().reload();
+            Notification.show("Application  des changements attribués");
+        });
+
+        clear.addClickListener(event -> {
+            chatController.clearMessageChat();
+            Notification.show("Nettoyage de tous les messages du tchat");
         });
         settingsDialog.add(layout);
         return settingsDialog;

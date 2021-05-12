@@ -447,8 +447,8 @@ public abstract class ViewWithSidebars extends VerticalLayout {
             HorizontalLayout layout = new HorizontalLayout();
             Checkbox mute = new Checkbox("Mute");
             Checkbox visible = new Checkbox("Visible");
-            mute.setLabel("Channels écriture reservé aux professeurs");
-            mute.setLabel("Channels reservé aux professeurs");
+            mute.setLabel("Channel écriture reservé aux professeurs");
+            mute.setLabel("Channel reservé aux professeurs");
             name.setLabel("Créer un salon textuel");
             name.setPlaceholder("Nom du salon");
             name.focus();
@@ -457,8 +457,8 @@ public abstract class ViewWithSidebars extends VerticalLayout {
             valider.addClickListener(event -> {
                 boolean priveBoolean = false;
                 boolean muteBoolean = false;
-                if(visible.getValue())priveBoolean = true;
-                if(mute.getValue())muteBoolean = true;
+                if (visible.getValue()) priveBoolean = true;
+                if (mute.getValue()) muteBoolean = true;
                 controller.createChannel(name.getValue(), muteBoolean, priveBoolean, getCourse().getId());
                 closeUpdate("Salon textuel créé");
                 UI.getCurrent().navigate("channels/"+getController().getLastTextChannelRepository(course.getId()).getId());
