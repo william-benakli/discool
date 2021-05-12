@@ -60,6 +60,8 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
     protected Button sendMessage;
     protected ComponentButton muteMicrophone;
     protected ComponentButton muteHeadphone;
+    protected VerticalLayout layoutMaster = new VerticalLayout();
+    protected HorizontalLayout messageInputBar = new HorizontalLayout();
 
 
     public TextChannelView(PublicTextChannelRepository publicTextChannelRepository,
@@ -245,12 +247,12 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                 .set("padding", "10px");
 
         FlexLayout chatButtonContainer = new FlexLayout();
-        chatButtonContainer.getStyle().set("margin-left", "2.5px");
-        chatButtonContainer.add(sendMessage/*, muteMicrophone, muteHeadphone, exitButton*/);
-        VerticalLayout layoutMaster = new VerticalLayout();
-        HorizontalLayout messageInputBar = new HorizontalLayout();
+        chatButtonContainer.getStyle().set("padding", "0 2.5px");
+        chatButtonContainer.add(sendMessage, muteMicrophone, muteHeadphone, exitButton);
         Button addFileOrImage = createButtonOpenDialogUpload();
+
         messageInputBar.add(addFileOrImage, messageTextField, chatButtonContainer);
+
         setCardStyle(messageContainer, "99%", ColorHTML.GREY);
         messageContainer.setHeightFull();
         messageContainer.getStyle()
@@ -262,13 +264,10 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                 .set("background-color", ColorHTML.GREY.getColorHtml())
                 .set("flex-direction", "column");
 
-        selectRep = new MessageResponsePopComponent();
-
+        layoutMaster.add(messageInputBar);
         for (ChatMessage message : chatController.getAllChatMessagesForChannel(textChannel)) {
             if (!message.isDeleted()) messageContainer.add(new MessageLayout(message));
         }
-        layoutMaster.getStyle().set("display", "block");
-        layoutMaster.add(selectRep, messageInputBar);
         chatBar.add(messageContainer, layoutMaster);
     }
 
@@ -436,6 +435,9 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         if (tab_name.length > 2) return "";
         return tab_name[1];
     }
+
+
+
 
 
     public class MessageResponsePopComponent extends Div {

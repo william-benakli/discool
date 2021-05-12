@@ -129,11 +129,18 @@ public class Controller {
     }
 
 
+    public void updateTextChannel(PublicTextChannel courantChannel, String name, boolean mute, boolean visible) {
+        courantChannel.setName(name);
+        courantChannel.setMute(mute);
+        courantChannel.setPrivateTeacher(visible);
+        publicTextChannelRepository.save(courantChannel);
+    }
+
     public ArrayList<Person> getAllUsers() {
         return personRepository.findAll();
     }
 
-    public ArrayList<GroupMembers> findByUserId(long id){
+    public ArrayList<GroupMembers> findByUserId(long id) {
         return groupMembersRepository.findByUserId(id);
     }
 
@@ -164,8 +171,8 @@ public class Controller {
         return new ArrayList<>(users);
     }
 
-    public void createChannel(String name, long courseId) {
-        PublicTextChannel toSave = PublicTextChannel.builder().name(name).courseId(courseId).build();
+    public void createChannel(String name, boolean mute, boolean prive, long courseId) {
+        PublicTextChannel toSave = PublicTextChannel.builder().name(name).courseId(courseId).mute(mute).privateTeacher(prive).build();
         publicTextChannelRepository.save(toSave);
     }
 

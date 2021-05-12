@@ -11,4 +11,5 @@ public interface PublicTextChannelRepository extends JpaRepository<PublicTextCha
     PublicTextChannel findFirstByCourseIdOrderByIdDesc(long courseId);
 
     PublicTextChannel findTextChannelById(long courseId);
+
 }

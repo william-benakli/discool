@@ -3,7 +3,20 @@ package app.web.views;
 import app.jpa_repo.*;
 import app.model.chat.PublicTextChannel;
 import app.model.courses.Course;
+import app.model.users.Person;
 import app.web.layout.Navbar;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.Route;
@@ -55,5 +68,82 @@ public class PublicTextChannelView extends TextChannelView implements HasUrlPara
         createMembersBar(((PublicTextChannel) textChannel).getCourseId());
         createLayout(chatBar);
         createChatBar();
+    }
+
+
+    @Override
+    public void createChatBar() {
+        super.createChatBar();
+        selectRep = new MessageResponsePopComponent();
+        layoutMaster.getStyle().set("display", "block");
+        if (((PublicTextChannel) textChannel).isMute()) {
+            if (currentUser.getRole() == Person.Role.STUDENT) {
+                final Paragraph p = new Paragraph("Ce channel est reservé aux professeurs, impossible d'envoyer un message");
+                p.getStyle().set("size", "54px").set("font-weight", "bold");
+                layoutMaster.add(p);
+            } else {
+                layoutMaster.add(selectRep);
+            }
+        } else {
+            layoutMaster.add(selectRep);
+        }
+
+        Button settings = createButtonSettings();
+        if (currentUser.getRole() != Person.Role.STUDENT) {
+            messageInputBar.addComponentAsFirst(settings);
+        }
+    }
+
+    private Button createButtonSettings() {
+        Button settings = new Button(new Icon(VaadinIcon.COGS));
+        settings.getStyle().set("color", ColorHTML.PURPLE.getColorHtml());
+        Dialog d = createDialogSettings();
+        settings.addClickListener(event -> {
+            if (currentUser.getRole() != Person.Role.STUDENT)
+                d.open();
+        });
+        return settings;
+    }
+
+    private Dialog createDialogSettings() {
+        final H2 title = new H2("Modification du channel");
+        final Dialog settingsDialog = new Dialog();
+        final TextField name = new TextField();
+        final Button valider = new Button("Valider");
+        final Button clear = new Button("Nettoyer tous les messages");
+
+        final VerticalLayout layout = new VerticalLayout();
+        final HorizontalLayout layoutButton = new HorizontalLayout();
+        final HorizontalLayout layoutCheckBox = new HorizontalLayout();
+
+        final Checkbox mute = new Checkbox("Channel écriture reservé aux professeurs");
+        final Checkbox visible = new Checkbox("Channel reservé aux professeur");
+        final PublicTextChannel channel = getController().getTextChannel(textChannel.getId());
+        layout.setAlignItems(Alignment.START);
+
+        title.getStyle().set("color", ColorHTML.PURPLE.getColorHtml());
+        name.setLabel("Nom du channel : ");
+        name.getStyle().set("color", ColorHTML.PURPLE.getColorHtml());
+        name.setValue(channel.getName());
+        mute.setValue(channel.isMute());
+        visible.setValue(channel.isPrivateTeacher());
+        layoutButton.add(clear, valider);
+        layoutCheckBox.add(mute, visible);
+        layout.add(title, name, layoutCheckBox, layoutButton);
+        valider.addClickListener(event -> {
+            getController().updateTextChannel(channel, name.getValue(), mute.getValue(), visible.getValue());
+            settingsDialog.close();
+            UI.getCurrent().getPage().reload();
+            Notification.show("Application  des changements attribués");
+        });
+
+        clear.addClickListener(event -> {
+            chatController.clearMessageChat();
+            settingsDialog.close();
+            UI.getCurrent().getPage().reload();
+            Notification.show("Nettoyage de tous les messages du tchat");
+        });
+        settingsDialog.add(layout);
+        return settingsDialog;
     }
 }

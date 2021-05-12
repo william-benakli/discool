@@ -290,17 +290,33 @@ public abstract class ViewWithSidebars extends VerticalLayout {
      * @param t have the number of the channel in which the user is
      */
     private void addChannelsLinksToSidebar(long courseId, String[] s2, String t) {
+        final Person userCurrent = SecurityUtils.getCurrentUser(personRepository);
         ArrayList<PublicTextChannel> publicTextChannels = controller.getAllChannelsForCourse(courseId);
         publicTextChannels.forEach(channel -> {
-            RouterLink link = new RouterLink("", PublicTextChannelView.class, channel.getId());
-            Button button = new Button(channel.getName());
-            button.addClassName(channel.getId() + "");
-            styleButton(link, button);
-            button.addClassName("color" + channel.getId());
-            if (s2.length >= 4 && s2[3].equals("channels") && t.equals(channel.getId() + "")) {
-                button.getStyle().set("color", ColorHTML.PURPLE.getColorHtml());
-            } else button.getStyle().set("color", ColorHTML.TEXTGREY.getColorHtml());
-            sideBar.add(link);
+            if(channel.isPrivateTeacher()){
+                if(userCurrent.getRole() == Person.Role.TEACHER ||
+                        userCurrent.getRole() == Person.Role.ADMIN){
+                    RouterLink link = new RouterLink("", PublicTextChannelView.class, channel.getId());
+                    Button button = new Button(channel.getName(), new Icon(VaadinIcon.LOCK));
+                    button.addClassName(channel.getId() + "");
+                    styleButton(link, button);
+                    button.addClassName("color" + channel.getId());
+                    if (s2.length >= 4 && s2[3].equals("channels") && t.equals(channel.getId() + "")) {
+                        button.getStyle().set("color", ColorHTML.PURPLE.getColorHtml());
+                    } else button.getStyle().set("color", ColorHTML.TEXTGREY.getColorHtml());
+                    sideBar.add(link);
+                }
+            }else{
+                RouterLink link = new RouterLink("", PublicTextChannelView.class, channel.getId());
+                Button button = new Button(channel.getName());
+                button.addClassName(channel.getId() + "");
+                styleButton(link, button);
+                button.addClassName("color" + channel.getId());
+                if (s2.length >= 4 && s2[3].equals("channels") && t.equals(channel.getId() + "")) {
+                    button.getStyle().set("color", ColorHTML.PURPLE.getColorHtml());
+                } else button.getStyle().set("color", ColorHTML.TEXTGREY.getColorHtml());
+                sideBar.add(link);
+            }
         });
     }
 
@@ -428,18 +444,25 @@ public abstract class ViewWithSidebars extends VerticalLayout {
 
         private void createChannelPage() {
             TextField name = new TextField();
+            HorizontalLayout layout = new HorizontalLayout();
+            Checkbox mute = new Checkbox("Channel écriture reservé aux professeurs");
+            Checkbox visible = new Checkbox("Channel reservé aux professeurs");
             name.setLabel("Créer un salon textuel");
             name.setPlaceholder("Nom du salon");
             name.focus();
 
             Button valider = new Button("Valider");
             valider.addClickListener(event -> {
-                controller.createChannel(name.getValue(), getCourse().getId());
+                boolean priveBoolean = false;
+                boolean muteBoolean = false;
+                if (visible.getValue()) priveBoolean = true;
+                if (mute.getValue()) muteBoolean = true;
+                controller.createChannel(name.getValue(), muteBoolean, priveBoolean, getCourse().getId());
                 closeUpdate("Salon textuel créé");
                 UI.getCurrent().navigate("channels/"+getController().getLastTextChannelRepository(course.getId()).getId());
             });
-
-            chanelLayout.add(name, valider);
+            layout.add( mute, visible);
+            chanelLayout.add(name,layout, valider);
         }
 
         private void createAssignmentPage() {

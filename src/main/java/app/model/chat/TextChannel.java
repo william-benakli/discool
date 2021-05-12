@@ -1,7 +1,8 @@
 package app.model.chat;
 
 public interface TextChannel {
-    long getId();
 
+    long getId();
     String getName();
+
 }
