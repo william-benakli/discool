@@ -12,6 +12,7 @@ import app.web.components.UploadComponent;
 import app.web.layout.Navbar;
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
@@ -257,7 +258,13 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         VerticalLayout layoutMaster = new VerticalLayout();
         HorizontalLayout messageInputBar = new HorizontalLayout();
         Button addFileOrImage = createButtonOpenDialogUpload();
-        messageInputBar.add(addFileOrImage, messageTextField, chatButtonContainer);
+        Button settings = createButtonSettings();
+
+        if (currentUser.getRole() != Person.Role.STUDENT) {
+            messageInputBar.add(settings, addFileOrImage, messageTextField, chatButtonContainer);
+        } else {
+            messageInputBar.add(addFileOrImage, messageTextField, chatButtonContainer);
+        }
         setCardStyle(messageContainer, "99%", ColorHTML.GREY);
         messageContainer.setHeightFull();
         messageContainer.getStyle()
@@ -275,7 +282,18 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
             if (!message.isDeleted()) messageContainer.add(new MessageLayout(message));
         }
         layoutMaster.getStyle().set("display", "block");
-        layoutMaster.add(selectRep, messageInputBar);
+
+        if (channel.isMute()) {
+            if (currentUser.getRole() == Person.Role.STUDENT) {
+                final Paragraph p = new Paragraph("Ce channel est reservé aux professeurs, impossible d'envoyer un message");
+                p.getStyle().set("size", "54px").set("font-weight", "bold");
+                layoutMaster.add(p);
+            } else {
+                layoutMaster.add(selectRep, messageInputBar);
+            }
+        } else {
+            layoutMaster.add(selectRep, messageInputBar);
+        }
         chatBar.add(messageContainer, layoutMaster);
     }
 
@@ -444,6 +462,41 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         return tab_name[1];
     }
 
+
+    private Button createButtonSettings() {
+        Button settings = new Button(new Icon(VaadinIcon.COGS));
+        settings.getStyle().set("color", ColorHTML.PURPLE.getColorHtml());
+        Dialog d = createDialogSettings();
+        settings.addClickListener(event -> {
+            if (currentUser.getRole() != Person.Role.STUDENT)
+                d.open();
+        });
+        return settings;
+    }
+
+    private Dialog createDialogSettings() {
+        final H1 title = new H1("Modifier votre channel de text");
+        final Dialog settingsDialog = new Dialog();
+        final TextField name = new TextField();
+        final Button valider = new Button("Valider");
+        final VerticalLayout layout = new VerticalLayout();
+        final Checkbox mute = new Checkbox("mute");
+        final Checkbox visible = new Checkbox("visible");
+        final PublicTextChannel channel = getController().getTextChannel(textChannel.getId());
+        layout.setAlignItems(Alignment.CENTER);
+        name.setLabel("Nom du channel : ");
+        name.setValue(channel.getName());
+        mute.setValue(channel.isMute());
+        visible.setValue(channel.isPrivateTeacher());
+        layout.add(title, name, mute, visible, valider);
+        valider.addClickListener(event -> {
+            getController().updateTextChannel(channel, name.getValue(), mute.getValue(), visible.getValue());
+            settingsDialog.close();
+            UI.getCurrent().getPage().reload();
+        });
+        settingsDialog.add(layout);
+        return settingsDialog;
+    }
 
     public class MessageResponsePopComponent extends Div {
         VerticalLayout layoutVerticalLayout;

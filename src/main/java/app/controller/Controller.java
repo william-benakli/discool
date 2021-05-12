@@ -129,11 +129,18 @@ public class Controller {
     }
 
 
+    public void updateTextChannel(PublicTextChannel courantChannel, String name, boolean mute, boolean visible) {
+        courantChannel.setName(name);
+        courantChannel.setMute(mute);
+        courantChannel.setPrivateTeacher(visible);
+        publicTextChannelRepository.save(courantChannel);
+    }
+
     public ArrayList<Person> getAllUsers() {
         return personRepository.findAll();
     }
 
-    public ArrayList<GroupMembers> findByUserId(long id){
+    public ArrayList<GroupMembers> findByUserId(long id) {
         return groupMembersRepository.findByUserId(id);
     }
 
