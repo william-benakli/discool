@@ -7,6 +7,7 @@ import app.web.layout.Navbar;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -132,24 +133,37 @@ public class PrivateTextChannelView extends TextChannelView implements HasUrlPar
         public AddChannelDialog() {
             formLayout = new VerticalLayout();
             this.add(formLayout);
-            addCloseListeners();
             createTitle();
             createRadioButtons();
             createAllComboBox();
-            createValidateButton();
+            createButton();
             open();
         }
 
-        private void addCloseListeners() {
+        private void createButton(){
+            Div div=new Div();
+            div.add(addCloseListeners(), createValidateButton());
+            div.getStyle()
+                    .set("flex-direction","row")
+                    .set("padding-top","25px");
+            formLayout.add(div);
+        }
+
+        private Button addCloseListeners() {
             setCloseOnEsc(true);
             setCloseOnOutsideClick(true);
             Button closeButton = new Button("Close");
             closeButton.addClickListener(event -> close());
-            formLayout.add(closeButton);
+            closeButton.getStyle()
+                    .set("margin-right","2.5px")
+                    .set("background-color",ColorHTML.PURPLE.getColorHtml())
+                    .set("color",ColorHTML.WHITE.getColorHtml());
+            return closeButton;
         }
 
         private void createTitle() {
             H2 title = new H2("Ajouter une nouvelle conversation avec : ");
+            title.getStyle().set("color",ColorHTML.PURPLE.getColorHtml());
             formLayout.add(title);
         }
 
@@ -158,7 +172,6 @@ public class PrivateTextChannelView extends TextChannelView implements HasUrlPar
             radioButtons.setItems("nom", "pseudo");
             radioButtons.setValue("nom");
             radioButtons.setLabel("Chercher par : ");
-            radioButtons.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
             radioButtons.addValueChangeListener(event -> {
                 names.setVisible(event.getValue().equals("nom"));
                 userNames.setVisible(event.getValue().equals("pseudo"));
@@ -175,7 +188,7 @@ public class PrivateTextChannelView extends TextChannelView implements HasUrlPar
             names.setVisible(true);
         }
 
-        private void createValidateButton() {
+        private Button createValidateButton() {
             Button validate = new Button("Valider");
             validate.addClickListener(event -> {
                 String value;
@@ -187,13 +200,18 @@ public class PrivateTextChannelView extends TextChannelView implements HasUrlPar
                 long ok = chatController.createNewPrivateChannel(currentUser.getId(), radioButtons.getValue(), value);
                 closeAndShowError(ok);
             });
-            formLayout.add(validate);
+            validate.getStyle()
+                    .set("margin-left","2.5px")
+                    .set("background-color",ColorHTML.PURPLE.getColorHtml())
+                    .set("color",ColorHTML.WHITE.getColorHtml());
+            return validate;
         }
 
         private void createComboBox(ComboBox<String> comboBox, ArrayList<String> values) {
             comboBox.setItems(values);
             comboBox.setVisible(false);
             comboBox.setClearButtonVisible(true);
+            comboBox.getStyle().set("margin","0");
             formLayout.add(comboBox);
         }
 
