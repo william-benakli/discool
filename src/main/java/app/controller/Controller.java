@@ -3,6 +3,7 @@ package app.controller;
 
 import app.controller.security.SecurityUtils;
 import app.jpa_repo.*;
+import app.model.chat.PublicChatMessage;
 import app.model.chat.PublicTextChannel;
 import app.model.courses.Course;
 import app.model.courses.MoodlePage;
