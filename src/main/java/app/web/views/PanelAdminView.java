@@ -126,11 +126,11 @@ public class PanelAdminView extends VerticalLayout {
      */
 
     private void infoCsv(){
-        final VerticalLayout masterLayout = new VerticalLayout();
-        final Dialog info = new Dialog();
-        final H1 p = new H1("Format du fichier .csv");
-        final Paragraph paragraph = new Paragraph("La première ligne n'est pas necessaire.Voici deux examples ci-dessous.");
-        final Image image = new Image("img/exampleCSV.png","");
+        VerticalLayout masterLayout = new VerticalLayout();
+        Dialog info = new Dialog();
+        H1 p = new H1("Format du fichier .csv");
+        Paragraph paragraph = new Paragraph("Voici un exemple de l'ordre des valeurs. Ne pas mettre la première ligne avec le nom des colonnes.");
+        Image image = new Image("img/exampleCSV.png","");
         image.setWidth("60%");
         image.setHeight("auto");
         info.setWidth("40%");
