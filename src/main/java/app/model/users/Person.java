@@ -121,7 +121,6 @@ public class Person {
         return this.role ;
     }
 
-    //TODO: find a way to see if the user is logged in
     public boolean isConnected(){
         return SecurityUtils.online.contains(getUsername());
     }

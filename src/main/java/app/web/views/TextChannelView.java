@@ -248,7 +248,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
 
         FlexLayout chatButtonContainer = new FlexLayout();
         chatButtonContainer.getStyle().set("padding", "0 2.5px");
-        chatButtonContainer.add(sendMessage, muteMicrophone, muteHeadphone, exitButton);
+        chatButtonContainer.add(sendMessage/*, muteMicrophone, muteHeadphone, exitButton*/);
         Button addFileOrImage = createButtonOpenDialogUpload();
 
         messageInputBar.add(addFileOrImage, messageTextField, chatButtonContainer);
