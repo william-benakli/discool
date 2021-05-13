@@ -19,4 +19,6 @@ public interface MoodlePageRepository extends JpaRepository<MoodlePage, Long> {
     @Query(value =" DELETE FROM moodle_pages WHERE courseid = :idparam ",nativeQuery = true)
     void deleteAllByCourseId(@Param("idparam") long id);
 
+    MoodlePage findByCourseIdAndHomePage(long id, Boolean homePage);
+
 }

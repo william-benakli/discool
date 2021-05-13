@@ -7,6 +7,7 @@ import app.jpa_repo.*;
 import app.model.chat.PublicChatMessage;
 import app.model.chat.PublicTextChannel;
 import app.model.courses.Course;
+import app.model.courses.MoodlePage;
 import app.model.users.Group;
 import app.model.users.Person;
 import app.web.components.UploadComponent;
@@ -34,6 +35,7 @@ import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinServletRequest;
 import com.vaadin.server.Page;
@@ -197,20 +199,8 @@ public class PanelAdminView extends VerticalLayout {
         Paragraph course = new Paragraph("Cours");
         Paragraph nada = new Paragraph("");
         div.getStyle().set("background-color", ViewWithSidebars.ColorHTML.GREYTAB.getColorHtml());
-        div.getStyle()
-                .set("display","flex")
-                .set("flex-direction","row")
-                .set("justify-content","space-around");
-        creator.getStyle()
-                .set("min-width","150px")
-                .set("text-align","center");
-        course.getStyle()
-                .set("min-width","150px")
-                .set("text-align","center");
-        nada.getStyle()
-                .set("min-width","150px")
-                .set("text-align","center");
-        div.add(creator, course, nada);
+        styleDiv(div);
+        div.add( styleDivParagraph(creator, null), styleDivParagraph(course, null), styleDivParagraph(nada, null));
         return div;
     }
 
@@ -219,21 +209,35 @@ public class PanelAdminView extends VerticalLayout {
         Paragraph paragraph = new Paragraph(courseWithName.getCourse());
         Paragraph paragraphName = new Paragraph(courseWithName.getName());
         div.getStyle().set("background-color", (!color)?ViewWithSidebars.ColorHTML.WHITE.getColorHtml():ViewWithSidebars.ColorHTML.GREYTAB.getColorHtml());
+        styleDiv(div);
+        courseWithName.getButton().getStyle()
+                .set("min-width","150px")
+                .set("text-align","center");
+        div.add(styleDivParagraph(paragraphName, null), styleDivParagraph(paragraph, courseWithName), courseWithName.getButton());
+        return div;
+    }
+
+    Paragraph styleDivParagraph(Paragraph paragraph, CourseWithName courseWithName){
+        paragraph.getStyle()
+                .set("min-width","150px")
+                .set("text-align","center");
+        if(courseWithName!=null) {
+            paragraph.addClickListener(paragraphClickEvent -> {
+                UI.getCurrent().getPage().executeJs("window.location.href='" + courseWithName.getUrl() + "moodle/" + courseWithName.getCourseObjct().getId() + "'");
+            });
+            paragraph.getStyle()
+                    .set("cursor","pointer")
+                    .set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml())
+                    .set("text-decoration","underline");
+        }
+        return paragraph;
+    }
+
+    void styleDiv(Div div){
         div.getStyle()
                 .set("display","flex")
                 .set("flex-direction","row")
                 .set("justify-content","space-around");
-        paragraph.getStyle()
-                .set("min-width","150px")
-                .set("text-align","center");
-        paragraphName.getStyle()
-                .set("min-width","150px")
-                .set("text-align","center");
-        courseWithName.getButton().getStyle()
-                .set("min-width","150px")
-                .set("text-align","center");
-        div.add(paragraphName, paragraph, courseWithName.getButton());
-        return div;
     }
 
     private void savePerson(UserForm.SaveEvent evt) {
@@ -424,10 +428,12 @@ public class PanelAdminView extends VerticalLayout {
         private final String course;
         private final String teacher;
         private final Button remove;
+        private final MoodlePage courseObjct;
 
         public CourseWithName(Course course, String name, Controller controller, AssignmentController assignmentController) {
             this.course = course.getName();
             this.teacher = name;
+            this.courseObjct = controller.getHomePageCourse(course.getId(), true);
             this.remove = new Button("Supprimer", buttonClickEvent -> {
                 deletCourse(course.getId(), controller, assignmentController);
                 UI.getCurrent().getPage().executeJs("window.location.href='"+getUrl()+"admin'");
@@ -468,6 +474,9 @@ public class PanelAdminView extends VerticalLayout {
         public Button getButton() {
             return remove;
         }
+
+        public MoodlePage getCourseObjct(){ return courseObjct; }
+
     }
 
 }

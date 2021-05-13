@@ -292,4 +292,9 @@ public class Controller {
     public ArrayList<PublicChatMessage> listPosts(long id) {
         return publicChatMessageRepository.findAllByChannelidOrderByIdDesc(id);
     }
+
+    public MoodlePage getHomePageCourse(long id, boolean bool){
+        return moodlePageRepository.findByCourseIdAndHomePage(id, bool);
+    }
+
 }
