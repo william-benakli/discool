@@ -49,5 +49,24 @@ public interface PublicChatMessageRepository extends JpaRepository<PublicChatMes
     @Query(value = "UPDATE posts SET userid = 1, deleted = 1 WHERE userid = :idparam", nativeQuery = true)
     void deleteByUserId(@Param("idparam") long id);
 
+    @Modifying
+    @Transactional
+    @Query(value =" DELETE FROM posts WHERE id = :idparam ORDER BY ID DESC",nativeQuery = true)
+    void deleteById(@Param("idparam") long id);
+
+
+   // ALTER TABLE T_CLIENT ADD CONSTRAINT PK_CLI PRIMARY KEY (CLI_NOM)
+    @Modifying
+    @Transactional
+    @Query(value =" SET FOREIGN_KEY_CHECKS=0;",nativeQuery = true)
+    void dropConstraint();
+
+    @Modifying
+    @Transactional
+    @Query(value =" SET FOREIGN_KEY_CHECKS=1;",nativeQuery = true)
+    void addConstraint();
+
+    ArrayList<PublicChatMessage> findAllByChannelidOrderByIdDesc(long id);
+
     PublicChatMessage findById(long id);
 }

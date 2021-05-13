@@ -11,4 +11,11 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 
 public interface CourseRepository extends JpaRepository<Course, Long> {
+
+    //public void deleteCourseById(long id);
+
+    @Modifying
+    @Transactional
+    @Query(value =" DELETE FROM courses WHERE id = :idparam ",nativeQuery = true)
+    void deleteById(@Param("idparam") long id);
 }

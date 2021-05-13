@@ -1,10 +1,13 @@
 package app.web.views;
 
+import app.controller.AssignmentController;
 import app.controller.ChatController;
 import app.controller.Controller;
 import app.jpa_repo.*;
 import app.model.chat.PublicChatMessage;
+import app.model.chat.PublicTextChannel;
 import app.model.courses.Course;
+import app.model.users.Group;
 import app.model.users.Person;
 import app.web.components.UploadComponent;
 import app.web.components.UserForm;
@@ -61,14 +64,21 @@ public class PanelAdminView extends VerticalLayout {
     private final Tab coursesTab = new Tab("Cours");
     private final Tabs tabs = new Tabs(usersTab, coursesTab);
     private final Grid<Person> usersGrid = new Grid<>();
-    private final Grid<CourseWithName> coursesGrid = new Grid<>(CourseWithName.class);
+    private final Div coursesGrid = new Div();
+    private final AssignmentController assignmentController;
 
     public PanelAdminView(@Autowired PersonRepository personRepository,
                           @Autowired CourseRepository courseRepository,
                           @Autowired PublicChatMessageRepository publicChatMessageRepository,
                           @Autowired GroupMembersRepository groupMembersRepository,
                           @Autowired PrivateTextChannelRepository privateTextChannelRepository,
-                          @Autowired PrivateChatMessageRepository privateChatMessageRepository) {
+                          @Autowired PrivateChatMessageRepository privateChatMessageRepository,
+                          @Autowired GroupRepository groupRepository,
+                          @Autowired AssignmentRepository assignmentRepository,
+                          @Autowired StudentAssignmentsUploadsRepository studentAssignmentsUploadsRepository,
+                          @Autowired PublicTextChannelRepository publicTextChannelRepository,
+                          @Autowired MoodlePageRepository moodlePageRepository) {
+        this.assignmentController = new AssignmentController(personRepository, assignmentRepository, studentAssignmentsUploadsRepository, courseRepository);
         upload.setAcceptedFileTypes(".csv");
         upload.addFinishedListener(finishedEvent -> {
             try {
@@ -88,9 +98,9 @@ public class PanelAdminView extends VerticalLayout {
         this.publicChatMessageRepository = publicChatMessageRepository;
         this.privateChatMessageRepository = privateChatMessageRepository;
         this.controller = new Controller(personRepository,
-                                         null, publicChatMessageRepository,
-                                         courseRepository, null,
-                                         null, null, privateChatMessageRepository);
+                publicTextChannelRepository, publicChatMessageRepository,
+                                         courseRepository, moodlePageRepository,
+                groupRepository, groupMembersRepository, privateChatMessageRepository);
         this.chatController = new ChatController(personRepository, null,
                                                  publicChatMessageRepository, null,
                                                  privateChatMessageRepository);
@@ -160,10 +170,19 @@ public class PanelAdminView extends VerticalLayout {
 
     private void createCourseGrid() {
         List<CourseWithName> personList = new ArrayList<>();
-        selectTeacher(controller.getAllUsers()).forEach((key, value) -> personList.add(new CourseWithName(key.getName(), value)));
-        coursesGrid.setItems(personList);
+        selectTeacher(controller.getAllUsers()).forEach((key, value) -> personList.add(new CourseWithName(key, value, controller, assignmentController)));
+        for (PanelAdminView.CourseWithName courseWithName :personList) {
+            Div div = new Div();
+            div.getStyle()
+                    .set("display","flex")
+                    .set("flex-direction","row");
+            div.add(new Paragraph(courseWithName.getName()), new Paragraph(courseWithName.getCourse()), courseWithName.getButton());
+            coursesGrid.add(div);
+        }
+        /*coursesGrid.setItems(personList);
         coursesGrid.addThemeVariants(GridVariant.LUMO_NO_BORDER,
                                      GridVariant.LUMO_NO_ROW_BORDERS, GridVariant.LUMO_ROW_STRIPES);
+        coursesTab.add(coursesGrid);*/
         coursesTab.add(coursesGrid);
     }
 
@@ -354,10 +373,31 @@ public class PanelAdminView extends VerticalLayout {
     public static class CourseWithName {
         private final String course;
         private final String teacher;
+        private final Button remove;
 
-        public CourseWithName(String course, String name) {
-            this.course = course;
+        public CourseWithName(Course course, String name, Controller controller, AssignmentController assignmentController) {
+            this.course = course.getName();
             this.teacher = name;
+            this.remove = new Button("Supprimer", buttonClickEvent -> {
+
+                for (Group group : controller.selectGroupeCourse(course.getId())) {
+                    controller.removeGroupMembers(group.getId());
+                }
+
+                controller.removeGroups(course.getId());
+                assignmentController.removeUploadsStudent(course.getId());
+                assignmentController.removeAssignment(course.getId());
+
+                for (PublicTextChannel publicTextChannel: controller.getAllChannelsForCourse(course.getId())) {
+                    for (PublicChatMessage publicChatMessage: controller.listPosts(publicTextChannel.getId())) {
+                        controller.removePosts(publicChatMessage.getId());
+                    }
+                }
+
+                controller.removeChannels(course.getId());
+                controller.removeMoodlePage(course.getId());
+                controller.removeCourse(course.getId());
+            });
         }
 
         public String getName() {
@@ -366,6 +406,10 @@ public class PanelAdminView extends VerticalLayout {
 
         public String getCourse() {
             return course;
+        }
+
+        public Button getButton() {
+            return remove;
         }
     }
 
