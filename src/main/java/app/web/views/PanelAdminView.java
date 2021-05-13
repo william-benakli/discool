@@ -175,21 +175,65 @@ public class PanelAdminView extends VerticalLayout {
     }
 
     private void createCourseGrid() {
+        boolean color=false;
         List<CourseWithName> personList = new ArrayList<>();
         selectTeacher(controller.getAllUsers()).forEach((key, value) -> personList.add(new CourseWithName(key, value, controller, assignmentController)));
+        coursesGrid.add(createDivCourseHeader());
         for (PanelAdminView.CourseWithName courseWithName :personList) {
-            Div div = new Div();
-            div.getStyle()
-                    .set("display","flex")
-                    .set("flex-direction","row");
-            div.add(new Paragraph(courseWithName.getName()), new Paragraph(courseWithName.getCourse()), courseWithName.getButton());
-            coursesGrid.add(div);
+            coursesGrid.add(createDivCourse(courseWithName, color));
+            color=!color;
         }
-        /*coursesGrid.setItems(personList);
-        coursesGrid.addThemeVariants(GridVariant.LUMO_NO_BORDER,
-                                     GridVariant.LUMO_NO_ROW_BORDERS, GridVariant.LUMO_ROW_STRIPES);
-        coursesTab.add(coursesGrid);*/
+        coursesGrid.getStyle()
+                .set("max-width","1000px")
+                .set("margin","auto")
+                .set("max-height","500px")
+                .set("overflow","auto");
         coursesTab.add(coursesGrid);
+    }
+
+    Div createDivCourseHeader(){
+        Div div = new Div();
+        Paragraph creator = new Paragraph("Créateur");
+        Paragraph course = new Paragraph("Cours");
+        Paragraph nada = new Paragraph("");
+        div.getStyle().set("background-color", ViewWithSidebars.ColorHTML.GREYTAB.getColorHtml());
+        div.getStyle()
+                .set("display","flex")
+                .set("flex-direction","row")
+                .set("justify-content","space-around");
+        creator.getStyle()
+                .set("min-width","150px")
+                .set("text-align","center");
+        course.getStyle()
+                .set("min-width","150px")
+                .set("text-align","center");
+        nada.getStyle()
+                .set("min-width","150px")
+                .set("text-align","center");
+        div.add(creator, course, nada);
+        return div;
+    }
+
+    Div createDivCourse(CourseWithName courseWithName, Boolean color){
+        Div div = new Div();
+        Paragraph paragraph = new Paragraph(courseWithName.getCourse());
+        Paragraph paragraphName = new Paragraph(courseWithName.getName());
+        div.getStyle().set("background-color", (!color)?ViewWithSidebars.ColorHTML.WHITE.getColorHtml():ViewWithSidebars.ColorHTML.GREYTAB.getColorHtml());
+        div.getStyle()
+                .set("display","flex")
+                .set("flex-direction","row")
+                .set("justify-content","space-around");
+        paragraph.getStyle()
+                .set("min-width","150px")
+                .set("text-align","center");
+        paragraphName.getStyle()
+                .set("min-width","150px")
+                .set("text-align","center");
+        courseWithName.getButton().getStyle()
+                .set("min-width","150px")
+                .set("text-align","center");
+        div.add(paragraphName, paragraph, courseWithName.getButton());
+        return div;
     }
 
     private void savePerson(UserForm.SaveEvent evt) {
