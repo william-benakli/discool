@@ -32,6 +32,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.HasDynamicTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.shared.Registration;
+import jdk.javadoc.doclet.Reporter;
 import lombok.Getter;
 import org.apache.commons.io.FileUtils;
 
@@ -541,6 +542,8 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         private Button response;
         private Button delete;
         private Button modify;
+        private Button report;
+
 
         public MessageLayout(ChatMessage chatMessage) {
             this.chatMessage = chatMessage;
@@ -560,7 +563,9 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
             createPictureSetting(chatMessage.getSender());
             createDeleteButton();
             createModifyButton();
+            createReportButton();
             createResponseButton();
+
             createPopMessage();
             createChatBlock();
             messageFullLayout.add(profilPicture);
@@ -660,6 +665,22 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
             });
         }
 
+        private void createReportButton() {
+            report = new ComponentButton("img/editer.svgimg/editer.svg","!", SIZEWIDTH, SIZEHEIGHT);
+            report.getStyle().set("color", ColorHTML.PURPLE.getColorHtml());
+            report.addClickListener(event -> {
+                Dialog dialog = new Dialog();
+                Button valider = new Button("Valider");
+
+                TextField messageUpdate = new TextField();
+                messageUpdate.setValue(chatMessage.getMessage());
+                dialog.add(new Paragraph("Voulez-vous modifier votre message?"));
+                dialog.add(messageUpdate);
+                dialog.add(valider);
+                dialog.open();
+            });
+        }
+
         public void createPopMessage() {
             optionsUser.add(response);
 
@@ -667,7 +688,9 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
             if (currentUser.getId() == chatMessage.getSender()) {
                 optionsUser.add(modify);
                 optionsUser.add(delete);
+                optionsUser.add(report);
             }
+
             layoutPop.add(optionsUser);
             layoutPop.resize();
 
