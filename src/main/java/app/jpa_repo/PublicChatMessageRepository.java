@@ -54,8 +54,6 @@ public interface PublicChatMessageRepository extends JpaRepository<PublicChatMes
     @Query(value =" DELETE FROM posts WHERE id = :idparam ORDER BY ID DESC",nativeQuery = true)
     void deleteById(@Param("idparam") long id);
 
-
-   // ALTER TABLE T_CLIENT ADD CONSTRAINT PK_CLI PRIMARY KEY (CLI_NOM)
     @Modifying
     @Transactional
     @Query(value =" SET FOREIGN_KEY_CHECKS=0;",nativeQuery = true)

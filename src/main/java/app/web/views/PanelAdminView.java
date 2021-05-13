@@ -14,6 +14,7 @@ import app.web.components.UserForm;
 import app.web.layout.Navbar;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Text;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dialog.Dialog;
@@ -33,9 +34,14 @@ import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.VaadinService;
+import com.vaadin.flow.server.VaadinServletRequest;
+import com.vaadin.server.Page;
+import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -379,25 +385,32 @@ public class PanelAdminView extends VerticalLayout {
             this.course = course.getName();
             this.teacher = name;
             this.remove = new Button("Supprimer", buttonClickEvent -> {
-
-                for (Group group : controller.selectGroupeCourse(course.getId())) {
-                    controller.removeGroupMembers(group.getId());
-                }
-
-                controller.removeGroups(course.getId());
-                assignmentController.removeUploadsStudent(course.getId());
-                assignmentController.removeAssignment(course.getId());
-
-                for (PublicTextChannel publicTextChannel: controller.getAllChannelsForCourse(course.getId())) {
-                    for (PublicChatMessage publicChatMessage: controller.listPosts(publicTextChannel.getId())) {
-                        controller.removePosts(publicChatMessage.getId());
-                    }
-                }
-
-                controller.removeChannels(course.getId());
-                controller.removeMoodlePage(course.getId());
-                controller.removeCourse(course.getId());
+                deletCourse(course.getId(), controller, assignmentController);
+                UI.getCurrent().getPage().executeJs("window.location.href='"+getUrl()+"admin'");
             });
+        }
+
+        @SneakyThrows
+        private String getUrl(){
+            VaadinServletRequest req = (VaadinServletRequest) VaadinService.getCurrentRequest();
+            StringBuffer uriString = req.getRequestURL();
+            URI uri = new URI(uriString.toString());
+            return uri.toString();
+        }
+
+        void deletCourse(long course, Controller controller, AssignmentController assignmentController){
+            for (Group group : controller.selectGroupeCourse(course)) controller.removeGroupMembers(group.getId());
+            controller.removeGroups(course);
+            assignmentController.removeUploadsStudent(course);
+            assignmentController.removeAssignment(course);
+            for (PublicTextChannel publicTextChannel: controller.getAllChannelsForCourse(course)) {
+                for (PublicChatMessage publicChatMessage: controller.listPosts(publicTextChannel.getId())) {
+                    controller.removePosts(publicChatMessage.getId());
+                }
+            }
+            controller.removeChannels(course);
+            controller.removeMoodlePage(course);
+            controller.removeCourse(course);
         }
 
         public String getName() {

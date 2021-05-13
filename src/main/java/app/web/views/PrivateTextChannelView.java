@@ -4,6 +4,7 @@ import app.jpa_repo.*;
 import app.model.chat.PrivateTextChannel;
 import app.model.users.Person;
 import app.web.layout.Navbar;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dialog.Dialog;
@@ -271,6 +272,7 @@ public class PrivateTextChannelView extends TextChannelView implements HasUrlPar
                 }
                 long ok = chatController.createNewPrivateChannel(currentUser.getId(), radioButtons.getValue(), value);
                 closeAndShowError(ok);
+                UI.getCurrent().getPage().executeJs("window.location.href='"+getUrl()+"dms/-1'");
             });
             validate.getStyle()
                     .set("margin-left","2.5px")
