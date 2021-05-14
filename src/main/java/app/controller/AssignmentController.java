@@ -132,4 +132,12 @@ public class AssignmentController {
                 .maxAttempts((short) 1).build();
         assignmentRepository.save(assignment);
     }
+
+    public void removeAssignment(long id) {
+        assignmentRepository.deleteAllByCourseId(id);
+    }
+
+    public void removeUploadsStudent(long id) {
+        studentAssignmentsUploadsRepository.deleteAllByCourseId(id);
+    }
 }
