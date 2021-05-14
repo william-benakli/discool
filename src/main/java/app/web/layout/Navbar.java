@@ -8,27 +8,24 @@ import app.controller.security.SecurityUtils;
 import app.jpa_repo.*;
 import app.model.courses.Course;
 import app.model.courses.MoodlePage;
-import app.model.users.GroupMembers;
 import app.model.users.Group;
 import app.model.users.GroupMembers;
 import app.model.users.Person;
 import app.web.components.ComponentButton;
 import app.web.components.ServerFormComponent;
 import app.web.components.UploadComponent;
-import app.web.views.HomeView;
-import app.web.views.MoodleView;
-import app.web.views.PanelAdminView;
-import app.web.views.ViewWithSidebars;
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.Key;
-import com.vaadin.flow.component.KeyModifier;
-import com.vaadin.flow.component.UI;
+import app.web.views.*;
+import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.dialog.Dialog;
-import com.vaadin.flow.component.html.*;
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -48,10 +45,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.File;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Push(transport = Transport.LONG_POLLING)
 @CssImport("./styles/style.css")
@@ -661,76 +655,6 @@ public class Navbar extends AppLayout {
             File old = new File(oldName);
             File newFile = new File("src/main/webapp/profile_pictures/" + currentUser.getId() + extension.toLowerCase());
             if (!old.renameTo(newFile)) {
-                throw new Exception("File can't be renamed");
-            }
-        }
-    }
-
-    private class ChangeServerPictureDialog extends Dialog {
-        ComponentButton button;
-        String name;
-
-        public ChangeServerPictureDialog(ComponentButton button, String name) {
-            this.button = button;
-            this.name = name;
-            createDialog();
-            open();
-        }
-
-        private void createDialog() {
-            H2 title = new H2("Upload a new server picture");
-            title.getStyle()
-                    .set("text-align", "center")
-                    .set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml());
-            Paragraph instructions = new Paragraph("Choose a new picture from your browser (or drag-and-drop).\n " +
-                    "Only .jpg and .jpeg files are accepted.");
-
-
-            UploadComponent uploadComponent = new UploadComponent("50px", "96%", 1, 30000000,
-                    "src/main/webapp/course_pic",
-                    "image/jpeg");
-            uploadComponent.addSucceededListener(event -> {
-                String oldName = uploadComponent.getFileName();
-                String newName = "";
-                try {
-                    if (newName.equals(name)) {
-                        newName = renameFile(name, "src/main/webapp/course_pic", name);
-                    } else {
-                        newName = renameFile(oldName, "src/main/webapp/course_pic", name);
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                System.out.println(newName + "name");
-                Image imgServ = new Image(newName.replace("src/main/webapp/", ""), name);
-                button.SetStyle(imgServ).setHeightFull();
-                button.SetStyle(imgServ).setWidthFull();
-                button.setIcon(imgServ);
-                Notification.show("Your server picture was updated successfully");
-                this.close();
-            });
-
-            this.add(title, instructions, uploadComponent);
-        }
-
-        private void renameProfilePicture(String oldName) throws Exception {
-            String extension;
-            if (oldName.endsWith("jpeg")) {
-                extension = ".jpeg";
-            } else if (oldName.endsWith("jpg")){
-                extension = ".jpg";
-            } else if (oldName.endsWith("JPG")) {
-                extension = ".JPG";
-            } else if (oldName.endsWith("JPEG")) {
-                extension = ".JPEG";
-            } else {
-                System.out.println("Problem while tying to figure out the file's name while renaming the profile picture");
-                extension = "";
-            }
-            File old = new File(oldName);
-            File newFile = new File("src/main/webapp/profile_pictures/" + currentUser.getId() + extension.toLowerCase());
-            if (! old.renameTo(newFile)) {
-              
                 throw new Exception("File can't be renamed");
             }
         }

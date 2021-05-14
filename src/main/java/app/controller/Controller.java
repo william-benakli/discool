@@ -231,7 +231,7 @@ public class Controller {
      * @param title     The name of the course
      * @param iconPath  The path to the course's picture
      */
-    public void createServer(long teacherId, String title, String iconPath) {
+    public Course createServer(long teacherId, String title, String iconPath) {
         Course toSave = Course.builder()
                 .teacherId(teacherId)
                 .name(title)
@@ -243,6 +243,7 @@ public class Controller {
                 .title("Homepage")
                 .courseId(toSave.getId()).build();
         moodlePageRepository.save(moodlePage);
+        return toSave;
     }
 
     public List<Course> findAllCourses() {
@@ -265,6 +266,10 @@ public class Controller {
     }
 
     public List<Person> findAllUserByRole(Person.Role r) {
+        return personRepository.findAllByRole(r);
+    }
+
+    public List<Person> findAllUserByRoleifPresent(Person.Role r) {
         return personRepository.findAllByRole(r);
     }
 
@@ -355,4 +360,11 @@ public class Controller {
         return moodlePageRepository.findByCourseIdAndHomePage(id, bool);
     }
 
+    public void saveCourse(Course course) {
+        this.courseRepository.save(course);
+    }
+
+    public Group findGroudByCourseId(long id) {
+        return null;
+    }
 }

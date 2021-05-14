@@ -9,6 +9,7 @@ import app.model.courses.Assignment;
 import app.model.courses.Course;
 import app.model.courses.MoodlePage;
 import app.model.users.Person;
+import app.web.components.ServerFormComponent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -166,11 +167,12 @@ public abstract class ViewWithSidebars extends VerticalLayout {
      */
     public void createSidebar(long courseId) {
         String s = getUrl();
-        String[] s2=s.split("/");
-        String t=s2[s2.length-1];
+        String[] s2 = s.split("/");
+        String t = s2[s2.length - 1];
 
         sideBar = new FlexLayout();
-        if (! SecurityUtils.isUserStudent()) {
+        if (!SecurityUtils.isUserStudent()) {
+            createSettingsButton();
             createAddButton();
         }
         addMoodleLinksToSidebar(courseId, s2, t);
@@ -196,8 +198,8 @@ public abstract class ViewWithSidebars extends VerticalLayout {
     private void createAddButton() {
         Button button = new Button("Ajouter", new Icon(VaadinIcon.PLUS_CIRCLE));
         button.getStyle()
-                .set("color",ColorHTML.WHITE.getColorHtml())
-                .set("background-color",ColorHTML.PURPLE.getColorHtml());
+                .set("color", ColorHTML.WHITE.getColorHtml())
+                .set("background-color", ColorHTML.PURPLE.getColorHtml());
         button.addClickListener(event -> {
             CustomAddDialog dialog = new CustomAddDialog();
             dialog.setHeight("50%");
@@ -207,6 +209,22 @@ public abstract class ViewWithSidebars extends VerticalLayout {
         sideBar.add(button);
     }
 
+    /**
+     * Creates the button & dialog to add a new text channel/assignment/moodle page
+     */
+    private void createSettingsButton() {
+        Button button = new Button(new Icon(VaadinIcon.COG));
+        button.getStyle()
+                .set("color", ColorHTML.WHITE.getColorHtml())
+                .set("background-color", ColorHTML.PURPLE.getColorHtml());
+        button.addClickListener(event -> {
+            ServerFormComponent serverFormComponent = new ServerFormComponent(controller, SecurityUtils.getCurrentUser(personRepository), getCourse());
+            serverFormComponent.open();
+        });
+        sideBar.add(button);
+    }
+
+
     private void addMoodleLinksToSidebar(long courseId, String[] s2, String t) {
 
         long homePageId = getController().findHomePageId(courseId);
@@ -214,7 +232,7 @@ public abstract class ViewWithSidebars extends VerticalLayout {
         Button buttonHome = new Button("Page d'accueil");
         buttonHome.addClassName(homePageId + "");
         styleButton(linkHome, buttonHome);
-        styleMoodleLink( linkHome);
+        styleMoodleLink(linkHome);
         if (s2.length >= 4 && s2[3].equals("moodle") && t.equals(homePageId + "")) {
             buttonHome.getStyle().set("color", ColorHTML.PURPLE.getColorHtml());
         } else buttonHome.getStyle().set("color", ColorHTML.TEXTGREY.getColorHtml());

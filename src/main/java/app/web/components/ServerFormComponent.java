@@ -26,50 +26,97 @@ import java.util.*;
 
 public class ServerFormComponent extends Dialog {
 
-    private Controller controller;
-
+    protected final Controller controller;
+    protected final Person person;
+    protected final String newDirName = "course_pic/";
 
     public ServerFormComponent(Controller controller, Person currentUser) {
         this.controller = controller;
+        this.person = currentUser;
+        new CreateServerFormComponent();
+    }
 
+    public ServerFormComponent(Controller controller, Person currentUser, Course course) {
+        this.controller = controller;
+        this.person = currentUser;
+        new EditServerFormComponent(course);
 
-        Div tabGrid = new Div();
-        String newDirName = "course_pic/";
-        String name = String.valueOf(getRandom());
-        Image image = new Image(newDirName + "default.png", "image_serveur");
-        TextField field = new TextField();
-        ComponentButton server_image = Navbar.createServDockImage(image, Key.NAVIGATE_NEXT);
+    }
 
-        ChangeServerPictureDialog pictureDialog = new ChangeServerPictureDialog(server_image, name);
+    private Grid<Person> createUserTeacherGrid() {
+        Grid<Person> grid = new Grid<>();
+        grid.setItems(controller.findAllUserByRole(Person.Role.TEACHER));
+        grid.addColumn(Person::getUsername).setHeader("Nom");
+        grid.addColumn(Person::getRole).setHeader("Role");
+        grid.setSelectionMode(Grid.SelectionMode.MULTI);
+        return grid;
+    }
 
-        Button changePicture = new Button("Changer de profil de serveur", buttonClickEvent1 -> {
-            pictureDialog.open();
-        });
+    private Grid<Person> createUserStudentGrid() {
+        Grid<Person> grid = new Grid<>();
+        grid.setItems(controller.findAllUserByRole(Person.Role.STUDENT));
+        grid.addColumn(Person::getUsername).setHeader("Nom");
+        grid.addColumn(Person::getRole).setHeader("Role");
+        grid.setSelectionMode(Grid.SelectionMode.MULTI);
+        return grid;
+    }
 
+    private Grid<Group> createGroupGrid() {
+        Grid<Group> grid = new Grid<>();
+        grid.setItems(controller.findGroupAll());
+        grid.addColumn(Group::getName).setHeader("Groupe");
+        grid.addColumn(Group::getDescription).setHeader("Description");
+        grid.setSelectionMode(Grid.SelectionMode.MULTI);
+        return grid;
+    }
 
-        Grid<Person> teacherUser = createUserTeacherGrid();
-        Grid<Person> studentsUser = createUserStudentGrid();
-        Grid<Group> groupUser = createGroupGrid();
+    private class CreateServerFormComponent {
 
-        Tabs tabs = createTabs(new Tab("Liste des étudiants"), new Tab("Liste des professeurs"), new Tab("Liste des étudiants"), studentsUser, teacherUser, groupUser);
+        private final Paragraph errorInput = new Paragraph("");
 
+        CreateServerFormComponent() {
 
-        Button valider = new Button("Valider", buttonClickEvent1 -> {
+            Div tabGrid = new Div();
+            String name = String.valueOf(getRandom());
+            Image image = new Image(newDirName + "default.png", "image_serveur");
+            TextField fieldUserInput = new TextField();
+            ComponentButton server_image = Navbar.createServDockImage(image, Key.NAVIGATE_NEXT);
+            ChangeServerPictureDialog pictureDialog = new ChangeServerPictureDialog(server_image, name);
+            Button changePicture = new Button("Changer de profil de serveur", buttonClickEvent1 -> {
+                pictureDialog.open();
+            });
+            Grid<Person> teacherUser = createUserTeacherGrid();
+            Grid<Person> studentsUser = createUserStudentGrid();
+            Grid<Group> groupUser = createGroupGrid();
+            Tabs tabs = createTabs(new Tab("Liste des étudiants"), new Tab("Liste des professeurs"), new Tab("Liste des étudiants"), studentsUser, teacherUser, groupUser);
 
-            System.out.println(newDirName + name + ".jpg" + " exit ?");
+            Button valider = new Button("Valider", buttonClickEvent1 -> {
+                if (!fieldUserInput.isEmpty()) {
+                    Course course = controller.createServer(person.getId(), fieldUserInput.getValue(), newDirName + "default.png");
+                    saveCoursePath(course, name, newDirName);
+                    controller.createGroup(course, fieldUserInput.getValue());
+                    Group groupCreate = controller.getLastGroup();
+                    addGridListToGroupList(teacherUser, studentsUser, groupUser, groupCreate);
+                    close();
+                    UI.getCurrent().getPage().reload();
+                } else {
+                    errorInput("Erreur ! Champs invalides");
+                }
+            });
+
+            tabGrid.add(tabs, teacherUser, studentsUser, groupUser);
+            add(fieldUserInput, server_image, changePicture, tabGrid, errorInput, valider);
+        }
+
+        private void saveCoursePath(Course course, String name, String newDirName) {
             File f = new File("src/main/webapp/course_pic/" + name + ".jpg");
-            if (f.exists()) {
-                controller.createServer(currentUser.getId(), field.getValue(), newDirName + name + ".jpg");
-            } else {
-                controller.createServer(currentUser.getId(), field.getValue(), newDirName + "default.png");
-            }
+            if (f.exists()) course.setPathIcon(newDirName + name + ".jpg");
+            else course.setPathIcon(newDirName + "default.png");
+            controller.saveCourse(course);
+        }
 
-            Course course = controller.getLastCourse();
-
-            controller.createGroup(course, field.getValue());
-            Group groupCreate = controller.getLastGroup();
-            controller.addPersonToCourse(controller.getPersonById(currentUser.getId()), groupCreate);
-
+        private void addGridListToGroupList(Grid teacherUser, Grid studentsUser, Grid groupUser, Group groupCreate) {
+            controller.addPersonToCourse(controller.getPersonById(person.getId()), groupCreate);
             Set<Person> teacher = teacherUser.getSelectedItems();
             for (Person p : teacher) controller.addPersonToCourse(p, groupCreate);
 
@@ -83,41 +130,96 @@ public class ServerFormComponent extends Dialog {
                     controller.addPersonToCourse(controller.getPersonById(group_list.getUserId()), groupCreate);
                 }
             }
-            close();
-            UI.getCurrent().getPage().reload();
-        });
+        }
 
+        private void errorInput(String s) {
+            errorInput.setText(s);
+            errorInput.getStyle().set("color", "red");
+        }
 
-        tabGrid.add(tabs, teacherUser, studentsUser, groupUser);
-        add(field, server_image, changePicture, tabGrid, valider);
     }
 
+    private class EditServerFormComponent {
 
-    private Grid createUserTeacherGrid() {
-        Grid<Person> grid = new Grid<>();
-        grid.setItems(controller.findAllUserByRole(Person.Role.TEACHER));
-        grid.addColumn(Person::getUsername).setHeader("Nom");
-        grid.addColumn(Person::getRole).setHeader("Role");
-        grid.setSelectionMode(Grid.SelectionMode.MULTI);
-        return grid;
-    }
 
-    private Grid createUserStudentGrid() {
-        Grid<Person> grid = new Grid<>();
-        grid.setItems(controller.findAllUserByRole(Person.Role.STUDENT));
-        grid.addColumn(Person::getUsername).setHeader("Nom");
-        grid.addColumn(Person::getRole).setHeader("Role");
-        grid.setSelectionMode(Grid.SelectionMode.MULTI);
-        return grid;
-    }
+        private final Course course;
 
-    private Grid createGroupGrid() {
-        Grid<Group> grid = new Grid<>();
-        grid.setItems(controller.findGroupAll());
-        grid.addColumn(Group::getName).setHeader("Groupe");
-        grid.addColumn(Group::getDescription).setHeader("Description");
-        grid.setSelectionMode(Grid.SelectionMode.MULTI);
-        return grid;
+        EditServerFormComponent(Course course) {
+            this.course = course;
+
+            Div tabGrid = new Div();
+            String newDirName = "course_pic/";
+            String name = String.valueOf(getRandom());
+            Image image = new Image(newDirName + "default.png", "image_serveur");
+            TextField field = new TextField();
+            field.setValue(course.getName());
+
+            ComponentButton server_image = Navbar.createServDockImage(image, Key.NAVIGATE_NEXT);
+
+            ChangeServerPictureDialog pictureDialog = new ChangeServerPictureDialog(server_image, name);
+
+            Button changePicture = new Button("Changer de profil de serveur", buttonClickEvent1 -> {
+                pictureDialog.open();
+            });
+
+
+            Grid<Person> teacherUser = createUserTeacherGrid();
+            Grid<Person> studentsUser = createUserStudentGrid();
+            Grid<Group> groupUser = createGroupGrid();
+
+            Tabs tabs = createTabs(new Tab("Liste des étudiants"), new Tab("Liste des professeurs"), new Tab("Liste des étudiants"), studentsUser, teacherUser, groupUser);
+
+
+            Button valider = new Button("Valider", buttonClickEvent1 -> {
+
+                System.out.println(newDirName + name + ".jpg" + " exit ?");
+                saveCoursePath(name, newDirName);
+
+                Group groupSelect = null;
+                controller.addPersonToCourse(controller.getPersonById(person.getId()), groupSelect);
+
+                Set<Person> teacher = teacherUser.getSelectedItems();
+                for (Person p : teacher) controller.addPersonToCourse(p, groupSelect);
+
+                Set<Person> Students = studentsUser.getSelectedItems();
+                for (Person p : Students) controller.addPersonToCourse(p, groupSelect);
+
+                Set<Group> group = groupUser.getSelectedItems();
+                for (Group g : group) {
+                    ArrayList<GroupMembers> personGroup = controller.getPersonByGroupId(g.getId());
+                    for (GroupMembers group_list : personGroup) {
+                        controller.addPersonToCourse(controller.getPersonById(group_list.getUserId()), groupSelect);
+                    }
+                }
+                close();
+                UI.getCurrent().getPage().reload();
+            });
+
+            Button supprimer = createSuppCourse();
+
+            tabGrid.add(tabs, teacherUser, studentsUser, groupUser);
+            add(field, server_image, changePicture, tabGrid, supprimer, valider);
+        }
+
+
+        private void saveCoursePath(String name, String newDirName) {
+            File f = new File("src/main/webapp/course_pic/" + name + ".jpg");
+            if (f.exists()) course.setPathIcon(newDirName + name + ".jpg");
+            else course.setPathIcon(newDirName + "default.png");
+            controller.saveCourse(course);
+        }
+
+        private Button createSuppCourse() {
+            Button b = new Button("Suppresion du cours");
+            b.getStyle().set("color", "red");
+
+            b.addClickListener(event -> {
+                //fonction de david pour supp des cours
+                close();
+                UI.getCurrent().navigate("home");
+            });
+            return b;
+        }
     }
 
 
@@ -146,17 +248,15 @@ public class ServerFormComponent extends Dialog {
         return r.nextLong();
     }
 
-
     private class ChangeServerPictureDialog extends Dialog {
 
-        ComponentButton button;
-        String name;
+        private final ComponentButton button;
+        private final String namePath;
 
-        public ChangeServerPictureDialog(ComponentButton button, String name) {
+        public ChangeServerPictureDialog(ComponentButton button, String namePath) {
             this.button = button;
-            this.name = name;
+            this.namePath = namePath;
             createDialog();
-            open();
         }
 
         private void createDialog() {
@@ -177,11 +277,11 @@ public class ServerFormComponent extends Dialog {
                 String newName = "";
 
                 try {
-                    newName = renameFile(oldName, "src/main/webapp/course_pic", name);
+                    newName = renameFile(oldName, "src/main/webapp/course_pic", namePath);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                Image img = new Image(newName.replace("src/main/webapp/", ""), name);
+                Image img = new Image(newName.replace("src/main/webapp/", ""), namePath);
                 img.getStyle()
                         .set("padding", "0")
                         .set("margin", "12px 6px 6px 6px")
@@ -202,7 +302,7 @@ public class ServerFormComponent extends Dialog {
             return button;
         }
 
-        public String renameFile(String oldName, String path, String linkName) throws Exception {
+        private String renameFile(String oldName, String path, String linkName) throws Exception {
             String extension = getExtensionImage(oldName);
             String newPath = path + "/" + linkName + "." + extension;
             File old = new File(oldName);
@@ -215,7 +315,7 @@ public class ServerFormComponent extends Dialog {
             return newPath;
         }
 
-        public String getExtensionImage(String name) {
+        private String getExtensionImage(String name) {
             String[] tab_name = name.toLowerCase().split("\\.");
             if (tab_name.length > 2) return "";
             if (tab_name[1].contains("jpg") || tab_name[1].contains("jpeg") || tab_name[1].contains("png")) {
