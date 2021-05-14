@@ -677,7 +677,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                 reasonReport.setPlaceholder("Reason de Signalement");
                 valider.addClickListener(evt -> {
                     long ok = chatController.createNewPrivateChannel(currentUser.getId(), "pseudo", "admin");
-                    chatController.saveMessage(reasonReport.getValue(),ok,chatMessage.getParentId(),currentUser.getId(),true,0);
+                    chatController.saveMessage("je signale l'user @"+chatController.getUsernameOfSender(chatMessage)+" pour : "+reasonReport.getValue(),ok,chatMessage.getParentId(),currentUser.getId(),true,0);
                     if (ok == -1) {
                         Notification.show("Probleme : votre conversation n'a pas pu etre crée.");
                     } else {
