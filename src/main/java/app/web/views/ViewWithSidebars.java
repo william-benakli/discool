@@ -1,6 +1,7 @@
 package app.web.views;
 
 import app.controller.AssignmentController;
+import app.controller.ChatController;
 import app.controller.Controller;
 import app.controller.security.SecurityUtils;
 import app.jpa_repo.PersonRepository;
@@ -63,6 +64,8 @@ public abstract class ViewWithSidebars extends VerticalLayout {
     private PersonRepository personRepository;
     @Getter @Setter
     private Course course;
+    @Getter @Setter
+    private ChatController chatController;
 
     public void createLayout(FlexLayout centerElement) {
         HorizontalLayout layout = new HorizontalLayout();
@@ -122,6 +125,13 @@ public abstract class ViewWithSidebars extends VerticalLayout {
 
         divUser.add(iconUser);
         divUser.add(div);
+        divUser.getStyle()
+                .set("border","solid 1px red")
+                .set("cursor","pointer");
+        divUser.addClickListener(flexLayoutClickEvent -> {
+           getChatController().createNewPrivateChannel(SecurityUtils.getCurrentUser(personRepository).getId(), "username", p.getUsername());
+           UI.getCurrent().getPage().executeJs("window.location.href='"+getUrl()+"dms/"+chatController.lastDm(SecurityUtils.getCurrentUser(personRepository).getId()).getId()+"'");
+        });
         return divUser;
     }
 
