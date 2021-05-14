@@ -15,6 +15,7 @@ import app.web.components.UploadComponent;
 import app.web.layout.Navbar;
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
@@ -671,11 +672,20 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
             report.addClickListener(event -> {
                 Dialog dialog = new Dialog();
                 Button valider = new Button("Valider");
-
-                TextField messageUpdate = new TextField();
-                messageUpdate.setValue(chatMessage.getMessage());
-                dialog.add(new Paragraph("Voulez-vous modifier votre message?"));
-                dialog.add(messageUpdate);
+                ComboBox<String> reasonReport = new ComboBox<>();
+                reasonReport.setItems("propos désagreable", "Mauvais comportement");
+                reasonReport.setPlaceholder("Reason de Signalement");
+                valider.addClickListener(evt -> {
+                    long ok = chatController.createNewPrivateChannel(currentUser.getId(), "pseudo", "admin");
+                    chatController.saveMessage(reasonReport.getValue(),ok,chatMessage.getParentId(),currentUser.getId(),true,0);
+                    if (ok == -1) {
+                        Notification.show("Probleme : votre conversation n'a pas pu etre crée.");
+                    } else {
+                        Notification.show("Conversation creee ! Rafraichissez la page pour vous y rendre");
+                    }
+                    dialog.close();
+                });
+                    dialog.add(reasonReport);
                 dialog.add(valider);
                 dialog.open();
             });
@@ -688,9 +698,8 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
             if (currentUser.getId() == chatMessage.getSender()) {
                 optionsUser.add(modify);
                 optionsUser.add(delete);
-                optionsUser.add(report);
             }
-
+            optionsUser.add(report);
             layoutPop.add(optionsUser);
             layoutPop.resize();
 
