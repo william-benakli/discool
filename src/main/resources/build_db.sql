@@ -1,6 +1,11 @@
 DROP DATABASE discool;
 CREATE DATABASE discool;
 USE discool;
+
+CREATE USER 'discool'@'localhost' IDENTIFIED BY 'a';
+GRANT ALL ON discool.* to 'discool'@'%' identified by 'a' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
+
 CREATE TABLE IF NOT EXISTS config (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE,
     name VARCHAR(255) NOT NULL,
