@@ -228,6 +228,6 @@ public class ChatController {
     }
 
     public PrivateTextChannel lastDm(long id) {
-        return privateTextChannelRepository.findPrivateTextChannelByUserAOrderByIdDesc(id);
+        return privateTextChannelRepository.findFirstByUserAOrderByIdDesc(id);
     }
 }

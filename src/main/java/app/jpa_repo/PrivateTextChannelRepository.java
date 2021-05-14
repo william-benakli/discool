@@ -14,6 +14,6 @@ public interface PrivateTextChannelRepository extends JpaRepository<PrivateTextC
 
     Optional<PrivateTextChannel> findByUserAAndUserB(long userA, long userB);
 
-    PrivateTextChannel findPrivateTextChannelByUserAOrderByIdDesc(long id);
+    PrivateTextChannel findFirstByUserAOrderByIdDesc(long id);
 
 }

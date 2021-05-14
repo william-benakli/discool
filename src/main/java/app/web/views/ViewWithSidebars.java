@@ -129,8 +129,26 @@ public abstract class ViewWithSidebars extends VerticalLayout {
                 .set("border","solid 1px red")
                 .set("cursor","pointer");
         divUser.addClickListener(flexLayoutClickEvent -> {
-           getChatController().createNewPrivateChannel(SecurityUtils.getCurrentUser(personRepository).getId(), "username", p.getUsername());
-           UI.getCurrent().getPage().executeJs("window.location.href='"+getUrl()+"dms/"+chatController.lastDm(SecurityUtils.getCurrentUser(personRepository).getId()).getId()+"'");
+            Dialog dialog = new Dialog();
+            dialog.open();
+
+            String typeUser;
+            if (p.getRole().equals(Person.Role.STUDENT))typeUser="de l'élève";
+            else if (p.getRole().equals(Person.Role.ADMIN))typeUser="de l'administrateur";
+            else typeUser="du professeur";
+
+            dialog.add(
+                    p.getProfilePicture(),
+                    new Paragraph(p.getUsername()),
+                    new Paragraph(p.getFirstName()+""+p.getLastName()),
+                    new Paragraph("E-mail "+typeUser+": "+p.getEmail()),
+                    new Paragraph(p.getWebsite()),
+                    new Paragraph(p.getDescription()),
+                    new Button("Envoyer un message privé", buttonClickEvent -> {
+                        getChatController().createNewPrivateChannel(SecurityUtils.getCurrentUser(personRepository).getId(), "username", p.getUsername());
+                        UI.getCurrent().getPage().executeJs("window.location.href='"+getUrl()+"dms/"+chatController.lastDm(SecurityUtils.getCurrentUser(personRepository).getId()).getId()+"'");
+                        dialog.close();
+                    }));
         });
         return divUser;
     }
