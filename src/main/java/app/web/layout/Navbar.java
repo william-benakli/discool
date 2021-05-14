@@ -8,7 +8,6 @@ import app.controller.security.SecurityUtils;
 import app.jpa_repo.*;
 import app.model.courses.Course;
 import app.model.courses.MoodlePage;
-import app.model.users.Group;
 import app.model.users.GroupMembers;
 import app.model.users.Person;
 import app.web.components.ComponentButton;
@@ -21,7 +20,6 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.dialog.Dialog;
-import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Image;
@@ -45,7 +43,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.File;
 import java.net.URI;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Push(transport = Transport.LONG_POLLING)
 @CssImport("./styles/style.css")
@@ -88,21 +89,24 @@ public class Navbar extends AppLayout {
     }
 
     /**
-     * Generates the navigation bar submenu that contains the logo
+     * Create a button in one of the docks of the navigation bar
+     *
+     * @param img      The picture to put in the navbar to represent a course
+     * @param shortCut Shortcuts to access the course
+     * @return the button with an Anchor link to the course
      */
-    @SneakyThrows
-    private void createLeftSubMenu() {
-        HorizontalLayout servCardDock = createCustomHorizontalLayout();
-        servCardDock.getStyle().set("margin", "0");
-        ComponentButton button = createServDockImage(new Image("img/Discool.png", "créer un serveur"), Key.NAVIGATE_NEXT);
-        button.getStyle()
-                .set("width", "200px")
-                .set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml());
-        RouterLink routerLink = new RouterLink("", HomeView.class);
-        routerLink.getStyle()
-                .set("margin-left", "16px");
-        linkRouteurImage(servCardDock, button, routerLink);
-        addToNavbar(servCardDock);
+    public static ComponentButton createServImage(Image img, Key shortCut) {
+
+        ComponentButton imgButton = new ComponentButton(img);
+        imgButton.getStyle()
+                .set("padding", "0")
+                .set("margin", "12px 6px 6px 6px")
+                .set("height", "50px")
+                .set("width", "50px")
+                .set("border-radius", "10px")
+                .set("cursor", "pointer");
+        imgButton.addFocusShortcut(shortCut, KeyModifier.ALT);
+        return imgButton;
     }
 
     /**
@@ -132,13 +136,31 @@ public class Navbar extends AppLayout {
                 for (GroupMembers groupeMembers : controller.findByUserId(currentUser.getId())) {
                     if (groupeMembers.getGroupId() == c.getId()) createCourseButton(c, splitURI, cleanURI);
                 }
-            }else createCourseButton(c, splitURI, cleanURI);
+            } else createCourseButton(c, splitURI, cleanURI);
         }
 
         if (!SecurityUtils.isUserStudent()) {
             createAddACourseButton();
         }
         addToNavbar(courseNavigationDock);
+    }
+
+    /**
+     * Generates the navigation bar submenu that contains the logo
+     */
+    @SneakyThrows
+    private void createLeftSubMenu() {
+        HorizontalLayout servCardDock = createCustomHorizontalLayout();
+        servCardDock.getStyle().set("margin", "0");
+        ComponentButton button = createServImage(new Image("img/Discool.png", "créer un serveur"), Key.NAVIGATE_NEXT);
+        button.getStyle()
+                .set("width", "200px")
+                .set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml());
+        RouterLink routerLink = new RouterLink("", HomeView.class);
+        routerLink.getStyle()
+                .set("margin-left", "16px");
+        linkRouteurImage(servCardDock, button, routerLink);
+        addToNavbar(servCardDock);
     }
 
     /**
@@ -160,26 +182,6 @@ public class Navbar extends AppLayout {
                 .set("cursor", "pointer");
         imgButton.addFocusShortcut(shortCut, KeyModifier.ALT);
         return imgButton;
-    }
-    private void createUserTeacherGrid(Grid<Person> grid) {
-        grid.setItems(controller.findAllUserByRole(Person.Role.TEACHER));
-        grid.addColumn(Person::getUsername).setHeader("Nom");
-        grid.addColumn(Person::getRole).setHeader("Role");
-
-    }
-
-    private void createUserStudentGrid(Grid<Person> grid) {
-        grid.setItems(controller.findAllUserByRole(Person.Role.STUDENT));
-        grid.addColumn(Person::getUsername).setHeader("Nom");
-        grid.addColumn(Person::getRole).setHeader("Role");
-
-    }
-
-    private void createGroupeGrid(Grid<Group> grid) {
-        grid.setItems(controller.findGroupAll());
-        grid.addColumn(Group::getName).setHeader("Groupe");
-        grid.addColumn(Group::getDescription).setHeader("Description");
-
     }
 
     /**
@@ -304,9 +306,7 @@ public class Navbar extends AppLayout {
         button.getStyle()
                 .set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml());
         Dialog d = new ServerFormComponent(controller, currentUser);
-        button.addClickListener(buttonClickEvent -> {
-            d.open();
-        });
+        button.addClickListener(buttonClickEvent -> d.open());
         courseNavigationDock.add(button);
     }
 
@@ -323,20 +323,6 @@ public class Navbar extends AppLayout {
         servCardDock.add(routerLink);
     }
 
-    private long getRandomId() {
-        return new Random().nextLong();
-    }
-
-    private String renameFile(String oldName, String path, String linkName) throws Exception {
-        String extension = getExtensionImage(oldName);
-        String newPath = path + "/" + linkName + "." + extension;
-        File old = new File(oldName);
-        File newFile = new File(newPath);
-        if (!old.renameTo(newFile)) {
-            throw new Exception("File can't be renamed");
-        }
-        return newPath;
-    }
 
     public String getExtensionImage(String name) {
         String[] tab_name = name.toLowerCase().split("\\.");
@@ -596,7 +582,7 @@ public class Navbar extends AppLayout {
                     .set("margin","24px 0 12px 24px");
 
             button.addClickListener(event -> {
-                ChangeProfilePictureDialog changeProfilePicture = new ChangeProfilePictureDialog();
+                new ChangeProfilePictureDialog();
             });
             nameButton.add(userName, button);
             ppLayout.add(profilPicture, nameButton);

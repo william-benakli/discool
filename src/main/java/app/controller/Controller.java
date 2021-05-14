@@ -364,7 +364,12 @@ public class Controller {
         this.courseRepository.save(course);
     }
 
-    public Group findGroudByCourseId(long id) {
-        return null;
+    public void deleteUserInGroup(Person p) {
+        groupMembersRepository.deleteByUserId(p.getId());
     }
+
+    public Group getGroupByCourseId(long courseId) {
+        return groupRepository.findGroupByCourseId(courseId);
+    }
+
 }
