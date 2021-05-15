@@ -22,169 +22,45 @@ import javax.annotation.security.PermitAll;
 @RouteAlias(value = "", layout = Navbar.class)
 public class HomeView extends VerticalLayout {
 
-    public HomeView() {
-        H1 bienvenue = new H1("Bienvenue sur Discool !");
+    public HomeView(){
+        imageRight(
+                new Paragraph("Bienvenue sur Discool !"),
+                new Paragraph("Le lieu parfait qui recrée à distance les meilleurs conditions réelles" +
+                        " d'apprentissage tout en supprimant les contraintes du presentiel."),
+                new Image("img/img.svg", "alt")
+                );
+        imageLeft(
+                new Paragraph("Apprenez ou vous voulez !"),
+                new Paragraph("Peu importe l'endroit ou vous etes, vous pouvez suivre vos cours et " +
+                        "progresser en ayant qu'une connexion internet."),
+                new Image("img/wfh_1.svg", "alt")
+        );
+        imageRight(
+                new Paragraph("Un véritable encadrement scolaire"),
+                new Paragraph("Les Administrateurs et les professeurs sont la afin d'avoir le meme" +
+                        " encadrement qu'en présentiel."),
+                new Image("img/Chat.svg", "alt")
+        );
+        imageLeft(
+                new Paragraph("Preserver le contacte humain"),
+                new Paragraph("Nous savons à quel point le contacte humain est important, c'est pour" +
+                        " cela que nous avons mis a votre disposition un chat public et privé."),
+                new Image("img/Chat.svg", "alt")
+        );
+    }
 
-        // TODO add a RouterLink to the LoginView when the button is clicked
-        Button join = new Button("Lancer Discool");
-        Paragraph p = new Paragraph("Le lieu parfait qui recrée à distance les meilleurs conditions réelles d'apprentissage tout en supprimant les contraintes du presentiel.");
-        Image img = new Image("img/img.svg", "alt");
-        add(img);
+    public void imageLeft(Paragraph title, Paragraph text, Image image){
 
-        bienvenue.getStyle().set("display", "block");
-        bienvenue.getStyle().set("color", "#845ec2");
+        this.add(title);
+        this.add(text);
+        this.add(image);
+    }
 
-        join.getStyle().set("display", "block");
-        join.getStyle().set("width", "200px");
-            join.getStyle().set("height","80px");
-            join.getStyle().set("background-color","#845ec2");
-            join.getStyle().set("color","white");
-            join.getStyle().set("border-radius","10px");
-            join.getStyle().set("font-size","25px");
-            join.addClickListener(click -> {
-                UI.getCurrent().navigate("login");
-            });
-            p.getStyle().set("display","block");
-            p.getStyle().set("font-size","30px");
-            p.getStyle().set("margin","10px");
+    public void imageRight(Paragraph title, Paragraph text, Image image){
 
-            img.getStyle().set("position","relative");
-            img.getStyle().set("margin-right","10%");
-            img.getStyle().set("width","80%");
-            img.getStyle().set("height","80%");
-            img.getStyle().set("left","5%");
-            img.getStyle().set("top","30%");
-
-        FlexLayout div2 = new FlexLayout();
-            div2.add(bienvenue,p , join);
-            div2.getStyle().set("display","block");
-            div2.getStyle().set("left","0px");
-            div2.getStyle().set("padding","3em");
-            div2.getStyle().set("horizontal-align","middle");
-            div2.getStyle().set("vertical-align","middle");
-            div2.getStyle().set("width","600px");
-            div2.getStyle().set("margin-top","100px");
-            div2.getStyle().set("margin-left","20%");
-            div2.getStyle().set("position","block");
-            div2.getStyle().set("right","50%");
-
-            FlexLayout div1 = new FlexLayout();
-            div1.add(img,div2);
-            div1.getStyle().set("background-color","#f4f9f9");
-            div1.setWidth("100%");
-            div1.setHeight("40%");
-            div1.getStyle().set("flex-direction","row-reverse");
-            div1.getStyle().set("padding","150");
-            add(div1);
-
-            div("Apprenez ou vous voulez !","Peu importe l'endroit ou vous etes, vous pouvez suivre vos cours et progresser en ayant qu'une connexion internet.");
-            divReverse("Un véritable encadrement scolaire ","Les Administrateurs et les professeurs sont la afin d'avoir le meme encadrement qu'en présentiel.");
-            div2("Preserver le contacte humain ","Nous savons à quel point le contacte humain est important, c'est pour cela que nous avons mis a votre disposition un chat public et privé.");
-        }
-
-        public void div(String title, String text){
-            Image img2 = new Image("img/wfh_1.svg", "alt");
-            img2.getStyle().set("width", "150%");
-            img2.getStyle().set("height", "150%");
-            img2.getStyle().set("left", "200px");
-
-            H1 titre2 = new H1(title);
-            titre2.getStyle().set("color", "#845ec2");
-            titre2.getStyle().set("font-size", "40px");
-            Paragraph p2 = new Paragraph(text);
-            p2.getStyle().set("font-size", "25px");
-            p2.getStyle().set("margin", "10px");
-
-            FlexLayout div3 = new FlexLayout();
-            div3.add(titre2, p2);
-            div3.getStyle().set("display", "inline-block");
-            div3.getStyle().set("position", "relative");
-            div3.getStyle().set("word-wrap", "break-word");
-            div3.getStyle().set("height", "300px");
-            div3.getStyle().set("margin-left", "30px");
-            div3.getStyle().set("margin-top", "5%");
-            div3.getStyle().set("horizontal-align", "middle");
-
-
-            FlexLayout div4 = new FlexLayout();
-            div4.add(img2, div3);
-            div4.getStyle().set("padding", "200px");
-            div4.getStyle().set("width", "1200px");
-            div4.getStyle().set("height", "300px");
-            div4.getStyle().set("margin-left", "auto");
-            div4.getStyle().set("margin-right", "auto");
-            add(div4);
-        }
-
-        public void divReverse(String title , String text){
-            Image img2 = new Image("img/Headhunter.svg", "alt");
-            img2.getStyle().set("width", "150%");
-            img2.getStyle().set("height", "150%");
-
-            H1 titre3 = new H1(title);
-            titre3.getStyle().set("color","#845ec2");
-            titre3.getStyle().set("font-size", "40px");
-
-            Paragraph p3 = new Paragraph(text);
-            p3.getStyle().set("font-size","25px");
-            p3.getStyle().set("margin","10px");
-
-            FlexLayout div5 = new FlexLayout();
-            div5.add(titre3,p3);
-            div5.getStyle().set("display","inline-block");
-            div5.getStyle().set("position","relative");
-            div5.getStyle().set("word-wrap","break-word");
-            div5.getStyle().set("height","300px");
-            div5.getStyle().set("margin-left","20%");
-            div5.getStyle().set("horizontal-align","middle");
-
-            FlexLayout div6 = new FlexLayout();
-            div6.add(img2, div5);
-            div6.getStyle().set("padding", "200px");
-            div6.getStyle().set("width","1500px");
-            div6.getStyle().set("height","300px");
-            div6.getStyle().set("margin-left","auto");
-            div6.getStyle().set("margin-right","auto");
-            div6.getStyle().set("flex-direction","row-reverse");
-            div6.getStyle().set("background-color","#f4f9f9");
-
-            add(div6);
-        }
-
-    public void div2(String title, String text){
-        Image img2 = new Image("img/Chat.svg", "alt");
-        img2.getStyle().set("width", "150%");
-        img2.getStyle().set("height", "150%");
-        img2.getStyle().set("left", "200px");
-
-        H1 titre2 = new H1(title);
-        titre2.getStyle().set("color", "#845ec2");
-        titre2.getStyle().set("font-size", "40px");
-
-        Paragraph p2 = new Paragraph(text);
-        p2.getStyle().set("font-size", "25px");
-        p2.getStyle().set("margin", "10px");
-
-        FlexLayout div3 = new FlexLayout();
-        div3.add(titre2, p2);
-        div3.getStyle().set("display", "inline-block");
-        div3.getStyle().set("position", "relative");
-        div3.getStyle().set("word-wrap", "break-word");
-        div3.getStyle().set("height", "300px");
-        div3.getStyle().set("margin-left", "30px");
-        div3.getStyle().set("margin-top", "5%");
-        div3.getStyle().set("horizontal-align", "middle");
-
-
-        FlexLayout div4 = new FlexLayout();
-        div4.add(img2, div3);
-        div4.getStyle().set("padding", "150px");
-        div4.getStyle().set("width", "1200px");
-        div4.getStyle().set("height", "300px");
-        div4.getStyle().set("margin-left", "auto");
-        div4.getStyle().set("margin-right", "auto");
-
-        add(div4);
+        this.add(title);
+        this.add(text);
+        this.add(image);
     }
 
 }
