@@ -42,7 +42,7 @@ public class HomeView extends VerticalLayout {
             join.getStyle().set("border-radius","10px");
             join.getStyle().set("font-size","25px");
             join.addClickListener(click -> {
-                UI.getCurrent().navigate("www.google.com");
+                UI.getCurrent().navigate("login");
             });
             p.getStyle().set("display","block");
             p.getStyle().set("font-size","30px");
