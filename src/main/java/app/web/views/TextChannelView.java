@@ -31,7 +31,6 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.HasDynamicTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.shared.Registration;
-import jdk.javadoc.doclet.Reporter;
 import lombok.Getter;
 import org.apache.commons.io.FileUtils;
 
@@ -435,10 +434,6 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         return tab_name[1];
     }
 
-
-
-
-
     public class MessageResponsePopComponent extends Div {
         VerticalLayout layoutVerticalLayout;
 
@@ -662,9 +657,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                 }
             });
         }
-        /**
-         * to add some style to the dialog's report
-         */
+
         private void reportDialogStyle(Dialog dialog, Div buttons, Button valider , Button fermer, H1 title, ComboBox<String> reasonReport,TextField reasonTextfield){
             dialog.setHeight("40%");
 
@@ -698,35 +691,33 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
             reasonReport.setPlaceholder("Raison de signalement");
             reasonReport.isRequired();
         }
-        /**
-         * the function of reporting
-         */
-        private void sendReport(ComboBox<String> reasonReport, TextField reasonTextfield){
-            Notification notification = new Notification();
+
+        private void sendReport(ComboBox<String> reasonReport, TextField reasonTextfield) {
             long ok = chatController.createNewPrivateChannel(currentUser.getId(), "pseudo", "admin");
             PublicTextChannel publicTextChannel = getController().getTextChannel(textChannel.getId());
             Course course = getController().findCourseById(publicTextChannel.getCourseId());
-            if(reasonReport.getValue().equals("Autre...")){
-                chatController.saveMessage("Je signale l'user @" + chatController.getUsernameOfSender(chatMessage) + " pour cause : " + reasonTextfield.getValue() + " ,dans le channel :" + textChannel.getName() + ". Dans le cours :"
-                                + course.getName(),
-                        ok, chatMessage.getParentId(), currentUser.getId(), true, 0);
-                chatController.saveMessage("Votre demande à été transmise avec succés !", ok,chatMessage.getParentId() , 1, true, 0);
-            }else {
-                chatController.saveMessage("Je signale l'user @" + chatController.getUsernameOfSender(chatMessage) + " pour motif : " + reasonReport.getValue() + " ,dans le channel :" + textChannel.getName() + ". Dans le cours :"
-                                + course.getName(),
-                        ok, chatMessage.getParentId(), currentUser.getId(), true, 0);
-                chatController.saveMessage("Votre demande à été transmise avec succés !", ok,chatMessage.getParentId() , 1, true, 0);
-            }
-            if (ok == -1) {
-                notification.show("Votre signalement n'a pas pu etre effectué.");
+            if (reasonReport.getValue().equals("Autre...")) {
+                String message = "Je signale l'user @" + chatController.getUsernameOfSender(chatMessage) + " pour cause : "
+                        + reasonTextfield.getValue() + " ,dans le channel :" + textChannel.getName() + ". Dans le cours :"
+                        + course.getName();
+                chatController.saveMessage(message, ok, chatMessage.getParentId(), currentUser.getId(), true, 0);
             } else {
-                notification.show("Signalement de l'utilsateur @" + chatController.getUsernameOfSender(chatMessage) + " reussi !").setPosition(Notification.Position.MIDDLE);
+                String message = "Je signale l'user @" + chatController.getUsernameOfSender(chatMessage) + " pour motif : "
+                        + reasonReport.getValue() + " ,dans le channel :" + textChannel.getName() + ". Dans le cours :"
+                        + course.getName();
+                chatController.saveMessage(message, ok, chatMessage.getParentId(), currentUser.getId(), true, 0);
             }
-            UI.getCurrent().navigate("dms/1");
+            chatController.saveMessage("Votre demande à été transmise avec succés !", ok,
+                                       chatMessage.getParentId(), 1, true, 0);
+            if (ok == -1) {
+                Notification.show("Votre signalement n'a pas pu etre effectué.");
+            } else {
+                String notificationMessage = "Signalement de l'utilsateur @" +
+                        chatController.getUsernameOfSender(chatMessage) + " reussi !";
+                Notification.show(notificationMessage).setPosition(Notification.Position.MIDDLE);
+            }
         }
-        /**
-         * Creates a Button with the report fuction
-         */
+
         private void createReportButton() {
             report = new ComponentButton("","!", SIZEWIDTH, SIZEHEIGHT);
             report.getStyle().set("color", ColorHTML.PURPLE.getColorHtml());
