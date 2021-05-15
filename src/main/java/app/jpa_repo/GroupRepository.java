@@ -21,6 +21,8 @@ public interface GroupRepository extends JpaRepository<Group, Long> {
 
     ArrayList<Group> findAll();
 
+    Group findById(long id);
+
     Group findGroupByCourseId(long courseId);
     Group findTopByOrderByIdDesc();
 }

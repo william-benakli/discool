@@ -56,6 +56,7 @@ public class Navbar extends AppLayout {
 
     private final PersonRepository personRepository;
     private final MoodlePageRepository moodlePageRepository;
+    private final GroupRepository groupRepository;
     private final Controller controller;
     private final ChatController chatController;
     private Person currentUser;
@@ -79,6 +80,7 @@ public class Navbar extends AppLayout {
         this.assignmentController = new AssignmentController(personRepository, assignmentRepository, studentAssignmentsUploadsRepository, courseRepository);
         this.personRepository = personRepository;
         this.moodlePageRepository = moodlePageRepository;
+        this.groupRepository = groupRepository;
         this.controller = new Controller(personRepository, publicTextChannelRepository, publicChatMessageRepository, courseRepository,
                                          moodlePageRepository, groupRepository, groupMembersRepository, privateChatMessageRepository);
         this.chatController = new ChatController(personRepository, publicTextChannelRepository, publicChatMessageRepository,
@@ -122,21 +124,30 @@ public class Navbar extends AppLayout {
         URI uri = new URI(uriString.toString());
         String tmp = uri.toString();
         String[] splitURI = tmp.split("/");
-        String cleanURI = splitURI[splitURI.length-1];
+        String cleanURI = splitURI[splitURI.length - 1];
 
         courseNavigationDock = createCustomHorizontalLayout();
         courseNavigationDock.getStyle()
-                .set("width","750px")
-                .set("overflow","auto")
-                .set("overflow-y","hidden")
-                .set("transform","rotateX(180deg)");
+                .set("width", "750px")
+                .set("overflow", "auto")
+                .set("overflow-y", "hidden")
+                .set("transform", "rotateX(180deg)");
         List<Course> courses = controller.findAllCourses();
+        // find all the groups the user is a member of
+        ArrayList<GroupMembers> groupMembers = controller.findByUserId(currentUser.getId());
+        ArrayList<Long> userGroupsId = new ArrayList<>(); // a list of the ids of the courses the user is a part of
+        groupMembers.forEach(groupMember -> {
+            userGroupsId.add(groupRepository.findById(groupMember.getGroupId()).getCourseId());
+        });
+        // add courses to the menu bar
         for (Course c : courses) {
-            if (!SecurityUtils.isUserAdmin()) {
-                for (GroupMembers groupeMembers : controller.findByUserId(currentUser.getId())) {
-                    if (groupeMembers.getGroupId() == c.getId()) createCourseButton(c, splitURI, cleanURI);
-                }
-            } else createCourseButton(c, splitURI, cleanURI);
+            if (SecurityUtils.isUserAdmin()) { // admins can see ALL the courses
+                createCourseButton(c, splitURI, cleanURI);
+            } else if (c.getTeacherId() == currentUser.getId()) { // if the teacher created the course
+                createCourseButton(c, splitURI, cleanURI);
+            } else if (userGroupsId.contains(c.getId())) { // if the user is part of a group inside that course
+                createCourseButton(c, splitURI, cleanURI);
+            }
         }
 
         if (!SecurityUtils.isUserStudent()) {
