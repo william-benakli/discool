@@ -77,9 +77,9 @@ public class HomeView extends VerticalLayout {
             div1.getStyle().set("padding","150");
             add(div1);
 
-            div("Bienvenue","Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.");
-            divReverse("Bienvenue","Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.");
-            div2("Bienvenue","Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.");
+            div("Apprenez ou vous voulez !","Peu importe l'endroit ou vous etes, vous pouvez suivre vos cours et progresser en ayant qu'une connexion internet.");
+            divReverse("Un véritable encadrement scolaire ","Les Administrateurs et les professeurs sont la afin d'avoir le meme encadrement qu'en présentiel.");
+            div2("Preserver le contacte humain ","Nous savons à quel point le contacte humain est important, c'est pour cela que nous avons mis a votre disposition un chat public et privé.");
         }
 
         public void div(String title, String text){
