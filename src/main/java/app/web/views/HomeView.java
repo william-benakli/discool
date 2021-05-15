@@ -27,7 +27,7 @@ public class HomeView extends VerticalLayout {
 
         // TODO add a RouterLink to the LoginView when the button is clicked
         Button join = new Button("Lancer Discool");
-        Paragraph p = new Paragraph("Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.");
+        Paragraph p = new Paragraph("Le lieu parfait qui recrée à distance les meilleurs conditions réelles d'apprentissage tout en supprimant les contraintes du presentiel.");
         Image img = new Image("img/img.svg", "alt");
         add(img);
 
@@ -50,6 +50,7 @@ public class HomeView extends VerticalLayout {
 
             img.getStyle().set("position","relative");
             img.getStyle().set("padding","1em");
+            img.getStyle().set("margin-right","30%");
             img.getStyle().set("width","800px");
             img.getStyle().set("height","800px");
 
@@ -61,6 +62,8 @@ public class HomeView extends VerticalLayout {
             div2.getStyle().set("horizontal-align","middle");
             div2.getStyle().set("vertical-align","middle");
             div2.getStyle().set("width","600px");
+            div2.getStyle().set("margin-top","100px");
+            div2.getStyle().set("margin-left","10%");
             div2.getStyle().set("position","block");
 
             FlexLayout div1 = new FlexLayout();
@@ -69,18 +72,18 @@ public class HomeView extends VerticalLayout {
             div1.setWidth("100%");
             div1.setHeight("40%");
             div1.getStyle().set("flex-direction","row-reverse");
-            div1.getStyle().set("padding","0");
+            div1.getStyle().set("padding","150");
             add(div1);
 
             div("Bienvenue","Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.");
             divReverse("Bienvenue","Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.");
-            div("Bienvenue","Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.");
+            div2("Bienvenue","Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.");
         }
 
         public void div(String title, String text){
-            Image img2 = new Image("img/books.jpg", "alt");
-            img2.getStyle().set("width", "500px");
-            img2.getStyle().set("height", "300px");
+            Image img2 = new Image("img/wfh_1.svg", "alt");
+            img2.getStyle().set("width", "150%");
+            img2.getStyle().set("height", "150%");
             img2.getStyle().set("left", "200px");
 
             H1 titre2 = new H1(title);
@@ -96,13 +99,14 @@ public class HomeView extends VerticalLayout {
             div3.getStyle().set("position", "relative");
             div3.getStyle().set("word-wrap", "break-word");
             div3.getStyle().set("height", "300px");
-            div3.getStyle().set("margin-left", "20px");
+            div3.getStyle().set("margin-left", "30px");
+            div3.getStyle().set("margin-top", "5%");
             div3.getStyle().set("horizontal-align", "middle");
 
 
             FlexLayout div4 = new FlexLayout();
             div4.add(img2, div3);
-            div4.getStyle().set("padding", "20px");
+            div4.getStyle().set("padding", "150px");
             div4.getStyle().set("width", "1200px");
             div4.getStyle().set("height", "300px");
             div4.getStyle().set("margin-left", "auto");
@@ -111,11 +115,10 @@ public class HomeView extends VerticalLayout {
         }
 
         public void divReverse(String title , String text){
-            Image img3= new Image("img/books.jpg", "alt");
-            img3.getStyle().set("width","500px");
-            img3.getStyle().set("height","300px");
-            img3.getStyle().set("left","200px");
-            img3.getStyle().set("float","right");
+            Image img2 = new Image("img/Headhunter.svg", "alt");
+            img2.getStyle().set("width", "150%");
+            img2.getStyle().set("height", "150%");
+            img2.getStyle().set("left", "200px");
 
             H1 titre3 = new H1(title);
             titre3.getStyle().set("color","#845ec2");
@@ -134,8 +137,8 @@ public class HomeView extends VerticalLayout {
             div5.getStyle().set("horizontal-align","middle");
 
             FlexLayout div6 = new FlexLayout();
-            div6.add(img3, div5);
-            div6.getStyle().set("padding","20px");
+            div6.add(img2, div5);
+            div6.getStyle().set("padding", "100px");
             div6.getStyle().set("width","1200px");
             div6.getStyle().set("height","300px");
             div6.getStyle().set("margin-left","auto");
@@ -143,5 +146,39 @@ public class HomeView extends VerticalLayout {
             div6.getStyle().set("flex-direction","row-reverse");
             add(div6);
         }
+
+    public void div2(String title, String text){
+        Image img2 = new Image("img/Chat.svg", "alt");
+        img2.getStyle().set("width", "150%");
+        img2.getStyle().set("height", "150%");
+        img2.getStyle().set("left", "200px");
+
+        H1 titre2 = new H1(title);
+        titre2.getStyle().set("color", "#845ec2");
+
+        Paragraph p2 = new Paragraph(text);
+        p2.getStyle().set("font-size", "20px");
+        p2.getStyle().set("margin", "10px");
+
+        FlexLayout div3 = new FlexLayout();
+        div3.add(titre2, p2);
+        div3.getStyle().set("display", "inline-block");
+        div3.getStyle().set("position", "relative");
+        div3.getStyle().set("word-wrap", "break-word");
+        div3.getStyle().set("height", "300px");
+        div3.getStyle().set("margin-left", "30px");
+        div3.getStyle().set("margin-top", "5%");
+        div3.getStyle().set("horizontal-align", "middle");
+
+
+        FlexLayout div4 = new FlexLayout();
+        div4.add(img2, div3);
+        div4.getStyle().set("padding", "150px");
+        div4.getStyle().set("width", "1200px");
+        div4.getStyle().set("height", "300px");
+        div4.getStyle().set("margin-left", "auto");
+        div4.getStyle().set("margin-right", "auto");
+        add(div4);
+    }
 
 }
