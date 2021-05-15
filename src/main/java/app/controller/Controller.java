@@ -300,8 +300,6 @@ public class Controller {
                             .groupId(getLastGroup().getId())
                             .timeAdded(0)
                             .build());
-        } else {
-            System.out.println("L'utilisateur est déjà présent sur ce serveur");
         }
     }
 
