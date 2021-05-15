@@ -90,9 +90,9 @@ public class HomeView extends VerticalLayout {
 
             H1 titre2 = new H1(title);
             titre2.getStyle().set("color", "#845ec2");
-
+            titre2.getStyle().set("font-size", "40px");
             Paragraph p2 = new Paragraph(text);
-            p2.getStyle().set("font-size", "20px");
+            p2.getStyle().set("font-size", "25px");
             p2.getStyle().set("margin", "10px");
 
             FlexLayout div3 = new FlexLayout();
@@ -120,13 +120,13 @@ public class HomeView extends VerticalLayout {
             Image img2 = new Image("img/Headhunter.svg", "alt");
             img2.getStyle().set("width", "150%");
             img2.getStyle().set("height", "150%");
-            img2.getStyle().set("left", "200px");
 
             H1 titre3 = new H1(title);
             titre3.getStyle().set("color","#845ec2");
+            titre3.getStyle().set("font-size", "40px");
 
             Paragraph p3 = new Paragraph(text);
-            p3.getStyle().set("font-size","20px");
+            p3.getStyle().set("font-size","25px");
             p3.getStyle().set("margin","10px");
 
             FlexLayout div5 = new FlexLayout();
@@ -135,7 +135,7 @@ public class HomeView extends VerticalLayout {
             div5.getStyle().set("position","relative");
             div5.getStyle().set("word-wrap","break-word");
             div5.getStyle().set("height","300px");
-            div5.getStyle().set("margin-left","20px");
+            div5.getStyle().set("margin-left","20%");
             div5.getStyle().set("horizontal-align","middle");
 
             FlexLayout div6 = new FlexLayout();
@@ -147,6 +147,7 @@ public class HomeView extends VerticalLayout {
             div6.getStyle().set("margin-right","auto");
             div6.getStyle().set("flex-direction","row-reverse");
             div6.getStyle().set("background-color","#f4f9f9");
+
             add(div6);
         }
 
@@ -158,9 +159,10 @@ public class HomeView extends VerticalLayout {
 
         H1 titre2 = new H1(title);
         titre2.getStyle().set("color", "#845ec2");
+        titre2.getStyle().set("font-size", "40px");
 
         Paragraph p2 = new Paragraph(text);
-        p2.getStyle().set("font-size", "20px");
+        p2.getStyle().set("font-size", "25px");
         p2.getStyle().set("margin", "10px");
 
         FlexLayout div3 = new FlexLayout();
