@@ -49,12 +49,13 @@ public class HomeView extends VerticalLayout {
             p.getStyle().set("margin","10px");
 
             img.getStyle().set("position","relative");
-            img.getStyle().set("padding","1em");
-            img.getStyle().set("margin-right","30%");
-            img.getStyle().set("width","800px");
-            img.getStyle().set("height","800px");
+            img.getStyle().set("margin-right","10%");
+            img.getStyle().set("width","80%");
+            img.getStyle().set("height","80%");
+            img.getStyle().set("left","5%");
+            img.getStyle().set("top","30%");
 
-            FlexLayout div2 = new FlexLayout();
+        FlexLayout div2 = new FlexLayout();
             div2.add(bienvenue,p , join);
             div2.getStyle().set("display","block");
             div2.getStyle().set("left","0px");
@@ -63,8 +64,9 @@ public class HomeView extends VerticalLayout {
             div2.getStyle().set("vertical-align","middle");
             div2.getStyle().set("width","600px");
             div2.getStyle().set("margin-top","100px");
-            div2.getStyle().set("margin-left","10%");
+            div2.getStyle().set("margin-left","20%");
             div2.getStyle().set("position","block");
+            div2.getStyle().set("right","50%");
 
             FlexLayout div1 = new FlexLayout();
             div1.add(img,div2);
@@ -106,7 +108,7 @@ public class HomeView extends VerticalLayout {
 
             FlexLayout div4 = new FlexLayout();
             div4.add(img2, div3);
-            div4.getStyle().set("padding", "150px");
+            div4.getStyle().set("padding", "200px");
             div4.getStyle().set("width", "1200px");
             div4.getStyle().set("height", "300px");
             div4.getStyle().set("margin-left", "auto");
@@ -138,12 +140,13 @@ public class HomeView extends VerticalLayout {
 
             FlexLayout div6 = new FlexLayout();
             div6.add(img2, div5);
-            div6.getStyle().set("padding", "100px");
-            div6.getStyle().set("width","1200px");
+            div6.getStyle().set("padding", "200px");
+            div6.getStyle().set("width","1500px");
             div6.getStyle().set("height","300px");
             div6.getStyle().set("margin-left","auto");
             div6.getStyle().set("margin-right","auto");
             div6.getStyle().set("flex-direction","row-reverse");
+            div6.getStyle().set("background-color","#f4f9f9");
             add(div6);
         }
 
@@ -178,6 +181,7 @@ public class HomeView extends VerticalLayout {
         div4.getStyle().set("height", "300px");
         div4.getStyle().set("margin-left", "auto");
         div4.getStyle().set("margin-right", "auto");
+
         add(div4);
     }
 
