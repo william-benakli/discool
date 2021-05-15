@@ -125,9 +125,7 @@ public abstract class ViewWithSidebars extends VerticalLayout {
 
         divUser.add(iconUser);
         divUser.add(div);
-        divUser.getStyle()
-                .set("border","solid 1px red")
-                .set("cursor","pointer");
+        divUser.getStyle().set("cursor","pointer");
         divUser.addClickListener(flexLayoutClickEvent -> {
             Dialog dialog = new Dialog();
             dialog.open();
@@ -137,18 +135,62 @@ public abstract class ViewWithSidebars extends VerticalLayout {
             else if (p.getRole().equals(Person.Role.ADMIN))typeUser="de l'administrateur";
             else typeUser="du professeur";
 
-            dialog.add(
-                    p.getProfilePicture(),
-                    new Paragraph(p.getUsername()),
-                    new Paragraph(p.getFirstName()+""+p.getLastName()),
-                    new Paragraph("E-mail "+typeUser+": "+p.getEmail()),
-                    new Paragraph(p.getWebsite()),
-                    new Paragraph(p.getDescription()),
-                    new Button("Envoyer un message privé", buttonClickEvent -> {
-                        getChatController().createNewPrivateChannel(SecurityUtils.getCurrentUser(personRepository).getId(), "username", p.getUsername());
-                        UI.getCurrent().getPage().executeJs("window.location.href='"+getUrl()+"dms/"+chatController.lastDm(SecurityUtils.getCurrentUser(personRepository).getId()).getId()+"'");
-                        dialog.close();
-                    }));
+            Image ppp=p.getProfilePicture();
+            ppp.getStyle()
+                    .set("height","125px")
+                    .set("width","125px")
+                    .set("border-radius","90px")
+                    .set("margin-right","20px");
+
+            Paragraph pUserName = new Paragraph(p.getUsername());
+            pUserName.getStyle()
+                    .set("color", ColorHTML.PURPLE.getColorHtml())
+                    .set("font-weight", "700")
+                    .set("font-size","20px");
+
+            Paragraph pFirstLastName = new Paragraph(p.getFirstName()+" "+p.getLastName());
+            pFirstLastName.getStyle()
+                    .set("color", ColorHTML.TEXTGREY.getColorHtml())
+                    .set("font-size","17px");
+
+            Div divPPSup = new Div();
+            Div divPPSupRight = new Div();
+            divPPSupRight.add(pUserName, pFirstLastName);
+            divPPSup.getStyle()
+                    .set("display","flex")
+                    .set("flex-direction","raw");
+            divPPSup.add(ppp, divPPSupRight);
+
+            Paragraph pEmail = new Paragraph("E-mail "+typeUser+": "+p.getEmail());
+            pEmail.getStyle()
+                    .set("color", ColorHTML.TEXTGREY.getColorHtml())
+                    .set("font-size","17px");
+
+            Paragraph pWebSite = new Paragraph(p.getWebsite());
+            pWebSite.getStyle()
+                    .set("color", ColorHTML.TEXTGREY.getColorHtml())
+                    .set("font-size","17px");
+
+            Paragraph pDescription = new Paragraph(p.getDescription());
+            pDescription.getStyle().set("color", ColorHTML.TEXTGREY.getColorHtml());
+
+            Button newDM = new Button("Envoyer un message privé", buttonClickEvent -> {
+                getChatController().createNewPrivateChannel(SecurityUtils.getCurrentUser(personRepository).getId(), "username", p.getUsername());
+                UI.getCurrent().getPage().executeJs("window.location.href='"+getUrl()+"dms/"+chatController.lastDm(SecurityUtils.getCurrentUser(personRepository).getId()).getId()+"'");
+                dialog.close();
+            });
+            newDM.getStyle()
+                    .set("background-color",ColorHTML.PURPLE.getColorHtml())
+                    .set("color", ColorHTML.WHITE.getColorHtml())
+                    .set("margin-top","50px");
+            Div divSeparator= new Div();
+            divSeparator.getStyle()
+                    .set("width","100%")
+                    .set("margin-top","50px")
+                    .set("margin-bottom","25px")
+                    .set("border-top","solid 1px"+ColorHTML.DARKGREY.getColorHtml());
+            dialog.add(divPPSup, divSeparator, pEmail, pWebSite, pDescription,newDM);
+
         });
         return divUser;
     }
