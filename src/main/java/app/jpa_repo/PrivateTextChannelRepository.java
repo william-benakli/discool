@@ -13,4 +13,7 @@ public interface PrivateTextChannelRepository extends JpaRepository<PrivateTextC
     ArrayList<PrivateTextChannel> findAllByUserB(long userB);
 
     Optional<PrivateTextChannel> findByUserAAndUserB(long userA, long userB);
+
+    PrivateTextChannel findFirstByUserAOrderByIdDesc(long id);
+
 }

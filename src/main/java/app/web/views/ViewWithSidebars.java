@@ -1,6 +1,7 @@
 package app.web.views;
 
 import app.controller.AssignmentController;
+import app.controller.ChatController;
 import app.controller.Controller;
 import app.controller.security.SecurityUtils;
 import app.jpa_repo.PersonRepository;
@@ -63,6 +64,8 @@ public abstract class ViewWithSidebars extends VerticalLayout {
     private PersonRepository personRepository;
     @Getter @Setter
     private Course course;
+    @Getter @Setter
+    private ChatController chatController;
 
     public void createLayout(FlexLayout centerElement) {
         HorizontalLayout layout = new HorizontalLayout();
@@ -120,9 +123,78 @@ public abstract class ViewWithSidebars extends VerticalLayout {
                 .set("margin","10px")
                 .set("border-radius","25px");
 
-        divUser.add(iconUser);
-        divUser.add(div);
+        divUser.add(iconUser, div);
+        divUser.getStyle().set("cursor","pointer");
+        divUser.addClickListener(flexLayoutClickEvent -> {
+            Dialog dialog = new Dialog();
+            dialog.open();
+            Div divSeparator= new Div();
+            divSeparator.getStyle()
+                    .set("width","100%")
+                    .set("margin-top","50px")
+                    .set("margin-bottom","25px")
+                    .set("border-top","solid 1px"+ColorHTML.DARKGREY.getColorHtml());
+            dialog.add(
+                    pppSuppDiv(p),
+                    divSeparator,
+                    styleParagraph(new Paragraph("E-mail "+userRoletoString(p)+": "+p.getEmail())),
+                    styleParagraph(new Paragraph(p.getWebsite())),
+                    styleParagraph(new Paragraph(p.getDescription())),
+                    newDMButton(dialog, p)
+            );
+
+        });
         return divUser;
+    }
+
+    private Div pppSuppDiv(Person p){
+        Image ppp=p.getProfilePicture();
+        ppp.getStyle()
+                .set("height","125px")
+                .set("width","125px")
+                .set("border-radius","90px")
+                .set("margin-right","20px");
+
+        Paragraph pUserName = new Paragraph(p.getUsername());
+        pUserName.getStyle()
+                .set("color", ColorHTML.PURPLE.getColorHtml())
+                .set("font-weight", "700")
+                .set("font-size","20px");
+
+        Div divPPSup = new Div();
+        Div divPPSupRight = new Div();
+        divPPSupRight.add(pUserName, styleParagraph(new Paragraph(p.getFirstName()+" "+p.getLastName())));
+        divPPSup.getStyle()
+                .set("display","flex")
+                .set("flex-direction","raw");
+        divPPSup.add(ppp, divPPSupRight);
+        return divPPSup;
+    }
+
+    private Button newDMButton(Dialog dialog, Person p){
+        Button newDM = new Button("Envoyer un message privé", buttonClickEvent -> {
+            getChatController().createNewPrivateChannel(SecurityUtils.getCurrentUser(personRepository).getId(), "username", p.getUsername());
+            UI.getCurrent().getPage().executeJs("window.location.href='"+getUrl()+"dms/"+chatController.lastDm(SecurityUtils.getCurrentUser(personRepository).getId()).getId()+"'");
+            dialog.close();
+        });
+        newDM.getStyle()
+                .set("background-color",ColorHTML.PURPLE.getColorHtml())
+                .set("color", ColorHTML.WHITE.getColorHtml())
+                .set("margin-top","50px");
+        return newDM;
+    }
+
+    private String userRoletoString(Person p){
+        if (p.getRole().equals(Person.Role.STUDENT)) return "de l'élève";
+        else if (p.getRole().equals(Person.Role.ADMIN))return "de l'administrateur";
+        return "du professeur";
+    }
+
+    private Paragraph styleParagraph(Paragraph p){
+        p.getStyle()
+                .set("color", ColorHTML.TEXTGREY.getColorHtml())
+                .set("font-size","17px");
+        return p;
     }
 
     /**

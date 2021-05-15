@@ -226,4 +226,8 @@ public class ChatController {
     public void clearMessageChat(int value, long channelid) {
         publicChatMessageRepository.updateDeleted(channelid, value);
     }
+
+    public PrivateTextChannel lastDm(long id) {
+        return privateTextChannelRepository.findFirstByUserAOrderByIdDesc(id);
+    }
 }

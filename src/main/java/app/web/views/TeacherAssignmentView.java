@@ -1,6 +1,7 @@
 package app.web.views;
 
 import app.controller.AssignmentController;
+import app.controller.ChatController;
 import app.controller.Controller;
 import app.controller.DownloadController;
 import app.jpa_repo.*;
@@ -58,13 +59,17 @@ public class TeacherAssignmentView extends ViewWithSidebars implements HasDynami
                                  @Autowired GroupRepository groupRepository,
                                  @Autowired GroupMembersRepository groupMembersRepository,
                                  @Autowired MoodlePageRepository moodlePageRepository,
-                                 @Autowired PrivateChatMessageRepository privateChatMessageRepository) {
+                                 @Autowired PrivateChatMessageRepository privateChatMessageRepository,
+                                 @Autowired PublicChatMessageRepository publicChatMessageRepository,
+                                 @Autowired PrivateTextChannelRepository privateTextChannelRepository) {
         this.assignmentRepository = assignmentRepository;
         this.courseRepository = courseRepository;
         setPersonRepository(personRepository);
         setController(new Controller(personRepository, publicTextChannelRepository, null,
                                      courseRepository, moodlePageRepository, groupRepository, groupMembersRepository,
                                      privateChatMessageRepository));
+        setChatController(new ChatController(personRepository,publicTextChannelRepository,publicChatMessageRepository,
+                privateTextChannelRepository,privateChatMessageRepository ));
         setAssignmentController(new AssignmentController(personRepository, assignmentRepository,
                                                          studentAssignmentsUploadsRepository, courseRepository));
     }
