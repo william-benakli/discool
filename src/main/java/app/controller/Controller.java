@@ -84,9 +84,6 @@ public class Controller {
         SecurityUtils.online.remove(name);
     }
 
-    public void saveMessage(PublicChatMessage message) {
-        publicChatMessageRepository.save(message);
-    }
 
     public List<Person> searchByUserName(String searchTerm) {
         return personRepository.searchByUserName(searchTerm);
@@ -128,6 +125,9 @@ public class Controller {
         moodlePageRepository.delete(section);
     }
 
+    public String getUsernameOfSender(PublicChatMessage publicChatMessage) {
+        return personRepository.findById(publicChatMessage.getSender()).getUsername();
+    }
 
     public void updateTextChannel(PublicTextChannel courantChannel, String name, boolean mute, boolean visible) {
         courantChannel.setName(name);
@@ -148,6 +148,18 @@ public class Controller {
         section.setTitle(title);
         section.setContent(content);
         moodlePageRepository.save(section);
+    }
+
+    public void clearMessageChat() {
+        publicChatMessageRepository.updateDeletedAll();
+    }
+
+    public void clearMessageChat(int value, long channelid) {
+        publicChatMessageRepository.updateDeleted(channelid, value);
+    }
+
+    public PublicChatMessage getMessageById(long id) {
+        return publicChatMessageRepository.findById(id);
     }
 
     public ArrayList<Person> getAllStudentsForCourse(long courseId) {
@@ -219,7 +231,7 @@ public class Controller {
      * @param title     The name of the course
      * @param iconPath  The path to the course's picture
      */
-    public void createServer(long teacherId, String title, String iconPath) {
+    public Course createServer(long teacherId, String title, String iconPath) {
         Course toSave = Course.builder()
                 .teacherId(teacherId)
                 .name(title)
@@ -231,6 +243,7 @@ public class Controller {
                 .title("Homepage")
                 .courseId(toSave.getId()).build();
         moodlePageRepository.save(moodlePage);
+        return toSave;
     }
 
     public List<Course> findAllCourses() {
@@ -252,6 +265,19 @@ public class Controller {
         personRepository.deleteUserById(person.getId());
     }
 
+    public List<Group> findGroupAll() {
+        return groupRepository.findAll();
+    }
+
+    public List<Person> findAllUserByRole(Person.Role r) {
+        return personRepository.findAllByRole(r);
+    }
+
+    public List<Person> findAllUserByRoleifPresent(Person.Role r) {
+        return personRepository.findAllByRole(r);
+    }
+
+
     /**
      * @param users    the list of users to get the data from
      * @param getNames true to get the names (first+last), false to get the usernames
@@ -266,6 +292,41 @@ public class Controller {
         }
         return values;
     }
+    public Course getLastCourse() {
+        return courseRepository.findTopByOrderByIdDesc();
+    }
+
+    public void addPersonToCourse(Person p, Group group) {
+        if (!existPersonIntoCourse(p, group)) {
+            groupMembersRepository.save(
+                    GroupMembers.builder()
+                            .userId(p.getId())
+                            .groupId(getLastGroup().getId())
+                            .timeAdded(0)
+                            .build());
+        }
+    }
+
+    public boolean existPersonIntoCourse(Person p, Group group) {
+        return (groupMembersRepository.findByUserIdAndGroupId(p.getId(), group.getId()) != null);
+    }
+
+    public Group getLastGroup() {
+        return groupRepository.findTopByOrderByIdDesc();
+    }
+
+    public void createGroup(Course c, String name) {
+        groupRepository.save(Group.builder().courseId(c.getId()).name(name).build());
+    }
+
+    public ArrayList<GroupMembers> getPersonByGroupId(long id) {
+        return groupMembersRepository.findAllByGroupId(id);
+    }
+
+    public Person getPersonById(long id) {
+        return personRepository.findById(id);
+    }
+
 
     public void removeCourse(long course) {
         courseRepository.deleteById(course);
@@ -301,4 +362,31 @@ public class Controller {
         return moodlePageRepository.findByCourseIdAndHomePage(id, bool);
     }
 
+    public void saveCourse(Course course) {
+        this.courseRepository.save(course);
+    }
+
+    public void deleteUserInGroup(Person p) {
+        groupMembersRepository.deleteByUserId(p.getId());
+    }
+
+    public Group getGroupByCourseId(long courseId) {
+        return groupRepository.findGroupByCourseId(courseId);
+    }
+
+
+    public void deletCourse(long course, AssignmentController assignmentController) {
+        for (Group group : selectGroupeCourse(course)) removeGroupMembers(group.getId());
+        removeGroups(course);
+        assignmentController.removeUploadsStudent(course);
+        assignmentController.removeAssignment(course);
+        for (PublicTextChannel publicTextChannel : getAllChannelsForCourse(course)) {
+            for (PublicChatMessage publicChatMessage : listPosts(publicTextChannel.getId())) {
+                removePosts(publicChatMessage.getId());
+            }
+        }
+        removeChannels(course);
+        removeMoodlePage(course);
+        removeCourse(course);
+    }
 }

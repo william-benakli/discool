@@ -19,4 +19,7 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
     @Query(value =" DELETE FROM courses WHERE id = :idparam ",nativeQuery = true)
     void deleteById(@Param("idparam") long id);
 
+
+    Course findTopByOrderByIdDesc();
+
 }

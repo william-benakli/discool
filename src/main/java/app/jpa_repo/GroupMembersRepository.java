@@ -12,7 +12,6 @@ import java.util.ArrayList;
 public interface GroupMembersRepository extends JpaRepository<GroupMembers, Long> {
 
     ArrayList<GroupMembers> findByUserId(long id);
-
     ArrayList<GroupMembers> findByGroupId(long id);
 
     @Modifying
@@ -24,5 +23,10 @@ public interface GroupMembersRepository extends JpaRepository<GroupMembers, Long
     @Transactional
     @Query(value = "DELETE FROM group_members WHERE userid = :idparam", nativeQuery = true)
     void deleteByUserId(@Param("idparam") long id);
+
+
+    GroupMembers findByUserIdAndGroupId(long userId, long groupId);
+
+    ArrayList<GroupMembers> findAllByGroupId(long groupId);
 
 }

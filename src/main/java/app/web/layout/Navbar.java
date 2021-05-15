@@ -11,6 +11,7 @@ import app.model.courses.MoodlePage;
 import app.model.users.GroupMembers;
 import app.model.users.Person;
 import app.web.components.ComponentButton;
+import app.web.components.ServerFormComponent;
 import app.web.components.UploadComponent;
 import app.web.views.*;
 import com.vaadin.flow.component.*;
@@ -19,7 +20,10 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.dialog.Dialog;
-import com.vaadin.flow.component.html.*;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -29,7 +33,6 @@ import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.PasswordField;
-import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinServletRequest;
@@ -49,9 +52,11 @@ import java.util.Map;
 @CssImport("./styles/style.css")
 @StyleSheet("https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap")
 public class Navbar extends AppLayout {
+    //TODO: the background of the selected button changes color when clicked #42
 
     private final PersonRepository personRepository;
     private final MoodlePageRepository moodlePageRepository;
+    private final GroupRepository groupRepository;
     private final Controller controller;
     private final ChatController chatController;
     private Person currentUser;
@@ -75,6 +80,7 @@ public class Navbar extends AppLayout {
         this.assignmentController = new AssignmentController(personRepository, assignmentRepository, studentAssignmentsUploadsRepository, courseRepository);
         this.personRepository = personRepository;
         this.moodlePageRepository = moodlePageRepository;
+        this.groupRepository = groupRepository;
         this.controller = new Controller(personRepository, publicTextChannelRepository, publicChatMessageRepository, courseRepository,
                                          moodlePageRepository, groupRepository, groupMembersRepository, privateChatMessageRepository);
         this.chatController = new ChatController(personRepository, publicTextChannelRepository, publicChatMessageRepository,
@@ -85,21 +91,24 @@ public class Navbar extends AppLayout {
     }
 
     /**
-     * Generates the navigation bar submenu that contains the logo
+     * Create a button in one of the docks of the navigation bar
+     *
+     * @param img      The picture to put in the navbar to represent a course
+     * @param shortCut Shortcuts to access the course
+     * @return the button with an Anchor link to the course
      */
-    @SneakyThrows
-    private void createLeftSubMenu() {
-        HorizontalLayout servCardDock = createCustomHorizontalLayout();
-        servCardDock.getStyle().set("margin", "0");
-        ComponentButton button = createServDockImage(new Image("img/Discool.png", "créer un serveur"), Key.NAVIGATE_NEXT);
-        button.getStyle()
-                .set("width", "200px")
-                .set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml());
-        RouterLink routerLink = new RouterLink("", HomeView.class);
-        routerLink.getStyle()
-                .set("margin-left", "16px");
-        linkRouteurImage(servCardDock, button, routerLink);
-        addToNavbar(servCardDock);
+    public static ComponentButton createServImage(Image img, Key shortCut) {
+
+        ComponentButton imgButton = new ComponentButton(img);
+        imgButton.getStyle()
+                .set("padding", "0")
+                .set("margin", "12px 6px 6px 6px")
+                .set("height", "50px")
+                .set("width", "50px")
+                .set("border-radius", "10px")
+                .set("cursor", "pointer");
+        imgButton.addFocusShortcut(shortCut, KeyModifier.ALT);
+        return imgButton;
     }
 
     /**
@@ -115,43 +124,75 @@ public class Navbar extends AppLayout {
         URI uri = new URI(uriString.toString());
         String tmp = uri.toString();
         String[] splitURI = tmp.split("/");
-        String cleanURI = splitURI[splitURI.length-1];
+        String cleanURI = splitURI[splitURI.length - 1];
 
         courseNavigationDock = createCustomHorizontalLayout();
         courseNavigationDock.getStyle()
-                .set("width","750px")
-                .set("overflow","auto")
-                .set("overflow-y","hidden")
-                .set("transform","rotateX(180deg)");
+                .set("width", "750px")
+                .set("overflow", "auto")
+                .set("overflow-y", "hidden")
+                .set("transform", "rotateX(180deg)");
         List<Course> courses = controller.findAllCourses();
+        // find all the groups the user is a member of
+        ArrayList<GroupMembers> groupMembers = controller.findByUserId(currentUser.getId());
+        ArrayList<Long> userGroupsId = new ArrayList<>(); // a list of the ids of the courses the user is a part of
+        groupMembers.forEach(groupMember -> {
+            userGroupsId.add(groupRepository.findById(groupMember.getGroupId()).getCourseId());
+        });
+        // add courses to the menu bar
         for (Course c : courses) {
-            if (!SecurityUtils.isUserAdmin()) {
-                for (GroupMembers groupeMembers : controller.findByUserId(currentUser.getId())) {
-                    if (groupeMembers.getGroupId() == c.getId()) createCourseButton(c, splitURI, cleanURI);
-                }
-            }else createCourseButton(c, splitURI, cleanURI);
+            if (SecurityUtils.isUserAdmin()) { // admins can see ALL the courses
+                createCourseButton(c, splitURI, cleanURI);
+            } else if (c.getTeacherId() == currentUser.getId()) { // if the teacher created the course
+                createCourseButton(c, splitURI, cleanURI);
+            } else if (userGroupsId.contains(c.getId())) { // if the user is part of a group inside that course
+                createCourseButton(c, splitURI, cleanURI);
+            }
         }
 
-        if (! SecurityUtils.isUserStudent()) {
+        if (!SecurityUtils.isUserStudent()) {
             createAddACourseButton();
         }
         addToNavbar(courseNavigationDock);
     }
 
-    private void createAddACourseButton() {
-        ComponentButton button = createServDockImage(new Image("img/add.svg", "Create serveur"), Key.NAVIGATE_NEXT);
-        Dialog dialog = new Dialog();
-        TextField field = new TextField();
-        Button valider = new Button("Valider", buttonClickEvent1 -> {
-            controller.createServer(currentUser.getId(), field.getValue(), "img/DDiscool.svg");
-            dialog.close();
-            UI.getCurrent().getPage().reload();
-        });
+    /**
+     * Generates the navigation bar submenu that contains the logo
+     */
+    @SneakyThrows
+    private void createLeftSubMenu() {
+        HorizontalLayout servCardDock = createCustomHorizontalLayout();
+        servCardDock.getStyle().set("margin", "0");
+        ComponentButton button = createServImage(new Image("img/Discool.png", "créer un serveur"), Key.NAVIGATE_NEXT);
         button.getStyle()
+                .set("width", "200px")
                 .set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml());
-        dialog.add(field, valider);
-        button.addClickListener(buttonClickEvent -> dialog.open());
-        courseNavigationDock.add(button);
+        RouterLink routerLink = new RouterLink("", HomeView.class);
+        routerLink.getStyle()
+                .set("margin-left", "16px");
+        linkRouteurImage(servCardDock, button, routerLink);
+        addToNavbar(servCardDock);
+    }
+
+    /**
+     * Create a button in one of the docks of the navigation bar
+     *
+     * @param img      The picture to put in the navbar to represent a course
+     * @param shortCut Shortcuts to access the course
+     * @return the button with an Anchor link to the course
+     */
+    public static ComponentButton createServDockImage(Image img, Key shortCut) {
+
+        ComponentButton imgButton = new ComponentButton(img, 50, 50);
+        imgButton.getStyle()
+                .set("padding", "0")
+                .set("margin", "12px 6px 6px 6px")
+                .set("height", "50px")
+                .set("width", "50px")
+                .set("border-radius", "10px")
+                .set("cursor", "pointer");
+        imgButton.addFocusShortcut(shortCut, KeyModifier.ALT);
+        return imgButton;
     }
 
     /**
@@ -168,7 +209,7 @@ public class Navbar extends AppLayout {
                 ), Key.NAVIGATE_NEXT);
         button.getStyle()
                 .set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml())
-                .set("transform","rotateX(180deg)");
+                .set("transform", "rotateX(180deg)");
         long pageId = findHomePageId(c.getId());
         RouterLink routerLink = new RouterLink("", MoodleView.class, pageId);
         linkRouteurImage(courseNavigationDock, button, routerLink);
@@ -271,26 +312,13 @@ public class Navbar extends AppLayout {
         return servCardDock;
     }
 
-    /**
-     * Create a button in one of the docks of the navigation bar
-     *
-     * @param img      The picture to put in the navbar to represent a course
-     * @param shortCut Shortcuts to access the course
-     * @return the button with an Anchor link to the course
-     */
-    public static ComponentButton createServDockImage(Image img, Key shortCut) {
-        img.setHeightFull();
-        img.setWidthFull();
-        ComponentButton imgButton = new ComponentButton(img);
-        imgButton.getStyle()
-                .set("padding", "0")
-                .set("margin", "12px 6px 6px 6px")
-                .set("height", "50px")
-                .set("width", "50px")
-                .set("border-radius", "10px")
-                .set("cursor", "pointer");
-        imgButton.addFocusShortcut(shortCut, KeyModifier.ALT);
-        return imgButton;
+    private void createAddACourseButton() {
+        ComponentButton button = createServDockImage(new Image("img/add.svg", "Create serveur"), Key.NAVIGATE_NEXT);
+        button.getStyle()
+                .set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml());
+        Dialog d = new ServerFormComponent(controller, currentUser);
+        button.addClickListener(buttonClickEvent -> d.open());
+        courseNavigationDock.add(button);
     }
 
     /**
@@ -304,6 +332,21 @@ public class Navbar extends AppLayout {
         button.getStyle().set("overflow", "hidden");
         routerLink.getElement().appendChild(button.getElement());
         servCardDock.add(routerLink);
+    }
+
+
+    public String getExtensionImage(String name) {
+        String[] tab_name = name.toLowerCase().split("\\.");
+        if (tab_name.length > 2) return "";
+        if (tab_name[1].contains("jpg") || tab_name[1].contains("jpeg") || tab_name[1].contains("png")) {
+            return tab_name[1];
+        }
+        return "";
+    }
+
+    public boolean ImageExist(String url) {
+        File f = new File(url);
+        return f.exists();
     }
 
     /**
@@ -523,6 +566,7 @@ public class Navbar extends AppLayout {
 
         /**
          * Create a layout with the profile picture and a button to change the picture
+         *
          * @return the layout
          */
         private FlexLayout createProfilePicture(Paragraph userName) {
@@ -549,7 +593,7 @@ public class Navbar extends AppLayout {
                     .set("margin","24px 0 12px 24px");
 
             button.addClickListener(event -> {
-                ChangeProfilePictureDialog changeProfilePicture = new ChangeProfilePictureDialog();
+                new ChangeProfilePictureDialog();
             });
             nameButton.add(userName, button);
             ppLayout.add(profilPicture, nameButton);
@@ -568,7 +612,7 @@ public class Navbar extends AppLayout {
         private void createDialog() {
             H2 title = new H2("Upload a new profile picture");
             title.getStyle()
-                    .set("text-align","center")
+                    .set("text-align", "center")
                     .set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml());
             Paragraph instructions = new Paragraph("Choose a new picture from your browser (or drag-and-drop).\n " +
                                                         "Only .jpg and .jpeg files are accepted.");
@@ -595,7 +639,7 @@ public class Navbar extends AppLayout {
             String extension;
             if (oldName.endsWith("jpeg")) {
                 extension = ".jpeg";
-            } else if (oldName.endsWith("jpg")){
+            } else if (oldName.endsWith("jpg")) {
                 extension = ".jpg";
             } else if (oldName.endsWith("JPG")) {
                 extension = ".JPG";
@@ -639,5 +683,6 @@ public class Navbar extends AppLayout {
         }
         directMessageButton = createAndStyleButton(imagePath, "Messages prives");
     }
+
 
 }

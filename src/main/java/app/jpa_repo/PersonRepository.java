@@ -56,6 +56,8 @@ public interface PersonRepository extends JpaRepository<Person, Long> {
 
     ArrayList<Person> findAll();
 
+    ArrayList<Person> findAllByRole(Person.Role r);
+
     Person findByFirstNameAndLastName(String firstName, String lastName);
 
 }
