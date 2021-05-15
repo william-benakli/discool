@@ -401,9 +401,8 @@ public class Navbar extends AppLayout {
             /*navigation between tabs*/
             Map<Tab, Component> tabsToPages = new HashMap<>();
             tabsToPages.put(tab1, page1);
-            tabsToPages.put(tab2, page2);
-            Tabs tabs = new Tabs(tab1, tab2);
-            Div pages = new Div(page1, page2);
+            Tabs tabs = new Tabs(tab1);
+            Div pages = new Div(page1);
 
             tabs.addSelectedChangeListener(event -> {
                 tabsToPages.values().forEach(page -> page.setVisible(false));

@@ -657,7 +657,9 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                 }
             });
         }
-
+        /**
+         * to add some style to the dialog's report
+         */
         private void reportDialogStyle(Dialog dialog, Div buttons, Button valider , Button fermer, H1 title, ComboBox<String> reasonReport,TextField reasonTextfield){
             dialog.setHeight("40%");
 
@@ -691,33 +693,34 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
             reasonReport.setPlaceholder("Raison de signalement");
             reasonReport.isRequired();
         }
-
-        private void sendReport(ComboBox<String> reasonReport, TextField reasonTextfield) {
+        /**
+         * the function of reporting
+         */
+        private void sendReport(ComboBox<String> reasonReport, TextField reasonTextfield){
+            Notification notification = new Notification();
             long ok = chatController.createNewPrivateChannel(currentUser.getId(), "pseudo", "admin");
             PublicTextChannel publicTextChannel = getController().getTextChannel(textChannel.getId());
             Course course = getController().findCourseById(publicTextChannel.getCourseId());
-            if (reasonReport.getValue().equals("Autre...")) {
-                String message = "Je signale l'user @" + chatController.getUsernameOfSender(chatMessage) + " pour cause : "
-                        + reasonTextfield.getValue() + " ,dans le channel :" + textChannel.getName() + ". Dans le cours :"
-                        + course.getName();
-                chatController.saveMessage(message, ok, chatMessage.getParentId(), currentUser.getId(), true, 0);
-            } else {
-                String message = "Je signale l'user @" + chatController.getUsernameOfSender(chatMessage) + " pour motif : "
-                        + reasonReport.getValue() + " ,dans le channel :" + textChannel.getName() + ". Dans le cours :"
-                        + course.getName();
-                chatController.saveMessage(message, ok, chatMessage.getParentId(), currentUser.getId(), true, 0);
+            if(reasonReport.getValue().equals("Autre...")){
+                chatController.saveMessage("Je signale l'user @" + chatController.getUsernameOfSender(chatMessage) + " pour cause : " + reasonTextfield.getValue() + " ,dans le channel :" + textChannel.getName() + ". Dans le cours :"
+                                + course.getName(),
+                        ok, chatMessage.getParentId(), currentUser.getId(), true, 0);
+                chatController.saveMessage("Votre demande à été transmise avec succés !", ok,chatMessage.getParentId() , 1, true, 0);
+            }else {
+                chatController.saveMessage("Je signale l'user @" + chatController.getUsernameOfSender(chatMessage) + " pour motif : " + reasonReport.getValue() + " ,dans le channel :" + textChannel.getName() + ". Dans le cours :"
+                                + course.getName(),
+                        ok, chatMessage.getParentId(), currentUser.getId(), true, 0);
+                chatController.saveMessage("Votre demande à été transmise avec succés !", ok,chatMessage.getParentId() , 1, true, 0);
             }
-            chatController.saveMessage("Votre demande à été transmise avec succés !", ok,
-                                       chatMessage.getParentId(), 1, true, 0);
             if (ok == -1) {
-                Notification.show("Votre signalement n'a pas pu etre effectué.");
+                notification.show("Votre signalement n'a pas pu etre effectué.");
             } else {
-                String notificationMessage = "Signalement de l'utilsateur @" +
-                        chatController.getUsernameOfSender(chatMessage) + " reussi !";
-                Notification.show(notificationMessage).setPosition(Notification.Position.MIDDLE);
+                notification.show("Signalement de l'utilsateur @" + chatController.getUsernameOfSender(chatMessage) + " reussi !").setPosition(Notification.Position.MIDDLE);
             }
         }
-
+        /**
+         * Creates a Button with the report fuction
+         */
         private void createReportButton() {
             report = new ComponentButton("","!", SIZEWIDTH, SIZEHEIGHT);
             report.getStyle().set("color", ColorHTML.PURPLE.getColorHtml());
