@@ -63,7 +63,6 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
     protected VerticalLayout layoutMaster = new VerticalLayout();
     protected HorizontalLayout messageInputBar = new HorizontalLayout();
 
-
     public TextChannelView(PublicTextChannelRepository publicTextChannelRepository,
                            PublicChatMessageRepository publicChatMessageRepository,
                            PrivateTextChannelRepository privateTextChannelRepository,
@@ -663,9 +662,73 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                 }
             });
         }
+        /**
+         * to add some style to the dialog's report
+         */
+        private void reportDialogStyle(Dialog dialog, Div buttons, Button valider , Button fermer, H1 title, ComboBox<String> reasonReport,TextField reasonTextfield){
+            dialog.setHeight("40%");
 
+            fermer.getStyle()
+                    .set("background-color","#F04747")
+                    .set("color","white");
+
+            valider.getStyle()
+                    .set("background-color",ColorHTML.PURPLE.getColorHtml())
+                    .set("color","white");
+
+            title.getStyle().set("color",ColorHTML.PURPLE.getColorHtml());
+
+            reasonTextfield.setVisible(false);
+            reasonTextfield.getStyle()
+                    .set("display","block")
+                    .set("margin-top","-30px");
+
+            buttons.add(valider,fermer);
+            buttons.getStyle()
+                    .set("display","inline")
+                    .set("width","50%")
+                    .set("padding","10px")
+                    .set("margin-top","15px")
+                    .set("margin-left","25%");
+
+            fermer.getStyle().set("margin-left","10px");
+
+            reasonReport.getStyle().set("display","block");
+            reasonReport.setItems("Propos désagreable", "Mauvais comportement","Trop bavard","Autre...");
+            reasonReport.setPlaceholder("Raison de signalement");
+            reasonReport.isRequired();
+        }
+        /**
+         * the function of reporting
+         */
+        private void sendReport(ComboBox<String> reasonReport, TextField reasonTextfield){
+            Notification notification = new Notification();
+            long ok = chatController.createNewPrivateChannel(currentUser.getId(), "pseudo", "admin");
+            PublicTextChannel publicTextChannel = getController().getTextChannel(textChannel.getId());
+            Course course = getController().findCourseById(publicTextChannel.getCourseId());
+            if(reasonReport.getValue().equals("Autre...")){
+                chatController.saveMessage("Je signale l'user @" + chatController.getUsernameOfSender(chatMessage) + " pour cause : " + reasonTextfield.getValue() + " ,dans le channel :" + textChannel.getName() + ". Dans le cours :"
+                                + course.getName(),
+                        ok, chatMessage.getParentId(), currentUser.getId(), true, 0);
+                chatController.saveMessage("Votre demande à été transmise avec succés !", ok,chatMessage.getParentId() , 1, true, 0);
+            }else {
+                chatController.saveMessage("Je signale l'user @" + chatController.getUsernameOfSender(chatMessage) + " pour motif : " + reasonReport.getValue() + " ,dans le channel :" + textChannel.getName() + ". Dans le cours :"
+                                + course.getName(),
+                        ok, chatMessage.getParentId(), currentUser.getId(), true, 0);
+                chatController.saveMessage("Votre demande à été transmise avec succés !", ok,chatMessage.getParentId() , 1, true, 0);
+            }
+            if (ok == -1) {
+                notification.show("Votre signalement n'a pas pu etre effectué.");
+            } else {
+                notification.show("Signalement de l'utilsateur @" + chatController.getUsernameOfSender(chatMessage) + " reussi !").setPosition(Notification.Position.MIDDLE);
+            }
+            UI.getCurrent().navigate("dms/1");
+        }
+        /**
+         * Creates a Button with the report fuction
+         */
         private void createReportButton() {
-            report = new ComponentButton("img/editer.svgimg/editer.svg","!", SIZEWIDTH, SIZEHEIGHT);
+            report = new ComponentButton("","!", SIZEWIDTH, SIZEHEIGHT);
             report.getStyle().set("color", ColorHTML.PURPLE.getColorHtml());
             report.addClickListener(event -> {
                 Dialog dialog = new Dialog();
@@ -675,61 +738,24 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                 H1 title = new H1("Signaler un utilisateur");
                 ComboBox<String> reasonReport = new ComboBox<>();
                 TextField reasonTextfield = new TextField();
+                reportDialogStyle(dialog, buttons, valider, fermer, title, reasonReport, reasonTextfield);
 
-                reasonTextfield.setVisible(false);
-                reasonTextfield.getStyle().set("display","block");
-
-                buttons.add(valider,fermer);
-                buttons.getStyle().set("display","inline")
-                                  .set("width","50%")
-                                  .set("padding","10px");
-                fermer.getStyle().set("margin-left","10px");
-
-                reasonReport.getStyle().set("display","block");
-                reasonReport.setItems("propos désagreable", "Mauvais comportement","trop bavard","autre...");
-                reasonReport.setPlaceholder("Reason de Signalement");
-                reasonReport.isRequired();
                 reasonReport.addValueChangeListener(evt -> {
-                if(evt.getValue().equals("autre...")) {
+                if(evt.getValue().equals("Autre...")) {
                     reasonTextfield.setVisible(true);
-                    reasonTextfield.setPlaceholder("decrivez votre raison");
-
+                    reasonTextfield.setPlaceholder("Decrivez votre raison");
                 }
                 });
-                    valider.addClickListener(evt -> {
-                        Notification notification = new Notification();
-                        long ok = chatController.createNewPrivateChannel(currentUser.getId(), "pseudo", "admin");
-                        PublicTextChannel publicTextChannel = getController().getTextChannel(textChannel.getId());
-                        Course course = getController().findCourseById(publicTextChannel.getCourseId());
-                        if(reasonReport.getValue().equals("autre...")){
-                            chatController.saveMessage("je signale l'user @" + chatController.getUsernameOfSender(chatMessage) + " pour cause : " + reasonTextfield.getValue() + ", dans le channel :" + textChannel.getName() + " .Dans le cours :"
-                                            + course.getName(),
-                                    ok, chatMessage.getParentId(), currentUser.getId(), true, 0);
+                fermer.addClickListener(e -> dialog.close());
 
-                            chatController.saveMessage("Votre demande à été transmise avec succés !", ok,chatMessage.getParentId() , 1, true, 0);
-
-
-                        }else {
-                            chatController.saveMessage("je signale l'user @" + chatController.getUsernameOfSender(chatMessage) + " pour motif : " + reasonReport.getValue() + ", dans le channel :" + textChannel.getName() + " .Dans le cours :"
-                                            + course.getName(),
-                                    ok, chatMessage.getParentId(), currentUser.getId(), true, 0);
-                            chatController.saveMessage("Votre demande à été transmise avec succés !", ok,chatMessage.getParentId() , 1, true, 0);
-                        }
-                        if (ok == -1) {
-                            notification.show("votre signalement n'a pas pu etre effectué.").setPosition(Notification.Position.MIDDLE);
-                        } else {
-                            notification.show("Signalement de l'utilsateur @" + chatController.getUsernameOfSender(chatMessage) + " reussi !").setPosition(Notification.Position.MIDDLE);
-                        }
-                        UI.getCurrent().navigate("dms/1");
-                        dialog.close();
-                    });
-                    dialog.add(title);
-                    dialog.add(reasonReport);
-                    dialog.add(reasonTextfield);
-                    dialog.add(buttons);
-                    dialog.open();
+                valider.addClickListener(evt -> {
+                    sendReport(reasonReport,reasonTextfield);
+                    dialog.close();
                 });
-            }
+                dialog.add(title,reasonReport,reasonTextfield,buttons);
+                dialog.open();
+            });
+        }
 
         public void createPopMessage() {
             optionsUser.add(response);
