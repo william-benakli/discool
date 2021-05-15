@@ -705,18 +705,22 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                             chatController.saveMessage("je signale l'user @" + chatController.getUsernameOfSender(chatMessage) + " pour cause : " + reasonTextfield.getValue() + ", dans le channel :" + textChannel.getName() + " .Dans le cours :"
                                             + course.getName(),
                                     ok, chatMessage.getParentId(), currentUser.getId(), true, 0);
+
                             chatController.saveMessage("Votre demande à été transmise avec succés !", ok,chatMessage.getParentId() , 1, true, 0);
 
+
                         }else {
-                            chatController.saveMessage("je signale l'user @" + chatController.getUsernameOfSender(chatMessage) + " pour : " + reasonReport.getValue() + ", dans le channel :" + textChannel.getName() + " .Dans le cours :"
+                            chatController.saveMessage("je signale l'user @" + chatController.getUsernameOfSender(chatMessage) + " pour motif : " + reasonReport.getValue() + ", dans le channel :" + textChannel.getName() + " .Dans le cours :"
                                             + course.getName(),
                                     ok, chatMessage.getParentId(), currentUser.getId(), true, 0);
+                            chatController.saveMessage("Votre demande à été transmise avec succés !", ok,chatMessage.getParentId() , 1, true, 0);
                         }
                         if (ok == -1) {
                             notification.show("votre signalement n'a pas pu etre effectué.").setPosition(Notification.Position.MIDDLE);
                         } else {
                             notification.show("Signalement de l'utilsateur @" + chatController.getUsernameOfSender(chatMessage) + " reussi !").setPosition(Notification.Position.MIDDLE);
                         }
+                        UI.getCurrent().navigate("dms/1");
                         dialog.close();
                     });
                     dialog.add(title);
@@ -735,7 +739,9 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                 optionsUser.add(modify);
                 optionsUser.add(delete);
             }
-            optionsUser.add(report);
+            if(currentUser.getId() != chatMessage.getSender() && !getController().findUserById(chatMessage.getSender()).getRoleAsString().equals("ADMIN")){
+                optionsUser.add(report);
+            }
             layoutPop.add(optionsUser);
             layoutPop.resize();
 
