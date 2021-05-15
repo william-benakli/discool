@@ -5,10 +5,8 @@ import app.controller.broadcasters.ChatMessagesBroadcaster;
 import app.controller.commands.CommandsClearChat;
 import app.controller.security.SecurityUtils;
 import app.jpa_repo.*;
-import app.model.chat.ChatMessage;
-import app.model.chat.PrivateChatMessage;
-import app.model.chat.PrivateTextChannel;
-import app.model.chat.TextChannel;
+import app.model.chat.*;
+import app.model.courses.Course;
 import app.model.users.Person;
 import app.web.components.ComponentButton;
 import app.web.components.UploadComponent;
@@ -671,25 +669,61 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
             report.getStyle().set("color", ColorHTML.PURPLE.getColorHtml());
             report.addClickListener(event -> {
                 Dialog dialog = new Dialog();
+                Div buttons = new Div();
                 Button valider = new Button("Valider");
+                Button fermer = new Button("fermer");
+                H1 title = new H1("Signaler un utilisateur");
                 ComboBox<String> reasonReport = new ComboBox<>();
-                reasonReport.setItems("propos désagreable", "Mauvais comportement");
+                TextField reasonTextfield = new TextField();
+
+                reasonTextfield.setVisible(false);
+                reasonTextfield.getStyle().set("display","block");
+
+                buttons.add(valider,fermer);
+                buttons.getStyle().set("display","inline")
+                                  .set("width","50%")
+                                  .set("padding","10px");
+                fermer.getStyle().set("margin-left","10px");
+
+                reasonReport.getStyle().set("display","block");
+                reasonReport.setItems("propos désagreable", "Mauvais comportement","trop bavard","autre...");
                 reasonReport.setPlaceholder("Reason de Signalement");
-                valider.addClickListener(evt -> {
-                    long ok = chatController.createNewPrivateChannel(currentUser.getId(), "pseudo", "admin");
-                    chatController.saveMessage("je signale l'user @"+chatController.getUsernameOfSender(chatMessage)+" pour : "+reasonReport.getValue(),ok,chatMessage.getParentId(),currentUser.getId(),true,0);
-                    if (ok == -1) {
-                        Notification.show("Probleme : votre conversation n'a pas pu etre crée.");
-                    } else {
-                        Notification.show("Conversation creee ! Rafraichissez la page pour vous y rendre");
-                    }
-                    dialog.close();
+                reasonReport.isRequired();
+                reasonReport.addValueChangeListener(evt -> {
+                if(evt.getValue().equals("autre...")) {
+                    reasonTextfield.setVisible(true);
+                    reasonTextfield.setPlaceholder("decrivez votre raison");
+
+                }
                 });
+                    valider.addClickListener(evt -> {
+                        Notification notification = new Notification();
+                        long ok = chatController.createNewPrivateChannel(currentUser.getId(), "pseudo", "admin");
+                        PublicTextChannel publicTextChannel = getController().getTextChannel(textChannel.getId());
+                        Course course = getController().findCourseById(publicTextChannel.getCourseId());
+                        if(reasonReport.getValue().equals("autre...")){
+                            chatController.saveMessage("je signale l'user @" + chatController.getUsernameOfSender(chatMessage) + " pour cause : " + reasonTextfield.getValue() + ", dans le channel :" + textChannel.getName() + " .Dans le cours :"
+                                            + course.getName(),
+                                    ok, chatMessage.getParentId(), currentUser.getId(), true, 0);
+                        }else {
+                            chatController.saveMessage("je signale l'user @" + chatController.getUsernameOfSender(chatMessage) + " pour : " + reasonReport.getValue() + ", dans le channel :" + textChannel.getName() + " .Dans le cours :"
+                                            + course.getName(),
+                                    ok, chatMessage.getParentId(), currentUser.getId(), true, 0);
+                        }
+                        if (ok == -1) {
+                            notification.show("votre signalement n'a pas pu etre effectué.").setPosition(Notification.Position.MIDDLE);
+                        } else {
+                            notification.show("Signalement de l'utilsateur @" + chatController.getUsernameOfSender(chatMessage) + " reussi !").setPosition(Notification.Position.MIDDLE);
+                        }
+                        dialog.close();
+                    });
+                    dialog.add(title);
                     dialog.add(reasonReport);
-                dialog.add(valider);
-                dialog.open();
-            });
-        }
+                    dialog.add(reasonTextfield);
+                    dialog.add(buttons);
+                    dialog.open();
+                });
+            }
 
         public void createPopMessage() {
             optionsUser.add(response);
