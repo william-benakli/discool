@@ -237,6 +237,10 @@ public class Controller {
         return courseRepository.findAll();
     }
 
+    public Course findCourseById(long id){
+        return courseRepository.findCourseById(id);
+    }
+
     public List<MoodlePage> getAllMoodlePageForCourse(long courseID) {
         return moodlePageRepository.findAllByCourseId(courseID);
     }

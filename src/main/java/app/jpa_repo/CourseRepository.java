@@ -12,6 +12,8 @@ import java.util.ArrayList;
 
 public interface CourseRepository extends JpaRepository<Course, Long> {
 
+    public Course findCourseById(long id);
+
     @Modifying
     @Transactional
     @Query(value =" DELETE FROM courses WHERE id = :idparam ",nativeQuery = true)

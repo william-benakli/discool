@@ -5,16 +5,15 @@ import app.controller.broadcasters.ChatMessagesBroadcaster;
 import app.controller.commands.CommandsClearChat;
 import app.controller.security.SecurityUtils;
 import app.jpa_repo.*;
-import app.model.chat.ChatMessage;
-import app.model.chat.PrivateChatMessage;
-import app.model.chat.PrivateTextChannel;
-import app.model.chat.TextChannel;
+import app.model.chat.*;
+import app.model.courses.Course;
 import app.model.users.Person;
 import app.web.components.ComponentButton;
 import app.web.components.UploadComponent;
 import app.web.layout.Navbar;
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
@@ -62,7 +61,6 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
     protected ComponentButton muteHeadphone;
     protected VerticalLayout layoutMaster = new VerticalLayout();
     protected HorizontalLayout messageInputBar = new HorizontalLayout();
-
 
     public TextChannelView(PublicTextChannelRepository publicTextChannelRepository,
                            PublicChatMessageRepository publicChatMessageRepository,
@@ -438,10 +436,6 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         return tab_name[1];
     }
 
-
-
-
-
     public class MessageResponsePopComponent extends Div {
         VerticalLayout layoutVerticalLayout;
 
@@ -543,6 +537,8 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         private Button response;
         private Button delete;
         private Button modify;
+        private Button report;
+
 
         public MessageLayout(ChatMessage chatMessage) {
             this.chatMessage = chatMessage;
@@ -562,7 +558,9 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
             createPictureSetting(chatMessage.getSender());
             createDeleteButton();
             createModifyButton();
+            createReportButton();
             createResponseButton();
+
             createPopMessage();
             createChatBlock();
             messageFullLayout.add(profilPicture);
@@ -662,6 +660,96 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
             });
         }
 
+        private void reportDialogStyle(Dialog dialog, Div buttons, Button valider , Button fermer, H1 title, ComboBox<String> reasonReport,TextField reasonTextfield){
+            dialog.setHeight("40%");
+
+            fermer.getStyle()
+                    .set("background-color","#F04747")
+                    .set("color","white");
+
+            valider.getStyle()
+                    .set("background-color",ColorHTML.PURPLE.getColorHtml())
+                    .set("color","white");
+
+            title.getStyle().set("color",ColorHTML.PURPLE.getColorHtml());
+
+            reasonTextfield.setVisible(false);
+            reasonTextfield.getStyle()
+                    .set("display","block")
+                    .set("margin-top","-30px");
+
+            buttons.add(valider,fermer);
+            buttons.getStyle()
+                    .set("display","inline")
+                    .set("width","50%")
+                    .set("padding","10px")
+                    .set("margin-top","15px")
+                    .set("margin-left","25%");
+
+            fermer.getStyle().set("margin-left","10px");
+
+            reasonReport.getStyle().set("display","block");
+            reasonReport.setItems("Propos désagreable", "Mauvais comportement","Trop bavard","Autre...");
+            reasonReport.setPlaceholder("Raison de signalement");
+            reasonReport.isRequired();
+        }
+
+        private void sendReport(ComboBox<String> reasonReport, TextField reasonTextfield) {
+            long ok = chatController.createNewPrivateChannel(currentUser.getId(), "pseudo", "admin");
+            PublicTextChannel publicTextChannel = getController().getTextChannel(textChannel.getId());
+            Course course = getController().findCourseById(publicTextChannel.getCourseId());
+            if (reasonReport.getValue().equals("Autre...")) {
+                String message = "Je signale l'user @" + chatController.getUsernameOfSender(chatMessage) + " pour cause : "
+                        + reasonTextfield.getValue() + " ,dans le channel :" + textChannel.getName() + ". Dans le cours :"
+                        + course.getName();
+                chatController.saveMessage(message, ok, chatMessage.getParentId(), currentUser.getId(), true, 0);
+            } else {
+                String message = "Je signale l'user @" + chatController.getUsernameOfSender(chatMessage) + " pour motif : "
+                        + reasonReport.getValue() + " ,dans le channel :" + textChannel.getName() + ". Dans le cours :"
+                        + course.getName();
+                chatController.saveMessage(message, ok, chatMessage.getParentId(), currentUser.getId(), true, 0);
+            }
+            chatController.saveMessage("Votre demande à été transmise avec succés !", ok,
+                                       chatMessage.getParentId(), 1, true, 0);
+            if (ok == -1) {
+                Notification.show("Votre signalement n'a pas pu etre effectué.");
+            } else {
+                String notificationMessage = "Signalement de l'utilsateur @" +
+                        chatController.getUsernameOfSender(chatMessage) + " reussi !";
+                Notification.show(notificationMessage).setPosition(Notification.Position.MIDDLE);
+            }
+        }
+
+        private void createReportButton() {
+            report = new ComponentButton("","!", SIZEWIDTH, SIZEHEIGHT);
+            report.getStyle().set("color", ColorHTML.PURPLE.getColorHtml());
+            report.addClickListener(event -> {
+                Dialog dialog = new Dialog();
+                Div buttons = new Div();
+                Button valider = new Button("Valider");
+                Button fermer = new Button("fermer");
+                H1 title = new H1("Signaler un utilisateur");
+                ComboBox<String> reasonReport = new ComboBox<>();
+                TextField reasonTextfield = new TextField();
+                reportDialogStyle(dialog, buttons, valider, fermer, title, reasonReport, reasonTextfield);
+
+                reasonReport.addValueChangeListener(evt -> {
+                if(evt.getValue().equals("Autre...")) {
+                    reasonTextfield.setVisible(true);
+                    reasonTextfield.setPlaceholder("Decrivez votre raison");
+                }
+                });
+                fermer.addClickListener(e -> dialog.close());
+
+                valider.addClickListener(evt -> {
+                    sendReport(reasonReport,reasonTextfield);
+                    dialog.close();
+                });
+                dialog.add(title,reasonReport,reasonTextfield,buttons);
+                dialog.open();
+            });
+        }
+
         public void createPopMessage() {
             optionsUser.add(response);
 
@@ -669,6 +757,9 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
             if (currentUser.getId() == chatMessage.getSender()) {
                 optionsUser.add(modify);
                 optionsUser.add(delete);
+            }
+            if(currentUser.getId() != chatMessage.getSender() && !getController().findUserById(chatMessage.getSender()).getRoleAsString().equals("ADMIN")){
+                optionsUser.add(report);
             }
             layoutPop.add(optionsUser);
             layoutPop.resize();
