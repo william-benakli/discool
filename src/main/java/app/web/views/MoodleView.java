@@ -187,14 +187,14 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
                 String src_original = "!$" + src + "!$";
                 String[] tab_source = src.split(":");
                 if (tab_source.length < 3) {
-                    content = content.replace(src_original, "\n ㅤ<img src='moodle/images/" + src + "' >ㅤ");
+                    content = content.replace(src_original, "<img src='moodle/images/" + src + "'>");
                 } else {
                     if (tab_source[1].equals("null")) {
-                        content = content.replace(src_original, "\n ㅤ<img src='moodle/images/" + tab_source[0] + "' height='" + tab_source[2] + "' >ㅤ");
+                        content = content.replace(src_original, "<img src='moodle/images/" + tab_source[0] + "' height='" + tab_source[2] + "'>");
                     } else if (tab_source[2].equals("null")) {
-                        content = content.replace(src_original, "\n ㅤ<img src='moodle/images/" + tab_source[0] + "' width='" + tab_source[1] + ">ㅤ");
+                        content = content.replace(src_original, "<img src='moodle/images/" + tab_source[0] + "' width='" + tab_source[1] + ">");
                     } else {
-                        content = content.replace(src_original, "\n ㅤ<img src='moodle/images/" + tab_source[0] + "' width='" + tab_source[1] + "' height='" + tab_source[2] + "' >ㅤ");
+                        content = content.replace(src_original, "<img src='moodle/images/" + tab_source[0] + "' width='" + tab_source[1] + "' height='" + tab_source[2] + "'>");
                     }
                 }
                 src = StringUtils.substringBetween(content, "!$", "!$");
