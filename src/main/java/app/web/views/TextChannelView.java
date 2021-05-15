@@ -705,6 +705,8 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                             chatController.saveMessage("je signale l'user @" + chatController.getUsernameOfSender(chatMessage) + " pour cause : " + reasonTextfield.getValue() + ", dans le channel :" + textChannel.getName() + " .Dans le cours :"
                                             + course.getName(),
                                     ok, chatMessage.getParentId(), currentUser.getId(), true, 0);
+                            chatController.saveMessage("Votre demande à été transmise avec succés !", ok,chatMessage.getParentId() , 1, true, 0);
+
                         }else {
                             chatController.saveMessage("je signale l'user @" + chatController.getUsernameOfSender(chatMessage) + " pour : " + reasonReport.getValue() + ", dans le channel :" + textChannel.getName() + " .Dans le cours :"
                                             + course.getName(),
