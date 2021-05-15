@@ -2,6 +2,7 @@ DROP DATABASE discool;
 CREATE DATABASE discool;
 USE discool;
 
+DROP USER 'discool'@'localhost';
 CREATE USER 'discool'@'localhost' IDENTIFIED BY 'a';
 GRANT ALL ON discool.* to 'discool'@'%' identified by 'a' WITH GRANT OPTION;
 FLUSH PRIVILEGES;
