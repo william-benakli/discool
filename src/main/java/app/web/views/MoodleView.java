@@ -1,6 +1,7 @@
 package app.web.views;
 
 import app.controller.AssignmentController;
+import app.controller.ChatController;
 import app.controller.Controller;
 import app.controller.Markdown;
 import app.controller.broadcasters.MoodleBroadcaster;
@@ -64,13 +65,17 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
                       @Autowired StudentAssignmentsUploadsRepository studentAssignmentsUploadsRepository,
                       @Autowired GroupRepository groupRepository,
                       @Autowired GroupMembersRepository groupMembersRepository,
-                      @Autowired PrivateChatMessageRepository privateChatMessageRepository) {
+                      @Autowired PrivateChatMessageRepository privateChatMessageRepository,
+                      @Autowired PublicChatMessageRepository publicChatMessageRepository,
+                      @Autowired PrivateTextChannelRepository privateTextChannelRepository) {
         this.courseRepository = courseRepository;
         this.moodlePageRepository = moodlePageRepository;
         setPersonRepository(personRepository);
         setController(new Controller(personRepository, publicTextChannelRepository, null,
-                courseRepository, moodlePageRepository, groupRepository, groupMembersRepository,
-                privateChatMessageRepository));
+                                     courseRepository, moodlePageRepository, groupRepository, groupMembersRepository,
+                                     privateChatMessageRepository));
+        setChatController(new ChatController(personRepository,publicTextChannelRepository,publicChatMessageRepository,
+                                    privateTextChannelRepository,privateChatMessageRepository ));
         setAssignmentController(new AssignmentController(personRepository, assignmentRepository,
                 studentAssignmentsUploadsRepository, courseRepository));
     }
@@ -153,7 +158,10 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
 
             if (!SecurityUtils.isUserStudent()) {
                 FlexLayout f = new FlexLayout();
-                f.add(createDeleteButton(), createModifyButton());
+
+                if (!section.isHomePage())f.add(createDeleteButton());
+                f.add(createModifyButton());
+
                 this.add(f);
             }
 

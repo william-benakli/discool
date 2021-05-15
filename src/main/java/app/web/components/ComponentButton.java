@@ -62,6 +62,11 @@ public class ComponentButton extends Button {
         setIcon(imgServ);
     }
 
+    public ComponentButton(Image imgServ, int width, int height) {
+        imgServ.getStyle().set("width", String.valueOf(width) + "px").set("height", String.valueOf(height) + "px");
+        setIcon(imgServ);
+    }
+
     public ComponentButton(String cheminImage, String alt, int sizeWitdh, int sizeHeight) {
         Image imgServ = new Image(cheminImage, alt);
         imgServ.getStyle()

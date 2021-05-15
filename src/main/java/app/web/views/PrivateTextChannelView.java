@@ -272,7 +272,7 @@ public class PrivateTextChannelView extends TextChannelView implements HasUrlPar
                 }
                 long ok = chatController.createNewPrivateChannel(currentUser.getId(), radioButtons.getValue(), value);
                 closeAndShowError(ok);
-                UI.getCurrent().getPage().executeJs("window.location.href='"+getUrl()+"dms/-1'");
+                UI.getCurrent().getPage().executeJs("window.location.href='" + getUrl() + "dms/" + ok + "'");
             });
             validate.getStyle()
                     .set("margin-left","2.5px")
