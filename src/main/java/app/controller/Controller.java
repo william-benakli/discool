@@ -372,4 +372,19 @@ public class Controller {
         return groupRepository.findGroupByCourseId(courseId);
     }
 
+
+    public void deletCourse(long course, AssignmentController assignmentController) {
+        for (Group group : selectGroupeCourse(course)) removeGroupMembers(group.getId());
+        removeGroups(course);
+        assignmentController.removeUploadsStudent(course);
+        assignmentController.removeAssignment(course);
+        for (PublicTextChannel publicTextChannel : getAllChannelsForCourse(course)) {
+            for (PublicChatMessage publicChatMessage : listPosts(publicTextChannel.getId())) {
+                removePosts(publicChatMessage.getId());
+            }
+        }
+        removeChannels(course);
+        removeMoodlePage(course);
+        removeCourse(course);
+    }
 }

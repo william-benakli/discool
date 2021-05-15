@@ -218,7 +218,7 @@ public abstract class ViewWithSidebars extends VerticalLayout {
                 .set("color", ColorHTML.WHITE.getColorHtml())
                 .set("background-color", ColorHTML.PURPLE.getColorHtml());
         button.addClickListener(event -> {
-            ServerFormComponent serverFormComponent = new ServerFormComponent(controller, SecurityUtils.getCurrentUser(personRepository), getCourse());
+            ServerFormComponent serverFormComponent = new ServerFormComponent(controller, assignmentController, SecurityUtils.getCurrentUser(personRepository), getCourse());
             serverFormComponent.open();
         });
         sideBar.add(button);

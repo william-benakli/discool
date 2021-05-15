@@ -1,5 +1,6 @@
 package app.web.components;
 
+import app.controller.AssignmentController;
 import app.controller.Controller;
 import app.model.courses.Course;
 import app.model.users.Group;
@@ -36,10 +37,10 @@ public class ServerFormComponent extends Dialog {
         new CreateServerFormComponent();
     }
 
-    public ServerFormComponent(Controller controller, Person currentUser, Course course) {
+    public ServerFormComponent(Controller controller, AssignmentController assignmentController, Person currentUser, Course course) {
         this.controller = controller;
         this.currentPerson = currentUser;
-        new EditServerFormComponent(course);
+        new EditServerFormComponent(course, assignmentController);
 
     }
 
@@ -168,14 +169,14 @@ public class ServerFormComponent extends Dialog {
 
     private class EditServerFormComponent {
 
-
+        private final AssignmentController assignmentController;
         private final Course course;
-        private String name = String.valueOf(getRandom());
+        private final String name = String.valueOf(getRandom());
 
 
-        EditServerFormComponent(Course course) {
+        EditServerFormComponent(Course course, AssignmentController assignmentController) {
             this.course = course;
-
+            this.assignmentController = assignmentController;
             Image image = new Image(course.getPathIcon(), "image");
             TextField field = new TextField();
             field.setValue(course.getName());
@@ -216,9 +217,10 @@ public class ServerFormComponent extends Dialog {
             b.getStyle().set("color", "red");
 
             b.addClickListener(event -> {
-                //fonction de david pour supp des cours
+                controller.deletCourse(course.getId(), assignmentController);
                 close();
                 UI.getCurrent().navigate("home");
+                UI.getCurrent().getPage().reload();
             });
             return b;
         }
