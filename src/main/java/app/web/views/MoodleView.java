@@ -146,8 +146,10 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
 
             if (!SecurityUtils.isUserStudent()) {
                 FlexLayout f = new FlexLayout();
+
                 if (!section.isHomePage())f.add(createDeleteButton());
                 f.add(createModifyButton());
+
                 this.add(f);
             }
 
