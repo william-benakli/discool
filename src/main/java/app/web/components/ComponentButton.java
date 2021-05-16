@@ -5,6 +5,8 @@ import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -74,6 +76,15 @@ public class ComponentButton extends Button {
                 .set("height", String.valueOf(sizeHeight) + "px")
                 .set("border-radius", "0px");
         setIcon(imgServ);
+        getStyle().set("background-color", ViewWithSidebars.ColorHTML.GREY.getColorHtml());
+    }
+
+    public ComponentButton(VaadinIcon icon, int sizeWitdh, int sizeHeight) {
+        Icon iconI = new Icon(icon);
+        iconI.getStyle()
+                .set("widht",sizeWitdh+"px")
+                .set("height",sizeHeight+"px");
+        setIcon(iconI);
         getStyle().set("background-color", ViewWithSidebars.ColorHTML.GREY.getColorHtml());
     }
 
