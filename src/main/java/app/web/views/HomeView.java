@@ -4,6 +4,7 @@ import app.web.layout.Navbar;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Paragraph;
@@ -22,126 +23,102 @@ import javax.annotation.security.PermitAll;
 @RouteAlias(value = "", layout = Navbar.class)
 public class HomeView extends VerticalLayout {
 
-    public HomeView() {
-        H1 bienvenue = new H1("Bienvenue sur Discool !");
+    public HomeView(){
+        imageRight(
+                new Paragraph("Bienvenue sur Discool !"),
+                new Paragraph("Le lieu parfait qui recrée à distance les meilleures conditions réelles" +
+                        " d'apprentissage tout en supprimant les contraintes du présentiel."),
+                new Image("img/homeimage.svg", "alt")
+                );
+        imageLeft(
+                new Paragraph("Apprenez ou vous voulez !"),
+                new Paragraph("Peu importe l'endroit où vous êtes, vous pouvez suivre vos cours et " +
+                        "progresser en ayant qu'une connexion internet."),
+                new Image("img/wfh_1.svg", "alt")
+        );
+        imageRight(
+                new Paragraph("Un véritable encadrement scolaire"),
+                new Paragraph("Les administrateurs et les professeurs sont là afin d'avoir le même" +
+                        " encadrement qu'en présentiel."),
+                new Image("img/Headhunter.svg", "alt")
+        );
+        imageLeft(
+                new Paragraph("Préserver le contact humain"),
+                new Paragraph("Nous savons à quel point le contacte humain et important, c'est pour" +
+                        " cela que nous avons mis à votre disposition un chat public et privé."),
+                new Image("img/Chat.svg", "alt")
+        );
+    }
 
-        // TODO add a RouterLink to the LoginView when the button is clicked
-        Button join = new Button("Lancer Discool");
-        Paragraph p = new Paragraph("Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.");
-        Image img = new Image("img/img.svg", "alt");
-        add(img);
+    public void imageLeft(Paragraph title, Paragraph text, Image image){
+        Div main = new Div();
+        Div inter = new Div();
+        Div left = new Div();
+        Div right = new Div();
+        Div interText = new Div();
 
-        bienvenue.getStyle().set("display", "block");
-        bienvenue.getStyle().set("color", "#845ec2");
+        //Style Div
+        styleDiv(main, title, text, interText, image, inter);
+        left.getStyle().set("margin","auto");
+        right.getStyle()
+                .set("display","flex")
+                .set("margin","auto");
 
-        join.getStyle().set("display", "block");
-        join.getStyle().set("width", "200px");
-            join.getStyle().set("height","80px");
-            join.getStyle().set("background-color","#845ec2");
-            join.getStyle().set("color","white");
-            join.getStyle().set("border-radius","10px");
-            join.getStyle().set("font-size","25px");
-            join.addClickListener(click -> {
-                UI.getCurrent().navigate("login");
-            });
-            p.getStyle().set("display","block");
-            p.getStyle().set("font-size","30px");
-            p.getStyle().set("margin","10px");
+        interText.add(title, text);
+        left.add(image);
+        right.add(interText);
+        inter.add(left, right);
+        main.add(inter);
+        this.add(main);
+    }
 
-            img.getStyle().set("position","relative");
-            img.getStyle().set("padding","1em");
-            img.getStyle().set("width","800px");
-            img.getStyle().set("height","800px");
+    public void imageRight(Paragraph title, Paragraph text, Image image){
+        Div main = new Div();
+        Div inter = new Div();
+        Div left = new Div();
+        Div right = new Div();
+        Div interText = new Div();
 
-            FlexLayout div2 = new FlexLayout();
-            div2.add(bienvenue,p , join);
-            div2.getStyle().set("display","block");
-            div2.getStyle().set("left","0px");
-            div2.getStyle().set("padding","3em");
-            div2.getStyle().set("horizontal-align","middle");
-            div2.getStyle().set("vertical-align","middle");
-            div2.getStyle().set("width","600px");
-            div2.getStyle().set("position","block");
+        //Style Div
+        styleDiv(main, title, text, interText, image, inter);
+        right.getStyle().set("margin","auto");
+        left.getStyle()
+                .set("display","flex")
+                .set("margin","auto");
 
-            FlexLayout div1 = new FlexLayout();
-            div1.add(img,div2);
-            div1.getStyle().set("background-color","#f4f9f9");
-            div1.setWidth("100%");
-            div1.setHeight("40%");
-            div1.getStyle().set("flex-direction","row-reverse");
-            div1.getStyle().set("padding","0");
-            add(div1);
+        interText.add(title, text);
+        right.add(image);
+        left.add(interText);
+        inter.add(left, right);
+        main.add(inter);
+        this.add(main);
+    }
 
-            div("Bienvenue","Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.");
-            divReverse("Bienvenue","Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.");
-            div("Bienvenue","Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.");
-        }
-
-        public void div(String title, String text){
-            Image img2 = new Image("img/books.jpg", "alt");
-            img2.getStyle().set("width", "500px");
-            img2.getStyle().set("height", "300px");
-            img2.getStyle().set("left", "200px");
-
-            H1 titre2 = new H1(title);
-            titre2.getStyle().set("color", "#845ec2");
-
-            Paragraph p2 = new Paragraph(text);
-            p2.getStyle().set("font-size", "20px");
-            p2.getStyle().set("margin", "10px");
-
-            FlexLayout div3 = new FlexLayout();
-            div3.add(titre2, p2);
-            div3.getStyle().set("display", "inline-block");
-            div3.getStyle().set("position", "relative");
-            div3.getStyle().set("word-wrap", "break-word");
-            div3.getStyle().set("height", "300px");
-            div3.getStyle().set("margin-left", "20px");
-            div3.getStyle().set("horizontal-align", "middle");
-
-
-            FlexLayout div4 = new FlexLayout();
-            div4.add(img2, div3);
-            div4.getStyle().set("padding", "20px");
-            div4.getStyle().set("width", "1200px");
-            div4.getStyle().set("height", "300px");
-            div4.getStyle().set("margin-left", "auto");
-            div4.getStyle().set("margin-right", "auto");
-            add(div4);
-        }
-
-        public void divReverse(String title , String text){
-            Image img3= new Image("img/books.jpg", "alt");
-            img3.getStyle().set("width","500px");
-            img3.getStyle().set("height","300px");
-            img3.getStyle().set("left","200px");
-            img3.getStyle().set("float","right");
-
-            H1 titre3 = new H1(title);
-            titre3.getStyle().set("color","#845ec2");
-
-            Paragraph p3 = new Paragraph(text);
-            p3.getStyle().set("font-size","20px");
-            p3.getStyle().set("margin","10px");
-
-            FlexLayout div5 = new FlexLayout();
-            div5.add(titre3,p3);
-            div5.getStyle().set("display","inline-block");
-            div5.getStyle().set("position","relative");
-            div5.getStyle().set("word-wrap","break-word");
-            div5.getStyle().set("height","300px");
-            div5.getStyle().set("margin-left","20px");
-            div5.getStyle().set("horizontal-align","middle");
-
-            FlexLayout div6 = new FlexLayout();
-            div6.add(img3, div5);
-            div6.getStyle().set("padding","20px");
-            div6.getStyle().set("width","1200px");
-            div6.getStyle().set("height","300px");
-            div6.getStyle().set("margin-left","auto");
-            div6.getStyle().set("margin-right","auto");
-            div6.getStyle().set("flex-direction","row-reverse");
-            add(div6);
-        }
+    void styleDiv(Div main, Paragraph title, Paragraph text, Div interText, Image image, Div inter){
+        main.getStyle()
+                .set("height","100vh")
+                .set("width","100%")
+                .set("display","flex")
+                .set("margin","auto")
+                .set("border-bottom","solid 1px"+ ViewWithSidebars.ColorHTML.GREYTAB.getColorHtml());
+        title.getStyle()
+                .set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml())
+                .set("font-weight","700")
+                .set("font-size","20px");
+        text.getStyle()
+                .set("font-size","20px")
+                .set("text-align","justify");
+        interText.getStyle()
+                .set("max-width","350px")
+                .set("margin","auto");
+        image.getStyle()
+                .set("height","600px")
+                .set("width","600px");
+        inter.getStyle()
+                .set("display","flex")
+                .set("flex-direction","row")
+                .set("margin","auto")
+                .set("flex-wrap","wrap");
+    }
 
 }
