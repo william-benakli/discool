@@ -291,14 +291,14 @@ public class PrivateTextChannelView extends TextChannelView implements HasUrlPar
 
         /**
          * @param ok if -1: close dialog and show error
-         *           else: close dialog and opens a new one with link to the new channel
+         *           else: close dialog and show success notification
          */
         private void closeAndShowError(long ok) {
             this.close();
             if (ok == -1) {
-                Notification.show("Probleme : votre conversation n'a pas pu etre creee.");
+                Notification.show("Problème : votre conversation n'a pas pu être créée.");
             } else {
-                Notification.show("Conversation creee ! Rafraichissez la page pour vous y rendre");
+                Notification.show("Conversation créée ! Rafraîchissez la page pour vous y rendre");
             }
         }
 

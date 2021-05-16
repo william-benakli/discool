@@ -273,7 +273,7 @@ public class ServerFormComponent extends Dialog {
             Button b = new Button("Supprimer le cours");
             b.getStyle().set("color", "red");
             b.addClickListener(event -> {
-                controller.deletCourse(course.getId(), assignmentController);
+                controller.deleteCourse(course.getId(), assignmentController);
                 close();
                 UI.getCurrent().navigate("home");
                 UI.getCurrent().getPage().reload();

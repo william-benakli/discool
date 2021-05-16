@@ -29,7 +29,6 @@ import java.util.Optional;
 public class PublicTextChannelView extends TextChannelView implements HasUrlParameter<Long> {
 
     private final PublicTextChannelRepository publicTextChannelRepository;
-    private final PublicChatMessageRepository publicChatMessageRepository;
 
     public PublicTextChannelView(@Autowired PublicTextChannelRepository publicTextChannelRepository,
                                  @Autowired PublicChatMessageRepository publicChatMessageRepository,
@@ -47,7 +46,6 @@ public class PublicTextChannelView extends TextChannelView implements HasUrlPara
               assignmentRepository, courseRepository, studentAssignmentsUploadsRepository,
               groupRepository, groupMembersRepository, moodlePageRepository);
         this.publicTextChannelRepository = publicTextChannelRepository;
-        this.publicChatMessageRepository = publicChatMessageRepository;
     }
 
 
@@ -110,19 +108,19 @@ public class PublicTextChannelView extends TextChannelView implements HasUrlPara
         final Dialog settingsDialog = new Dialog();
         final TextField name = new TextField();
         final Button valider = new Button("Valider");
-        final Button clear = new Button("Nettoyer tous les messages");
+        final Button clear = new Button("Supprimer tous les messages");
 
         final VerticalLayout layout = new VerticalLayout();
         final HorizontalLayout layoutButton = new HorizontalLayout();
         final HorizontalLayout layoutCheckBox = new HorizontalLayout();
 
-        final Checkbox mute = new Checkbox("Channel écriture reservé aux professeurs");
-        final Checkbox visible = new Checkbox("Channel reservé aux professeur");
+        final Checkbox mute = new Checkbox("Les élèves ne peuvent pas écrire dans ce salon");
+        final Checkbox visible = new Checkbox("Salon visible uniquement par les professeurs");
         final PublicTextChannel channel = getController().getTextChannel(textChannel.getId());
         layout.setAlignItems(Alignment.START);
 
         title.getStyle().set("color", ColorHTML.PURPLE.getColorHtml());
-        name.setLabel("Nom du channel : ");
+        name.setLabel("Nom du salon : ");
         name.getStyle().set("color", ColorHTML.PURPLE.getColorHtml());
         name.setValue(channel.getName());
         mute.setValue(channel.isMute());
@@ -134,14 +132,14 @@ public class PublicTextChannelView extends TextChannelView implements HasUrlPara
             getController().updateTextChannel(channel, name.getValue(), mute.getValue(), visible.getValue());
             settingsDialog.close();
             UI.getCurrent().getPage().reload();
-            Notification.show("Application  des changements attribués");
+            Notification.show("Vos changements ont bien été sauvegardés.");
         });
 
         clear.addClickListener(event -> {
             chatController.clearMessageChat();
             settingsDialog.close();
             UI.getCurrent().getPage().reload();
-            Notification.show("Nettoyage de tous les messages du tchat");
+            Notification.show("Tous les messages du salon ont été supprimés.");
         });
         settingsDialog.add(layout);
         return settingsDialog;

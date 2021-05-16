@@ -135,7 +135,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                             new CommandsClearChat(chatController, currentUser.getId(), textChannel.getId(), arg);
                             break;
                     }
-                    Notification.show("Vous executez une commande");
+                    Notification.show("Vous exécutez une commande");
                 }
                 messageTextField.clear();
                 messageTextField.focus();
@@ -290,8 +290,8 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
 
     private Div createUploadDialog(String title, String subTitle, UploadComponent component) {
         final Div element = new Div();
-        final H1 h1 = new H1(title); // "Télécharger une nouvelle image\n"
-        final Paragraph p = new Paragraph(subTitle); // "Choisissez une nouvelle image depuis votre navigateur (ou faites un glisser-déposer). Seuls les fichiers .jpg et .jpeg sont acceptés.")
+        final H1 h1 = new H1(title);
+        final Paragraph p = new Paragraph(subTitle);
         final VerticalLayout layout = new VerticalLayout();
         h1.getStyle().set("color", ColorHTML.PURPLE.getColorHtml());
         layout.setDefaultHorizontalComponentAlignment(Alignment.CENTER);
@@ -346,35 +346,21 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
 
         component.addFileRejectedListener(event -> {
             courant.close();
-            Dialog errorDialog = errorUploadDialog("Votre fichier ne respect pas les conditions d'envoie !");
+            Dialog errorDialog = errorUploadDialog("Votre fichier ne respecte pas les conditions d'envoi !");
             errorDialog.open();
         });
 
         component.addFailedListener(event -> {
             courant.close();
-            Dialog errorDialog = errorUploadDialog("Votre fichier n'as pas atteint la bonne destination... Ressayez !");
+            Dialog errorDialog = errorUploadDialog("Votre fichier n'as pas atteint la bonne destination... Réessayez !");
             errorDialog.open();
         });
         return component;
     }
 
-    private Dialog errorUploadDialog(String subtitle) {
-        final Dialog dialogError = new Dialog();
-        final H1 h1 = new H1("Erreur d'envoie de votre fichier");
-        final Paragraph p = new Paragraph(subtitle);
-        final Button close = new Button("Fermer");
-        close.addClickListener(event -> dialogError.close());
-        final VerticalLayout layout = new VerticalLayout();
-        h1.getStyle().set("color", "#FF0000");
-        layout.setDefaultHorizontalComponentAlignment(Alignment.CENTER);
-        layout.add(h1, p, close);
-        dialogError.add(layout);
-        return dialogError;
-    }
-
     private Dialog successUploadDialog(String sources, String nameFile, int type) {
         final Dialog dialogSuccess = new Dialog();
-        final H1 h1 = new H1("Fichier téléchager avec succes ");
+        final H1 h1 = new H1("Fichier télécharger avec succès ");
         final Paragraph p = new Paragraph("Votre fichier est sur le point d'etre envoyé !");
         final Button send = new Button("Envoyer");
         final Button close = new Button("Fermer");
@@ -406,6 +392,20 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         layout.add(h1, p, buttonLayout);
         dialogSuccess.add(layout);
         return dialogSuccess;
+    }
+
+    private Dialog errorUploadDialog(String subtitle) {
+        final Dialog dialogError = new Dialog();
+        final H1 h1 = new H1("Erreur d'envoi de votre fichier");
+        final Paragraph p = new Paragraph(subtitle);
+        final Button close = new Button("Fermer");
+        close.addClickListener(event -> dialogError.close());
+        final VerticalLayout layout = new VerticalLayout();
+        h1.getStyle().set("color", "#FF0000");
+        layout.setDefaultHorizontalComponentAlignment(Alignment.CENTER);
+        layout.add(h1, p, close);
+        dialogError.add(layout);
+        return dialogError;
     }
 
     private Button createButtonOpenDialogUpload() {
@@ -532,8 +532,6 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         return button;
     }
 
-
-
     public class MessageLayout extends HorizontalLayout {
         private final int SIZEWIDTH = 25;
         private final int SIZEHEIGHT = 15;
@@ -645,7 +643,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
 
                 TextField messageUpdate = new TextField();
                 messageUpdate.setValue(chatMessage.getMessage());
-                dialog.add(new Paragraph("Voulez-vous modifier votre message?"));
+                dialog.add(new Paragraph("Voulez-vous modifier votre message ?"));
                 dialog.add(messageUpdate);
 
                 dialog.add(oui);
@@ -677,68 +675,8 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
             });
         }
 
-        private void reportDialogStyle(Dialog dialog, Div buttons, Button valider , Button fermer, H1 title, ComboBox<String> reasonReport,TextField reasonTextfield){
-            dialog.setHeight("40%");
-
-            fermer.getStyle()
-                    .set("background-color","#F04747")
-                    .set("color","white");
-
-            valider.getStyle()
-                    .set("background-color",ColorHTML.PURPLE.getColorHtml())
-                    .set("color","white");
-
-            title.getStyle().set("color",ColorHTML.PURPLE.getColorHtml());
-
-            reasonTextfield.setVisible(false);
-            reasonTextfield.getStyle()
-                    .set("display","block")
-                    .set("margin-top","-30px");
-
-            buttons.add(valider,fermer);
-            buttons.getStyle()
-                    .set("display","inline")
-                    .set("width","50%")
-                    .set("padding","10px")
-                    .set("margin-top","15px")
-                    .set("margin-left","25%");
-
-            fermer.getStyle().set("margin-left","10px");
-
-            reasonReport.getStyle().set("display","block");
-            reasonReport.setItems("Propos désagreable", "Mauvais comportement","Trop bavard","Autre...");
-            reasonReport.setPlaceholder("Raison de signalement");
-            reasonReport.isRequired();
-        }
-
-        private void sendReport(ComboBox<String> reasonReport, TextField reasonTextfield) {
-            long ok = chatController.createNewPrivateChannel(currentUser.getId(), "pseudo", "admin");
-            PublicTextChannel publicTextChannel = getController().getTextChannel(textChannel.getId());
-            Course course = getController().findCourseById(publicTextChannel.getCourseId());
-            if (reasonReport.getValue().equals("Autre...")) {
-                String message = "Je signale l'user @" + chatController.getUsernameOfSender(chatMessage) + " pour cause : "
-                        + reasonTextfield.getValue() + " ,dans le channel :" + textChannel.getName() + ". Dans le cours :"
-                        + course.getName();
-                chatController.saveMessage(message, ok, chatMessage.getParentId(), currentUser.getId(), true, 0);
-            } else {
-                String message = "Je signale l'user @" + chatController.getUsernameOfSender(chatMessage) + " pour motif : "
-                        + reasonReport.getValue() + " ,dans le channel :" + textChannel.getName() + ". Dans le cours :"
-                        + course.getName();
-                chatController.saveMessage(message, ok, chatMessage.getParentId(), currentUser.getId(), true, 0);
-            }
-            chatController.saveMessage("Votre demande à été transmise avec succés !", ok,
-                                       chatMessage.getParentId(), 1, true, 0);
-            if (ok == -1) {
-                Notification.show("Votre signalement n'a pas pu etre effectué.");
-            } else {
-                String notificationMessage = "Signalement de l'utilsateur @" +
-                        chatController.getUsernameOfSender(chatMessage) + " reussi !";
-                Notification.show(notificationMessage).setPosition(Notification.Position.MIDDLE);
-            }
-        }
-
         private void createReportButton() {
-            report = new ComponentButton("","!", SIZEWIDTH, SIZEHEIGHT);
+            report = new ComponentButton("", "!", SIZEWIDTH, SIZEHEIGHT);
             report.getStyle().set("color", ColorHTML.PURPLE.getColorHtml());
             report.addClickListener(event -> {
                 Dialog dialog = new Dialog();
@@ -751,26 +689,85 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
                 reportDialogStyle(dialog, buttons, valider, fermer, title, reasonReport, reasonTextfield);
 
                 reasonReport.addValueChangeListener(evt -> {
-                if(evt.getValue().equals("Autre...")) {
-                    reasonTextfield.setVisible(true);
-                    reasonTextfield.setPlaceholder("Decrivez votre raison");
-                }
+                    if (evt.getValue().equals("Autre...")) {
+                        reasonTextfield.setVisible(true);
+                        reasonTextfield.setPlaceholder("Décrivez votre raison");
+                    }
                 });
                 fermer.addClickListener(e -> dialog.close());
 
                 valider.addClickListener(evt -> {
-                    sendReport(reasonReport,reasonTextfield);
+                    sendReport(reasonReport, reasonTextfield);
                     dialog.close();
                 });
-                dialog.add(title,reasonReport,reasonTextfield,buttons);
+                dialog.add(title, reasonReport, reasonTextfield, buttons);
                 dialog.open();
             });
+        }
+
+        private void reportDialogStyle(Dialog dialog, Div buttons, Button valider, Button fermer, H1 title, ComboBox<String> reasonReport, TextField reasonTextfield) {
+            dialog.setHeight("40%");
+
+            fermer.getStyle()
+                    .set("background-color", "#F04747")
+                    .set("color", "white");
+
+            valider.getStyle()
+                    .set("background-color", ColorHTML.PURPLE.getColorHtml())
+                    .set("color","white");
+
+            title.getStyle().set("color",ColorHTML.PURPLE.getColorHtml());
+
+            reasonTextfield.setVisible(false);
+            reasonTextfield.getStyle()
+                    .set("display","block")
+                    .set("margin-top","-30px");
+
+            buttons.add(valider,fermer);
+            buttons.getStyle()
+                    .set("display", "inline")
+                    .set("width", "50%")
+                    .set("padding", "10px")
+                    .set("margin-top", "15px")
+                    .set("margin-left", "25%");
+
+            fermer.getStyle().set("margin-left", "10px");
+
+            reasonReport.getStyle().set("display", "block");
+            reasonReport.setItems("Propos désagréables", "Mauvais comportement", "Autre...");
+            reasonReport.setPlaceholder("Raison du signalement");
+            reasonReport.isRequired();
+        }
+
+        private void sendReport(ComboBox<String> reasonReport, TextField reasonTextfield) {
+            long ok = chatController.createNewPrivateChannel(currentUser.getId(), "pseudo", "admin");
+            PublicTextChannel publicTextChannel = getController().getTextChannel(textChannel.getId());
+            Course course = getController().findCourseById(publicTextChannel.getCourseId());
+            if (reasonReport.getValue().equals("Autre...")) {
+                String message = "Je signale l'user @" + chatController.getUsernameOfSender(chatMessage) + " pour cause : "
+                        + reasonTextfield.getValue() + ", dans le channel :" + textChannel.getName() + ". Dans le cours :"
+                        + course.getName();
+                chatController.saveMessage(message, ok, chatMessage.getParentId(), currentUser.getId(), true, 0);
+            } else {
+                String message = "Je signale l'user @" + chatController.getUsernameOfSender(chatMessage) + " pour motif : "
+                        + reasonReport.getValue() + ", dans le channel :" + textChannel.getName() + ". Dans le cours :"
+                        + course.getName();
+                chatController.saveMessage(message, ok, chatMessage.getParentId(), currentUser.getId(), true, 0);
+            }
+            chatController.saveMessage("Votre demande à été transmise avec succès !", ok,
+                                       chatMessage.getParentId(), 1, true, 0);
+            if (ok == -1) {
+                Notification.show("Votre signalement n'a pas pu être effectué.");
+            } else {
+                String notificationMessage = "Signalement de l'utilisateur @" +
+                        chatController.getUsernameOfSender(chatMessage) + " réussi !";
+                Notification.show(notificationMessage).setPosition(Notification.Position.MIDDLE);
+            }
         }
 
         public void createPopMessage() {
             optionsUser.add(response);
 
-            //Protection si l'utilisateur est bien le createur du message
             if (currentUser.getId() == chatMessage.getSender()) {
                 optionsUser.add(modify);
                 optionsUser.add(delete);
@@ -787,7 +784,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         private void createChatBlock() {
             Paragraph metaData = createParagrapheAmelioration(chatController.getUsernameOfSender(chatMessage) + " | "
                                                                       + getController().convertLongToDate(chatMessage.getTimeCreated()));
-            final Paragraph error = new Paragraph("Erreur fichier introuvable");
+            final Paragraph error = new Paragraph("Erreur : fichier introuvable");
             metaData.getStyle()
                     .set("color", ColorHTML.PURPLE.getColorHtml())
                     .set("font-weight", "700");

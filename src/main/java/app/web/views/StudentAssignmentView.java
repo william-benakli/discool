@@ -191,10 +191,14 @@ public class StudentAssignmentView extends ViewWithSidebars implements HasDynami
             if (studentAssignmentUpload != null && assignment.getDuedate()*1000-3600000*2 > System.currentTimeMillis()){
                 res= ColorHTML.GREEN;
             }else{
-                if (assignment.getAllowLate() == 1 && assignment.getDuedate()*1000-3600000*2 < System.currentTimeMillis() && assignment.getCutoffdate()*1000-3600000*2 > System.currentTimeMillis()){
-                    res=ColorHTML.ORANGE;
-                }else if((assignment.getCutoffdate()*1000-3600000*2 < System.currentTimeMillis() && assignment.getAllowLate() == 1) || (assignment.getAllowLate() == 0 && assignment.getDuedate()*1000-3600000*2<System.currentTimeMillis())){
-                    res=ColorHTML.DANGER;
+                if (assignment.getAllowLate() == 1
+                        && assignment.getDuedate() * 1000 - 3600000 * 2 < System.currentTimeMillis()
+                        && assignment.getCutoffdate() * 1000 - 3600000 * 2 > System.currentTimeMillis()) {
+                    res = ColorHTML.ORANGE;
+                } else if ((assignment.getCutoffdate() * 1000 - 3600000 * 2 < System.currentTimeMillis()
+                        && assignment.getAllowLate() == 1) || (assignment.getAllowLate() == 0
+                        && assignment.getDuedate() * 1000 - 3600000 * 2 < System.currentTimeMillis())) {
+                    res = ColorHTML.DANGER;
                 }
             }
             return res;
@@ -228,7 +232,7 @@ public class StudentAssignmentView extends ViewWithSidebars implements HasDynami
             uploadComponent.addSucceededListener(event -> {
                 getAssignmentController().saveStudentUploadIfNeeded(assignment.getId(), assignment.getCourseId(),
                                                                     currentUser.getId());
-                Notification.show("Vous avez téléchargé votre fichier avec succès!");
+                Notification.show("Vous avez téléchargé votre fichier avec succès !");
             });
 
             uploadComponent.addFileRejectedListener(event -> {
