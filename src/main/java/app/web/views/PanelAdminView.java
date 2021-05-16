@@ -220,27 +220,6 @@ public class PanelAdminView extends VerticalLayout {
         return div;
     }
 
-    private Button createInfoButton(long id) {
-        Button button = new Button("Messages");
-        Dialog dialog = new Dialog();
-        dialog.add(new Text("L'ensemble des messages de cet utilisateur :"));
-        dialog.setWidth("50%");
-        dialog.setHeight("65%");
-
-        Grid<PublicChatMessage> messagesGrid = new Grid<>(PublicChatMessage.class);
-        messagesGrid.setItems(publicChatMessageRepository.findAllBySenderAndDeletedFalse(id));
-        messagesGrid.getColumns().get(1).setVisible(false);
-        messagesGrid.getColumns().get(2).setVisible(false);
-        messagesGrid.getColumns().get(4).setVisible(false);
-        messagesGrid.getColumns().get(5).setVisible(false);
-        messagesGrid.getColumns().get(6).setVisible(false); // to hide the date of creation of the message
-        messagesGrid.addComponentColumn(item -> createRemoveButton(messagesGrid, item))
-                .setHeader("Actions");
-        dialog.add(messagesGrid);
-        button.addClickListener(event -> dialog.open());
-        return button;
-    }
-
     void styleDiv(Div div) {
         div.getStyle()
                 .set("display", "flex")
@@ -338,9 +317,7 @@ public class PanelAdminView extends VerticalLayout {
                 .set("min-width", "150px")
                 .set("text-align", "center");
         if (courseWithName != null) {
-            paragraph.addClickListener(paragraphClickEvent -> {
-                UI.getCurrent().getPage().executeJs("window.location.href='" + courseWithName.getUrl() + "moodle/" + courseWithName.getCourseObject().getId() + "'");
-            });
+            paragraph.addClickListener(paragraphClickEvent -> UI.getCurrent().getPage().executeJs("window.location.href='" + courseWithName.getUrl() + "moodle/" + courseWithName.getCourseObject().getId() + "'"));
             paragraph.getStyle()
                     .set("cursor", "pointer")
                     .set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml())

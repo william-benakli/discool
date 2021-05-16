@@ -365,7 +365,7 @@ public class Navbar extends AppLayout {
         public UserParametersDialog() {
             createUserParametersForm();
             createUserTabs();
-            //createAudioControls();
+            createAudioControls();
             createAdminButtonForUserParamDialog();
             styleUserParamLayout();
 
@@ -432,19 +432,19 @@ public class Navbar extends AppLayout {
             page1.add(userInfosLayout);
 
             /*Tab 2*/
-            //Tab tab2 = new Tab("Voix et Vidéo");
-            //Div page2 = new Div();
-            //page2.setVisible(false);
-            //audioControlsLayout = new FlexLayout();
-            //styleTab(tab2, audioControlsLayout);
-            //page2.add(audioControlsLayout);
+            Tab tab2 = new Tab("Voix et Vidéo");
+            Div page2 = new Div();
+            page2.setVisible(false);
+            audioControlsLayout = new FlexLayout();
+            styleTab(tab2, audioControlsLayout);
+            page2.add(audioControlsLayout);
 
             /*navigation between tabs*/
             Map<Tab, Component> tabsToPages = new HashMap<>();
             tabsToPages.put(tab1, page1);
-            //tabsToPages.put(tab2, page2);
-            Tabs tabs = new Tabs(tab1/*, tab2*/);
-            Div pages = new Div(page1/*, page2*/);
+            tabsToPages.put(tab2, page2);
+            Tabs tabs = new Tabs(tab1, tab2);
+            Div pages = new Div(page1, page2);
 
             tabs.addSelectedChangeListener(event -> {
                 tabsToPages.values().forEach(page -> page.setVisible(false));
