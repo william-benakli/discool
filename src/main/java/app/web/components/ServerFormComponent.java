@@ -76,13 +76,17 @@ public class ServerFormComponent extends Dialog {
     private void dialogGroupe(long id, AssignmentController assignmentController){
 
         HashMap<String ,Group> hashMap = new HashMap<>();
-    HashSet<Group> listGroup = controller.findAllGroupByCourseId(id);
-    for(Group e :listGroup){
-        hashMap.put(e.getName(),e);
-    }
+        HashSet<Group> listGroup = controller.findAllGroupByCourseId(id);
+        for(Group e :listGroup){
+            hashMap.put(e.getName(),e);
+        }
         H1 title = new H1("Selectionner le groupe :");
+        title.getStyle().set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml());
         ComboBox<String> groupComboBox = new ComboBox<>();
         Button valider = new Button("Valider");
+        valider.getStyle()
+                .set("color", ViewWithSidebars.ColorHTML.WHITE.getColorHtml())
+                .set("background-color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml());
         valider.addClickListener(buttonClickEvent -> {
             if(!groupComboBox.isEmpty()) {
                 removeAll();
