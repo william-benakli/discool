@@ -11,6 +11,7 @@ import app.web.views.ViewWithSidebars;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.*;
@@ -41,8 +42,9 @@ public class ServerFormComponent extends Dialog {
     public ServerFormComponent(Controller controller, AssignmentController assignmentController, Person currentUser, Course course) {
         this.controller = controller;
         this.currentPerson = currentUser;
-        new EditServerFormComponent(course, assignmentController);
-
+//        new EditServerFormComponent(course, assignmentController);
+        dialogGroupe(course.getId(), assignmentController);
+        open();
     }
 
     private Grid<Person> createUserTeacherGrid() {
@@ -72,6 +74,22 @@ public class ServerFormComponent extends Dialog {
         return grid;
     }
 
+    private void dialogGroupe(long id, AssignmentController assignmentController){
+
+        ComboBox<Group> groupComboBox = new ComboBox<>();
+        Button valider = new Button("Valider");
+        valider.addClickListener(buttonClickEvent -> {
+            //close();
+            if(!groupComboBox.isEmpty()) {
+                removeAll();
+                new EditServerFormComponent(controller.findCourseById(id), groupComboBox.getValue(), assignmentController);
+            }
+        });
+        groupComboBox.setItems(controller.findAllGroupByCourseId(id));
+        add(groupComboBox);
+        add(valider);
+
+    }
 
     private Tabs createTabs(Tab user, Tab teacher, Tab group, Grid<Person> userGrid, Grid<Person> teacherGrid, Grid<Group> groupGrid) {
         Tabs tabsGrid = new Tabs(teacher, user, group);
@@ -334,8 +352,6 @@ public class ServerFormComponent extends Dialog {
             Button valider = new Button("Valider", buttonClickEvent1 -> {
                 close();
                 saveCoursePath(name);
-                Group groupSelect = controller.getGroupByCourseId(course.getId());
-                controller.addPersonToCourse(controller.getPersonById(currentPerson.getId()), groupSelect);
                 Set<Person> teacher = teacherUser.getSelectedItems();
                 for (Person p : teacher) controller.addPersonToCourse(p, groupSelect);
 
