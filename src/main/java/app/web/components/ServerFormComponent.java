@@ -74,16 +74,15 @@ public class ServerFormComponent extends Dialog {
     }
 
     private void dialogGroupe(long id, AssignmentController assignmentController){
-
         HashMap<String ,Group> hashMap = new HashMap<>();
         HashSet<Group> listGroup = controller.findAllGroupByCourseId(id);
+        H1 title = new H1("Selectionner le groupe :");
+        ComboBox<String> groupComboBox = new ComboBox<>();
+        Button valider = new Button("Valider");
         for(Group e :listGroup){
             hashMap.put(e.getName(),e);
         }
-        H1 title = new H1("Selectionner le groupe :");
         title.getStyle().set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml());
-        ComboBox<String> groupComboBox = new ComboBox<>();
-        Button valider = new Button("Valider");
         valider.getStyle()
                 .set("color", ViewWithSidebars.ColorHTML.WHITE.getColorHtml())
                 .set("background-color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml());
@@ -96,8 +95,6 @@ public class ServerFormComponent extends Dialog {
         ArrayList<String> listGroupName = new ArrayList<>(hashMap.keySet());
         groupComboBox.setItems(listGroupName);
         add(title, groupComboBox, valider);
-
-
     }
 
     private Tabs createTabs(Tab user, Tab teacher, Tab group, Grid<Person> userGrid, Grid<Person> teacherGrid, Grid<Group> groupGrid) {
