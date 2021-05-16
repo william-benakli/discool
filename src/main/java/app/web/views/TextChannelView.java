@@ -30,12 +30,17 @@ import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.HasDynamicTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.VaadinService;
+import com.vaadin.flow.server.VaadinServletRequest;
 import com.vaadin.flow.shared.Registration;
 import lombok.Getter;
+import lombok.SneakyThrows;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -251,7 +256,11 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         chatButtonContainer.add(sendMessage/*, muteMicrophone, muteHeadphone, exitButton*/);
         Button addFileOrImage = createButtonOpenDialogUpload();
 
-        messageInputBar.add(addFileOrImage, messageTextField, chatButtonContainer);
+        String s = getUrl();
+        String[] s2=s.split("/");
+        if ( (s2.length>3 && s2[s2.length-2].equals("dms")) || !((PublicTextChannel) textChannel).isMute() || currentUser.getRole() != Person.Role.STUDENT) {
+            messageInputBar.add(addFileOrImage, messageTextField, chatButtonContainer);
+        }
 
         setCardStyle(messageContainer, "99%", ColorHTML.GREY);
         messageContainer.setHeightFull();
@@ -269,6 +278,14 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
             if (!message.isDeleted()) messageContainer.add(new MessageLayout(message));
         }
         chatBar.add(messageContainer, layoutMaster);
+    }
+
+    @SneakyThrows
+    private String getUrl(){
+        VaadinServletRequest req = (VaadinServletRequest) VaadinService.getCurrentRequest();
+        StringBuffer uriString = req.getRequestURL();
+        URI uri = new URI(uriString.toString());
+        return uri.toString();
     }
 
     private Div createUploadDialog(String title, String subTitle, UploadComponent component) {

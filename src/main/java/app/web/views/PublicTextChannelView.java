@@ -71,7 +71,6 @@ public class PublicTextChannelView extends TextChannelView implements HasUrlPara
 
     @Override
     public void createChatBar() {
-        super.createChatBar();
         selectRep = new MessageResponsePopComponent();
         layoutMaster.getStyle().set("display", "block");
         if (((PublicTextChannel) textChannel).isMute()) {
@@ -90,6 +89,7 @@ public class PublicTextChannelView extends TextChannelView implements HasUrlPara
         if (currentUser.getRole() != Person.Role.STUDENT) {
             messageInputBar.addComponentAsFirst(settings);
         }
+        super.createChatBar();
     }
 
     private Button createButtonSettings() {

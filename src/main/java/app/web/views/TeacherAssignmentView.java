@@ -187,6 +187,9 @@ public class TeacherAssignmentView extends ViewWithSidebars implements HasDynami
             Collection<Button> editButtons = Collections.newSetFromMap(new WeakHashMap<>());
             editorColumn = grid.addComponentColumn(row -> {
                 Button edit = new Button("Noter");
+                edit.getStyle()
+                        .set("background-color", ColorHTML.PURPLE.getColorHtml())
+                        .set("color", ColorHTML.WHITE.getColorHtml());
                 edit.addClassName("edit");
                 edit.addClickListener(e -> {
                     editor.editItem(row);

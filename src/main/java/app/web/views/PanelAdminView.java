@@ -155,11 +155,19 @@ public class PanelAdminView extends VerticalLayout {
         usersTab.add(usersGrid);
     }
 
+    void styleButtonok(Button button){
+        button.getStyle()
+                .set("background-color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml())
+                .set("color", ViewWithSidebars.ColorHTML.WHITE.getColorHtml());
+    }
 
     private Div createButtonsDiv() {
         Div div = new Div();
         Button addUser = new Button("Ajouter des utilisateurs");
+        styleButtonok(addUser);
         Button addCsvFile = new Button("Importer un fichier .csv");
+        addCsvFile.getStyle().set("margin-left","4px");
+        styleButtonok(addCsvFile);
         div.add(lastNameFilter, emailFilter, firstNameFilter, addUser, addCsvFile);
         div.getStyle().set("display", "inline-block");
         lastNameFilter.getStyle().set("padding", "5px");
@@ -210,27 +218,6 @@ public class PanelAdminView extends VerticalLayout {
                 .set("text-align", "center");
         div.add(styleDivParagraph(paragraphName, null), styleDivParagraph(paragraph, courseWithName), courseWithName.getButton());
         return div;
-    }
-
-    private Button createInfoButton(long id) {
-        Button button = new Button("Messages");
-        Dialog dialog = new Dialog();
-        dialog.add(new Text("L'ensemble des messages de cet utilisateur :"));
-        dialog.setWidth("50%");
-        dialog.setHeight("65%");
-
-        Grid<PublicChatMessage> messagesGrid = new Grid<>(PublicChatMessage.class);
-        messagesGrid.setItems(publicChatMessageRepository.findAllBySenderAndDeletedFalse(id));
-        messagesGrid.getColumns().get(1).setVisible(false);
-        messagesGrid.getColumns().get(2).setVisible(false);
-        messagesGrid.getColumns().get(4).setVisible(false);
-        messagesGrid.getColumns().get(5).setVisible(false);
-        messagesGrid.getColumns().get(6).setVisible(false); // to hide the date of creation of the message
-        messagesGrid.addComponentColumn(item -> createRemoveButton(messagesGrid, item))
-                .setHeader("Actions");
-        dialog.add(messagesGrid);
-        button.addClickListener(event -> dialog.open());
-        return button;
     }
 
     void styleDiv(Div div) {
@@ -330,9 +317,7 @@ public class PanelAdminView extends VerticalLayout {
                 .set("min-width", "150px")
                 .set("text-align", "center");
         if (courseWithName != null) {
-            paragraph.addClickListener(paragraphClickEvent -> {
-                UI.getCurrent().getPage().executeJs("window.location.href='" + courseWithName.getUrl() + "moodle/" + courseWithName.getCourseObject().getId() + "'");
-            });
+            paragraph.addClickListener(paragraphClickEvent -> UI.getCurrent().getPage().executeJs("window.location.href='" + courseWithName.getUrl() + "moodle/" + courseWithName.getCourseObject().getId() + "'"));
             paragraph.getStyle()
                     .set("cursor", "pointer")
                     .set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml())
@@ -349,6 +334,30 @@ public class PanelAdminView extends VerticalLayout {
             form.setPerson(person);
             addClassName("editing");
         }
+    }
+
+    private Button createInfoButton(long id) {
+        Button button = new Button("Messages");
+        styleButtonok(button);
+        Dialog dialog = new Dialog();
+        dialog.add(new Text("l'ensemble des messages de cet utilisateur :"));
+        dialog.setWidth("50%");
+        dialog.setHeight("65%");
+
+        Grid<PublicChatMessage> messagesGrid = new Grid<>(PublicChatMessage.class);
+        messagesGrid.setItems(publicChatMessageRepository.findAllBySenderAndDeletedFalse(id));
+        messagesGrid.getColumns().get(1).setVisible(false);
+        messagesGrid.getColumns().get(2).setVisible(false);
+        messagesGrid.getColumns().get(4).setVisible(false);
+        messagesGrid.getColumns().get(5).setVisible(false);
+        messagesGrid.getColumns().get(6).setVisible(false); // to hide the date of creation of the message
+        messagesGrid.addComponentColumn(item -> createRemoveButton(messagesGrid, item))
+                .setHeader("Actions");
+        //messagesGrid.addColumn(publicChatMessage -> publicChatMessageRepository.findPublicChatMessageByUserid(id)).setHeader("Id");
+
+        dialog.add(messagesGrid);
+        button.addClickListener(event -> dialog.open());
+        return button;
     }
 
     private void configureFirstNameFilter() {
@@ -400,7 +409,9 @@ public class PanelAdminView extends VerticalLayout {
             dataProvider.getItems().remove(item);
             dataProvider.refreshAll();
         });
-        button.getStyle().set("color", "red");
+        button.getStyle()
+                .set("background-color", ViewWithSidebars.ColorHTML.DANGER.getColorHtml())
+                .set("color", ViewWithSidebars.ColorHTML.WHITE.getColorHtml());
         return button;
     }
 
@@ -430,6 +441,9 @@ public class PanelAdminView extends VerticalLayout {
                 deleteCourse(course.getId(), controller, assignmentController);
                 UI.getCurrent().getPage().executeJs("window.location.href='" + getUrl() + "admin'");
             });
+            remove.getStyle()
+                    .set("background-color", ViewWithSidebars.ColorHTML.DANGER.getColorHtml())
+                    .set("color", ViewWithSidebars.ColorHTML.WHITE.getColorHtml());
         }
 
         @SneakyThrows

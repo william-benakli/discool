@@ -135,13 +135,17 @@ public abstract class ViewWithSidebars extends VerticalLayout {
                     .set("margin-top","50px")
                     .set("margin-bottom","25px")
                     .set("border-top","solid 1px"+ColorHTML.DARKGREY.getColorHtml());
+            Button close = new Button("Fermer", buttonClickEvent -> dialog.close());
+            close.getStyle()
+                    .set("background-color",ColorHTML.PURPLE.getColorHtml())
+                    .set("color", ColorHTML.WHITE.getColorHtml());
             dialog.add(
                     pppSuppDiv(p),
                     divSeparator,
                     styleParagraph(new Paragraph("E-mail "+userRoletoString(p)+": "+p.getEmail())),
                     styleParagraph(new Paragraph(p.getWebsite())),
                     styleParagraph(new Paragraph(p.getDescription())),
-                    newDMButton(dialog, p)
+                    (SecurityUtils.getCurrentUser(personRepository).getId()!=p.getId())?newDMButton(dialog, p):close
             );
 
         });
@@ -540,6 +544,9 @@ public abstract class ViewWithSidebars extends VerticalLayout {
             name.focus();
 
             Button valider = new Button("Valider");
+            valider.getStyle()
+                    .set("background-color",ColorHTML.PURPLE.getColorHtml())
+                    .set("color",ColorHTML.WHITE.getColorHtml());
             valider.addClickListener(event -> {
                 boolean priveBoolean = false;
                 boolean muteBoolean = false;
@@ -564,6 +571,9 @@ public abstract class ViewWithSidebars extends VerticalLayout {
             title.setLabel("Titre");
 
             Button valider = new Button("Valider");
+            valider.getStyle()
+                    .set("background-color",ColorHTML.PURPLE.getColorHtml())
+                    .set("color",ColorHTML.WHITE.getColorHtml());
             valider.addClickListener(event -> {
                 controller.createMoodlePage(title.getValue(), getCourse().getId());
                 closeUpdate("Page moodle créée");

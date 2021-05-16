@@ -136,9 +136,7 @@ public class Navbar extends AppLayout {
         // find all the groups the user is a member of
         ArrayList<GroupMembers> groupMembers = controller.findByUserId(currentUser.getId());
         ArrayList<Long> userGroupsId = new ArrayList<>(); // a list of the ids of the courses the user is a part of
-        groupMembers.forEach(groupMember -> {
-            userGroupsId.add(groupRepository.findById(groupMember.getGroupId()).getCourseId());
-        });
+        groupMembers.forEach(groupMember -> userGroupsId.add(groupRepository.findById(groupMember.getGroupId()).getCourseId()));
         // add courses to the menu bar
         for (Course c : courses) {
             if (SecurityUtils.isUserAdmin()) { // admins can see ALL the courses
@@ -592,9 +590,7 @@ public class Navbar extends AppLayout {
                     .set("color", ViewWithSidebars.ColorHTML.WHITE.getColorHtml())
                     .set("margin","24px 0 12px 24px");
 
-            button.addClickListener(event -> {
-                new ChangeProfilePictureDialog();
-            });
+            button.addClickListener(event -> new ChangeProfilePictureDialog());
             nameButton.add(userName, button);
             ppLayout.add(profilPicture, nameButton);
             return ppLayout;
