@@ -66,12 +66,12 @@ public class AssignmentController {
         Collections.sort(listAllGrade);
 
         HashMap<String, Integer> res = new HashMap<>();
-        if(listAllGrade.size()==0)return res;
-        res.put("median",listAllGrade.get((listAllGrade.size()+1)/2));
-        res.put("lowest",listAllGrade.get(0));
-        res.put("highest",listAllGrade.get(listAllGrade.size()-1));
-        res.put("average",listAllGrade.stream().mapToInt(Integer::intValue).sum()/listAllGrade.size());
-        res.put("user",studentAssignmentsUploadsRepository.findByAssignmentIdAndStudentId(assignment.getId(), currentUser.getId()).getGrade());
+        if(listAllGrade.size()<=1)return res;
+        res.put("medianne",listAllGrade.get((listAllGrade.size()+1)/2));
+        res.put("plus basse",listAllGrade.get(0));
+        res.put("plus élevé",listAllGrade.get(listAllGrade.size()-1));
+        res.put("moyenne",listAllGrade.stream().mapToInt(Integer::intValue).sum()/listAllGrade.size());
+        res.put("utilisateur",studentAssignmentsUploadsRepository.findByAssignmentIdAndStudentId(assignment.getId(), currentUser.getId()).getGrade());
         return res;
     }
 

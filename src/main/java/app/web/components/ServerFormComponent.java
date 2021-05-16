@@ -11,6 +11,7 @@ import app.web.views.ViewWithSidebars;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.*;
@@ -41,8 +42,8 @@ public class ServerFormComponent extends Dialog {
     public ServerFormComponent(Controller controller, AssignmentController assignmentController, Person currentUser, Course course) {
         this.controller = controller;
         this.currentPerson = currentUser;
-        new EditServerFormComponent(course, assignmentController);
-
+        dialogGroupe(course.getId(), assignmentController);
+        open();
     }
 
     private Grid<Person> createUserTeacherGrid() {
@@ -72,6 +73,29 @@ public class ServerFormComponent extends Dialog {
         return grid;
     }
 
+    private void dialogGroupe(long id, AssignmentController assignmentController){
+        HashMap<String ,Group> hashMap = new HashMap<>();
+        HashSet<Group> listGroup = controller.findAllGroupByCourseId(id);
+        H1 title = new H1("Selectionner le groupe :");
+        ComboBox<String> groupComboBox = new ComboBox<>();
+        Button valider = new Button("Valider");
+        for(Group e :listGroup){
+            hashMap.put(e.getName(),e);
+        }
+        title.getStyle().set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml());
+        valider.getStyle()
+                .set("color", ViewWithSidebars.ColorHTML.WHITE.getColorHtml())
+                .set("background-color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml());
+        valider.addClickListener(buttonClickEvent -> {
+            if(!groupComboBox.isEmpty()) {
+                removeAll();
+                new EditServerFormComponent(controller.findCourseById(id), hashMap.get(groupComboBox.getValue()), assignmentController);
+            }
+        });
+        ArrayList<String> listGroupName = new ArrayList<>(hashMap.keySet());
+        groupComboBox.setItems(listGroupName);
+        add(title, groupComboBox, valider);
+    }
 
     private Tabs createTabs(Tab user, Tab teacher, Tab group, Grid<Person> userGrid, Grid<Person> teacherGrid, Grid<Group> groupGrid) {
         Tabs tabsGrid = new Tabs(teacher, user, group);
@@ -194,12 +218,14 @@ public class ServerFormComponent extends Dialog {
     private class EditServerFormComponent {
 
         private final AssignmentController assignmentController;
+        private final Group group;
         private final Course course;
         private final String name = String.valueOf(getRandom());
 
 
-        EditServerFormComponent(Course course, AssignmentController assignmentController) {
+        EditServerFormComponent(Course course, Group group, AssignmentController assignmentController) {
             this.course = course;
+            this.group = group;
             this.assignmentController = assignmentController;
             createDialog();
         }
@@ -210,6 +236,7 @@ public class ServerFormComponent extends Dialog {
             HorizontalLayout horizontalLayout = new HorizontalLayout();
             HorizontalLayout horizontalImageLayout = new HorizontalLayout();
 
+            Label b = new Label("Vous modifiez le groupe" + group.getName());
             horizontalLayout.setAlignItems(FlexComponent.Alignment.CENTER);
             VerticalLayout layoutVertical = new VerticalLayout();
             layoutVertical.setAlignItems(FlexComponent.Alignment.CENTER);
@@ -249,7 +276,7 @@ public class ServerFormComponent extends Dialog {
                     .set("color", ViewWithSidebars.ColorHTML.WHITE.getColorHtml());
             horizontalLayout.add(supprimer, fermer, ajouterMembre, valider);
             horizontalImageLayout.add(server_image, changePicture);
-            layoutVertical.add(fieldUserInput, horizontalImageLayout, listPresentCourse, horizontalLayout);
+            layoutVertical.add(fieldUserInput, horizontalImageLayout, b, listPresentCourse, horizontalLayout);
             add(layoutVertical);
         }
 
@@ -258,7 +285,7 @@ public class ServerFormComponent extends Dialog {
             listPresentCourse.setItems(controller.getAllUsersForCourse(course.getId()));
             listPresentCourse.addColumn(Person::getUsername).setHeader("Nom");
             listPresentCourse.addColumn(Person::getRole).setHeader("Role");
-            listPresentCourse.addComponentColumn(item -> createRemoveButton(listPresentCourse, item, controller.getGroupByCourseId(course.getId())));
+            listPresentCourse.addComponentColumn(item -> createRemoveButton(listPresentCourse, item, group));
             return listPresentCourse;
         }
 
@@ -334,19 +361,17 @@ public class ServerFormComponent extends Dialog {
             Button valider = new Button("Valider", buttonClickEvent1 -> {
                 close();
                 saveCoursePath(name);
-                Group groupSelect = controller.getGroupByCourseId(course.getId());
-                controller.addPersonToCourse(controller.getPersonById(currentPerson.getId()), groupSelect);
                 Set<Person> teacher = teacherUser.getSelectedItems();
-                for (Person p : teacher) controller.addPersonToCourse(p, groupSelect);
+                for (Person p : teacher) controller.addPersonToCourse(p, group);
 
                 Set<Person> Students = studentsUser.getSelectedItems();
-                for (Person p : Students) controller.addPersonToCourse(p, groupSelect);
+                for (Person p : Students) controller.addPersonToCourse(p, group);
 
                 Set<Group> group = groupUser.getSelectedItems();
                 for (Group g : group) {
                     ArrayList<GroupMembers> personGroup = controller.getPersonByGroupId(g.getId());
                     for (GroupMembers group_list : personGroup) {
-                        controller.addPersonToCourse(controller.getPersonById(group_list.getUserId()), groupSelect);
+                        controller.addPersonToCourse(controller.getPersonById(group_list.getUserId()), this.group);
                     }
                 }
                 UI.getCurrent().getPage().reload();

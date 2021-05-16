@@ -676,7 +676,7 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         }
 
         private void createReportButton() {
-            report = new ComponentButton("", "!", SIZEWIDTH, SIZEHEIGHT);
+            report = new ComponentButton(VaadinIcon.EXCLAMATION, SIZEWIDTH*2, SIZEHEIGHT*2);
             report.getStyle().set("color", ColorHTML.PURPLE.getColorHtml());
             report.addClickListener(event -> {
                 Dialog dialog = new Dialog();

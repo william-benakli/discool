@@ -370,7 +370,7 @@ public class Controller {
         groupMembersRepository.deleteByUserId(p.getId());
     }
 
-    public Group getGroupByCourseId(long courseId) {
+    public HashSet<Group> findAllGroupByCourseId(long courseId) {
         return groupRepository.findGroupByCourseId(courseId);
     }
 

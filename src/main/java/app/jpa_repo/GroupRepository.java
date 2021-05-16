@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 public interface GroupRepository extends JpaRepository<Group, Long> {
     ArrayList<Group> findAllByCourseId(long courseId);
@@ -23,6 +24,6 @@ public interface GroupRepository extends JpaRepository<Group, Long> {
 
     Group findById(long id);
 
-    Group findGroupByCourseId(long courseId);
+    HashSet<Group> findGroupByCourseId(long courseId);
     Group findTopByOrderByIdDesc();
 }

@@ -11,6 +11,7 @@ import app.model.courses.StudentAssignmentUpload;
 import app.model.users.Person;
 import app.web.components.UploadComponent;
 import app.web.layout.Navbar;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
@@ -210,7 +211,7 @@ public class StudentAssignmentView extends ViewWithSidebars implements HasDynami
                 if (studentAssignmentUpload.getGrade() == -1) {
                     res+=" Votre devoir n'a pas encore été noté. ";
                 } else {
-                    res+=" Votre note est : " + studentAssignmentUpload.getGrade();
+                    res+=" Votre note est : \n" + studentAssignmentUpload.getGrade();
                     if (studentAssignmentUpload.getTeacherComments() == null) {
                         res+=" Votre professeur n'a écrit aucun commentaire. ";
                     } else {
@@ -232,6 +233,7 @@ public class StudentAssignmentView extends ViewWithSidebars implements HasDynami
             uploadComponent.addSucceededListener(event -> {
                 getAssignmentController().saveStudentUploadIfNeeded(assignment.getId(), assignment.getCourseId(),
                                                                     currentUser.getId());
+                UI.getCurrent().getPage().reload();
                 Notification.show("Vous avez téléchargé votre fichier avec succès !");
             });
 
