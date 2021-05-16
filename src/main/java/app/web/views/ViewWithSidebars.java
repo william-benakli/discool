@@ -546,6 +546,9 @@ public abstract class ViewWithSidebars extends VerticalLayout {
             name.focus();
 
             Button valider = new Button("Valider");
+            valider.getStyle()
+                    .set("background-color",ColorHTML.PURPLE.getColorHtml())
+                    .set("color",ColorHTML.WHITE.getColorHtml());
             valider.addClickListener(event -> {
                 boolean priveBoolean = false;
                 boolean muteBoolean = false;
@@ -570,6 +573,9 @@ public abstract class ViewWithSidebars extends VerticalLayout {
             title.setLabel("Titre");
 
             Button valider = new Button("Valider");
+            valider.getStyle()
+                    .set("background-color",ColorHTML.PURPLE.getColorHtml())
+                    .set("color",ColorHTML.WHITE.getColorHtml());
             valider.addClickListener(event -> {
                 controller.createMoodlePage(title.getValue(), getCourse().getId());
                 closeUpdate("Page moodle créée");

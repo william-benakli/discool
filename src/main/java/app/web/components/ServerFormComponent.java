@@ -130,6 +130,10 @@ public class ServerFormComponent extends Dialog {
 
             Button changePicture = new Button("Changer l'image du cours", buttonClickEvent1 -> pictureDialog.open());
 
+            changePicture.getStyle()
+                    .set("background-color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml())
+                    .set("color", ViewWithSidebars.ColorHTML.WHITE.getColorHtml());
+
             Tabs tabs = createTabs(new Tab("Liste des étudiants"), new Tab("Liste des professeurs"), new Tab("Liste des étudiants"), studentsUser, teacherUser, groupUser);
 
             Button valider = new Button("Valider", buttonClickEvent1 -> {
@@ -145,6 +149,10 @@ public class ServerFormComponent extends Dialog {
                     errorInput();
                 }
             });
+
+            valider.getStyle()
+                    .set("background-color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml())
+                    .set("color", ViewWithSidebars.ColorHTML.WHITE.getColorHtml());
 
             horizontalLayout.add(server_image, changePicture);
             tabGrid.add(tabs, teacherUser, studentsUser, groupUser);
@@ -221,9 +229,24 @@ public class ServerFormComponent extends Dialog {
                 UI.getCurrent().getPage().reload();
             });
 
+            changePicture.getStyle()
+                    .set("background-color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml())
+                    .set("color", ViewWithSidebars.ColorHTML.WHITE.getColorHtml());
+            valider.getStyle()
+                    .set("background-color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml())
+                    .set("color", ViewWithSidebars.ColorHTML.WHITE.getColorHtml());
             Button supprimer = createSuppCourse();
+            supprimer.getStyle()
+                    .set("background-color", ViewWithSidebars.ColorHTML.DANGER.getColorHtml())
+                    .set("color", ViewWithSidebars.ColorHTML.WHITE.getColorHtml());
             Button fermer = createCloseButton();
+            fermer.getStyle()
+                    .set("background-color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml())
+                    .set("color", ViewWithSidebars.ColorHTML.WHITE.getColorHtml());
             Button ajouterMembre = createAddMember();
+            ajouterMembre.getStyle()
+                    .set("background-color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml())
+                    .set("color", ViewWithSidebars.ColorHTML.WHITE.getColorHtml());
             horizontalLayout.add(supprimer, fermer, ajouterMembre, valider);
             horizontalImageLayout.add(server_image, changePicture);
             layoutVertical.add(fieldUserInput, horizontalImageLayout, listPresentCourse, horizontalLayout);
@@ -278,9 +301,7 @@ public class ServerFormComponent extends Dialog {
 
         private Button createAddMember() {
             Button addMemberButton = new Button("Ajouter des membres");
-            addMemberButton.addClickListener(event -> {
-                createDialogUser();
-            });
+            addMemberButton.addClickListener(event -> createDialogUser());
             return addMemberButton;
         }
 

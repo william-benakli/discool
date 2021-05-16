@@ -241,12 +241,25 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
 
             Button link = new Button("Ajouter un lien");
             Button image = new Button("Ajouter une Image");
-            Label label = new Label("Modify the section here");
-            TextField title = new TextField("Title");
+            Label label = new Label("Modifiez la page ici");
+            label.getStyle()
+                    .set("color",ColorHTML.PURPLE.getColorHtml())
+                    .set("font-size", "20px")
+                    .set("font-weight","700");
+            link.getStyle()
+                    .set("background-color",ColorHTML.PURPLE.getColorHtml())
+                    .set("color",ColorHTML.WHITE.getColorHtml());
+            image.getStyle()
+                    .set("background-color",ColorHTML.PURPLE.getColorHtml())
+                    .set("color",ColorHTML.WHITE.getColorHtml());
+            TextField title = new TextField("Titre");
             title.setValue(section.getTitle());
-            TextArea content = new TextArea("Content");
+            TextArea content = new TextArea("Contenu");
             content.setValue(section.getContent());
             Button okButton = new Button("Valider");
+            okButton.getStyle()
+                    .set("background-color",ColorHTML.PURPLE.getColorHtml())
+                    .set("color",ColorHTML.WHITE.getColorHtml());
             okButton.addClickListener(event -> {
                 getController().updateSection(section, title.getValue(), content.getValue());
                 modifyPopup.close();
