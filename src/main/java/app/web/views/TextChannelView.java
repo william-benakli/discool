@@ -251,7 +251,9 @@ public class TextChannelView extends ViewWithSidebars implements HasDynamicTitle
         chatButtonContainer.add(sendMessage/*, muteMicrophone, muteHeadphone, exitButton*/);
         Button addFileOrImage = createButtonOpenDialogUpload();
 
-        messageInputBar.add(addFileOrImage, messageTextField, chatButtonContainer);
+        if (!((PublicTextChannel) textChannel).isMute() || currentUser.getRole() != Person.Role.STUDENT) {
+            messageInputBar.add(addFileOrImage, messageTextField, chatButtonContainer);
+        }
 
         setCardStyle(messageContainer, "99%", ColorHTML.GREY);
         messageContainer.setHeightFull();
