@@ -58,39 +58,14 @@ public class HomeView extends VerticalLayout {
         Div interText = new Div();
 
         //Style Div
-        main.getStyle()
-                .set("height","100vh")
-                .set("width","100%")
-                .set("display","flex")
-                .set("margin","auto")
-                .set("border-bottom","solid 1px"+ ViewWithSidebars.ColorHTML.GREYTAB.getColorHtml());
-        inter.getStyle()
-                .set("display","flex")
-                .set("flex-direction","row")
-                .set("margin","auto")
-                .set("flex-wrap","wrap")
-                .set("align-content","center");
+        styleDiv(main, title, text, interText, image, inter);
+        left.getStyle().set("margin","auto");
         right.getStyle()
                 .set("display","flex")
                 .set("margin","auto");
-        left.getStyle().set("margin","auto");
-        title.getStyle()
-                .set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml())
-                .set("font-weight","700")
-                .set("font-size","20px");
-        text.getStyle()
-                .set("font-size","20px")
-                .set("text-align","justify");
-        interText.getStyle()
-                .set("max-width","350px")
-                .set("margin","auto");
-        image.getStyle()
-                .set("height","600px")
-                .set("width","600px");
 
         interText.add(title, text);
         left.add(image);
-
         right.add(interText);
         inter.add(left, right);
         main.add(inter);
@@ -105,21 +80,27 @@ public class HomeView extends VerticalLayout {
         Div interText = new Div();
 
         //Style Div
+        styleDiv(main, title, text, interText, image, inter);
+        right.getStyle().set("margin","auto");
+        left.getStyle()
+                .set("display","flex")
+                .set("margin","auto");
+
+        interText.add(title, text);
+        right.add(image);
+        left.add(interText);
+        inter.add(left, right);
+        main.add(inter);
+        this.add(main);
+    }
+
+    void styleDiv(Div main, Paragraph title, Paragraph text, Div interText, Image image, Div inter){
         main.getStyle()
                 .set("height","100vh")
                 .set("width","100%")
                 .set("display","flex")
                 .set("margin","auto")
                 .set("border-bottom","solid 1px"+ ViewWithSidebars.ColorHTML.GREYTAB.getColorHtml());
-        inter.getStyle()
-                .set("display","flex")
-                .set("flex-direction","row")
-                .set("margin","auto")
-                .set("flex-wrap","wrap");
-        left.getStyle()
-                .set("display","flex")
-                .set("margin","auto");
-        right.getStyle().set("margin","auto");
         title.getStyle()
                 .set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml())
                 .set("font-weight","700")
@@ -133,14 +114,11 @@ public class HomeView extends VerticalLayout {
         image.getStyle()
                 .set("height","600px")
                 .set("width","600px");
-
-        interText.add(title, text);
-        right.add(image);
-
-        left.add(interText);
-        inter.add(left, right);
-        main.add(inter);
-        this.add(main);
+        inter.getStyle()
+                .set("display","flex")
+                .set("flex-direction","row")
+                .set("margin","auto")
+                .set("flex-wrap","wrap");
     }
 
 }
