@@ -42,7 +42,6 @@ public class ServerFormComponent extends Dialog {
     public ServerFormComponent(Controller controller, AssignmentController assignmentController, Person currentUser, Course course) {
         this.controller = controller;
         this.currentPerson = currentUser;
-//        new EditServerFormComponent(course, assignmentController);
         dialogGroupe(course.getId(), assignmentController);
         open();
     }
@@ -76,18 +75,24 @@ public class ServerFormComponent extends Dialog {
 
     private void dialogGroupe(long id, AssignmentController assignmentController){
 
-        ComboBox<Group> groupComboBox = new ComboBox<>();
+        HashMap<String ,Group> hashMap = new HashMap<>();
+    HashSet<Group> listGroup = controller.findAllGroupByCourseId(id);
+    for(Group e :listGroup){
+        hashMap.put(e.getName(),e);
+    }
+        H1 title = new H1("Selectionner le groupe :");
+        ComboBox<String> groupComboBox = new ComboBox<>();
         Button valider = new Button("Valider");
         valider.addClickListener(buttonClickEvent -> {
-            //close();
             if(!groupComboBox.isEmpty()) {
                 removeAll();
-                new EditServerFormComponent(controller.findCourseById(id), groupComboBox.getValue(), assignmentController);
+                new EditServerFormComponent(controller.findCourseById(id), hashMap.get(groupComboBox.getValue()), assignmentController);
             }
         });
-        groupComboBox.setItems(controller.findAllGroupByCourseId(id));
-        add(groupComboBox);
-        add(valider);
+        ArrayList<String> listGroupName = new ArrayList<>(hashMap.keySet());
+        groupComboBox.setItems(listGroupName);
+        add(title, groupComboBox, valider);
+
 
     }
 
