@@ -26,26 +26,26 @@ public class HomeView extends VerticalLayout {
     public HomeView(){
         imageRight(
                 new Paragraph("Bienvenue sur Discool !"),
-                new Paragraph("Le lieu parfait qui recrée à distance les meilleurs conditions réelles" +
-                        " d'apprentissage tout en supprimant les contraintes du presentiel."),
-                new Image("img/img.svg", "alt")
+                new Paragraph("Le lieu parfait qui recrée à distance les meilleures conditions réelles" +
+                        " d'apprentissage tout en supprimant les contraintes du présentiel."),
+                new Image("img/homeimage.svg", "alt")
                 );
         imageLeft(
                 new Paragraph("Apprenez ou vous voulez !"),
-                new Paragraph("Peu importe l'endroit ou vous etes, vous pouvez suivre vos cours et " +
+                new Paragraph("Peu importe l'endroit où vous êtes, vous pouvez suivre vos cours et " +
                         "progresser en ayant qu'une connexion internet."),
                 new Image("img/wfh_1.svg", "alt")
         );
         imageRight(
                 new Paragraph("Un véritable encadrement scolaire"),
-                new Paragraph("Les Administrateurs et les professeurs sont la afin d'avoir le meme" +
+                new Paragraph("Les administrateurs et les professeurs sont là afin d'avoir le même" +
                         " encadrement qu'en présentiel."),
                 new Image("img/Headhunter.svg", "alt")
         );
         imageLeft(
-                new Paragraph("Preserver le contacte humain"),
-                new Paragraph("Nous savons à quel point le contacte humain est important, c'est pour" +
-                        " cela que nous avons mis a votre disposition un chat public et privé."),
+                new Paragraph("Préserver le contact humain"),
+                new Paragraph("Nous savons à quel point le contacte humain et important, c'est pour" +
+                        " cela que nous avons mis à votre disposition un chat public et privé."),
                 new Image("img/Chat.svg", "alt")
         );
     }
