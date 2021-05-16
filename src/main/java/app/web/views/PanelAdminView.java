@@ -160,11 +160,19 @@ public class PanelAdminView extends VerticalLayout {
         info.open();
     }
 
+    void styleButtonok(Button button){
+        button.getStyle()
+                .set("background-color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml())
+                .set("color", ViewWithSidebars.ColorHTML.WHITE.getColorHtml());
+    }
 
     private Div createButtonsDiv() {
         Div div = new Div();
         Button addUser = new Button("Ajouter des utilisateurs");
+        styleButtonok(addUser);
         Button addCsvFile = new Button("Importer un fichier .csv");
+        addCsvFile.getStyle().set("margin-left","4px");
+        styleButtonok(addCsvFile);
         div.add(lastNameFilter, emailFilter, firstNameFilter, addUser, addCsvFile);
         div.getStyle().set("display", "inline-block");
         lastNameFilter.getStyle().set("padding", "5px");
@@ -345,6 +353,7 @@ public class PanelAdminView extends VerticalLayout {
 
     private Button createInfoButton(long id) {
         Button button = new Button("Messages");
+        styleButtonok(button);
         Dialog dialog = new Dialog();
         dialog.add(new Text("l'ensemble des messages de cet utilisateur :"));
         dialog.setWidth("50%");
@@ -408,7 +417,9 @@ public class PanelAdminView extends VerticalLayout {
             dataProvider.getItems().remove(item);
             dataProvider.refreshAll();
         });
-        button.getStyle().set("color", "red");
+        button.getStyle()
+                .set("background-color", ViewWithSidebars.ColorHTML.DANGER.getColorHtml())
+                .set("color", ViewWithSidebars.ColorHTML.WHITE.getColorHtml());
         return button;
     }
 
@@ -438,6 +449,9 @@ public class PanelAdminView extends VerticalLayout {
                 deletCourse(course.getId(), controller, assignmentController);
                 UI.getCurrent().getPage().executeJs("window.location.href='"+getUrl()+"admin'");
             });
+            remove.getStyle()
+                    .set("background-color", ViewWithSidebars.ColorHTML.DANGER.getColorHtml())
+                    .set("color", ViewWithSidebars.ColorHTML.WHITE.getColorHtml());
         }
 
         @SneakyThrows
