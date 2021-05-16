@@ -212,12 +212,14 @@ public class ServerFormComponent extends Dialog {
     private class EditServerFormComponent {
 
         private final AssignmentController assignmentController;
+        private final Group group;
         private final Course course;
         private final String name = String.valueOf(getRandom());
 
 
-        EditServerFormComponent(Course course, AssignmentController assignmentController) {
+        EditServerFormComponent(Course course, Group group, AssignmentController assignmentController) {
             this.course = course;
+            this.group = group;
             this.assignmentController = assignmentController;
             createDialog();
         }
@@ -228,6 +230,7 @@ public class ServerFormComponent extends Dialog {
             HorizontalLayout horizontalLayout = new HorizontalLayout();
             HorizontalLayout horizontalImageLayout = new HorizontalLayout();
 
+            Label b = new Label("Vous modifiez le groupe" + group.getName());
             horizontalLayout.setAlignItems(FlexComponent.Alignment.CENTER);
             VerticalLayout layoutVertical = new VerticalLayout();
             layoutVertical.setAlignItems(FlexComponent.Alignment.CENTER);
@@ -267,7 +270,7 @@ public class ServerFormComponent extends Dialog {
                     .set("color", ViewWithSidebars.ColorHTML.WHITE.getColorHtml());
             horizontalLayout.add(supprimer, fermer, ajouterMembre, valider);
             horizontalImageLayout.add(server_image, changePicture);
-            layoutVertical.add(fieldUserInput, horizontalImageLayout, listPresentCourse, horizontalLayout);
+            layoutVertical.add(fieldUserInput, horizontalImageLayout, b, listPresentCourse, horizontalLayout);
             add(layoutVertical);
         }
 
@@ -276,7 +279,7 @@ public class ServerFormComponent extends Dialog {
             listPresentCourse.setItems(controller.getAllUsersForCourse(course.getId()));
             listPresentCourse.addColumn(Person::getUsername).setHeader("Nom");
             listPresentCourse.addColumn(Person::getRole).setHeader("Role");
-            listPresentCourse.addComponentColumn(item -> createRemoveButton(listPresentCourse, item, controller.getGroupByCourseId(course.getId())));
+            listPresentCourse.addComponentColumn(item -> createRemoveButton(listPresentCourse, item, group));
             return listPresentCourse;
         }
 
@@ -353,16 +356,16 @@ public class ServerFormComponent extends Dialog {
                 close();
                 saveCoursePath(name);
                 Set<Person> teacher = teacherUser.getSelectedItems();
-                for (Person p : teacher) controller.addPersonToCourse(p, groupSelect);
+                for (Person p : teacher) controller.addPersonToCourse(p, group);
 
                 Set<Person> Students = studentsUser.getSelectedItems();
-                for (Person p : Students) controller.addPersonToCourse(p, groupSelect);
+                for (Person p : Students) controller.addPersonToCourse(p, group);
 
                 Set<Group> group = groupUser.getSelectedItems();
                 for (Group g : group) {
                     ArrayList<GroupMembers> personGroup = controller.getPersonByGroupId(g.getId());
                     for (GroupMembers group_list : personGroup) {
-                        controller.addPersonToCourse(controller.getPersonById(group_list.getUserId()), groupSelect);
+                        controller.addPersonToCourse(controller.getPersonById(group_list.getUserId()), this.group);
                     }
                 }
                 UI.getCurrent().getPage().reload();
