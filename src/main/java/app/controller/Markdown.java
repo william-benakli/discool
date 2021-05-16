@@ -22,7 +22,7 @@ public class Markdown {
      * @return The HTML object containing the correct code
      */
     public static Html getHtmlFromMarkdown(String markdown) {
-        String converted = convertStringFromMarkdown(markdown);
+        String converted = convertStringFromMarkdown(markdown.replaceAll("\n","<br>"));
         return new Html("<span>" + converted + "</span>");
     }
 
