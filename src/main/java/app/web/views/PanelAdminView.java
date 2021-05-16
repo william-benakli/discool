@@ -35,10 +35,8 @@ import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinServletRequest;
-import com.vaadin.server.Page;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -97,7 +95,7 @@ public class PanelAdminView extends VerticalLayout {
         });
         upload.addFailedListener(failedEvent -> {
             Notification notification;
-            notification = new Notification("Error with the File", 3000, Notification.Position.MIDDLE);
+            notification = new Notification("Erreur avec le fichier.", 3000, Notification.Position.MIDDLE);
             notification.open();
         });
         this.groupMembersRepository = groupMembersRepository;
@@ -138,26 +136,23 @@ public class PanelAdminView extends VerticalLayout {
         }
     }
 
-
-    /**
-     * create a dialog in which we indicate to the user the form of how the fields in the CSV file should be
-     */
-
-    private void infoCsv(){
-        VerticalLayout masterLayout = new VerticalLayout();
-        Dialog info = new Dialog();
-        H1 p = new H1("Format du fichier .csv");
-        Paragraph paragraph = new Paragraph("Voici un exemple de l'ordre des valeurs. Ne pas mettre la première ligne avec le nom des colonnes.");
-        Image image = new Image("img/exampleCSV.png","");
-        image.setWidth("60%");
-        image.setHeight("auto");
-        info.setWidth("40%");
-        info.setHeight("auto");
-        p.getStyle().set("margin-top","50px");
-        masterLayout.add(p,paragraph,image,upload);
-        masterLayout.setAlignItems(FlexComponent.Alignment.CENTER);
-        info.add(masterLayout);
-        info.open();
+    private void createUserGrid() {
+        usersGrid.setItems(controller.findAllUsers());
+        usersGrid.addColumn(Person::getUsername).setHeader("Pseudo");
+        usersGrid.addColumn(Person::getLastName).setHeader("Nom");
+        usersGrid.addColumn(Person::getFirstName).setHeader("Prénom");
+        usersGrid.addColumn(Person::getEmail).setHeader("Email");
+        usersGrid.addColumn(Person::getDescription).setHeader("Description");
+        usersGrid.addColumn(Person::getRole).setHeader("Rôle");
+        usersGrid.addColumn(Person::getWebsite).setHeader("Site Web");
+        usersGrid.addComponentColumn(event -> createInfoButton(event.getId()))
+                .setHeader("Historique des messages");
+        usersGrid.addThemeVariants(GridVariant.LUMO_NO_BORDER,
+                                   GridVariant.LUMO_NO_ROW_BORDERS, GridVariant.LUMO_ROW_STRIPES);
+        usersGrid.getStyle().set("flex", "2");
+        usersGrid.getColumns().forEach(col -> col.setAutoWidth(true));
+        usersGrid.asSingleSelect().addValueChangeListener(event -> editPerson(event.getValue()));
+        usersTab.add(usersGrid);
     }
 
 
@@ -208,36 +203,41 @@ public class PanelAdminView extends VerticalLayout {
         Div div = new Div();
         Paragraph paragraph = new Paragraph(courseWithName.getCourse());
         Paragraph paragraphName = new Paragraph(courseWithName.getName());
-        div.getStyle().set("background-color", (!color)?ViewWithSidebars.ColorHTML.WHITE.getColorHtml():ViewWithSidebars.ColorHTML.GREYTAB.getColorHtml());
+        div.getStyle().set("background-color", (!color) ? ViewWithSidebars.ColorHTML.WHITE.getColorHtml() : ViewWithSidebars.ColorHTML.GREYTAB.getColorHtml());
         styleDiv(div);
         courseWithName.getButton().getStyle()
-                .set("min-width","150px")
-                .set("text-align","center");
+                .set("min-width", "150px")
+                .set("text-align", "center");
         div.add(styleDivParagraph(paragraphName, null), styleDivParagraph(paragraph, courseWithName), courseWithName.getButton());
         return div;
     }
 
-    Paragraph styleDivParagraph(Paragraph paragraph, CourseWithName courseWithName){
-        paragraph.getStyle()
-                .set("min-width","150px")
-                .set("text-align","center");
-        if(courseWithName!=null) {
-            paragraph.addClickListener(paragraphClickEvent -> {
-                UI.getCurrent().getPage().executeJs("window.location.href='" + courseWithName.getUrl() + "moodle/" + courseWithName.getCourseObjct().getId() + "'");
-            });
-            paragraph.getStyle()
-                    .set("cursor","pointer")
-                    .set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml())
-                    .set("text-decoration","underline");
-        }
-        return paragraph;
+    private Button createInfoButton(long id) {
+        Button button = new Button("Messages");
+        Dialog dialog = new Dialog();
+        dialog.add(new Text("L'ensemble des messages de cet utilisateur :"));
+        dialog.setWidth("50%");
+        dialog.setHeight("65%");
+
+        Grid<PublicChatMessage> messagesGrid = new Grid<>(PublicChatMessage.class);
+        messagesGrid.setItems(publicChatMessageRepository.findAllBySenderAndDeletedFalse(id));
+        messagesGrid.getColumns().get(1).setVisible(false);
+        messagesGrid.getColumns().get(2).setVisible(false);
+        messagesGrid.getColumns().get(4).setVisible(false);
+        messagesGrid.getColumns().get(5).setVisible(false);
+        messagesGrid.getColumns().get(6).setVisible(false); // to hide the date of creation of the message
+        messagesGrid.addComponentColumn(item -> createRemoveButton(messagesGrid, item))
+                .setHeader("Actions");
+        dialog.add(messagesGrid);
+        button.addClickListener(event -> dialog.open());
+        return button;
     }
 
-    void styleDiv(Div div){
+    void styleDiv(Div div) {
         div.getStyle()
-                .set("display","flex")
-                .set("flex-direction","row")
-                .set("justify-content","space-around");
+                .set("display", "flex")
+                .set("flex-direction", "row")
+                .set("justify-content", "space-around");
     }
 
     private void savePerson(UserForm.SaveEvent evt) {
@@ -279,11 +279,22 @@ public class PanelAdminView extends VerticalLayout {
         lastNameFilter.addValueChangeListener(e -> updateList());
     }
 
-    private void configureFirstNameFilter() {
-        firstNameFilter.setPlaceholder("Filtrer par Prénom...");
-        firstNameFilter.setClearButtonVisible(true);
-        firstNameFilter.setValueChangeMode(ValueChangeMode.LAZY);
-        firstNameFilter.addValueChangeListener(e -> updateList());
+    private void infoCsv() {
+        VerticalLayout masterLayout = new VerticalLayout();
+        Dialog info = new Dialog();
+        H1 p = new H1("Format du fichier .csv");
+        Paragraph paragraph = new Paragraph("Voici un exemple de l'ordre des valeurs. " +
+                                                    "Ne pas mettre la première ligne avec le nom des colonnes.");
+        Image image = new Image("img/exampleCSV.png", "");
+        image.setWidth("60%");
+        image.setHeight("auto");
+        info.setWidth("40%");
+        info.setHeight("auto");
+        p.getStyle().set("margin-top", "50px");
+        masterLayout.add(p, paragraph, image, upload);
+        masterLayout.setAlignItems(FlexComponent.Alignment.CENTER);
+        info.add(masterLayout);
+        info.open();
     }
 
     /**
@@ -314,23 +325,20 @@ public class PanelAdminView extends VerticalLayout {
         removeClassName("editing");
     }
 
-    private void createUserGrid() {
-        usersGrid.setItems(controller.findAllUsers());
-        usersGrid.addColumn(Person::getUsername).setHeader("Pseudo");
-        usersGrid.addColumn(Person::getLastName).setHeader("Nom");
-        usersGrid.addColumn(Person::getFirstName).setHeader("Prénom");
-        usersGrid.addColumn(Person::getEmail).setHeader("Email");
-        usersGrid.addColumn(Person::getDescription).setHeader("Description");
-        usersGrid.addColumn(Person::getRole).setHeader("Rôle");
-        usersGrid.addColumn(Person::getWebsite).setHeader("Site Web");
-        usersGrid.addComponentColumn(event -> createInfoButton(event.getId()))
-                .setHeader("Historique");
-        usersGrid.addThemeVariants(GridVariant.LUMO_NO_BORDER,
-                GridVariant.LUMO_NO_ROW_BORDERS, GridVariant.LUMO_ROW_STRIPES);
-        usersGrid.getStyle().set("flex", "2");
-        usersGrid.getColumns().forEach(col -> col.setAutoWidth(true));
-        usersGrid.asSingleSelect().addValueChangeListener(event -> editPerson(event.getValue()));
-        usersTab.add(usersGrid);
+    Paragraph styleDivParagraph(Paragraph paragraph, CourseWithName courseWithName) {
+        paragraph.getStyle()
+                .set("min-width", "150px")
+                .set("text-align", "center");
+        if (courseWithName != null) {
+            paragraph.addClickListener(paragraphClickEvent -> {
+                UI.getCurrent().getPage().executeJs("window.location.href='" + courseWithName.getUrl() + "moodle/" + courseWithName.getCourseObject().getId() + "'");
+            });
+            paragraph.getStyle()
+                    .set("cursor", "pointer")
+                    .set("color", ViewWithSidebars.ColorHTML.PURPLE.getColorHtml())
+                    .set("text-decoration", "underline");
+        }
+        return paragraph;
     }
 
     private void editPerson(Person person) {
@@ -343,27 +351,11 @@ public class PanelAdminView extends VerticalLayout {
         }
     }
 
-    private Button createInfoButton(long id) {
-        Button button = new Button("Messages");
-        Dialog dialog = new Dialog();
-        dialog.add(new Text("l'ensemble des messages de cet utilisateur :"));
-        dialog.setWidth("50%");
-        dialog.setHeight("65%");
-
-        Grid<PublicChatMessage> messagesGrid = new Grid<>(PublicChatMessage.class);
-        messagesGrid.setItems(publicChatMessageRepository.findAllBySenderAndDeletedFalse(id));
-        messagesGrid.getColumns().get(1).setVisible(false);
-        messagesGrid.getColumns().get(2).setVisible(false);
-        messagesGrid.getColumns().get(4).setVisible(false);
-        messagesGrid.getColumns().get(5).setVisible(false);
-        messagesGrid.getColumns().get(6).setVisible(false); // to hide the date of creation of the message
-        messagesGrid.addComponentColumn(item -> createRemoveButton(messagesGrid, item))
-                .setHeader("Actions");
-        //messagesGrid.addColumn(publicChatMessage -> publicChatMessageRepository.findPublicChatMessageByUserid(id)).setHeader("Id");
-
-        dialog.add(messagesGrid);
-        button.addClickListener(event -> dialog.open());
-        return button;
+    private void configureFirstNameFilter() {
+        firstNameFilter.setPlaceholder("Filtrer par prénom...");
+        firstNameFilter.setClearButtonVisible(true);
+        firstNameFilter.setValueChangeMode(ValueChangeMode.LAZY);
+        firstNameFilter.addValueChangeListener(e -> updateList());
     }
 
     private void deletePerson(UserForm.DeleteEvent evt) {
@@ -373,7 +365,7 @@ public class PanelAdminView extends VerticalLayout {
     }
 
     private void createTabs() {
-        form = new UserForm(personRepository,courseRepository,publicChatMessageRepository,groupMembersRepository);
+        form = new UserForm(personRepository, courseRepository, publicChatMessageRepository, groupMembersRepository);
         form.getStyle().set("flex", "1");
         form.getStyle().set("display", "list-item");
         Div content = new Div(usersGrid, form);
@@ -428,15 +420,15 @@ public class PanelAdminView extends VerticalLayout {
         private final String course;
         private final String teacher;
         private final Button remove;
-        private final MoodlePage courseObjct;
+        private final MoodlePage courseObject;
 
         public CourseWithName(Course course, String name, Controller controller, AssignmentController assignmentController) {
             this.course = course.getName();
             this.teacher = name;
-            this.courseObjct = controller.getHomePageCourse(course.getId(), true);
+            this.courseObject = controller.getHomePageCourse(course.getId(), true);
             this.remove = new Button("Supprimer", buttonClickEvent -> {
-                deletCourse(course.getId(), controller, assignmentController);
-                UI.getCurrent().getPage().executeJs("window.location.href='"+getUrl()+"admin'");
+                deleteCourse(course.getId(), controller, assignmentController);
+                UI.getCurrent().getPage().executeJs("window.location.href='" + getUrl() + "admin'");
             });
         }
 
@@ -448,13 +440,13 @@ public class PanelAdminView extends VerticalLayout {
             return uri.toString();
         }
 
-        void deletCourse(long course, Controller controller, AssignmentController assignmentController){
+        void deleteCourse(long course, Controller controller, AssignmentController assignmentController) {
             for (Group group : controller.selectGroupeCourse(course)) controller.removeGroupMembers(group.getId());
             controller.removeGroups(course);
             assignmentController.removeUploadsStudent(course);
             assignmentController.removeAssignment(course);
-            for (PublicTextChannel publicTextChannel: controller.getAllChannelsForCourse(course)) {
-                for (PublicChatMessage publicChatMessage: controller.listPosts(publicTextChannel.getId())) {
+            for (PublicTextChannel publicTextChannel : controller.getAllChannelsForCourse(course)) {
+                for (PublicChatMessage publicChatMessage : controller.listPosts(publicTextChannel.getId())) {
                     controller.removePosts(publicChatMessage.getId());
                 }
             }
@@ -475,7 +467,7 @@ public class PanelAdminView extends VerticalLayout {
             return remove;
         }
 
-        public MoodlePage getCourseObjct(){ return courseObjct; }
+        public MoodlePage getCourseObject() { return courseObject; }
 
     }
 

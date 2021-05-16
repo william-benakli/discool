@@ -187,7 +187,7 @@ public abstract class ViewWithSidebars extends VerticalLayout {
 
     private String userRoletoString(Person p){
         if (p.getRole().equals(Person.Role.STUDENT)) return "de l'élève";
-        else if (p.getRole().equals(Person.Role.ADMIN))return "de l'administrateur";
+        else if (p.getRole().equals(Person.Role.ADMIN)) return "de l'administrateur";
         return "du professeur";
     }
 
@@ -199,9 +199,9 @@ public abstract class ViewWithSidebars extends VerticalLayout {
     }
 
     /**
-     * Adding members to the right navigation bar
+     * Adding members to the navigation bar on the right-hand side
      *
-     * @param courseId id of the course concerned
+     * @param courseId id of the course
      */
     public void createMembersBar(long courseId) {
         membersBar = new FlexLayout();
@@ -233,7 +233,6 @@ public abstract class ViewWithSidebars extends VerticalLayout {
 
     /**
      * Creates the sidebar for Moodle pages and TextChannels.
-     * It contains
      *
      * @param courseId The id of the course
      */
@@ -298,7 +297,6 @@ public abstract class ViewWithSidebars extends VerticalLayout {
 
 
     private void addMoodleLinksToSidebar(long courseId, String[] s2, String t) {
-
         long homePageId = getController().findHomePageId(courseId);
         RouterLink linkHome = new RouterLink("", MoodleView.class, homePageId);
         Button buttonHome = new Button("Page d'accueil");

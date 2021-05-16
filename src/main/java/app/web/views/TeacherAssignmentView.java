@@ -82,7 +82,6 @@ public class TeacherAssignmentView extends ViewWithSidebars implements HasDynami
         assignment = a.orElse(null);
         if (assignment == null) {
             throw new Exception("There is no course with this ID.");
-            // TODO : take care of the exception (issue 28)
         }
         Optional<Course> c = courseRepository.findById(assignment.getCourseId());
         setCourse(c.orElse(null));
@@ -116,7 +115,6 @@ public class TeacherAssignmentView extends ViewWithSidebars implements HasDynami
         private Grid.Column<RowModel> nameColumn;
         private Grid.Column<RowModel> gradeColumn;
         private Grid.Column<RowModel> commentsColumn;
-        private Grid.Column<RowModel> tarColumn;
         private Grid.Column<RowModel> editorColumn;
         private Editor<RowModel> editor;
         private HeaderRow filterRow;
@@ -145,7 +143,6 @@ public class TeacherAssignmentView extends ViewWithSidebars implements HasDynami
                                           getAssignmentController().findStudentAssignmentSubmission(assignment.getId(), student.getId()));
                 values.add(u);
             });
-            //grid.setItems(values);
             this.dataProvider = new ListDataProvider<>(values);
             grid.setDataProvider(dataProvider);
         }
@@ -158,7 +155,7 @@ public class TeacherAssignmentView extends ViewWithSidebars implements HasDynami
             nameColumn = grid.addColumn(RowModel::getName).setHeader("Nom");
             gradeColumn = grid.addColumn(RowModel::getGrade).setHeader("Note");
             commentsColumn = grid.addColumn(RowModel::getComments).setHeader("Commentaire").setAutoWidth(true);
-            tarColumn = grid.addComponentColumn(RowModel::getDownloadButton).setHeader(".tar.gz");
+            grid.addComponentColumn(RowModel::getDownloadButton).setHeader(".tar.gz");
             TextField gradeField = new TextField();
             TextField commentsField = new TextField();
             editor = grid.getEditor();

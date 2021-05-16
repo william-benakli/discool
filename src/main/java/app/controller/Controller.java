@@ -375,7 +375,7 @@ public class Controller {
     }
 
 
-    public void deletCourse(long course, AssignmentController assignmentController) {
+    public void deleteCourse(long course, AssignmentController assignmentController) {
         for (Group group : selectGroupeCourse(course)) removeGroupMembers(group.getId());
         removeGroups(course);
         assignmentController.removeUploadsStudent(course);

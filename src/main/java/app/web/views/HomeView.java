@@ -1,14 +1,10 @@
 package app.web.views;
 
 import app.web.layout.Navbar;
-import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Paragraph;
-import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -26,26 +22,27 @@ public class HomeView extends VerticalLayout {
     public HomeView(){
         imageRight(
                 new Paragraph("Bienvenue sur Discool !"),
-                new Paragraph("Le lieu parfait qui recrée à distance les meilleures conditions réelles" +
-                        " d'apprentissage tout en supprimant les contraintes du présentiel."),
+                new Paragraph("Le lieu parfait qui recrée à distance les meilleures conditions" +
+                                      " d'apprentissage tout en supprimant les contraintes du présentiel."),
                 new Image("img/homeimage.svg", "alt")
                 );
         imageLeft(
-                new Paragraph("Apprenez ou vous voulez !"),
+                new Paragraph("Apprenez où vous voulez !"),
                 new Paragraph("Peu importe l'endroit où vous êtes, vous pouvez suivre vos cours et " +
-                        "progresser en ayant qu'une connexion internet."),
+                                      "progresser avec seulement une connexion internet."),
                 new Image("img/wfh_1.svg", "alt")
         );
         imageRight(
                 new Paragraph("Un véritable encadrement scolaire"),
-                new Paragraph("Les administrateurs et les professeurs sont là afin d'avoir le même" +
-                        " encadrement qu'en présentiel."),
+                new Paragraph("Retrouvez un vrai contact avec les professeurs et un encadrement personnalisé " +
+                                      "qui correspond à vos besoins."),
                 new Image("img/Headhunter.svg", "alt")
         );
         imageLeft(
                 new Paragraph("Préserver le contact humain"),
-                new Paragraph("Nous savons à quel point le contacte humain et important, c'est pour" +
-                        " cela que nous avons mis à votre disposition un chat public et privé."),
+                new Paragraph("Nous savons à quel point le contact humain et important. Avec " +
+                                      "Discool, vous pouvez communiquer en permanence avec vos enseignants et vos " +
+                                      "camarades !"),
                 new Image("img/Chat.svg", "alt")
         );
     }

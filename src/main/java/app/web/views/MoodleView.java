@@ -177,9 +177,11 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             add(content);
         }
 
-        /*
-            Cette fonction prend un content (un string avec toutes les informations données) et convertie une chaine
-            de caractere specifique "!$ valeur : hauteur : largeur!$ en img html
+        /**
+         * Creates an "<img>" tag with the picture information given in the String
+         *
+         * @param content a String in the form of : !$ value : height : width!$
+         * @return a correctly formatted <img> tag
          */
         private String convertIfImagePresent(String content) {
             String src = StringUtils.substringBetween(content, "!$", "!$");
@@ -227,9 +229,6 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             return modifyButton;
         }
 
-        /**
-         * The created pop-up is invisible until the open() method is called.
-         */
         private void createModifyPopup() {
             VerticalLayout layout = new VerticalLayout();
             HorizontalLayout layout_horizontal = new HorizontalLayout();
@@ -276,10 +275,10 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
 
     }
 
-        /*
-            Cette classe permet de générer un dialog avec des Tabs
-         */
 
+    /**
+     * A dialog that allows the user to generates valid links, and to upload images
+     */
     private class DialogMoodle extends Dialog {
 
         private final Dialog parent;
@@ -297,9 +296,6 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             }
         }
 
-        /*
-            Cette fonction crée les Tabs
-         */
         private void createTab(Div div_interne, Div div_externe, String name) {
             Tab externe = new Tab(name + " externe");
             tabsToPages.put(externe, div_externe);
@@ -321,9 +317,6 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             add(tabs, div_externe, div_interne);
         }
 
-        /*
-            Cette fonction créer la partie du tab qui s'occupe des liens externes
-         */
         private Div externeLinkDiv() {
             Div d = new Div();
 
@@ -341,7 +334,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             valide.addClickListener(event -> {
                 if (textField.isEmpty() || lien.isEmpty()) {
                     text.setValue("Erreur champs invalide");
-                } else if (!isLinks(lien.getValue())) {
+                } else if (!isLink(lien.getValue())) {
                     text.setValue("Erreur lien non valide");
                 } else {
                     text.setValue("[" + textField.getValue() + "](" + lien.getValue() + ")");
@@ -356,9 +349,18 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             return d;
         }
 
-        /*
-             Cette fonction créer la partie du tab qui s'occupe des liens internes
-        */
+        /**
+         * Makes sure the link is valid.
+         * It has to start with "http" or "https" otherwise the program interprets it as an internal link inside the
+         * website.
+         *
+         * @param s the link to consider
+         * @return true if the link is valid, false otherwise
+         */
+        private boolean isLink(String s) {
+            return (s.startsWith("http") || s.startsWith("https")) && s.contains(".");
+        }
+
         private Div interneLinkDiv() {
             Div interne = new Div();
             AtomicReference<String> url = new AtomicReference<>("channels");
@@ -424,13 +426,12 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
                 if (msg.isEmpty()) {
                     textField.setValue("Erreur champs invalide");
                 } else {
-                    //TODO: à changer pour le serveur ne plus mettre https://localhost:8080/
                     String urlRadicale = "http://localhost:8080/";
 
                     switch (url.get()) {
                         case "channels":
                             if (select_channel.getValue() == null) {
-                                textField.setValue("Erreur aucune séléction");
+                                textField.setValue("Erreur : aucune sélection");
                             } else {
                                 targetId = select_channel.getValue().getId();
                                 textField.setValue("[" + msg.getValue() + "](" + urlRadicale + url + "/" + targetId + " )");
@@ -438,7 +439,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
                             break;
                         case "assignment":
                             if (select_assignment.getValue() == null) {
-                                textField.setValue("Erreur aucune séléction");
+                                textField.setValue("Erreur : aucune sélection");
                             } else {
                                 targetId = select_assignment.getValue().getId();
                                 textField.setValue("[" + msg.getValue() + "](" + urlRadicale + url + "/" + targetId + " )");
@@ -446,7 +447,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
                             break;
                         case "moodle":
                             if (select_moodle.getValue() == null) {
-                                textField.setValue("Erreur aucune séléction");
+                                textField.setValue("Erreur : aucune sélection");
                             } else {
                                 targetId = select_moodle.getValue().getId();
                                 textField.setValue("[" + msg.getValue() + "](" + urlRadicale + url + "/" + targetId + " )");
@@ -464,9 +465,6 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             return interne;
         }
 
-        /*
-            Cette fonction créer la partie du tab qui s'occupe des images externes
-         */
         private Div externeImageDiv() {
             Div d = new Div();
 
@@ -478,16 +476,16 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             TextArea text = createTextArea("Texte généré:", "");
             Paragraph warning = new Paragraph("Les liens autorisés doivent finir par : .png, .jpg ou .jpeg");
 
-            Button valide = new Button("Generer");
+            Button valide = new Button("Générer");
             Button copie = new Button("Copier");
             Button close = createCloseButton();
             valide.addClickListener(event -> {
                 if (lien.isEmpty()) {
-                    text.setValue("Erreur champs invalide");
-                } else if (!isLinks(lien.getValue())) {
-                    text.setValue("Erreur lien non valide");
-                } else if (!isImages(lien.getValue())) {
-                    text.setValue("Erreur ce lien n'est pas une image");
+                    text.setValue("Erreur : champs invalides");
+                } else if (!isLink(lien.getValue())) {
+                    text.setValue("Erreur : lien non valide");
+                } else if (!isImage(lien.getValue())) {
+                    text.setValue("Erreur : ce lien n'est pas une image");
                 } else {
                     text.setValue("![](" + lien.getValue() + ")");
                 }
@@ -502,97 +500,8 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             return d;
         }
 
-        /*
-             Cette fonction créer la partie du tab qui s'occupe des images internes
-        */
-        private Div interneImageDiv() {
-            Div interne = new Div();
-
-            String newDirName = "src/main/webapp/moodle/images/" + getCourse().getId();
-
-
-            UploadComponent uploadComponent = new UploadComponent("100%", "100%", 1, 5242880, newDirName, ".jpg", ".jpeg", ".png");
-            uploadComponent.setDropLabel(new Paragraph("Séléctionez votre fichier (5MO max)"));
-            String nameChiffre = getRandomId() + "_" + getCourse().getId();
-            HorizontalLayout insertLayout = new HorizontalLayout();
-            HorizontalLayout buttonLayout = new HorizontalLayout();
-            VerticalLayout mainLayout = new VerticalLayout();
-
-            TextArea text = createTextArea("Texte généré:", "");
-            Paragraph warning = new Paragraph("Les fichiers autorisés sont .png, .jpg, .jpeg \n Les limites d'upload sont de 5Mo");
-
-            Div redimension = new Div();
-            Paragraph p = new Paragraph("Redimensionnez votre image: (avant Upload) ");
-            HorizontalLayout layout = new HorizontalLayout();
-            NumberField height = new NumberField("");
-            height.setLabel("Hauteur (px)");
-            height.setMax(1080);
-            NumberField width = new NumberField("");
-            width.setLabel("Largeur (px)");
-            width.setMax(1920);
-            layout.add(width, height);
-            redimension.add(p, layout);
-
-            Button copie = new Button("Copier");
-            Button close = createCloseButton();
-
-            uploadComponent.addSucceededListener(event -> {
-                String newPath = "";
-                com.vaadin.flow.component.notification.Notification.show("Votre fichier est bien téléchargé");
-                try {
-                    newPath = renameFile(uploadComponent.getFileName(), newDirName, nameChiffre);
-                } catch (Exception e) {
-                    text.setValue("Une erreur est survenue, le fichier est inexistant");
-                    close();
-                    this.parent.open();
-                }
-
-                if (ImageExist(newPath)) {
-                    if (height.isEmpty() && width.isEmpty()) {
-                        text.setValue("!$" + newPath.replace("src/main/webapp/moodle/images/", "") + "!$");
-                    } else {
-                        if (!width.isEmpty() && !height.isEmpty()) {
-                            text.setValue("!$" + newPath.replace("src/main/webapp/moodle/images/", "") + ":" + width.getValue().intValue() + ":" + height.getValue().intValue() + "!$");
-                        }
-                        if (width.isEmpty() && !height.isEmpty()) {
-                            text.setValue("!$" + newPath.replace("src/main/webapp/moodle/images/", "") + ":" + width.getValue() + ":" + height.getValue().intValue() + "!$");
-                        }
-                        if (!width.isEmpty() && height.isEmpty()) {
-                            text.setValue("!$" + newPath.replace("src/main/webapp/moodle/images/", "") + ":" + width.getValue().intValue() + ":" + height.getValue() + "!$");
-                        }
-                    }
-                    uploadComponent.setDropAllowed(false);
-                } else {
-                    text.setValue("Une erreur est survenue, le fichier est inexistant");
-                }
-            });
-
-            uploadComponent.addFileRejectedListener(event -> {
-                com.vaadin.flow.component.notification.Notification.show("Enrengistrement de l'image impossible");
-                com.vaadin.flow.component.notification.Notification.show(event.getErrorMessage());
-            });
-
-            insertLayout.add(uploadComponent);
-            buttonLayout.add(copie, close);
-            mainLayout.setDefaultHorizontalComponentAlignment(FlexComponent.Alignment.CENTER);
-            mainLayout.add(warning, redimension, insertLayout, text, buttonLayout);
-            interne.add(mainLayout);
-            return interne;
-        }
-
-        /*
-           Fonction de copy (dependance Maven)
-         */
-        private void copyInClipBoard(String text) {
-            //il faut que ce soit en https
-            VaadinClipboard vaadinClipboard = VaadinClipboardImpl.GetInstance();
-            vaadinClipboard.copyToClipboard(text, copySuccess -> {
-                if (copySuccess) {
-                    Notification.show("'" + text + "'" + " a bien été copié");
-                } else {
-                    Notification.show("Erreur la copie n'a pas été effectué", Notification.Type.ERROR_MESSAGE);
-                }
-            });
+        private boolean isImage(String s) {
+            return (s.toLowerCase().endsWith("jpg") || s.toLowerCase().endsWith("png") || s.toLowerCase().endsWith("jpeg")) && s.contains(".");
         }
 
         private Button createCloseButton() {
@@ -610,21 +519,93 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             return copy;
         }
 
-        /*
-            Cette fonction verifie qu'il s'agit d'un lien et non d'une entree interdite
-         */
-        private boolean isLinks(String s) {
-            return (s.startsWith("http") || s.startsWith("https")) && s.contains(".");
+        private void copyInClipBoard(String text) {
+            //il faut que ce soit en https
+            VaadinClipboard vaadinClipboard = VaadinClipboardImpl.GetInstance();
+            vaadinClipboard.copyToClipboard(text, copySuccess -> {
+                if (copySuccess) {
+                    Notification.show("'" + text + "'" + " a bien été copié");
+                } else {
+                    Notification.show("Erreur : la copie n'a pas été effectuée.", Notification.Type.ERROR_MESSAGE);
+                }
+            });
         }
 
-        /*
-             Cette fonction verifie qu'il s'agit d'un lien et non d'une entree interdite
-        */
-        private boolean isImages(String s) {
-            return (s.toLowerCase().endsWith("jpg") || s.toLowerCase().endsWith("png") || s.toLowerCase().endsWith("jpeg")) && s.contains(".");
+        private Div interneImageDiv() {
+            Div interne = new Div();
+
+            String newDirName = "src/main/webapp/moodle/images/" + getCourse().getId();
+
+            UploadComponent uploadComponent = new UploadComponent("100%", "100%", 1, 5242880, newDirName, ".jpg", ".jpeg", ".png");
+            uploadComponent.setDropLabel(new Paragraph("Sélectionnez votre fichier (5MO max)"));
+            String nameChiffre = getRandomId() + "_" + getCourse().getId();
+            HorizontalLayout insertLayout = new HorizontalLayout();
+            HorizontalLayout buttonLayout = new HorizontalLayout();
+            VerticalLayout mainLayout = new VerticalLayout();
+
+            TextArea text = createTextArea("Texte généré:", "");
+            Paragraph warning = new Paragraph("Les fichiers autorisés sont .png, .jpg, .jpeg " +
+                                                      "\n Votre fichier doit faire moins de 5Mo");
+
+            Div redimension = new Div();
+            Paragraph p = new Paragraph("Redimensionnez votre image (avant Upload) : ");
+            HorizontalLayout layout = new HorizontalLayout();
+            NumberField height = new NumberField("");
+            height.setLabel("Hauteur (px)");
+            height.setMax(1080);
+            NumberField width = new NumberField("");
+            width.setLabel("Largeur (px)");
+            width.setMax(1920);
+            layout.add(width, height);
+            redimension.add(p, layout);
+
+            Button copie = new Button("Copier");
+            Button close = createCloseButton();
+
+            uploadComponent.addSucceededListener(event -> {
+                String newPath = "";
+                com.vaadin.flow.component.notification.Notification.show("Votre fichier est bien téléchargé.");
+                try {
+                    newPath = renameFile(uploadComponent.getFileName(), newDirName, nameChiffre);
+                } catch (Exception e) {
+                    text.setValue("Une erreur est survenue, le fichier n'existe pas.");
+                    close();
+                    this.parent.open();
+                }
+
+                if (imageExist(newPath)) {
+                    if (height.isEmpty() && width.isEmpty()) {
+                        text.setValue("!$" + newPath.replace("src/main/webapp/moodle/images/", "") + "!$");
+                    } else {
+                        if (!width.isEmpty() && !height.isEmpty()) {
+                            text.setValue("!$" + newPath.replace("src/main/webapp/moodle/images/", "") + ":" + width.getValue().intValue() + ":" + height.getValue().intValue() + "!$");
+                        }
+                        if (width.isEmpty() && !height.isEmpty()) {
+                            text.setValue("!$" + newPath.replace("src/main/webapp/moodle/images/", "") + ":" + width.getValue() + ":" + height.getValue().intValue() + "!$");
+                        }
+                        if (!width.isEmpty() && height.isEmpty()) {
+                            text.setValue("!$" + newPath.replace("src/main/webapp/moodle/images/", "") + ":" + width.getValue().intValue() + ":" + height.getValue() + "!$");
+                        }
+                    }
+                    uploadComponent.setDropAllowed(false);
+                } else {
+                    text.setValue("Une erreur est survenue, le fichier n'existe pas.");
+                }
+            });
+
+            uploadComponent.addFileRejectedListener(event -> {
+                com.vaadin.flow.component.notification.Notification.show("Enregistrement de l'image impossible");
+                com.vaadin.flow.component.notification.Notification.show(event.getErrorMessage());
+            });
+
+            insertLayout.add(uploadComponent);
+            buttonLayout.add(copie, close);
+            mainLayout.setDefaultHorizontalComponentAlignment(FlexComponent.Alignment.CENTER);
+            mainLayout.add(warning, redimension, insertLayout, text, buttonLayout);
+            interne.add(mainLayout);
+            return interne;
         }
 
-        /* *** Fonction auxiliaire pour alleger le code  *** */
         private TextField createTextField(String label, String placeHolder) {
             TextField textField = new TextField();
             textField.setLabel(label);
@@ -659,27 +640,25 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
             return "";
         }
 
-        private boolean ImageExist(String url) {
-            File f = new File(url);
-            return f.exists();
-        }
-
         private String renameFile(String oldName, String path, String linkName) throws Exception {
             String extension = getExtensionImage(oldName);
             String newPath = path + "/" + linkName + "." + extension;
             File old = new File(oldName);
-            File newFile = new File(newPath); //extension.toLowerCase());
+            File newFile = new File(newPath);
             if (!old.renameTo(newFile)) {
                 throw new Exception("File can't be renamed");
             }
             return newPath;
         }
 
+        private boolean imageExist(String url) {
+            File f = new File(url);
+            return f.exists();
+        }
 
         private long getRandomId() {
             return new Random().nextLong();
         }
-        /* *** Fonction auxiliaire pour alleger le code  *** */
     }
 
 }
