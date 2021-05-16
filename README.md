@@ -88,6 +88,4 @@ Pour créer une conversation, il est possible de rechercher les utilisateurs par
 Quelques fonctionnalités que nous n'avons pas eu le temps d'implémenter :
 - un chat vocal/vidéo, avec partage d'écran : nous avons choisi le framwork Vaadin pour coder en Java. Il est cependant très difficile d'exécuter du javascript et nous n'avons pas réussi à intégrer webRTC.
 - un système de notifications : les utilisateurs ne sont pas prévenus lorqu'il y a un nouveau message ou des changements sur une page Moodle.
-- un système de signalement : les utilisateurs devraient pouvoir signaler à l'administrateur et à leurs professeurs les contenus déplacés.
-- une façon plus simple de créer des conversations privées : comme sur Discord, cliquer sur l'avatar de la personne dans la barre de droite devrait permettre de créer une conversation privée avec cette personne
 - un système de mention : avec le @ comme sur Discord
