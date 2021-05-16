@@ -630,6 +630,7 @@ public class Navbar extends AppLayout {
                 Notification.show("Your profile picture was updated successfully");
                 Notification.show("Reload the page to see the changes!");
                 this.close();
+                UI.getCurrent().getPage().reload();
             });
 
             this.add(title, instructions, uploadComponent);
