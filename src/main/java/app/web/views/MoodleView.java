@@ -439,15 +439,13 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
                 if (msg.isEmpty()) {
                     textField.setValue("Erreur champs invalide");
                 } else {
-                    String urlRadicale = "http://localhost:8080/";
-
                     switch (url.get()) {
                         case "channels":
                             if (select_channel.getValue() == null) {
                                 textField.setValue("Erreur : aucune sélection");
                             } else {
                                 targetId = select_channel.getValue().getId();
-                                textField.setValue("[" + msg.getValue() + "](" + urlRadicale + url + "/" + targetId + " )");
+                                textField.setValue("[" + msg.getValue() + "](" + url + "/" + targetId + " )");
                             }
                             break;
                         case "assignment":
@@ -455,7 +453,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
                                 textField.setValue("Erreur : aucune sélection");
                             } else {
                                 targetId = select_assignment.getValue().getId();
-                                textField.setValue("[" + msg.getValue() + "](" + urlRadicale + url + "/" + targetId + " )");
+                                textField.setValue("[" + msg.getValue() + "](" + url + "/" + targetId + " )");
                             }
                             break;
                         case "moodle":
@@ -463,7 +461,7 @@ public class MoodleView extends ViewWithSidebars implements HasDynamicTitle, Has
                                 textField.setValue("Erreur : aucune sélection");
                             } else {
                                 targetId = select_moodle.getValue().getId();
-                                textField.setValue("[" + msg.getValue() + "](" + urlRadicale + url + "/" + targetId + " )");
+                                textField.setValue("[" + msg.getValue() + "](" + url + "/" + targetId + " )");
                             }
                             break;
                     }
