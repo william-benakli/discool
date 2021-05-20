@@ -22,7 +22,7 @@ public class Markdown {
      * @return The HTML object containing the correct code
      */
     public static Html getHtmlFromMarkdown(String markdown) {
-        String converted = convertStringFromMarkdown(markdown.replaceAll("\n","<br>"));
+        String converted = convertStringFromMarkdown(markdown);
         return new Html("<span>" + converted + "</span>");
     }
 
@@ -43,10 +43,6 @@ public class Markdown {
         // parse and render the String
         Node tmp = parser.parse(markdown);
         String htmlText = renderer.render(tmp);
-        // remove the enclosing <p> tags
-        Pattern pattern = Pattern.compile("<p>(.+?)</p>", Pattern.DOTALL);
-        Matcher matcher = pattern.matcher(htmlText);
-        htmlText = (matcher.find())?matcher.group(1):htmlText;
         return htmlText;
     }
 }
